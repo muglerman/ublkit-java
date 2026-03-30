@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>{{ receipt.taxpayer.identity }}-{{ receipt.typedIdentity }}</title>
+	<style>
+		* {
+			box-sizing: border-box;
+		}
+
+		body {
+			font-family: Arial, sans-serif;
+			margin: 0;
+			padding: 20px;
+		}
+
+		.bordered {
+			border: 1px solid #666;
+			border-radius: 5px;
+		}
+
+		.row {
+			display: table;
+			width: 100%;
+		}
+
+		.col {
+			display: table-cell;
+		}
+
+		.col-1-2 {
+			width: 50%;
+		}
+
+		.p-1 {
+			padding: 5px;
+		}
+
+		.p-2 {
+			padding: 10px;
+		}
+
+		.m-0 {
+			margin: 0;
+		}
+
+		.m-2 {
+			margin: 10px;
+		}
+
+		.my-1 {
+			margin-top: 5px;
+			margin-bottom: 5px;
+		}
+
+		.text-right {
+			text-align: right;
+		}
+
+		.text-center {
+			text-align: center;
+		}
+
+		.text-left {
+			text-align: left;
+		}
+
+		.nowrap {
+			white-space: nowrap;
+		}
+
+		/* Header */
+		.logotipo,
+		.company-info,
+		.invoice-info {
+			vertical-align: middle;
+		}
+
+		.logotipo {
+			width: 15%;
+		}
+
+		.company-info {
+			width: 54%;
+		}
+
+		.invoice-info {
+			width: 30%;
+			font-weight: bold;
+		}
+
+		.receipt-name {
+			background-color: #dedede;
+		}
+
+		.business-name {
+			color: #a54;
+		}
+
+		.qr-section div {
+			display: inline-block;
+		}
+
+		.qr-section img {
+			width: 160px;
+			height: 160px;
+		}
+	</style>
+</head>
+
+<body>
+
+	<div class="container">
+		<div class="row header">
+			<div class="col logotipo">
+				<img alt="logotipo" src="{{ receipt.logo }}" />
+			</div>
+			<div class="col p-2 text-center company-info">
+				<p class="m-0 business-name">{{ receipt.taxpayer.name }}</p>
+				<p class="m-0">{{ receipt.taxpayer.address }}</p>
+				<p class="m-0">{{ receipt.taxpayer.contact.web }} - {{ receipt.taxpayer.contact.email }} - {{
+					receipt.taxpayer.contact.telephone }}</p>
+			</div>
+			<div class="col text-center invoice-info">
+				<div class="bordered">
+					<p class="m-0 p-1">RUC: {{ receipt.taxpayer.identity }}</p>
+					<p class="m-0 p-1 receipt-name">{{ receipt.name }}</p>
+					<p class="m-0 p-1">{{ receipt.identity }}</p>
+				</div>
+			</div>
+		</div>
+
+		<div class="my-1 text-left">Destinatario</div>
+
+		<div class="row bordered p-1 my-1 client-info">
+			<div class="col col-1-2">
+				<p class="m-0"><strong>Nombre:</strong> {{receipt.customer.name}}</p>
+				<p class="m-0"><strong>Fecha de emisión:</strong> {{ receipt.issueDate }}</p>
+			</div>
+			<div class="col col-1-2">
+				<p class="m-0"><strong>Documento:</strong> {{ receipt.customer.identity }}</p>
+				<p class="m-0"><strong>Dirección:</strong> {{ receipt.customer.address }}</p>
+			</div>
+		</div>
+
+		<div class="my-1 text-left">Datos del traslado</div>
+
+		<div class="row bordered p-1 my-1">
+			<div class="col col-1-2">
+				<p class="m-0"><strong>Fecha de inicio de traslado:</strong> {{ receipt.startDate }}</p>
+				<p class="m-0"><strong>Motivo de traslado:</strong> {{ receipt.handling }}</p>
+				<p class="m-0"><strong>Peso bruto total:</strong> {{ receipt.weight }} {{ receipt.unitCode }}</p>
+				<p class="m-0"><strong>Punto de partida:</strong> {{ receipt.address.origin.ubigeo }} - {{
+					receipt.address.origin.line }}</p>
+			</div>
+			<div class="col col-1-2">
+				<p class="m-0"><strong>Característica especial:</strong>
+					{% if receipt.lightVehicle %}
+					Vehículo M1 o L
+					{% else %}
+					-
+					{% endif %}
+				</p>
+				<p class="m-0"><strong>Modalidad de transporte:</strong>
+					{% if receipt.ownTransport %}
+					Transporte privado
+					{% else %}
+					Transporte público
+					{% endif %}
+				</p>
+				<p class="m-0"><strong>Número de bultos:</strong> {{ }}</p>
+				<p class="m-0"><strong>Punto de llegada:</strong> {{ receipt.address.delivery.ubigeo }} - {{
+					receipt.address.delivery.line }}</p>
+			</div>
+		</div>
+
+		{% if receipt.carrier %}
+		<div class="my-1 text-left">Datos del transportista</div>
+
+		<div class="row bordered p-1">
+			<div class="col col-1-2">
+				<p class="m-0"><strong>Nombre:</strong> {{ receipt.carrier.name }}</p>
+			</div>
+			<div class="col col-1-2">
+				<p class="m-0"><strong>Documento:</strong> {{ receipt.carrier.identity }}</p>
+			</div>
+		</div>
+		{% endif %}
+
+		{% if receipt.vehicles %}
+		<div class="my-1 text-left">Datos de los vehículos</div>
+
+		<div class="row bordered p-1">
+			<div class="col col-1">
+				{% for vehicle in receipt.vehicles %}
+				{% if loop.first %}
+				<p class="m-0"><strong>Principal:</strong> Número de placa: {{ vehicle.identity }}</p>
+				{% else %}
+				<p class="m-0"><strong>Secundario:</strong> Número de placa: {{ vehicle.identity }}</p>
+				{% endif %}
+				{% endfor %}
+			</div>
+		</div>
+		{% endif %}
+
+		{% if receipt.drivers %}
+		<div class="my-1 text-left">Datos de los conductores</div>
+
+		<div class="row bordered p-1">
+			<table class="nowrap">
+				{% for driver in receipt.drivers %}
+				{% if loop.first %}
+				<tr>
+					<td rowspan="2"><strong>Principal:</strong></td>
+					<td>{{ driver.surname}}, {{ driver.name }} - {{ driver.identity }}</td>
+				</tr>
+				<tr>
+					<td>Licencia: {{ driver.license }}</td>
+				</tr>
+				{% else %}
+				<tr>
+					<td rowspan="2"><strong>Secundario:</strong></td>
+					<td>{{ driver.surname}}, {{ driver.name }} - {{ driver.identity }}</td>
+				</tr>
+				<tr>
+					<td>Licencia: {{ driver.license }}</td>
+				</tr>
+				{% endif %}
+				{% endfor %}
+			</table>
+		</div>
+		{% endif %}
+
+		<div class="my-1 text-left">Documento relacionado: {{ receipt.reference.note }}</div>
+
+		<table class="row p-1 my-1 bordered items">
+			<tr>
+				<th class="text-left">Ítem</th>
+				<th class="text-center">Descripción</th>
+				<th class="text-center">Unidad</th>
+				<th class="text-right">Cantidad</th>
+			</tr>
+			{% for item in receipt.items %}
+			<tr>
+				<td class="text-left">{{ loop.index }}</td>
+				<td class="text-center">{{ item.description }}</td>
+				<td class="text-center">{{ item.unitCode }}</td>
+				<td class="text-right">{{ item.quantity }}</td>
+			</tr>
+			{% endfor %}
+		</table>
+
+		<div class="my-1 text-left">Nota u observación: {{ receipt.note }}</div>
+
+		<div class="row p-1 qr-section">
+			<div class="m-2">
+				<img src="{{ receipt.qr }}" alt="Código QR hacia URL" />
+			</div>
+			<div>
+				<p>Puede consultar la validez de esta guía de remisión desde la web de la Sunat.</p>
+				<p>Hash: {{ receipt.hash }}</p>
+			</div>
+		</div>
+
+	</div>
+
+</body>
+
+</html>

@@ -1,5 +1,4 @@
 package com.cna.ublkit.core.error;
-
 /**
  * Excepción base del proyecto UBLKit.
  *

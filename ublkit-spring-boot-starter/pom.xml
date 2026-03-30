@@ -26,6 +26,36 @@
             <artifactId>ublkit-core</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.cna</groupId>
+            <artifactId>ublkit-ubl</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.cna</groupId>
+            <artifactId>ublkit-sign</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.cna</groupId>
+            <artifactId>ublkit-gateway</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.cna</groupId>
+            <artifactId>ublkit-render</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.cna</groupId>
+            <artifactId>ublkit-validation</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.cna</groupId>
+            <artifactId>ublkit-catalogs</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 	</dependencies>
 
 	<build>

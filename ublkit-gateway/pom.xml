@@ -10,4 +10,12 @@
 	<artifactId>ublkit-gateway</artifactId>
 	<name>ublkit-gateway</name>
 	<description>Gateway framework-agnostic module</description>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.cna</groupId>
+			<artifactId>ublkit-core</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+	</dependencies>
 </project>
