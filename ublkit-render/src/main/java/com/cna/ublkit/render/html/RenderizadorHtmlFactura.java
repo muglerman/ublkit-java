@@ -254,6 +254,8 @@ public class RenderizadorHtmlFactura implements RenderizadorDocumento<BorradorFa
 
         Map<String, Object> summary = summaryMap(doc.getTotalImporte(), doc.getTotalImpuestos(), doc.getLeyendas());
         invoice.put("summary", summary);
+        invoice.put("legends", legends(doc.getLeyendas()));
+        applyTemplateAttributes(invoice, contexto.atributosPlantilla());
 
         Map<String, Object> scope = new HashMap<>();
         scope.put("invoice", invoice);
@@ -332,6 +334,31 @@ public class RenderizadorHtmlFactura implements RenderizadorDocumento<BorradorFa
             case "1002" -> "Anticipo";
             default -> "";
         };
+    }
+
+    private List<Map<String, Object>> legends(Map<String, String> leyendas) {
+        List<Map<String, Object>> values = new ArrayList<>();
+        if (leyendas == null || leyendas.isEmpty()) return values;
+        leyendas.forEach((code, value) -> {
+            if ("1000".equals(code)) return;
+            Map<String, Object> item = new HashMap<>();
+            item.put("code", txt(code));
+            item.put("value", txt(value));
+            values.add(item);
+        });
+        return values;
+    }
+
+    private void applyTemplateAttributes(Map<String, Object> invoice, Map<String, Object> attrs) {
+        if (attrs == null || attrs.isEmpty()) return;
+        invoice.put("header", txt(attrs.get("header")));
+        invoice.put("footer", txt(attrs.get("footer")));
+        Object extras = attrs.get("extras");
+        if (extras instanceof List<?> list) {
+            invoice.put("extras", list);
+        } else {
+            invoice.put("extras", List.of());
+        }
     }
 
     private Map<String, Object> contactMap(Contacto contacto) {

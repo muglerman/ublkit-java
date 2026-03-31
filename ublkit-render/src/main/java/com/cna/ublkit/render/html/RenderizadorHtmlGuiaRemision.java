@@ -272,6 +272,7 @@ public class RenderizadorHtmlGuiaRemision implements RenderizadorDocumento<Borra
         }
 
         Map<String, Object> scope = new HashMap<>();
+        applyTemplateAttributes(receipt, contexto.atributosPlantilla());
         scope.put("receipt", receipt);
 
         try {
@@ -367,5 +368,17 @@ public class RenderizadorHtmlGuiaRemision implements RenderizadorDocumento<Borra
                     + texto(doc.getDocumentosRelacionados().get(0).serieNumero()).trim();
         }
         return "";
+    }
+
+    private void applyTemplateAttributes(Map<String, Object> receipt, Map<String, Object> attrs) {
+        if (attrs == null || attrs.isEmpty()) return;
+        receipt.put("header", texto(attrs.get("header")));
+        receipt.put("footer", texto(attrs.get("footer")));
+        Object extras = attrs.get("extras");
+        if (extras instanceof List<?> list) {
+            receipt.put("extras", list);
+        } else {
+            receipt.put("extras", List.of());
+        }
     }
 }

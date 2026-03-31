@@ -36,6 +36,7 @@
   </style>
 </head>
 <body>
+  {% if receipt.header %}<div class="card small" style="padding:6px 8px; margin-bottom:6px;">{{ receipt.header }}</div>{% endif %}
   <div class="header">
     <div class="cell logo"><img src="{{ receipt.logo }}" alt="Logo" /></div>
     <div class="cell card issuer">
@@ -114,6 +115,7 @@
   <div class="section card" style="padding:7px 8px;">
     {% if receipt.reference.note %}<p><strong>Documento relacionado:</strong> {{ receipt.reference.note }}</p>{% endif %}
     {% if receipt.note %}<p><strong>Observacion:</strong> {{ receipt.note }}</p>{% endif %}
+    {% if receipt.extras %}{% for e in receipt.extras %}<p class="small">{{ e.name }}: {{ e.value }}</p>{% endfor %}{% endif %}
   </div>
 
   <div class="section">
@@ -128,5 +130,6 @@
     <div><img src="{{ receipt.qr }}" alt="QR" /></div>
     <div style="padding-left:8px;"><p class="small">Version: {{ receipt.version }}</p>{% if receipt.signer %}<p class="small">Firmante: {{ receipt.signer.identity }}</p>{% endif %}<p class="small">Hash: {{ receipt.hash }}</p></div>
   </div>
+  {% if receipt.footer %}<div class="card small" style="padding:6px 8px; margin-top:6px;">{{ receipt.footer }}</div>{% endif %}
 </body>
 </html>

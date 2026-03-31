@@ -38,6 +38,7 @@
   </style>
 </head>
 <body>
+  {% if invoice.header %}<div class="card small" style="padding:6px 8px; margin-bottom:6px;">{{ invoice.header }}</div>{% endif %}
   <div class="header">
     <div class="cell logo"><img src="{{ invoice.logo }}" alt="Logo" /></div>
     <div class="cell card issuer">
@@ -99,6 +100,7 @@
   <div class="section grid">
     <div class="col card" style="padding:7px 8px;">
       {% if invoice.charges %}<p><strong>Cargos:</strong></p>{% for c in invoice.charges %}<p class="small">{{ c.type }} {{ c.amount }}</p>{% endfor %}{% endif %}
+      {% if invoice.legends %}{% for l in invoice.legends %}<p class="small">{{ l.code }}: {{ l.value }}</p>{% endfor %}{% endif %}
       {% if invoice.sustento %}<p><strong>Sustento:</strong> {{ invoice.sustento }}</p>{% endif %}
     </div>
     <div class="col">
@@ -122,5 +124,6 @@
       <p class="small">Hash: {{ invoice.hash }}</p>
     </div>
   </div>
+  {% if invoice.footer %}<div class="card small" style="padding:6px 8px; margin-top:6px;">{{ invoice.footer }}</div>{% endif %}
 </body>
 </html>

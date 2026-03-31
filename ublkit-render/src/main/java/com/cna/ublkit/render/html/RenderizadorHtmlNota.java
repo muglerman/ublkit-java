@@ -83,6 +83,8 @@ public class RenderizadorHtmlNota implements RenderizadorDocumento<Object> {
         invoice.put("hash", txt(contexto.hashDocumento()));
         invoice.put("qr", txt(contexto.qrBase64()));
         invoice.put("logo", "logo.jpg");
+        invoice.put("legends", legends(((DocumentoBase) doc).getLeyendas()));
+        applyTemplateAttributes(invoice, contexto.atributosPlantilla());
 
         Map<String, Object> scope = new HashMap<>();
         scope.put("invoice", invoice);
@@ -257,6 +259,31 @@ public class RenderizadorHtmlNota implements RenderizadorDocumento<Object> {
         map.put("factor", txt(c.porcentaje()));
         map.put("document", txt(c.serieNumero()));
         return map;
+    }
+
+    private List<Map<String, Object>> legends(Map<String, String> leyendas) {
+        List<Map<String, Object>> values = new ArrayList<>();
+        if (leyendas == null || leyendas.isEmpty()) return values;
+        leyendas.forEach((code, value) -> {
+            if ("1000".equals(code)) return;
+            Map<String, Object> item = new HashMap<>();
+            item.put("code", txt(code));
+            item.put("value", txt(value));
+            values.add(item);
+        });
+        return values;
+    }
+
+    private void applyTemplateAttributes(Map<String, Object> invoice, Map<String, Object> attrs) {
+        if (attrs == null || attrs.isEmpty()) return;
+        invoice.put("header", txt(attrs.get("header")));
+        invoice.put("footer", txt(attrs.get("footer")));
+        Object extras = attrs.get("extras");
+        if (extras instanceof List<?> list) {
+            invoice.put("extras", list);
+        } else {
+            invoice.put("extras", List.of());
+        }
     }
 
     private String mapearTipoNotaCredito(String code) {

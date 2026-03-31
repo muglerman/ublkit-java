@@ -104,6 +104,7 @@ public class RenderizadorHtmlResumenDiario implements RenderizadorDocumento<Resu
             }
         }
         rc.put("lines", lines);
+        applyTemplateAttributes(rc, contexto.atributosPlantilla());
 
         Map<String, Object> scope = new HashMap<>();
         scope.put("summary", rc);
@@ -122,5 +123,11 @@ public class RenderizadorHtmlResumenDiario implements RenderizadorDocumento<Resu
         if (value == null) return "";
         if (value instanceof BigDecimal b) return b.stripTrailingZeros().toPlainString();
         return value.toString();
+    }
+
+    private void applyTemplateAttributes(Map<String, Object> summary, Map<String, Object> attrs) {
+        if (attrs == null || attrs.isEmpty()) return;
+        summary.put("header", txt(attrs.get("header")));
+        summary.put("footer", txt(attrs.get("footer")));
     }
 }

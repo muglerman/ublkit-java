@@ -64,6 +64,7 @@ public class RenderizadorHtmlComunicacionBaja implements RenderizadorDocumento<C
             }
         }
         ra.put("lines", lines);
+        applyTemplateAttributes(ra, contexto.atributosPlantilla());
 
         Map<String, Object> scope = new HashMap<>();
         scope.put("voided", ra);
@@ -80,5 +81,11 @@ public class RenderizadorHtmlComunicacionBaja implements RenderizadorDocumento<C
 
     private String txt(Object value) {
         return value == null ? "" : value.toString();
+    }
+
+    private void applyTemplateAttributes(Map<String, Object> voided, Map<String, Object> attrs) {
+        if (attrs == null || attrs.isEmpty()) return;
+        voided.put("header", txt(attrs.get("header")));
+        voided.put("footer", txt(attrs.get("footer")));
     }
 }

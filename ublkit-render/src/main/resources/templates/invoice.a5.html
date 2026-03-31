@@ -41,6 +41,7 @@
   </style>
 </head>
 <body>
+  {% if invoice.header %}<div class="card small" style="padding:6px 8px; margin-bottom:6px;">{{ invoice.header }}</div>{% endif %}
   <div class="header">
     <div class="cell logo"><img src="{{ invoice.logo }}" alt="Logo" /></div>
     <div class="cell card issuer">
@@ -106,6 +107,7 @@
       {% if invoice.reference.guides %}<p><strong>Guias:</strong></p>{% for g in invoice.reference.guides %}<p class="small">{{ g.type }} {{ g.document }}</p>{% endfor %}{% endif %}
       {% if invoice.deliveryAddress %}<p><strong>Entrega:</strong> {{ invoice.deliveryAddress }}</p>{% endif %}
       {% if invoice.note %}<p><strong>Obs:</strong> {{ invoice.note }}</p>{% endif %}
+      {% if invoice.legends %}{% for l in invoice.legends %}<p class="small">{{ l.code }}: {{ l.value }}</p>{% endfor %}{% endif %}
     </div>
     <div class="col">
       <table class="totals" style="width:100%;">
@@ -132,5 +134,6 @@
       <p class="small" style="margin-top:4px;">Hash: {{ invoice.hash }}</p>
     </div>
   </div>
+  {% if invoice.footer %}<div class="card small" style="padding:6px 8px; margin-top:6px;">{{ invoice.footer }}</div>{% endif %}
 </body>
 </html>

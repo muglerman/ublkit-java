@@ -23,6 +23,7 @@
   </style>
 </head>
 <body>
+  {% if summary.header %}<div class="card small" style="padding:7px 10px; margin-bottom:8px;">{{ summary.header }}</div>{% endif %}
   <div class="card header">
     <h1>Resumen Diario</h1>
     <p><strong>ID:</strong> {{ summary.id }}</p>
@@ -76,5 +77,6 @@
   </table>
 
   <div class="small" style="margin-top:10px;">Hash: {{ summary.hash }}</div>
+  {% if summary.footer %}<div class="card small" style="padding:7px 10px; margin-top:8px;">{{ summary.footer }}</div>{% endif %}
 </body>
 </html>
