@@ -27,10 +27,6 @@ import java.util.regex.Pattern;
  */
 public class ProveedorTokenNativo implements ProveedorToken {
     private static final Logger log = Logger.getLogger(ProveedorTokenNativo.class.getName());
-    private static final String BETA_DEMO_USER = "MODDATOS";
-    private static final String BETA_DEMO_PASSWORD = "MODDATOS";
-    private static final String BETA_DEMO_CLIENT_ID = "test-85e5b0ae-255c-4891-a595-0b98c65c9854";
-    private static final String BETA_DEMO_CLIENT_SECRET = "test-Hty/M6QshYvPgItX2P0+Kw==";
 
     private static final Pattern PATRON_TOKEN = Pattern.compile("\"access_token\"\\s*:\\s*\"([^\"]+)\"");
     private static final Pattern PATRON_EXPIRES_IN = Pattern.compile("\"expires_in\"\\s*:\\s*(\\d+)");
@@ -49,32 +45,31 @@ public class ProveedorTokenNativo implements ProveedorToken {
 
     @Override
     public String obtenerToken(CredencialesEmpresa credenciales, TipoAmbiente ambiente) {
-        CredencialesEmpresa credencialesNormalizadas = normalizarCredencialesParaAmbiente(credenciales, ambiente);
-        if (credencialesNormalizadas.clientId() == null || credencialesNormalizadas.clientSecret() == null) {
+        if (credenciales.clientId() == null || credenciales.clientSecret() == null) {
             throw new ExcepcionUblKit("Faltan credenciales OAuth2 (clientId/clientSecret) para solicitar token REST");
         }
 
-        String claveCache = claveCache(credencialesNormalizadas, ambiente);
+        String claveCache = claveCache(credenciales, ambiente);
         TokenCacheado cacheado = cacheTokens.get(claveCache);
         if (cacheado != null && !cacheado.expirado()) {
             log.info(String.format(
                     "[UBLKIT][TOKEN] cacheHit ambiente=%s, cacheKey=%s, expiraEn=%s, usernameConcatenado=%s",
-                    ambiente, mask(claveCache), cacheado.expiraEn(), mask(credencialesNormalizadas.getUsernameConcatenado())));
+                    ambiente, mask(claveCache), cacheado.expiraEn(), mask(credenciales.getUsernameConcatenado())));
             return cacheado.token();
         }
 
-        String url = ResolvedorEndpoints.urlRestToken(ambiente, credencialesNormalizadas.clientId());
-        String body = buildUrlEncodedParams(credencialesNormalizadas);
+        String url = ResolvedorEndpoints.urlRestToken(ambiente, credenciales.clientId());
+        String body = buildUrlEncodedParams(credenciales);
         log.info(String.format(
                 "[UBLKIT][TOKEN] solicitandoToken ambiente=%s, url=%s, contentType=%s, ruc=%s, usuarioSol=%s, usernameConcatenado=%s, clientId=%s, clientSecret=%s, bodyPreview=%s",
                 ambiente,
                 url,
                 "application/x-www-form-urlencoded; charset=UTF-8",
-                mask(credencialesNormalizadas.ruc()),
-                mask(credencialesNormalizadas.usuarioSol()),
-                mask(credencialesNormalizadas.getUsernameConcatenado()),
-                mask(credencialesNormalizadas.clientId()),
-                mask(credencialesNormalizadas.clientSecret()),
+                mask(credenciales.ruc()),
+                mask(credenciales.usuarioSol()),
+                mask(credenciales.getUsernameConcatenado()),
+                mask(credenciales.clientId()),
+                mask(credenciales.clientSecret()),
                 maskFormBody(body)));
 
         try {
@@ -132,41 +127,6 @@ public class ProveedorTokenNativo implements ProveedorToken {
             body.append(URLEncoder.encode(entry.getValue(), StandardCharsets.UTF_8));
         }
         return body.toString();
-    }
-
-    private CredencialesEmpresa normalizarCredencialesParaAmbiente(CredencialesEmpresa credenciales, TipoAmbiente ambiente) {
-        if (ambiente != TipoAmbiente.BETA) {
-            return credenciales;
-        }
-        String usuarioSol = BETA_DEMO_USER;
-        String claveSol = BETA_DEMO_PASSWORD;
-        String clientId = asegurarPrefijoTest(hasText(credenciales.clientId()) ? credenciales.clientId() : BETA_DEMO_CLIENT_ID);
-        String clientSecret = asegurarPrefijoTest(hasText(credenciales.clientSecret())
-                ? credenciales.clientSecret()
-                : BETA_DEMO_CLIENT_SECRET);
-        log.warning(String.format(
-                "[UBLKIT][TOKEN] BETA detectado: se forzará usuarioSOL=MODDATOS y se normalizarán credenciales OAuth con prefijo test-. ruc=%s, usuarioOriginal=%s, clientIdOriginal=%s, clientIdUsado=%s",
-                mask(credenciales.ruc()),
-                mask(credenciales.usuarioSol()),
-                mask(credenciales.clientId()),
-                mask(clientId)));
-        return new CredencialesEmpresa(
-                credenciales.ruc(),
-                usuarioSol,
-                claveSol,
-                clientId,
-                clientSecret);
-    }
-
-    private String asegurarPrefijoTest(String value) {
-        if (value == null || value.isBlank() || value.startsWith("test-")) {
-            return value;
-        }
-        return "test-" + value;
-    }
-
-    private boolean hasText(String value) {
-        return value != null && !value.isBlank();
     }
 
     private String claveCache(CredencialesEmpresa cred, TipoAmbiente ambiente) {
