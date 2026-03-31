@@ -70,19 +70,13 @@ public class PasarelaSunatDefecto implements PasarelaSunat {
 
     @Override
     public ResultadoEnvio enviarGuiaRemision(String xmlFirmado, String nombreArchivo, CredencialesEmpresa credenciales, TipoAmbiente ambiente) {
-        // 1. Obtener Token
         String token = proveedorToken.obtenerToken(credenciales, ambiente);
-        
-        // 2. Resolver Endpoint y armar con nombre de archivo
-        // El API REST de SUNAT requiere agregar {numRucEmisor}-{codCpe}-{numSerie}-{numCpe} al final de la URL
         String urlBase = ResolvedorEndpoints.urlRestEnvio(ambiente);
         String nameWithoutExtension = nombreArchivo.replace(".xml", "");
         String finalEndpoint = urlBase.endsWith("/") ? urlBase + nameWithoutExtension : urlBase + "/" + nameWithoutExtension;
         log.info(String.format(
                 "[UBLKIT][GRE] ambiente=%s, archivo=%s, urlBase=%s, finalEndpoint=%s, usernameConcatenado=%s, tokenMask=%s",
                 ambiente, nombreArchivo, urlBase, finalEndpoint, mask(credenciales.getUsernameConcatenado()), mask(token)));
-
-        // 3. Enviar
         return conRetry(() -> clienteRest.enviarGuia(xmlFirmado, nombreArchivo, finalEndpoint, token));
     }
 

@@ -25,6 +25,12 @@ class ResolvedorEndpointsTest {
     }
 
     @Test
+    void testUrlRestTokenBeta() {
+        assertThat(ResolvedorEndpoints.urlRestToken(TipoAmbiente.BETA, "mi_client_id"))
+                .isEqualTo("https://gre-test.nubefact.com/v1/clientessol/mi_client_id/oauth2/token");
+    }
+
+    @Test
     void testUrlRestTokenFallaSinClientId() {
         assertThatThrownBy(() -> ResolvedorEndpoints.urlRestToken(TipoAmbiente.PRODUCCION, ""))
                 .isInstanceOf(ExcepcionUblKit.class)
