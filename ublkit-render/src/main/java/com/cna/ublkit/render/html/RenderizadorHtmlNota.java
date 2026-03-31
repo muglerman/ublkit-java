@@ -1,11 +1,14 @@
 package com.cna.ublkit.render.html;
 
+import com.cna.ublkit.core.modelo.Contacto;
+import com.cna.ublkit.core.modelo.Direccion;
 import com.cna.ublkit.render.api.RenderizadorDocumento;
 import com.cna.ublkit.render.modelo.ContextoRender;
-import com.cna.ublkit.render.modelo.ResultadoRender;
 import com.cna.ublkit.render.modelo.FormatoImpresion;
+import com.cna.ublkit.render.modelo.ResultadoRender;
 import com.cna.ublkit.ubl.modelo.BorradorNotaCredito;
 import com.cna.ublkit.ubl.modelo.BorradorNotaDebito;
+import com.cna.ublkit.ubl.modelo.DocumentoBase;
 import com.cna.ublkit.ubl.modelo.actor.EmisorDocumento;
 import com.cna.ublkit.ubl.modelo.actor.ReceptorDocumento;
 import com.cna.ublkit.ubl.modelo.linea.LineaDetalle;
@@ -16,15 +19,14 @@ import io.pebbletemplates.pebble.template.PebbleTemplate;
 
 import java.io.StringWriter;
 import java.io.Writer;
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
- * Convierte un modelo de Nota Electrónica en HTML utilizando las plantillas base de Factura de Pebble (Twig).
- * Realiza la traducción del modelo de dominio de UBLKit hacia las llaves esperadas por la plantilla,
- * incluyendo los motivos y documentos relacionados característicos de las notas.
+ * Convierte Nota de Crédito/Débito en HTML usando plantillas Pebble.
  *
  * @since 0.1.0
  */
@@ -53,32 +55,29 @@ public class RenderizadorHtmlNota implements RenderizadorDocumento<Object> {
 
     @Override
     public ResultadoRender renderizar(ContextoRender<Object> contexto) {
-        Object docBase = contexto.documento();
-
-        if (!(docBase instanceof BorradorNotaCredito) && !(docBase instanceof BorradorNotaDebito)) {
-             throw new IllegalArgumentException("El documento debe ser una BorradorNotaCredito o BorradorNotaDebito");
+        Object doc = contexto.documento();
+        if (!(doc instanceof BorradorNotaCredito) && !(doc instanceof BorradorNotaDebito)) {
+            throw new IllegalArgumentException("El documento debe ser BorradorNotaCredito o BorradorNotaDebito");
         }
 
         Map<String, Object> invoice = new HashMap<>();
-        
-        // Extracción de datos comunes a ambos usando reflexion de alto nivel (en Java puro real a menudo usaríamos interfaces, pero DocumentoBase es sealed)
-        if (docBase instanceof BorradorNotaCredito doc) {
-            extraerBasicos(invoice, doc.getSerie(), doc.getNumero(), "07", "NOTA DE CRÉDITO ELECTRÓNICA", doc.getFechaEmision() != null ? doc.getFechaEmision().toString() : "", doc.getMoneda());
-            extraerRelacionado(invoice, doc.getComprobanteAfectadoTipo(), doc.getComprobanteAfectadoSerieNumero(), doc.getTipoNota(), doc.getSustentoDescripcion());
-            extraerActores(invoice, doc.getEmisor(), doc.getReceptor());
-            extraerTotales(invoice, doc.getTotalImporte(), doc.getTotalImpuestos(), doc.getLeyendas());
-            extraerDetalles(invoice, doc.getDetalles());
-        } else if (docBase instanceof BorradorNotaDebito doc) {
-            extraerBasicos(invoice, doc.getSerie(), doc.getNumero(), "08", "NOTA DE DÉBITO ELECTRÓNICA", doc.getFechaEmision() != null ? doc.getFechaEmision().toString() : "", doc.getMoneda());
-            extraerRelacionado(invoice, doc.getComprobanteAfectadoTipo(), doc.getComprobanteAfectadoSerieNumero(), doc.getTipoNota(), doc.getSustentoDescripcion());
-            extraerActores(invoice, doc.getEmisor(), doc.getReceptor());
-            extraerTotales(invoice, doc.getTotalImporte(), doc.getTotalImpuestos(), doc.getLeyendas());
-            extraerDetalles(invoice, doc.getDetalles());
+        if (doc instanceof BorradorNotaCredito nc) {
+            cargarDatosComunes(invoice, nc, "07", "NOTA DE CREDITO ELECTRONICA");
+            invoice.put("noteTypeCode", txt(nc.getTipoNota()));
+            invoice.put("noteTypeName", mapearTipoNotaCredito(nc.getTipoNota()));
+            invoice.put("sustento", txt(nc.getSustentoDescripcion()));
+            invoice.put("relatedDocument", relatedDocument(nc.getComprobanteAfectadoTipo(), nc.getComprobanteAfectadoSerieNumero(), nc.getTipoNota(), nc.getSustentoDescripcion()));
         }
-        
-        // Atributos inyectados del contexto
-        invoice.put("hash", contexto.hashDocumento() != null ? contexto.hashDocumento() : "");
-        invoice.put("qr", contexto.qrBase64() != null ? contexto.qrBase64() : "");
+        if (doc instanceof BorradorNotaDebito nd) {
+            cargarDatosComunes(invoice, nd, "08", "NOTA DE DEBITO ELECTRONICA");
+            invoice.put("noteTypeCode", txt(nd.getTipoNota()));
+            invoice.put("noteTypeName", mapearTipoNotaDebito(nd.getTipoNota()));
+            invoice.put("sustento", txt(nd.getSustentoDescripcion()));
+            invoice.put("relatedDocument", relatedDocument(nd.getComprobanteAfectadoTipo(), nd.getComprobanteAfectadoSerieNumero(), nd.getTipoNota(), nd.getSustentoDescripcion()));
+        }
+
+        invoice.put("hash", txt(contexto.hashDocumento()));
+        invoice.put("qr", txt(contexto.qrBase64()));
         invoice.put("logo", "logo.jpg");
 
         Map<String, Object> scope = new HashMap<>();
@@ -94,71 +93,161 @@ public class RenderizadorHtmlNota implements RenderizadorDocumento<Object> {
         }
     }
 
-    private void extraerBasicos(Map<String, Object> invoice, String serie, Integer numero, String type, String name, String issue, String curr) {
-        invoice.put("type", Integer.parseInt(type));
-        invoice.put("identity", serie + "-" + numero);
+    private void cargarDatosComunes(Map<String, Object> invoice, DocumentoBase doc, String typeCode, String name) {
+        invoice.put("type", parseInt(typeCode, 7));
+        invoice.put("typedIdentity", typeCode);
+        invoice.put("identity", txt(doc.getSerie()) + "-" + (doc.getNumero() != null ? doc.getNumero() : ""));
         invoice.put("name", name);
-        invoice.put("issueDate", issue);
-        invoice.put("currency", curr);
-    }
+        invoice.put("issueDate", txt(doc.getFechaEmision()));
+        invoice.put("issueTime", txt(doc.getHoraEmision()));
+        invoice.put("currency", txt(doc.getMoneda()));
 
-    private void extraerRelacionado(Map<String, Object> invoice, String tipoRef, String serieRef, String codMotivo, String descMotivo) {
-        Map<String, Object> docRef = new HashMap<>();
-        docRef.put("type", tipoRef);
-        docRef.put("document", serieRef);
-        docRef.put("code", codMotivo);
-        docRef.put("description", descMotivo);
-        invoice.put("relatedDocument", docRef);
-    }
-
-    private void extraerActores(Map<String, Object> invoice, EmisorDocumento emisor, ReceptorDocumento receptor) {
-        if (emisor != null) {
-            Map<String, Object> taxpayer = new HashMap<>();
-            taxpayer.put("identity", emisor.ruc());
-            taxpayer.put("name", emisor.razonSocial());
-            taxpayer.put("address", emisor.direccion() != null ? emisor.direccion().direccion() : "");
-            Map<String, Object> contact = new HashMap<>();
-            contact.put("email", ""); contact.put("telephone", "");
-            taxpayer.put("contact", contact);
-            invoice.put("taxpayer", taxpayer);
+        if (doc.getEmisor() != null) {
+            invoice.put("taxpayer", taxpayer(doc.getEmisor()));
+        }
+        if (doc.getReceptor() != null) {
+            invoice.put("customer", customer(doc.getReceptor()));
         }
 
-        if (receptor != null) {
-            Map<String, Object> customer = new HashMap<>();
-            customer.put("identity", receptor.numDocIdentidad());
-            customer.put("name", receptor.nombre());
-            customer.put("address", receptor.direccion() != null ? receptor.direccion().direccion() : "");
-            invoice.put("customer", customer);
-        }
-    }
-
-    private void extraerTotales(Map<String, Object> invoice, TotalImporte totalImp, TotalImpuestos totalTax, Map<String, String> keys) {
-        if (totalImp != null) {
-            Map<String, Object> summary = new HashMap<>();
-            summary.put("total", totalImp.importe());
-            if (keys != null && keys.containsKey("1000")) {
-                summary.put("totalText", keys.get("1000"));
-            }
-            if (totalTax != null) {
-                summary.put("igv", totalTax.total());
-                if (totalTax.gravadoBaseImponible() != null) summary.put("taxable", totalTax.gravadoBaseImponible());
-            }
-            invoice.put("summary", summary);
-        }
-    }
-
-    private void extraerDetalles(Map<String, Object> invoice, List<LineaDetalle> detalles) {
-        if (detalles != null) {
-            List<Map<String, Object>> items = detalles.stream().map(linea -> {
+        if (doc.getDetalles() != null) {
+            List<Map<String, Object>> items = new ArrayList<>();
+            int i = 1;
+            for (LineaDetalle linea : doc.getDetalles()) {
                 Map<String, Object> item = new HashMap<>();
-                item.put("quantity", linea.getCantidad());
-                item.put("unitCode", linea.getUnidadMedida());
-                item.put("description", linea.getDescripcion());
-                item.put("value", linea.getPrecio());
-                item.put("price", linea.getPrecio());
-                return item;
-            }).collect(Collectors.toList());
+                item.put("index", i++);
+                item.put("quantity", txt(linea.getCantidad()));
+                item.put("unitCode", txt(linea.getUnidadMedida()));
+                item.put("description", txt(linea.getDescripcion()));
+                item.put("code", txt(linea.getCodigoProducto()));
+                item.put("sunatCode", txt(linea.getCodigoProductoSunat()));
+                item.put("price", txt(linea.getPrecio()));
+                item.put("igv", txt(linea.getIgv()));
+                item.put("isc", txt(linea.getIsc()));
+                item.put("taxTotal", txt(linea.getTotalImpuestos()));
+                items.add(item);
+            }
             invoice.put("items", items);
         }
+
+        invoice.put("summary", summaryMap(doc));
+    }
+
+    private Map<String, Object> summaryMap(DocumentoBase doc) {
+        Map<String, Object> summary = new HashMap<>();
+        TotalImporte totalImp = doc instanceof BorradorNotaCredito nc ? nc.getTotalImporte()
+                : doc instanceof BorradorNotaDebito nd ? nd.getTotalImporte() : null;
+        TotalImpuestos totalTax = doc.getTotalImpuestos();
+
+        if (totalImp != null) {
+            summary.put("total", txt(totalImp.importe()));
+            summary.put("subtotal", txt(totalImp.importeSinImpuestos()));
+            summary.put("withTaxes", txt(totalImp.importeConImpuestos()));
+            summary.put("advanceTotal", txt(totalImp.anticipos()));
+            summary.put("discount", txt(totalImp.descuentos()));
+        }
+        if (totalTax != null) {
+            summary.put("taxTotal", txt(totalTax.total()));
+            summary.put("igv", txt(totalTax.gravadoImporte()));
+            summary.put("taxable", txt(totalTax.gravadoBaseImponible()));
+            summary.put("exonerated", txt(totalTax.exoneradoBaseImponible()));
+            summary.put("unaffected", txt(totalTax.inafectoBaseImponible()));
+            summary.put("icb", txt(totalTax.icbImporte()));
+            summary.put("isc", txt(totalTax.iscImporte()));
+
+            // Alias para templates ticket existentes.
+            summary.put("taxableFre", txt(totalTax.inafectoBaseImponible()));
+            summary.put("taxableVat", txt(totalTax.exoneradoBaseImponible()));
+        }
+        if (doc.getLeyendas() != null && doc.getLeyendas().containsKey("1000")) {
+            summary.put("totalText", doc.getLeyendas().get("1000"));
+        } else {
+            summary.put("totalText", "");
+        }
+        return summary;
+    }
+
+    private Map<String, Object> taxpayer(EmisorDocumento emisor) {
+        Map<String, Object> m = new HashMap<>();
+        m.put("identity", txt(emisor.ruc()));
+        m.put("name", txt(emisor.razonSocial()));
+        m.put("tradeName", txt(emisor.nombreComercial()));
+        m.put("address", txt(emisor.direccion() != null ? emisor.direccion().direccion() : ""));
+        m.put("location", location(emisor.direccion()));
+        m.put("contact", contactMap(emisor.contacto()));
+        return m;
+    }
+
+    private Map<String, Object> customer(ReceptorDocumento receptor) {
+        Map<String, Object> m = new HashMap<>();
+        m.put("documentType", txt(receptor.tipoDocIdentidad()));
+        m.put("identity", txt(receptor.numDocIdentidad()));
+        m.put("name", txt(receptor.nombre()));
+        m.put("address", txt(receptor.direccion() != null ? receptor.direccion().direccion() : ""));
+        m.put("location", location(receptor.direccion()));
+        m.put("contact", contactMap(receptor.contacto()));
+        return m;
+    }
+
+    private Map<String, Object> relatedDocument(String type, String document, String reasonCode, String reasonDescription) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("type", txt(type));
+        map.put("document", txt(document));
+        map.put("code", txt(reasonCode));
+        map.put("description", txt(reasonDescription));
+        return map;
+    }
+
+    private String mapearTipoNotaCredito(String code) {
+        return switch (txt(code)) {
+            case "01" -> "Anulación de la operación";
+            case "02" -> "Anulación por error en RUC";
+            case "03" -> "Corrección por error en descripción";
+            case "07" -> "Devolución por ítem";
+            default -> "";
+        };
+    }
+
+    private String mapearTipoNotaDebito(String code) {
+        return switch (txt(code)) {
+            case "01" -> "Intereses por mora";
+            case "02" -> "Aumento en el valor";
+            case "03" -> "Penalidades";
+            default -> "";
+        };
+    }
+
+    private Map<String, Object> contactMap(Contacto contacto) {
+        Map<String, Object> c = new HashMap<>();
+        c.put("name", txt(contacto != null ? contacto.nombre() : ""));
+        c.put("telephone", txt(contacto != null ? contacto.telefono() : ""));
+        c.put("email", txt(contacto != null ? contacto.email() : ""));
+        c.put("web", "");
+        return c;
+    }
+
+    private String location(Direccion d) {
+        if (d == null) return "";
+        List<String> parts = new ArrayList<>();
+        if (!txt(d.departamento()).isBlank()) parts.add(txt(d.departamento()));
+        if (!txt(d.provincia()).isBlank()) parts.add(txt(d.provincia()));
+        if (!txt(d.distrito()).isBlank()) parts.add(txt(d.distrito()));
+        if (!txt(d.ubigeo()).isBlank()) parts.add("Ubigeo " + d.ubigeo());
+        return String.join(" - ", parts);
+    }
+
+    private int parseInt(String value, int dft) {
+        try {
+            return value != null ? Integer.parseInt(value) : dft;
+        } catch (NumberFormatException ex) {
+            return dft;
+        }
+    }
+
+    private String txt(Object value) {
+        if (value == null) return "";
+        if (value instanceof BigDecimal b) {
+            return b.stripTrailingZeros().toPlainString();
+        }
+        return value.toString();
     }
 }

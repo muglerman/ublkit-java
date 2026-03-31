@@ -6,6 +6,8 @@ import com.cna.ublkit.render.modelo.ResultadoRender;
 import com.cna.ublkit.render.modelo.FormatoImpresion;
 import com.cna.ublkit.ubl.modelo.guia.BorradorGuiaRemision;
 import com.cna.ublkit.ubl.modelo.guia.Conductor;
+import com.cna.ublkit.ubl.modelo.guia.Contenedor;
+import com.cna.ublkit.ubl.modelo.guia.DeclaracionAduanera;
 import com.cna.ublkit.ubl.modelo.guia.Vehiculo;
 import io.pebbletemplates.pebble.PebbleEngine;
 import io.pebbletemplates.pebble.template.PebbleTemplate;
@@ -58,6 +60,7 @@ public class RenderizadorHtmlGuiaRemision implements RenderizadorDocumento<Borra
         receipt.put("identity", (texto(doc.getSerie()).isBlank() ? "-" : texto(doc.getSerie())) + "-" + (doc.getNumero() != null ? doc.getNumero() : "-"));
         receipt.put("name", "31".equals(doc.getTipoComprobante()) ? "GUÍA DE REMISIÓN TRANSPORTISTA" : "GUÍA DE REMISIÓN REMITENTE");
         receipt.put("issueDate", texto(doc.getFechaEmision()));
+        receipt.put("issueTime", texto(doc.getHoraEmision()));
         receipt.put("note", texto(doc.getObservaciones()));
 
         // Metadatos y firmas.
@@ -86,12 +89,29 @@ public class RenderizadorHtmlGuiaRemision implements RenderizadorDocumento<Borra
         // Customer / Destinatario.
         if (doc.getDestinatario() != null) {
             Map<String, Object> customer = new HashMap<>();
+            customer.put("documentType", texto(doc.getDestinatario().tipoDocumentoIdentidad()));
             customer.put("identity", texto(doc.getDestinatario().numeroDocumentoIdentidad()));
             customer.put("name", texto(doc.getDestinatario().nombre()));
             customer.put("address", doc.getEnvio() != null && doc.getEnvio().getDestino() != null
                     ? texto(doc.getEnvio().getDestino().direccion())
                     : "");
             receipt.put("customer", customer);
+        }
+
+        if (doc.getTercero() != null) {
+            Map<String, Object> third = new HashMap<>();
+            third.put("documentType", texto(doc.getTercero().tipoDocumentoIdentidad()));
+            third.put("identity", texto(doc.getTercero().numeroDocumentoIdentidad()));
+            third.put("name", texto(doc.getTercero().nombre()));
+            receipt.put("thirdParty", third);
+        }
+
+        if (doc.getComprador() != null) {
+            Map<String, Object> buyer = new HashMap<>();
+            buyer.put("documentType", texto(doc.getComprador().tipoDocumentoIdentidad()));
+            buyer.put("identity", texto(doc.getComprador().numeroDocumentoIdentidad()));
+            buyer.put("name", texto(doc.getComprador().nombre()));
+            receipt.put("buyer", buyer);
         }
 
         // Datos del traslado (envío).
@@ -105,6 +125,7 @@ public class RenderizadorHtmlGuiaRemision implements RenderizadorDocumento<Borra
             receipt.put("ownTransport", "01".equals(doc.getEnvio().getTipoModalidadTraslado()));
             receipt.put("transportModeCode", texto(doc.getEnvio().getTipoModalidadTraslado()));
             receipt.put("transportModeName", descripcionModalidadTraslado(doc.getEnvio().getTipoModalidadTraslado()));
+            receipt.put("manifest", texto(doc.getEnvio().getNumeroManifiesto()));
 
             Map<String, Object> address = new HashMap<>();
             if (doc.getEnvio().getPartida() != null) {
@@ -147,11 +168,69 @@ public class RenderizadorHtmlGuiaRemision implements RenderizadorDocumento<Borra
                         .collect(Collectors.toList());
                 receipt.put("drivers", drivers);
             }
+
+            if (doc.getEnvio().getContenedores() != null) {
+                List<Map<String, Object>> containers = new ArrayList<>();
+                for (Contenedor c : doc.getEnvio().getContenedores()) {
+                    Map<String, Object> container = new HashMap<>();
+                    container.put("number", texto(c.numero()));
+                    container.put("seal", texto(c.precinto()));
+                    containers.add(container);
+                }
+                receipt.put("containers", containers);
+            }
+
+            if (doc.getEnvio().getDeclaracionesAduaneras() != null) {
+                List<Map<String, Object>> customsDeclarations = new ArrayList<>();
+                for (DeclaracionAduanera da : doc.getEnvio().getDeclaracionesAduaneras()) {
+                    Map<String, Object> d = new HashMap<>();
+                    d.put("type", texto(da.tipoDocumento()));
+                    d.put("number", texto(da.numero()));
+                    d.put("customsOffice", texto(da.serieAduana()));
+                    customsDeclarations.add(d);
+                }
+                receipt.put("customsDeclarations", customsDeclarations);
+            }
+
+            if (doc.getEnvio().getPuerto() != null) {
+                Map<String, Object> port = new HashMap<>();
+                port.put("code", texto(doc.getEnvio().getPuerto().codigo()));
+                port.put("description", texto(doc.getEnvio().getPuerto().descripcion()));
+                receipt.put("port", port);
+            }
+
+            if (doc.getEnvio().getAeropuerto() != null) {
+                Map<String, Object> airport = new HashMap<>();
+                airport.put("code", texto(doc.getEnvio().getAeropuerto().codigo()));
+                airport.put("description", texto(doc.getEnvio().getAeropuerto().descripcion()));
+                receipt.put("airport", airport);
+            }
         }
 
         // Referencia documental.
         Map<String, Object> reference = new HashMap<>();
         reference.put("note", construirReferencia(doc));
+        if (doc.getDocumentosRelacionados() != null && !doc.getDocumentosRelacionados().isEmpty()) {
+            List<Map<String, Object>> relatedDocuments = new ArrayList<>();
+            doc.getDocumentosRelacionados().forEach(r -> {
+                Map<String, Object> d = new HashMap<>();
+                d.put("type", texto(r.tipoDocumento()));
+                d.put("document", texto(r.serieNumero()));
+                relatedDocuments.add(d);
+            });
+            reference.put("relatedDocuments", relatedDocuments);
+        }
+        if (doc.getDocumentosAdicionales() != null && !doc.getDocumentosAdicionales().isEmpty()) {
+            List<Map<String, Object>> additionalDocuments = new ArrayList<>();
+            doc.getDocumentosAdicionales().forEach(r -> {
+                Map<String, Object> d = new HashMap<>();
+                d.put("type", texto(r.tipoDocumento()));
+                d.put("document", texto(r.serieNumero()));
+                d.put("issuer", texto(r.emisor()));
+                additionalDocuments.add(d);
+            });
+            reference.put("additionalDocuments", additionalDocuments);
+        }
         receipt.put("reference", reference);
 
         // Ítems.

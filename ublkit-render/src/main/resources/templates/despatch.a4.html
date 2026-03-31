@@ -1,326 +1,214 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
-	<meta charset="UTF-8" />
-	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-	<title>{{ receipt.taxpayer.identity }}-{{ receipt.typedIdentity }}</title>
-	<style>
-		* {
-			box-sizing: border-box;
-		}
-
-		body {
-			font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-			font-size: 12px;
-			line-height: 1.35;
-			margin: 0;
-			padding: 16px;
-			color: #1f2937;
-		}
-
-		.container {
-			max-width: 100%;
-		}
-
-		.card {
-			border: 1px solid #cbd5e1;
-			border-radius: 6px;
-			background: #ffffff;
-		}
-
-		.header {
-			display: table;
-			width: 100%;
-			border-collapse: separate;
-			border-spacing: 10px 0;
-		}
-
-		.header-cell {
-			display: table-cell;
-			vertical-align: top;
-		}
-
-		.logo-cell {
-			width: 95px;
-		}
-
-		.logo-cell img {
-			max-width: 82px;
-			max-height: 82px;
-		}
-
-		.company-cell {
-			width: auto;
-		}
-
-		.company-name {
-			font-size: 16px;
-			font-weight: 700;
-			margin: 0 0 6px;
-		}
-
-		.doc-cell {
-			width: 230px;
-		}
-
-		.doc-card {
-			border: 2px solid #334155;
-			border-radius: 8px;
-			overflow: hidden;
-		}
-
-		.doc-card p {
-			margin: 0;
-			padding: 8px 10px;
-			text-align: center;
-			font-weight: 700;
-		}
-
-		.doc-name {
-			background: #e2e8f0;
-			color: #0f172a;
-		}
-
-		.section {
-			margin-top: 10px;
-		}
-
-		.section-title {
-			font-size: 11px;
-			font-weight: 700;
-			letter-spacing: .3px;
-			text-transform: uppercase;
-			margin: 0 0 5px;
-			color: #334155;
-		}
-
-		.grid {
-			display: table;
-			width: 100%;
-			border-collapse: separate;
-			border-spacing: 0;
-		}
-
-		.grid-col {
-			display: table-cell;
-			vertical-align: top;
-			width: 50%;
-			padding: 8px 10px;
-		}
-
-		.grid-col + .grid-col {
-			border-left: 1px solid #e2e8f0;
-		}
-
-		.meta {
-			margin: 0 0 3px;
-		}
-
-		table {
-			width: 100%;
-			border-collapse: collapse;
-		}
-
-		th,
-		td {
-			border: 1px solid #cbd5e1;
-			padding: 6px 8px;
-			vertical-align: top;
-		}
-
-		th {
-			background: #dbeafe;
-			color: #0f172a;
-			font-size: 11px;
-			text-align: left;
-		}
-
-		.text-right {
-			text-align: right;
-		}
-
-		.text-center {
-			text-align: center;
-		}
-
-		.qr-area {
-			margin-top: 12px;
-			display: table;
-			width: 100%;
-		}
-
-		.qr-cell {
-			display: table-cell;
-			vertical-align: top;
-		}
-
-		.qr-cell img {
-			width: 110px;
-			height: 110px;
-		}
-
-		.footer-note {
-			font-size: 11px;
-			color: #475569;
-		}
-	</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ receipt.identity }}</title>
+  <style>
+    :root { --ink:#0f172a; --muted:#475569; --line:#cbd5e1; --soft:#f8fafc; --accent:#1d4ed8; }
+    * { box-sizing:border-box; }
+    body { margin:0; padding:18px; font-family:"Helvetica Neue",Helvetica,Arial,sans-serif; font-size:12px; line-height:1.35; color:var(--ink); }
+    .card { border:1px solid var(--line); border-radius:8px; background:#fff; }
+    .header { display:table; width:100%; border-collapse:separate; border-spacing:10px 0; }
+    .cell { display:table-cell; vertical-align:top; }
+    .logo { width:90px; }
+    .logo img { max-width:78px; max-height:78px; }
+    .issuer { padding:10px; }
+    .issuer h1 { margin:0 0 4px; font-size:16px; }
+    .doc { width:230px; border:2px solid var(--ink); border-radius:10px; overflow:hidden; }
+    .doc p { margin:0; padding:8px 10px; text-align:center; font-weight:700; }
+    .doc .type { background:#dbeafe; color:#1e3a8a; }
+    .section { margin-top:10px; }
+    .title { margin:0 0 5px; font-size:11px; text-transform:uppercase; letter-spacing:.3px; color:#334155; font-weight:700; }
+    .grid { display:table; width:100%; }
+    .col { display:table-cell; width:50%; vertical-align:top; padding:8px 10px; }
+    .col + .col { border-left:1px solid #e2e8f0; }
+    p { margin:0 0 4px; }
+    .small { color:var(--muted); font-size:11px; }
+    table { width:100%; border-collapse:collapse; }
+    th, td { border:1px solid var(--line); padding:6px 7px; vertical-align:top; }
+    th { background:#eff6ff; font-size:11px; text-align:left; }
+    .right { text-align:right; }
+    .center { text-align:center; }
+    .qr { margin-top:12px; display:table; width:100%; }
+    .qr div { display:table-cell; vertical-align:top; }
+    .qr img { width:105px; height:105px; }
+    .pill { display:inline-block; border:1px solid #bfdbfe; background:#eff6ff; color:#1d4ed8; border-radius:999px; padding:1px 8px; font-size:11px; }
+  </style>
 </head>
-
 <body>
-	<div class="container">
-		<div class="header">
-			<div class="header-cell logo-cell">
-				<img alt="logotipo" src="{{ receipt.logo }}" />
-			</div>
-			<div class="header-cell company-cell card" style="padding: 10px;">
-				<p class="company-name">{{ receipt.taxpayer.name }}</p>
-				<p class="meta">{{ receipt.taxpayer.address }}</p>
-				{% if receipt.taxpayer.contact.web or receipt.taxpayer.contact.email or receipt.taxpayer.contact.telephone %}
-				<p class="meta">{{ receipt.taxpayer.contact.web }} {{ receipt.taxpayer.contact.email }} {{ receipt.taxpayer.contact.telephone }}</p>
-				{% endif %}
-			</div>
-			<div class="header-cell doc-cell">
-				<div class="doc-card">
-					<p>RUC: {{ receipt.taxpayer.identity }}</p>
-					<p class="doc-name">{{ receipt.name }}</p>
-					<p>{{ receipt.identity }}</p>
-				</div>
-			</div>
-		</div>
+  <div class="header">
+    <div class="cell logo"><img src="{{ receipt.logo }}" alt="Logo" /></div>
+    <div class="cell card issuer">
+      <h1>{{ receipt.taxpayer.name }}</h1>
+      <p>{{ receipt.taxpayer.address }}</p>
+      {% if receipt.taxpayer.contact.email or receipt.taxpayer.contact.telephone %}<p class="small">{{ receipt.taxpayer.contact.email }} {{ receipt.taxpayer.contact.telephone }}</p>{% endif %}
+    </div>
+    <div class="cell">
+      <div class="doc">
+        <p>RUC: {{ receipt.taxpayer.identity }}</p>
+        <p class="type">{{ receipt.name }}</p>
+        <p>{{ receipt.identity }}</p>
+      </div>
+    </div>
+  </div>
 
-		<div class="section">
-			<p class="section-title">Destinatario</p>
-			<div class="card grid">
-				<div class="grid-col">
-					<p class="meta"><strong>Nombre:</strong> {{ receipt.customer.name }}</p>
-					<p class="meta"><strong>Documento:</strong> {{ receipt.customer.identity }}</p>
-				</div>
-				<div class="grid-col">
-					<p class="meta"><strong>Dirección:</strong> {{ receipt.customer.address }}</p>
-					<p class="meta"><strong>Fecha de emisión:</strong> {{ receipt.issueDate }}</p>
-				</div>
-			</div>
-		</div>
+  <div class="section">
+    <p class="title">Destinatario</p>
+    <div class="card grid">
+      <div class="col">
+        <p><strong>Nombre:</strong> {{ receipt.customer.name }}</p>
+        <p><strong>Documento:</strong> {{ receipt.customer.documentType }} {{ receipt.customer.identity }}</p>
+        {% if receipt.customer.address %}<p><strong>Direccion:</strong> {{ receipt.customer.address }}</p>{% endif %}
+      </div>
+      <div class="col">
+        <p><strong>Emision:</strong> {{ receipt.issueDate }} {{ receipt.issueTime }}</p>
+        <p><strong>Inicio traslado:</strong> {{ receipt.startDate }}</p>
+        <p><strong>Motivo:</strong> {{ receipt.handling }}</p>
+      </div>
+    </div>
+  </div>
 
-		<div class="section">
-			<p class="section-title">Datos del traslado</p>
-			<div class="card grid">
-				<div class="grid-col">
-					<p class="meta"><strong>Inicio de traslado:</strong> {{ receipt.startDate }}</p>
-					<p class="meta"><strong>Motivo:</strong> {{ receipt.handling }}</p>
-					<p class="meta"><strong>Peso bruto:</strong> {{ receipt.weight }} {{ receipt.unitCode }}</p>
-					<p class="meta"><strong>Número de bultos:</strong> {{ receipt.packages }}</p>
-				</div>
-				<div class="grid-col">
-					<p class="meta"><strong>Modalidad:</strong> {{ receipt.transportModeName }} {% if receipt.transportModeCode %}({{ receipt.transportModeCode }}){% endif %}</p>
-					<p class="meta"><strong>Vehículo M1/L:</strong> {% if receipt.lightVehicle %}Sí{% else %}No{% endif %}</p>
-					<p class="meta"><strong>Punto de partida:</strong> {{ receipt.address.origin.ubigeo }} - {{ receipt.address.origin.line }}</p>
-					<p class="meta"><strong>Punto de llegada:</strong> {{ receipt.address.delivery.ubigeo }} - {{ receipt.address.delivery.line }}</p>
-				</div>
-			</div>
-		</div>
+  {% if receipt.thirdParty or receipt.buyer %}
+  <div class="section">
+    <p class="title">Actores Adicionales</p>
+    <div class="card grid">
+      <div class="col">
+        {% if receipt.thirdParty %}
+        <p><strong>Tercero:</strong> {{ receipt.thirdParty.name }}</p>
+        <p>{{ receipt.thirdParty.documentType }} {{ receipt.thirdParty.identity }}</p>
+        {% endif %}
+      </div>
+      <div class="col">
+        {% if receipt.buyer %}
+        <p><strong>Comprador:</strong> {{ receipt.buyer.name }}</p>
+        <p>{{ receipt.buyer.documentType }} {{ receipt.buyer.identity }}</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  {% endif %}
 
-		{% if receipt.carrier %}
-		<div class="section">
-			<p class="section-title">Transportista</p>
-			<div class="card grid">
-				<div class="grid-col">
-					<p class="meta"><strong>Nombre/Razón social:</strong> {{ receipt.carrier.name }}</p>
-					<p class="meta"><strong>Documento:</strong> {{ receipt.carrier.documentType }} {{ receipt.carrier.identity }}</p>
-				</div>
-				<div class="grid-col">
-					<p class="meta"><strong>Registro MTC:</strong> {{ receipt.carrier.mtc }}</p>
-				</div>
-			</div>
-		</div>
-		{% endif %}
+  <div class="section">
+    <p class="title">Datos del Traslado</p>
+    <div class="card grid">
+      <div class="col">
+        <p><strong>Peso total:</strong> {{ receipt.weight }} {{ receipt.unitCode }}</p>
+        <p><strong>Bultos:</strong> {{ receipt.packages }}</p>
+        <p><strong>Modalidad:</strong> {{ receipt.transportModeCode }} {{ receipt.transportModeName }}</p>
+        <p><strong>Manifiesto:</strong> {{ receipt.manifest }}</p>
+      </div>
+      <div class="col">
+        {% if receipt.address and receipt.address.origin %}<p><strong>Partida:</strong> {{ receipt.address.origin.ubigeo }} - {{ receipt.address.origin.line }}</p>{% endif %}
+        {% if receipt.address and receipt.address.delivery %}<p><strong>Llegada:</strong> {{ receipt.address.delivery.ubigeo }} - {{ receipt.address.delivery.line }}</p>{% endif %}
+        <p><strong>Vehiculo M1/L:</strong> {% if receipt.lightVehicle %}SI{% else %}NO{% endif %}</p>
+      </div>
+    </div>
+  </div>
 
-		{% if receipt.vehicles %}
-		<div class="section">
-			<p class="section-title">Vehículos</p>
-			<table>
-				<tr>
-					<th>Tipo</th>
-					<th>Placa</th>
-					<th>Nro. circulación</th>
-					<th>Nro. autorización</th>
-				</tr>
-				{% for vehicle in receipt.vehicles %}
-				<tr>
-					<td>{{ vehicle.label }}</td>
-					<td>{{ vehicle.identity }}</td>
-					<td>{{ vehicle.number }}</td>
-					<td>{{ vehicle.authorization }}</td>
-				</tr>
-				{% endfor %}
-			</table>
-		</div>
-		{% endif %}
+  {% if receipt.carrier %}
+  <div class="section">
+    <p class="title">Transportista</p>
+    <div class="card grid">
+      <div class="col">
+        <p><strong>Razon social:</strong> {{ receipt.carrier.name }}</p>
+        <p><strong>Documento:</strong> {{ receipt.carrier.documentType }} {{ receipt.carrier.identity }}</p>
+      </div>
+      <div class="col">
+        <p><strong>Registro MTC:</strong> {{ receipt.carrier.mtc }}</p>
+      </div>
+    </div>
+  </div>
+  {% endif %}
 
-		{% if receipt.drivers %}
-		<div class="section">
-			<p class="section-title">Conductores</p>
-			<table>
-				<tr>
-					<th>Tipo</th>
-					<th>Nombres y apellidos</th>
-					<th>Documento</th>
-					<th>Licencia</th>
-				</tr>
-				{% for driver in receipt.drivers %}
-				<tr>
-					<td>{{ driver.type }}</td>
-					<td>{{ driver.surname }}, {{ driver.name }}</td>
-					<td>{{ driver.documentType }} {{ driver.identity }}</td>
-					<td>{{ driver.license }}</td>
-				</tr>
-				{% endfor %}
-			</table>
-		</div>
-		{% endif %}
+  {% if receipt.vehicles %}
+  <div class="section">
+    <p class="title">Vehiculos</p>
+    <table>
+      <tr><th>Tipo</th><th>Placa</th><th>Circulacion</th><th>Autorizacion</th></tr>
+      {% for vehicle in receipt.vehicles %}
+      <tr>
+        <td>{{ vehicle.label }}</td>
+        <td>{{ vehicle.identity }}</td>
+        <td>{{ vehicle.number }}</td>
+        <td>{{ vehicle.authorization }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+  {% endif %}
 
-		<div class="section">
-			<p class="section-title">Documento relacionado</p>
-			<div class="card" style="padding: 8px 10px;">{% if receipt.reference.note %}{{ receipt.reference.note }}{% else %}-{% endif %}</div>
-		</div>
+  {% if receipt.drivers %}
+  <div class="section">
+    <p class="title">Conductores</p>
+    <table>
+      <tr><th>Tipo</th><th>Nombre</th><th>Documento</th><th>Licencia</th></tr>
+      {% for driver in receipt.drivers %}
+      <tr>
+        <td>{{ driver.type }}</td>
+        <td>{{ driver.surname }}, {{ driver.name }}</td>
+        <td>{{ driver.documentType }} {{ driver.identity }}</td>
+        <td>{{ driver.license }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+  {% endif %}
 
-		<div class="section">
-			<p class="section-title">Detalle del traslado</p>
-			<table>
-				<tr>
-					<th style="width: 50px;">#</th>
-					<th style="width: 120px;">Código</th>
-					<th>Descripción</th>
-					<th style="width: 70px;" class="text-center">Unidad</th>
-					<th style="width: 85px;" class="text-right">Cantidad</th>
-				</tr>
-				{% for item in receipt.items %}
-				<tr>
-					<td class="text-center">{{ loop.index }}</td>
-					<td>{{ item.code }}</td>
-					<td>{{ item.description }}</td>
-					<td class="text-center">{{ item.unitCode }}</td>
-					<td class="text-right">{{ item.quantity }}</td>
-				</tr>
-				{% endfor %}
-			</table>
-		</div>
+  {% if receipt.containers or receipt.customsDeclarations or receipt.port.code or receipt.airport.code %}
+  <div class="section">
+    <p class="title">Logistica y Aduana</p>
+    <div class="card" style="padding:8px 10px;">
+      {% if receipt.port.code %}<p><strong>Puerto:</strong> {{ receipt.port.code }} {{ receipt.port.description }}</p>{% endif %}
+      {% if receipt.airport.code %}<p><strong>Aeropuerto:</strong> {{ receipt.airport.code }} {{ receipt.airport.description }}</p>{% endif %}
+      {% if receipt.containers %}<p><strong>Contenedores:</strong></p>{% for c in receipt.containers %}<p class="small">{{ c.number }}{% if c.seal %} | Precinto: {{ c.seal }}{% endif %}</p>{% endfor %}{% endif %}
+      {% if receipt.customsDeclarations %}<p><strong>Declaraciones aduaneras:</strong></p>{% for c in receipt.customsDeclarations %}<p class="small">{{ c.type }} {{ c.number }} {{ c.customsOffice }}</p>{% endfor %}{% endif %}
+    </div>
+  </div>
+  {% endif %}
 
-		<div class="section card" style="padding: 8px 10px;">
-			<strong>Nota u observación:</strong> {% if receipt.note %}{{ receipt.note }}{% else %}-{% endif %}
-		</div>
+  <div class="section">
+    <p class="title">Documentos Relacionados</p>
+    <div class="card" style="padding:8px 10px;">
+      {% if receipt.reference.note %}<p><strong>Principal:</strong> {{ receipt.reference.note }}</p>{% endif %}
+      {% if receipt.reference.relatedDocuments %}<p><strong>Relacionados:</strong></p>{% for d in receipt.reference.relatedDocuments %}<p class="small">{{ d.type }} {{ d.document }}</p>{% endfor %}{% endif %}
+      {% if receipt.reference.additionalDocuments %}<p><strong>Adicionales:</strong></p>{% for d in receipt.reference.additionalDocuments %}<p class="small">{{ d.type }} {{ d.document }} {{ d.issuer }}</p>{% endfor %}{% endif %}
+    </div>
+  </div>
 
-		<div class="qr-area">
-			<div class="qr-cell">
-				<img src="{{ receipt.qr }}" alt="Código QR" />
-			</div>
-			<div class="qr-cell footer-note" style="padding-left: 12px;">
-				Representación impresa de la guía de remisión electrónica.<br />
-				Hash: {{ receipt.hash }}
-			</div>
-		</div>
-	</div>
+  <div class="section">
+    <p class="title">Detalle de Bienes</p>
+    <table>
+      <tr>
+        <th style="width:35px;" class="center">#</th>
+        <th style="width:95px;">Codigo</th>
+        <th>Descripcion</th>
+        <th style="width:70px;" class="center">Unidad</th>
+        <th style="width:85px;" class="right">Cantidad</th>
+      </tr>
+      {% for item in receipt.items %}
+      <tr>
+        <td class="center">{{ loop.index }}</td>
+        <td>{{ item.code }}</td>
+        <td>{{ item.description }}</td>
+        <td class="center">{{ item.unitCode }}</td>
+        <td class="right">{{ item.quantity }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+
+  <div class="section card" style="padding:8px 10px;">
+    <strong>Observacion:</strong> {% if receipt.note %}{{ receipt.note }}{% else %}-{% endif %}
+  </div>
+
+  <div class="qr">
+    <div><img src="{{ receipt.qr }}" alt="QR" /></div>
+    <div style="padding-left:10px;">
+      <span class="pill">Representacion impresa</span>
+      <p class="small" style="margin-top:6px;">Consulte la validez del documento en SUNAT.</p>
+      <p class="small">Hash: {{ receipt.hash }}</p>
+    </div>
+  </div>
 </body>
-
 </html>

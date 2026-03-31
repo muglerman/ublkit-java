@@ -1,285 +1,131 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
-	<meta charset="UTF-8" />
-	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-	<title>{{ invoice.taxpayer.identity }}-{{ invoice.typedIdentity }}</title>
-	<style>
-		* {
-			box-sizing: border-box;
-		}
-
-		body {
-			font-family: Arial, sans-serif;
-			margin: 0;
-			padding: 20px;
-		}
-
-		.bordered {
-			border: 1px solid #666;
-			border-radius: 5px;
-		}
-
-		.row {
-			display: table;
-			width: 100%;
-		}
-
-		.col {
-			display: table-cell;
-		}
-
-		.col-1-2 {
-			width: 50%;
-		}
-
-		.p-1 {
-			padding: 5px;
-		}
-
-		.p-2 {
-			padding: 10px;
-		}
-
-		.m-0 {
-			margin: 0;
-		}
-
-		.m-2 {
-			margin: 10px;
-		}
-
-		.my-1 {
-			margin-top: 5px;
-			margin-bottom: 5px;
-		}
-
-		.text-right {
-			text-align: right;
-		}
-
-		.text-center {
-			text-align: center;
-		}
-
-		.text-left {
-			text-align: left;
-		}
-
-		/* Header */
-		.logotipo,
-		.company-info,
-		.invoice-info {
-			vertical-align: middle;
-		}
-
-		.logotipo {
-			width: 15%;
-		}
-
-		.company-info {
-			width: 54%;
-		}
-
-		.invoice-info {
-			width: 30%;
-			font-weight: bold;
-		}
-
-		.receipt-name {
-			background-color: #dedede;
-		}
-
-		.business-name {
-			color: #a54;
-		}
-
-		.qr-section div {
-			display: inline-block;
-		}
-
-		.qr-section img {
-			width: 160px;
-			height: 160px;
-		}
-
-		.totals .amount {
-			width: 95px;
-			display: inline-block;
-		}
-	</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ invoice.identity }}</title>
+  <style>
+    :root { --ink:#0f172a; --muted:#475569; --line:#cbd5e1; --soft:#f8fafc; --accent:#0f766e; }
+    * { box-sizing:border-box; }
+    body { margin:0; padding:12px; font-family:"Helvetica Neue",Helvetica,Arial,sans-serif; color:var(--ink); font-size:10.5px; line-height:1.32; }
+    .card { border:1px solid var(--line); border-radius:7px; background:#fff; }
+    .header { display:table; width:100%; border-collapse:separate; border-spacing:8px 0; }
+    .cell { display:table-cell; vertical-align:top; }
+    .logo { width:68px; }
+    .logo img { max-width:58px; max-height:58px; }
+    .issuer { padding:8px; }
+    .issuer h1 { margin:0 0 3px; font-size:13px; }
+    .doc { width:190px; border:2px solid var(--ink); border-radius:9px; overflow:hidden; }
+    .doc p { margin:0; padding:6px 8px; text-align:center; font-weight:700; }
+    .doc .type { background:#e6f4f1; }
+    .section { margin-top:8px; }
+    .title { margin:0 0 4px; font-size:10px; text-transform:uppercase; letter-spacing:.3px; color:#334155; font-weight:700; }
+    .grid { display:table; width:100%; }
+    .col { display:table-cell; width:50%; vertical-align:top; padding:7px 8px; }
+    .col + .col { border-left:1px solid #e2e8f0; }
+    p { margin:0 0 3px; }
+    .small { color:var(--muted); font-size:10px; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    table { width:100%; border-collapse:collapse; }
+    th, td { border:1px solid var(--line); padding:5px; vertical-align:top; }
+    th { background:#e6f4f1; font-size:9.8px; text-align:left; }
+    .center { text-align:center; }
+    .right { text-align:right; }
+    .totals td { border:0; padding:2px 0; }
+    .totals td:first-child { color:var(--muted); }
+    .legend { margin-top:4px; color:#334155; font-weight:600; }
+    .qr { margin-top:10px; display:table; width:100%; }
+    .qr div { display:table-cell; vertical-align:top; }
+    .qr img { width:82px; height:82px; }
+    .pill { display:inline-block; border:1px solid #99f6e4; background:#f0fdfa; color:#0f766e; border-radius:999px; padding:1px 7px; font-size:9.6px; }
+  </style>
 </head>
-
 <body>
-	{% set isInvoice = (invoice.type == 1) or (invoice.type == 3) %}
-	{% set isNote = (invoice.type == 7) or (invoice.type == 8) %}
-	<div class="container">
-		<div class="row header">
-			<div class="col logotipo">
-				<img alt="logotipo" src="{{ invoice.logo }}" />
-			</div>
-			<div class="col p-2 text-center company-info">
-				<p class="m-0 business-name">{{ invoice.taxpayer.name }}</p>
-				<p class="m-0">{{ invoice.taxpayer.address }}</p>
-				<p class="m-0">
-					{% if invoice.taxpayer.contact.web %}
-					{{ invoice.taxpayer.contact.web }}
-					{% endif %}
-					{% if invoice.taxpayer.contact.email %}
-					- {{ invoice.taxpayer.contact.email }}
-					{% endif %}
-					{% if invoice.taxpayer.contact.telephone %}
-					- {{ invoice.taxpayer.contact.telephone }}
-					{% endif %}
-				</p>
-			</div>
-			<div class="col text-center invoice-info">
-				<div class="bordered">
-					<p class="m-0 p-1">RUC: {{ invoice.taxpayer.identity }}</p>
-					<p class="m-0 p-1 receipt-name">{{ invoice.name }}</p>
-					<p class="m-0 p-1">{{ invoice.identity }}</p>
-				</div>
-			</div>
-		</div>
+  <div class="header">
+    <div class="cell logo"><img src="{{ invoice.logo }}" alt="Logo" /></div>
+    <div class="cell card issuer">
+      <h1>{{ invoice.taxpayer.name }}</h1>
+      {% if invoice.taxpayer.tradeName %}<p><strong>{{ invoice.taxpayer.tradeName }}</strong></p>{% endif %}
+      <p>{{ invoice.taxpayer.address }}</p>
+      {% if invoice.taxpayer.location %}<p class="small">{{ invoice.taxpayer.location }}</p>{% endif %}
+    </div>
+    <div class="cell">
+      <div class="doc">
+        <p>RUC: {{ invoice.taxpayer.identity }}</p>
+        <p class="type">{{ invoice.name }}</p>
+        <p class="mono">{{ invoice.identity }}</p>
+      </div>
+    </div>
+  </div>
 
-		<div class="row bordered p-1 my-1 client-info">
-			<div class="col col-1-2">
-				<p class="m-0"><strong>Nombre:</strong> {{invoice.customer.name}}</p>
-				<p class="m-0"><strong>Emisión:</strong> {{ invoice.issueDate }}</p>
-				{% if invoice.dueDate %}
-				<p class="m-0"><strong>Vencimiento:</strong> {{ invoice.dueDate }}</p>
-				{% endif %}
-				{% if isInvoice %}
-				{% if invoice.shares %}
-				<p class="m-0"><strong>Forma de pago:</strong> Al crédito</p>
-				{% else %}
-				<p class="m-0"><strong>Forma de pago:</strong> Al contado</p>
-				{% endif %}
-				{% endif %}
-				{% if invoice.relatedDocument %}
-				<p class="m-0"><strong>Tipo doc. ref.:</strong> {{ invoice.relatedDocument.type }}</p>
-				<p class="m-0"><strong>Documento ref.:</strong> {{ invoice.relatedDocument.document }}</p>
-				{% endif %}
-			</div>
-			<div class="col col-1-2">
-				<p class="m-0"><strong>Documento:</strong> {{ invoice.customer.identity }}</p>
-				<p class="m-0"><strong>Dirección:</strong> {{ invoice.customer.address }}</p>
-				<p class="m-0"><strong>Moneda:</strong> {{ invoice.currency }}</p>
-				{% if invoice.relatedDocument %}
-				<p class="m-0"><strong>Motivo:</strong> {{ invoice.relatedDocument.code }}</p>
-				<p class="m-0"><strong>Descripción:</strong> {{ invoice.relatedDocument.description }}</p>
-				{% endif %}
-			</div>
-		</div>
+  <div class="section">
+    <p class="title">Cliente</p>
+    <div class="card grid">
+      <div class="col">
+        <p><strong>{{ invoice.customer.name }}</strong></p>
+        <p>{{ invoice.customer.documentType }} {{ invoice.customer.identity }}</p>
+        {% if invoice.customer.address %}<p>{{ invoice.customer.address }}</p>{% endif %}
+      </div>
+      <div class="col">
+        <p><strong>Emision:</strong> {{ invoice.issueDate }} {{ invoice.issueTime }}</p>
+        {% if invoice.dueDate %}<p><strong>Vencimiento:</strong> {{ invoice.dueDate }}</p>{% endif %}
+        <p><strong>Moneda:</strong> {{ invoice.currency }}</p>
+        {% if invoice.operationTypeCode %}<p><strong>Operacion:</strong> {{ invoice.operationTypeCode }}</p>{% endif %}
+      </div>
+    </div>
+  </div>
 
-		{% if invoice.reference %}
-		<div class="my-1 text-center">{{ invoice.reference.order }} - {{ invoice.reference.note }}</div>
-		{% endif %}
+  <div class="section">
+    <p class="title">Detalle</p>
+    <table>
+      <tr>
+        <th style="width:28px;" class="center">#</th>
+        <th>Descripcion</th>
+        <th style="width:56px;" class="center">Und</th>
+        <th style="width:66px;" class="right">Cant</th>
+        <th style="width:78px;" class="right">Precio</th>
+      </tr>
+      {% for item in invoice.items %}
+      <tr>
+        <td class="center">{{ item.index }}</td>
+        <td>{{ item.description }}{% if item.code %}<div class="small">{{ item.code }}</div>{% endif %}</td>
+        <td class="center">{{ item.unitCode }}</td>
+        <td class="right">{{ item.quantity }}</td>
+        <td class="right">{{ item.price }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
 
-		<table class="row p-1 my-1 bordered items">
-			<tr>
-				<th class="text-left">Cantidad</th>
-				<th class="text-center">Medida</th>
-				<th class="text-center">Descripción</th>
-				<th class="text-center">Valor</th>
-				<th class="text-right">Subtotal</th>
-			</tr>
-			{% for item in invoice.items %}
-			<tr>
-				<td>{{ item.quantity }}</td>
-				<td class="text-center">{{ item.unitCode }}</td>
-				<td class="text-center">{{ item.description }}</td>
-				<td class="text-center">{{ item.value }}</td>
-				<td class="text-right">{{ item.price }}</td>
-			</tr>
-			{% endfor %}
-		</table>
+  <div class="section grid">
+    <div class="col card" style="padding:7px 8px;">
+      {% if invoice.payment %}<p><strong>Pago:</strong> {{ invoice.payment.type }} {{ invoice.payment.total }}</p>{% endif %}
+      {% if invoice.detraction %}<p><strong>Detraccion:</strong> {{ invoice.detraction.amount }}</p>{% endif %}
+      {% if invoice.perception %}<p><strong>Percepcion:</strong> {{ invoice.perception.amount }}</p>{% endif %}
+      {% if invoice.reference.guides %}<p><strong>Guias:</strong></p>{% for g in invoice.reference.guides %}<p class="small">{{ g.type }} {{ g.document }}</p>{% endfor %}{% endif %}
+      {% if invoice.note %}<p><strong>Obs:</strong> {{ invoice.note }}</p>{% endif %}
+    </div>
+    <div class="col">
+      <table class="totals" style="width:100%;">
+        <tr><td>Subtotal</td><td class="right">{{ invoice.summary.subtotal }}</td></tr>
+        <tr><td>Gravado</td><td class="right">{{ invoice.summary.taxable }}</td></tr>
+        <tr><td>Exonerado</td><td class="right">{{ invoice.summary.exonerated }}</td></tr>
+        <tr><td>Inafecto</td><td class="right">{{ invoice.summary.unaffected }}</td></tr>
+        <tr><td>IGV</td><td class="right">{{ invoice.summary.igv }}</td></tr>
+        <tr><td>ISC</td><td class="right">{{ invoice.summary.isc }}</td></tr>
+        <tr><td>ICBPER</td><td class="right">{{ invoice.summary.icb }}</td></tr>
+        <tr><td><strong>Total</strong></td><td class="right"><strong>{{ invoice.summary.total }}</strong></td></tr>
+      </table>
+      {% if invoice.summary.totalText %}<div class="legend">{{ invoice.summary.totalText }}</div>{% endif %}
+    </div>
+  </div>
 
-		<div class="row my-1 p-1">
-			<div class="col col-1-2 additional">
-				{% if invoice.detraction %}
-				<p class="m-0"><strong>Sujeto a detracciones:</strong></p>
-				<p class="m-0">Monto: {{ invoice.detraction.amount }}</p>
-				<p class="m-0">Cuenta BN: {{ invoice.detraction.financialAccount }}</p>
-				{% endif %}
-				{% if invoice.shares %}
-				<p class="m-0"><strong>Cuotas del crédito:</strong></p>
-				<table class="row p-1 my-1 bordered">
-					<tr>
-						<th class="text-left">Cuota</th>
-						<th class="text-center">Vencimiento</th>
-						<th class="text-right">Monto</th>
-					</tr>
-					{% for share in invoice.shares %}
-					<tr>
-						<td class="text-left">{{ loop.index }}</td>
-						<td class="text-center">{{ share.dueDate }}</td>
-						<td class="text-right">{{ share.amount }}</td>
-					</tr>
-					{% endfor %}
-				</table>
-				{% endif %}
-			</div>
-			<div class="col col-1-2">
-				{% if invoice.summary.discount %}
-				<div class="text-right totals">
-					<span>Descuento:</span>
-					<span class="amount">{{ invoice.summary.discount }}</span>
-				</div>
-				{% endif %}
-				{% if invoice.summary.taxable %}
-				<div class="text-right totals">
-					<span>Op. gravadas:</span>
-					<span class="amount">{{ invoice.summary.taxable }}</span>
-				</div>
-				{% endif %}
-				{% if invoice.summary.taxableFre %}
-				<div class="text-right totals">
-					<span>Op. inafectas:</span>
-					<span class="amount">{{ invoice.summary.taxableFre }}</span>
-				</div>
-				{% endif %}
-				{% if invoice.summary.taxableVat %}
-				<div class="text-right totals">
-					<span>Op. exoneradas:</span>
-					<span class="amount">{{ invoice.summary.taxableVat }}</span>
-				</div>
-				{% endif %}
-				{% if invoice.summary.isc %}
-				<div class="text-right totals">
-					<span>ISC:</span>
-					<span class="amount">{{ invoice.summary.isc }}</span>
-				</div>
-				{% endif %}
-				{% if invoice.summary.igv %}
-				<div class="text-right totals">
-					<span>IGV:</span>
-					<span class="amount">{{ invoice.summary.igv }}</span>
-				</div>
-				{% endif %}
-				{% if invoice.summary.total %}
-				<div class="text-right totals">
-					<strong>Total:</strong>
-					<span class="amount">{{ invoice.summary.total }}</span>
-				</div>
-				{% endif %}
-				<div class="my-1 text-right">{{ invoice.summary.totalText }}</div>
-			</div>
-		</div>
-
-		<div class="row p-1 qr-section">
-			<div class="m-2">
-				<img src="{{ invoice.qr }}" alt="Código QR" />
-			</div>
-			<div>
-				<p>Puede consultar la validez de este comprobante de pago desde la web de la Sunat.</p>
-				<p>Hash: {{ invoice.hash }}</p>
-			</div>
-		</div>
-
-	</div>
-
+  <div class="qr">
+    <div><img src="{{ invoice.qr }}" alt="QR" /></div>
+    <div style="padding-left:8px;">
+      <span class="pill">Representacion impresa</span>
+      <p class="small" style="margin-top:4px;">Hash: {{ invoice.hash }}</p>
+    </div>
+  </div>
 </body>
-
 </html>

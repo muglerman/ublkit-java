@@ -1,271 +1,130 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
-	<meta charset="UTF-8" />
-	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-	<title>{{ receipt.taxpayer.identity }}-{{ receipt.typedIdentity }}</title>
-	<style>
-		* {
-			box-sizing: border-box;
-		}
-
-		body {
-			font-family: Arial, sans-serif;
-			margin: 0;
-			padding: 20px;
-		}
-
-		.bordered {
-			border: 1px solid #666;
-			border-radius: 5px;
-		}
-
-		.row {
-			display: table;
-			width: 100%;
-		}
-
-		.col {
-			display: table-cell;
-		}
-
-		.col-1-2 {
-			width: 50%;
-		}
-
-		.p-1 {
-			padding: 5px;
-		}
-
-		.p-2 {
-			padding: 10px;
-		}
-
-		.m-0 {
-			margin: 0;
-		}
-
-		.m-2 {
-			margin: 10px;
-		}
-
-		.my-1 {
-			margin-top: 5px;
-			margin-bottom: 5px;
-		}
-
-		.text-right {
-			text-align: right;
-		}
-
-		.text-center {
-			text-align: center;
-		}
-
-		.text-left {
-			text-align: left;
-		}
-
-		.nowrap {
-			white-space: nowrap;
-		}
-
-		/* Header */
-		.logotipo,
-		.company-info,
-		.invoice-info {
-			vertical-align: middle;
-		}
-
-		.logotipo {
-			width: 15%;
-		}
-
-		.company-info {
-			width: 54%;
-		}
-
-		.invoice-info {
-			width: 30%;
-			font-weight: bold;
-		}
-
-		.receipt-name {
-			background-color: #dedede;
-		}
-
-		.business-name {
-			color: #a54;
-		}
-
-		.qr-section div {
-			display: inline-block;
-		}
-
-		.qr-section img {
-			width: 160px;
-			height: 160px;
-		}
-	</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ receipt.identity }}</title>
+  <style>
+    :root { --ink:#0f172a; --muted:#475569; --line:#cbd5e1; --accent:#1d4ed8; }
+    * { box-sizing:border-box; }
+    body { margin:0; padding:12px; font-family:"Helvetica Neue",Helvetica,Arial,sans-serif; color:var(--ink); font-size:10.5px; line-height:1.32; }
+    .card { border:1px solid var(--line); border-radius:7px; background:#fff; }
+    .header { display:table; width:100%; border-collapse:separate; border-spacing:8px 0; }
+    .cell { display:table-cell; vertical-align:top; }
+    .logo { width:68px; }
+    .logo img { max-width:58px; max-height:58px; }
+    .issuer { padding:8px; }
+    .issuer h1 { margin:0 0 3px; font-size:13px; }
+    .doc { width:190px; border:2px solid var(--ink); border-radius:9px; overflow:hidden; }
+    .doc p { margin:0; padding:6px 8px; text-align:center; font-weight:700; }
+    .doc .type { background:#eff6ff; color:#1e3a8a; }
+    .section { margin-top:8px; }
+    .title { margin:0 0 4px; font-size:10px; text-transform:uppercase; letter-spacing:.3px; color:#334155; font-weight:700; }
+    .grid { display:table; width:100%; }
+    .col { display:table-cell; width:50%; vertical-align:top; padding:7px 8px; }
+    .col + .col { border-left:1px solid #e2e8f0; }
+    p { margin:0 0 3px; }
+    .small { color:var(--muted); font-size:10px; }
+    table { width:100%; border-collapse:collapse; }
+    th, td { border:1px solid var(--line); padding:5px; vertical-align:top; }
+    th { background:#eff6ff; font-size:9.8px; text-align:left; }
+    .center { text-align:center; }
+    .right { text-align:right; }
+    .qr { margin-top:10px; display:table; width:100%; }
+    .qr div { display:table-cell; vertical-align:top; }
+    .qr img { width:82px; height:82px; }
+  </style>
 </head>
-
 <body>
+  <div class="header">
+    <div class="cell logo"><img src="{{ receipt.logo }}" alt="Logo" /></div>
+    <div class="cell card issuer">
+      <h1>{{ receipt.taxpayer.name }}</h1>
+      <p>{{ receipt.taxpayer.address }}</p>
+    </div>
+    <div class="cell">
+      <div class="doc">
+        <p>RUC: {{ receipt.taxpayer.identity }}</p>
+        <p class="type">{{ receipt.name }}</p>
+        <p>{{ receipt.identity }}</p>
+      </div>
+    </div>
+  </div>
 
-	<div class="container">
-		<div class="row header">
-			<div class="col logotipo">
-				<img alt="logotipo" src="{{ receipt.logo }}" />
-			</div>
-			<div class="col p-2 text-center company-info">
-				<p class="m-0 business-name">{{ receipt.taxpayer.name }}</p>
-				<p class="m-0">{{ receipt.taxpayer.address }}</p>
-				<p class="m-0">{{ receipt.taxpayer.contact.web }} - {{ receipt.taxpayer.contact.email }} - {{
-					receipt.taxpayer.contact.telephone }}</p>
-			</div>
-			<div class="col text-center invoice-info">
-				<div class="bordered">
-					<p class="m-0 p-1">RUC: {{ receipt.taxpayer.identity }}</p>
-					<p class="m-0 p-1 receipt-name">{{ receipt.name }}</p>
-					<p class="m-0 p-1">{{ receipt.identity }}</p>
-				</div>
-			</div>
-		</div>
+  <div class="section">
+    <p class="title">Destinatario</p>
+    <div class="card grid">
+      <div class="col">
+        <p><strong>{{ receipt.customer.name }}</strong></p>
+        <p>{{ receipt.customer.documentType }} {{ receipt.customer.identity }}</p>
+      </div>
+      <div class="col">
+        <p><strong>Emision:</strong> {{ receipt.issueDate }} {{ receipt.issueTime }}</p>
+        <p><strong>Inicio:</strong> {{ receipt.startDate }}</p>
+        <p><strong>Motivo:</strong> {{ receipt.handling }}</p>
+      </div>
+    </div>
+  </div>
 
-		<div class="my-1 text-left">Destinatario</div>
+  <div class="section">
+    <p class="title">Traslado</p>
+    <div class="card grid">
+      <div class="col">
+        <p><strong>Peso:</strong> {{ receipt.weight }} {{ receipt.unitCode }}</p>
+        <p><strong>Bultos:</strong> {{ receipt.packages }}</p>
+        <p><strong>Modalidad:</strong> {{ receipt.transportModeCode }} {{ receipt.transportModeName }}</p>
+      </div>
+      <div class="col">
+        {% if receipt.address and receipt.address.origin %}<p><strong>Partida:</strong> {{ receipt.address.origin.ubigeo }} {{ receipt.address.origin.line }}</p>{% endif %}
+        {% if receipt.address and receipt.address.delivery %}<p><strong>Llegada:</strong> {{ receipt.address.delivery.ubigeo }} {{ receipt.address.delivery.line }}</p>{% endif %}
+        <p><strong>M1/L:</strong> {% if receipt.lightVehicle %}SI{% else %}NO{% endif %}</p>
+      </div>
+    </div>
+  </div>
 
-		<div class="row bordered p-1 my-1 client-info">
-			<div class="col col-1-2">
-				<p class="m-0"><strong>Nombre:</strong> {{receipt.customer.name}}</p>
-				<p class="m-0"><strong>Fecha de emisión:</strong> {{ receipt.issueDate }}</p>
-			</div>
-			<div class="col col-1-2">
-				<p class="m-0"><strong>Documento:</strong> {{ receipt.customer.identity }}</p>
-				<p class="m-0"><strong>Dirección:</strong> {{ receipt.customer.address }}</p>
-			</div>
-		</div>
+  {% if receipt.carrier %}
+  <div class="section card" style="padding:7px 8px;">
+    <p><strong>Transportista:</strong> {{ receipt.carrier.name }}</p>
+    <p>{{ receipt.carrier.documentType }} {{ receipt.carrier.identity }} | MTC {{ receipt.carrier.mtc }}</p>
+  </div>
+  {% endif %}
 
-		<div class="my-1 text-left">Datos del traslado</div>
+  {% if receipt.vehicles %}
+  <div class="section">
+    <p class="title">Vehiculos</p>
+    <table>
+      <tr><th>Tipo</th><th>Placa</th><th>Circulacion</th></tr>
+      {% for vehicle in receipt.vehicles %}<tr><td>{{ vehicle.label }}</td><td>{{ vehicle.identity }}</td><td>{{ vehicle.number }}</td></tr>{% endfor %}
+    </table>
+  </div>
+  {% endif %}
 
-		<div class="row bordered p-1 my-1">
-			<div class="col col-1-2">
-				<p class="m-0"><strong>Fecha de inicio de traslado:</strong> {{ receipt.startDate }}</p>
-				<p class="m-0"><strong>Motivo de traslado:</strong> {{ receipt.handling }}</p>
-				<p class="m-0"><strong>Peso bruto total:</strong> {{ receipt.weight }} {{ receipt.unitCode }}</p>
-				<p class="m-0"><strong>Punto de partida:</strong> {{ receipt.address.origin.ubigeo }} - {{
-					receipt.address.origin.line }}</p>
-			</div>
-			<div class="col col-1-2">
-				<p class="m-0"><strong>Característica especial:</strong>
-					{% if receipt.lightVehicle %}
-					Vehículo M1 o L
-					{% else %}
-					-
-					{% endif %}
-				</p>
-				<p class="m-0"><strong>Modalidad de transporte:</strong>
-					{% if receipt.ownTransport %}
-					Transporte privado
-					{% else %}
-					Transporte público
-					{% endif %}
-				</p>
-				<p class="m-0"><strong>Número de bultos:</strong> {{ receipt.packages }}</p>
-				<p class="m-0"><strong>Punto de llegada:</strong> {{ receipt.address.delivery.ubigeo }} - {{
-					receipt.address.delivery.line }}</p>
-			</div>
-		</div>
+  {% if receipt.drivers %}
+  <div class="section">
+    <p class="title">Conductores</p>
+    <table>
+      <tr><th>Tipo</th><th>Nombre</th><th>Doc</th></tr>
+      {% for driver in receipt.drivers %}<tr><td>{{ driver.type }}</td><td>{{ driver.surname }}, {{ driver.name }}</td><td>{{ driver.documentType }} {{ driver.identity }}</td></tr>{% endfor %}
+    </table>
+  </div>
+  {% endif %}
 
-		{% if receipt.carrier %}
-		<div class="my-1 text-left">Datos del transportista</div>
+  <div class="section card" style="padding:7px 8px;">
+    {% if receipt.reference.note %}<p><strong>Documento relacionado:</strong> {{ receipt.reference.note }}</p>{% endif %}
+    {% if receipt.note %}<p><strong>Observacion:</strong> {{ receipt.note }}</p>{% endif %}
+  </div>
 
-		<div class="row bordered p-1">
-			<div class="col col-1-2">
-				<p class="m-0"><strong>Nombre:</strong> {{ receipt.carrier.name }}</p>
-			</div>
-			<div class="col col-1-2">
-				<p class="m-0"><strong>Documento:</strong> {{ receipt.carrier.identity }}</p>
-			</div>
-		</div>
-		{% endif %}
+  <div class="section">
+    <p class="title">Bienes</p>
+    <table>
+      <tr><th style="width:28px;" class="center">#</th><th>Descripcion</th><th style="width:56px;" class="center">Und</th><th style="width:70px;" class="right">Cant</th></tr>
+      {% for item in receipt.items %}<tr><td class="center">{{ loop.index }}</td><td>{{ item.description }}</td><td class="center">{{ item.unitCode }}</td><td class="right">{{ item.quantity }}</td></tr>{% endfor %}
+    </table>
+  </div>
 
-		{% if receipt.vehicles %}
-		<div class="my-1 text-left">Datos de los vehículos</div>
-
-		<div class="row bordered p-1">
-			<div class="col col-1">
-				{% for vehicle in receipt.vehicles %}
-				{% if loop.first %}
-				<p class="m-0"><strong>Principal:</strong> Número de placa: {{ vehicle.identity }}</p>
-				{% else %}
-				<p class="m-0"><strong>Secundario:</strong> Número de placa: {{ vehicle.identity }}</p>
-				{% endif %}
-				{% endfor %}
-			</div>
-		</div>
-		{% endif %}
-
-		{% if receipt.drivers %}
-		<div class="my-1 text-left">Datos de los conductores</div>
-
-		<div class="row bordered p-1">
-			<table class="nowrap">
-				{% for driver in receipt.drivers %}
-				{% if loop.first %}
-				<tr>
-					<td rowspan="2"><strong>Principal:</strong></td>
-					<td>{{ driver.surname}}, {{ driver.name }} - {{ driver.identity }}</td>
-				</tr>
-				<tr>
-					<td>Licencia: {{ driver.license }}</td>
-				</tr>
-				{% else %}
-				<tr>
-					<td rowspan="2"><strong>Secundario:</strong></td>
-					<td>{{ driver.surname}}, {{ driver.name }} - {{ driver.identity }}</td>
-				</tr>
-				<tr>
-					<td>Licencia: {{ driver.license }}</td>
-				</tr>
-				{% endif %}
-				{% endfor %}
-			</table>
-		</div>
-		{% endif %}
-
-		<div class="my-1 text-left">Documento relacionado: {{ receipt.reference.note }}</div>
-
-		<table class="row p-1 my-1 bordered items">
-			<tr>
-				<th class="text-left">Ítem</th>
-				<th class="text-center">Descripción</th>
-				<th class="text-center">Unidad</th>
-				<th class="text-right">Cantidad</th>
-			</tr>
-			{% for item in receipt.items %}
-			<tr>
-				<td class="text-left">{{ loop.index }}</td>
-				<td class="text-center">{{ item.description }}</td>
-				<td class="text-center">{{ item.unitCode }}</td>
-				<td class="text-right">{{ item.quantity }}</td>
-			</tr>
-			{% endfor %}
-		</table>
-
-		<div class="my-1 text-left">Nota u observación: {{ receipt.note }}</div>
-
-		<div class="row p-1 qr-section">
-			<div class="m-2">
-				<img src="{{ receipt.qr }}" alt="Código QR hacia URL" />
-			</div>
-			<div>
-				<p>Puede consultar la validez de esta guía de remisión desde la web de la Sunat.</p>
-				<p>Hash: {{ receipt.hash }}</p>
-			</div>
-		</div>
-
-	</div>
-
+  <div class="qr">
+    <div><img src="{{ receipt.qr }}" alt="QR" /></div>
+    <div style="padding-left:8px;"><p class="small">Hash: {{ receipt.hash }}</p></div>
+  </div>
 </body>
-
 </html>

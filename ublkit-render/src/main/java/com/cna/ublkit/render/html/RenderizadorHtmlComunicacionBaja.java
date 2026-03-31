@@ -5,8 +5,15 @@ import com.cna.ublkit.render.modelo.ContextoRender;
 import com.cna.ublkit.render.modelo.ResultadoRender;
 import com.cna.ublkit.ubl.modelo.sunat.baja.ComunicacionBaja;
 import com.cna.ublkit.ubl.modelo.sunat.baja.ItemBaja;
+import io.pebbletemplates.pebble.PebbleEngine;
+import io.pebbletemplates.pebble.template.PebbleTemplate;
 
+import java.io.StringWriter;
+import java.io.Writer;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Renderizador HTML para Comunicación de Baja.
@@ -15,32 +22,57 @@ import java.util.List;
  */
 public class RenderizadorHtmlComunicacionBaja implements RenderizadorDocumento<ComunicacionBaja> {
 
+    private final PebbleEngine engine = new PebbleEngine.Builder().build();
+
     @Override
     public ResultadoRender renderizar(ContextoRender<ComunicacionBaja> contexto) {
         ComunicacionBaja baja = contexto.documento();
-        List<ItemBaja> items = baja.getComprobantes() != null ? baja.getComprobantes() : List.of();
-        StringBuilder html = new StringBuilder();
-        html.append("<html><head><meta charset=\"UTF-8\"><style>")
-                .append("body{font-family:Arial,sans-serif;font-size:12px;color:#222;padding:24px}")
-                .append("h1{font-size:18px;margin:0 0 12px 0}table{width:100%;border-collapse:collapse}")
-                .append("th,td{border:1px solid #ddd;padding:8px;text-align:left}th{background:#f5f5f5}")
-                .append("</style></head><body>")
-                .append("<h1>Comunicación de Baja</h1>")
-                .append("<p><b>Número:</b> RA-")
-                .append(baja.getFechaEmision() != null ? baja.getFechaEmision().toString().replace("-", "") : "00000000")
-                .append("-").append(baja.getNumero() != null ? baja.getNumero() : 1).append("</p>")
-                .append("<table><thead><tr><th>#</th><th>Tipo</th><th>Serie</th><th>Número</th><th>Motivo</th></tr></thead><tbody>");
-        int i = 1;
-        for (ItemBaja item : items) {
-            html.append("<tr><td>").append(i++).append("</td><td>")
-                    .append(item.tipoComprobante() != null ? item.tipoComprobante() : "")
-                    .append("</td><td>").append(item.serie() != null ? item.serie() : "")
-                    .append("</td><td>").append(item.numero() != null ? item.numero() : "")
-                    .append("</td><td>").append(item.descripcionSustento() != null ? item.descripcionSustento() : "")
-                    .append("</td></tr>");
+
+        Map<String, Object> ra = new HashMap<>();
+        ra.put("id", "RA-" + (baja.getFechaEmision() != null ? baja.getFechaEmision().toString().replace("-", "") : "00000000") + "-" + (baja.getNumero() != null ? baja.getNumero() : 1));
+        ra.put("issueDate", txt(baja.getFechaEmision()));
+        ra.put("referenceDate", txt(baja.getFechaEmisionComprobantes()));
+        ra.put("currency", txt(baja.getMoneda()));
+        ra.put("hash", txt(contexto.hashDocumento()));
+        ra.put("qr", txt(contexto.qrBase64()));
+
+        if (baja.getEmisor() != null) {
+            Map<String, Object> issuer = new HashMap<>();
+            issuer.put("ruc", txt(baja.getEmisor().ruc()));
+            issuer.put("name", txt(baja.getEmisor().razonSocial()));
+            issuer.put("tradeName", txt(baja.getEmisor().nombreComercial()));
+            ra.put("issuer", issuer);
         }
-        html.append("</tbody></table></body></html>");
-        return ResultadoRender.html(html.toString());
+
+        List<Map<String, Object>> lines = new ArrayList<>();
+        if (baja.getComprobantes() != null) {
+            int i = 1;
+            for (ItemBaja item : baja.getComprobantes()) {
+                Map<String, Object> line = new HashMap<>();
+                line.put("index", i++);
+                line.put("documentType", txt(item.tipoComprobante()));
+                line.put("serie", txt(item.serie()));
+                line.put("number", item.numero() != null ? item.numero().toString() : "");
+                line.put("reason", txt(item.descripcionSustento()));
+                lines.add(line);
+            }
+        }
+        ra.put("lines", lines);
+
+        Map<String, Object> scope = new HashMap<>();
+        scope.put("voided", ra);
+
+        try {
+            PebbleTemplate compiledTemplate = engine.getTemplate("templates/voided.a4.html");
+            Writer writer = new StringWriter();
+            compiledTemplate.evaluate(writer, scope);
+            return ResultadoRender.html(writer.toString());
+        } catch (Exception e) {
+            throw new RuntimeException("Error renderizando comunicación de baja HTML: " + e.getMessage(), e);
+        }
+    }
+
+    private String txt(Object value) {
+        return value == null ? "" : value.toString();
     }
 }
-
