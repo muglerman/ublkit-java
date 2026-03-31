@@ -43,6 +43,12 @@ public class RenderizadorHtmlComunicacionBaja implements RenderizadorDocumento<C
             issuer.put("tradeName", txt(baja.getEmisor().nombreComercial()));
             ra.put("issuer", issuer);
         }
+        if (baja.getFirmante() != null) {
+            Map<String, Object> signer = new HashMap<>();
+            signer.put("ruc", txt(baja.getFirmante().ruc()));
+            signer.put("name", txt(baja.getFirmante().razonSocial()));
+            ra.put("signer", signer);
+        }
 
         List<Map<String, Object>> lines = new ArrayList<>();
         if (baja.getComprobantes() != null) {

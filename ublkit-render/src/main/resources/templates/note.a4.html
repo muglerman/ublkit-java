@@ -67,8 +67,10 @@
       <div class="col">
         <p><strong>Emision:</strong> {{ invoice.issueDate }} {{ invoice.issueTime }}</p>
         <p><strong>Moneda:</strong> {{ invoice.currency }}</p>
+        {% if invoice.exchangeRate %}<p><strong>Tipo cambio:</strong> {{ invoice.exchangeRate.date }} {{ invoice.exchangeRate.value }}</p>{% endif %}
         <p><strong>Tipo de nota:</strong> {{ invoice.noteTypeCode }} {{ invoice.noteTypeName }}</p>
         {% if invoice.relatedDocument.document %}<p><strong>Doc. afectado:</strong> {{ invoice.relatedDocument.type }} {{ invoice.relatedDocument.document }}</p>{% endif %}
+        {% if invoice.orderReference %}<p><strong>Orden:</strong> {{ invoice.orderReference }}</p>{% endif %}
       </div>
     </div>
   </div>
@@ -96,7 +98,7 @@
       <tr>
         <td class="center">{{ item.index }}</td>
         <td>{{ item.code }}{% if item.sunatCode %}<div class="small">SUNAT: {{ item.sunatCode }}</div>{% endif %}</td>
-        <td>{{ item.description }}</td>
+        <td>{{ item.description }}{% if item.igvType %}<div class="small">Afect. IGV: {{ item.igvType }}</div>{% endif %}</td>
         <td class="center">{{ item.unitCode }}</td>
         <td class="right">{{ item.quantity }}</td>
         <td class="right">{{ item.price }}</td>
@@ -110,6 +112,8 @@
     <div class="col card" style="padding:8px 10px;">
       <p><strong>Motivo del ajuste:</strong></p>
       <p class="small">{{ invoice.noteTypeCode }} - {{ invoice.noteTypeName }}</p>
+      {% if invoice.charges %}<p style="margin-top:6px;"><strong>Cargos:</strong></p>{% for c in invoice.charges %}<p class="small">{{ c.type }} {{ c.amount }}</p>{% endfor %}{% endif %}
+      {% if invoice.reference.guides %}<p style="margin-top:6px;"><strong>Guias rel.:</strong></p>{% for g in invoice.reference.guides %}<p class="small">{{ g.type }} {{ g.document }}</p>{% endfor %}{% endif %}
       {% if invoice.sustento %}<p style="margin-top:6px;">{{ invoice.sustento }}</p>{% endif %}
     </div>
     <div class="col">
@@ -121,6 +125,8 @@
         <tr><td>IGV</td><td class="right">{{ invoice.summary.igv }}</td></tr>
         <tr><td>ISC</td><td class="right">{{ invoice.summary.isc }}</td></tr>
         <tr><td>ICBPER</td><td class="right">{{ invoice.summary.icb }}</td></tr>
+        <tr><td>Tasa IGV</td><td class="right">{{ invoice.taxRates.igv }}</td></tr>
+        <tr><td>Tasa IVAP</td><td class="right">{{ invoice.taxRates.ivap }}</td></tr>
         <tr><td>Total impuestos</td><td class="right">{{ invoice.summary.taxTotal }}</td></tr>
         <tr><td><strong>Total</strong></td><td class="right"><strong>{{ invoice.summary.total }}</strong></td></tr>
       </table>
@@ -132,6 +138,7 @@
     <div><img src="{{ invoice.qr }}" alt="QR" /></div>
     <div style="padding-left:10px;">
       <p class="small">Representacion impresa de nota electronica.</p>
+      {% if invoice.signer %}<p class="small">Firmante: {{ invoice.signer.identity }} {{ invoice.signer.name }}</p>{% endif %}
       <p class="small">Hash: {{ invoice.hash }}</p>
     </div>
   </div>

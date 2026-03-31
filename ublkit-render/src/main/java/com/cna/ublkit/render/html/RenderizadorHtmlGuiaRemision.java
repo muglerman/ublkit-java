@@ -59,6 +59,7 @@ public class RenderizadorHtmlGuiaRemision implements RenderizadorDocumento<Borra
         receipt.put("typedIdentity", texto(doc.getTipoComprobante()));
         receipt.put("identity", (texto(doc.getSerie()).isBlank() ? "-" : texto(doc.getSerie())) + "-" + (doc.getNumero() != null ? doc.getNumero() : "-"));
         receipt.put("name", "31".equals(doc.getTipoComprobante()) ? "GUÍA DE REMISIÓN TRANSPORTISTA" : "GUÍA DE REMISIÓN REMITENTE");
+        receipt.put("version", texto(doc.getVersion()));
         receipt.put("issueDate", texto(doc.getFechaEmision()));
         receipt.put("issueTime", texto(doc.getHoraEmision()));
         receipt.put("note", texto(doc.getObservaciones()));
@@ -67,6 +68,12 @@ public class RenderizadorHtmlGuiaRemision implements RenderizadorDocumento<Borra
         receipt.put("hash", texto(contexto.hashDocumento()));
         receipt.put("qr", texto(contexto.qrBase64()));
         receipt.put("logo", "logo.jpg");
+        if (doc.getFirmante() != null) {
+            Map<String, Object> signer = new HashMap<>();
+            signer.put("identity", texto(doc.getFirmante().ruc()));
+            signer.put("name", texto(doc.getFirmante().razonSocial()));
+            receipt.put("signer", signer);
+        }
 
         // Taxpayer / Remitente.
         if (doc.getRemitente() != null) {
@@ -119,6 +126,8 @@ public class RenderizadorHtmlGuiaRemision implements RenderizadorDocumento<Borra
             receipt.put("startDate", texto(doc.getEnvio().getFechaTraslado()));
             receipt.put("weight", texto(doc.getEnvio().getPesoTotal()));
             receipt.put("unitCode", texto(doc.getEnvio().getPesoTotalUnidadMedida()));
+            receipt.put("itemsWeight", texto(doc.getEnvio().getPesoItems()));
+            receipt.put("weightReason", texto(doc.getEnvio().getSustentoPeso()));
             receipt.put("packages", doc.getEnvio().getNumeroDeBultos());
             receipt.put("handling", descripcionMotivoTraslado(doc.getEnvio().getTipoTraslado(), doc.getEnvio().getMotivoTraslado()));
             receipt.put("lightVehicle", esVehiculoM1L(doc.getEnvio().getIndicadores()));
@@ -126,18 +135,23 @@ public class RenderizadorHtmlGuiaRemision implements RenderizadorDocumento<Borra
             receipt.put("transportModeCode", texto(doc.getEnvio().getTipoModalidadTraslado()));
             receipt.put("transportModeName", descripcionModalidadTraslado(doc.getEnvio().getTipoModalidadTraslado()));
             receipt.put("manifest", texto(doc.getEnvio().getNumeroManifiesto()));
+            receipt.put("indicators", doc.getEnvio().getIndicadores() == null ? List.of() : doc.getEnvio().getIndicadores());
 
             Map<String, Object> address = new HashMap<>();
             if (doc.getEnvio().getPartida() != null) {
                 Map<String, String> origin = new HashMap<>();
                 origin.put("ubigeo", texto(doc.getEnvio().getPartida().ubigeo()));
                 origin.put("line", texto(doc.getEnvio().getPartida().direccion()));
+                origin.put("code", texto(doc.getEnvio().getPartida().codigoLocal()));
+                origin.put("ruc", texto(doc.getEnvio().getPartida().ruc()));
                 address.put("origin", origin);
             }
             if (doc.getEnvio().getDestino() != null) {
                 Map<String, String> delivery = new HashMap<>();
                 delivery.put("ubigeo", texto(doc.getEnvio().getDestino().ubigeo()));
                 delivery.put("line", texto(doc.getEnvio().getDestino().direccion()));
+                delivery.put("code", texto(doc.getEnvio().getDestino().codigoLocal()));
+                delivery.put("ruc", texto(doc.getEnvio().getDestino().ruc()));
                 address.put("delivery", delivery);
             }
             receipt.put("address", address);
@@ -241,6 +255,17 @@ public class RenderizadorHtmlGuiaRemision implements RenderizadorDocumento<Borra
                 item.put("unitCode", texto(linea.unidadMedida()));
                 item.put("description", texto(linea.descripcion()));
                 item.put("code", texto(linea.codigo()));
+                item.put("sunatCode", texto(linea.codigoSunat()));
+                if (linea.atributos() != null) {
+                    List<Map<String, Object>> attributes = new ArrayList<>();
+                    linea.atributos().forEach(a -> {
+                        Map<String, Object> attr = new HashMap<>();
+                        attr.put("code", texto(a.codigo()));
+                        attr.put("value", texto(a.valor()));
+                        attributes.add(attr);
+                    });
+                    item.put("attributes", attributes);
+                }
                 return item;
             }).collect(Collectors.toList());
             receipt.put("items", items);

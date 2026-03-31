@@ -36,6 +36,7 @@
         <p><strong>Emisor:</strong> {{ summary.issuer.name }}</p>
         <p><strong>RUC:</strong> {{ summary.issuer.ruc }}</p>
         {% if summary.issuer.tradeName %}<p><strong>Comercial:</strong> {{ summary.issuer.tradeName }}</p>{% endif %}
+        {% if summary.signer %}<p><strong>Firmante:</strong> {{ summary.signer.ruc }} {{ summary.signer.name }}</p>{% endif %}
       </div>
     </div>
   </div>
@@ -46,9 +47,9 @@
       <th style="width:115px;">Comprobante</th>
       <th style="width:75px;">Operacion</th>
       <th>Cliente</th>
-      <th style="width:85px;" class="right">Total</th>
-      <th style="width:70px;" class="right">IGV</th>
-      <th style="width:70px;" class="right">ISC</th>
+      <th style="width:120px;" class="right">Totales</th>
+      <th style="width:90px;" class="right">Impuestos</th>
+      <th style="width:90px;">Referencia</th>
     </tr>
     {% for line in summary.lines %}
     <tr>
@@ -56,9 +57,20 @@
       <td>{{ line.documentType }} {{ line.document }}<div class="small">{{ line.currency }}</div></td>
       <td>{{ line.operationType }}</td>
       <td>{{ line.customerName }}<div class="small">{{ line.customerDocType }} {{ line.customerDoc }}</div></td>
-      <td class="right">{{ line.total }}</td>
-      <td class="right">{{ line.igv }}</td>
-      <td class="right">{{ line.isc }}</td>
+      <td class="right">
+        {{ line.total }}
+        <div class="small">Grav: {{ line.gravado }} | Exo: {{ line.exonerado }}</div>
+        <div class="small">Inaf: {{ line.inafecto }} | Grat: {{ line.gratuito }}</div>
+      </td>
+      <td class="right">
+        IGV {{ line.igv }}<br />
+        ISC {{ line.isc }}
+        <div class="small">ICB {{ line.icb }} | IVAP {{ line.ivap }} | Otros {{ line.otros }}</div>
+      </td>
+      <td>
+        {% if line.perceptionType or line.perceptionAmount %}<div class="small">Perc {{ line.perceptionType }} {{ line.perceptionAmount }} / {{ line.perceptionTotal }}</div>{% endif %}
+        {% if line.affectedDocument %}<div class="small">Afecta {{ line.affectedType }} {{ line.affectedDocument }}</div>{% endif %}
+      </td>
     </tr>
     {% endfor %}
   </table>

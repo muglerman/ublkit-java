@@ -11,6 +11,9 @@ import com.cna.ublkit.ubl.modelo.BorradorNotaDebito;
 import com.cna.ublkit.ubl.modelo.DocumentoBase;
 import com.cna.ublkit.ubl.modelo.actor.EmisorDocumento;
 import com.cna.ublkit.ubl.modelo.actor.ReceptorDocumento;
+import com.cna.ublkit.ubl.modelo.complemento.DocumentoRelacionado;
+import com.cna.ublkit.ubl.modelo.complemento.GuiaRelacionada;
+import com.cna.ublkit.ubl.modelo.linea.CargoDescuento;
 import com.cna.ublkit.ubl.modelo.linea.LineaDetalle;
 import com.cna.ublkit.ubl.modelo.total.TotalImporte;
 import com.cna.ublkit.ubl.modelo.total.TotalImpuestos;
@@ -24,6 +27,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Convierte Nota de Crédito/Débito en HTML usando plantillas Pebble.
@@ -101,12 +105,30 @@ public class RenderizadorHtmlNota implements RenderizadorDocumento<Object> {
         invoice.put("issueDate", txt(doc.getFechaEmision()));
         invoice.put("issueTime", txt(doc.getHoraEmision()));
         invoice.put("currency", txt(doc.getMoneda()));
+        invoice.put("orderReference", txt(doc.getOrdenDeCompra()));
+        invoice.put("taxRates", Map.of(
+                "igv", txt(doc.getTasaIgv()),
+                "ivap", txt(doc.getTasaIvap()),
+                "icb", txt(doc.getTasaIcb())
+        ));
+        if (doc.getTipoCambio() != null) {
+            Map<String, Object> exchange = new HashMap<>();
+            exchange.put("date", txt(doc.getTipoCambio().fecha()));
+            exchange.put("value", txt(doc.getTipoCambio().valor()));
+            invoice.put("exchangeRate", exchange);
+        }
 
         if (doc.getEmisor() != null) {
             invoice.put("taxpayer", taxpayer(doc.getEmisor()));
         }
         if (doc.getReceptor() != null) {
             invoice.put("customer", customer(doc.getReceptor()));
+        }
+        if (doc.getFirmante() != null) {
+            Map<String, Object> signer = new HashMap<>();
+            signer.put("identity", txt(doc.getFirmante().ruc()));
+            signer.put("name", txt(doc.getFirmante().razonSocial()));
+            invoice.put("signer", signer);
         }
 
         if (doc.getDetalles() != null) {
@@ -120,14 +142,45 @@ public class RenderizadorHtmlNota implements RenderizadorDocumento<Object> {
                 item.put("description", txt(linea.getDescripcion()));
                 item.put("code", txt(linea.getCodigoProducto()));
                 item.put("sunatCode", txt(linea.getCodigoProductoSunat()));
+                item.put("gs1Code", txt(linea.getCodigoProductoGS1()));
                 item.put("price", txt(linea.getPrecio()));
+                item.put("igvType", txt(linea.getIgvTipo()));
                 item.put("igv", txt(linea.getIgv()));
                 item.put("isc", txt(linea.getIsc()));
+                item.put("icb", txt(linea.getIcb()));
                 item.put("taxTotal", txt(linea.getTotalImpuestos()));
                 items.add(item);
             }
             invoice.put("items", items);
         }
+        if (doc.getCargos() != null && !doc.getCargos().isEmpty()) {
+            List<Map<String, Object>> charges = doc.getCargos().stream().map(this::mapCharge).collect(Collectors.toList());
+            invoice.put("charges", charges);
+        }
+
+        Map<String, Object> reference = new HashMap<>();
+        reference.put("order", txt(doc.getOrdenDeCompra()));
+        if (doc.getGuias() != null && !doc.getGuias().isEmpty()) {
+            List<Map<String, Object>> guides = new ArrayList<>();
+            for (GuiaRelacionada guia : doc.getGuias()) {
+                Map<String, Object> g = new HashMap<>();
+                g.put("type", txt(guia.tipoDocumento()));
+                g.put("document", txt(guia.serieNumero()));
+                guides.add(g);
+            }
+            reference.put("guides", guides);
+        }
+        if (doc.getDocumentosRelacionados() != null && !doc.getDocumentosRelacionados().isEmpty()) {
+            List<Map<String, Object>> docs = new ArrayList<>();
+            for (DocumentoRelacionado rel : doc.getDocumentosRelacionados()) {
+                Map<String, Object> d = new HashMap<>();
+                d.put("type", txt(rel.tipoDocumento()));
+                d.put("document", txt(rel.serieNumero()));
+                docs.add(d);
+            }
+            reference.put("documents", docs);
+        }
+        invoice.put("reference", reference);
 
         invoice.put("summary", summaryMap(doc));
     }
@@ -194,6 +247,15 @@ public class RenderizadorHtmlNota implements RenderizadorDocumento<Object> {
         map.put("document", txt(document));
         map.put("code", txt(reasonCode));
         map.put("description", txt(reasonDescription));
+        return map;
+    }
+
+    private Map<String, Object> mapCharge(CargoDescuento c) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("type", txt(c.tipo()));
+        map.put("amount", txt(c.monto()));
+        map.put("factor", txt(c.porcentaje()));
+        map.put("document", txt(c.serieNumero()));
         return map;
     }
 

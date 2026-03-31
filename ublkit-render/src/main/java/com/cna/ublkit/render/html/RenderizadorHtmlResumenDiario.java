@@ -45,6 +45,12 @@ public class RenderizadorHtmlResumenDiario implements RenderizadorDocumento<Resu
             issuer.put("tradeName", txt(resumen.getEmisor().nombreComercial()));
             rc.put("issuer", issuer);
         }
+        if (resumen.getFirmante() != null) {
+            Map<String, Object> signer = new HashMap<>();
+            signer.put("ruc", txt(resumen.getFirmante().ruc()));
+            signer.put("name", txt(resumen.getFirmante().razonSocial()));
+            rc.put("signer", signer);
+        }
 
         List<Map<String, Object>> lines = new ArrayList<>();
         if (resumen.getComprobantes() != null) {

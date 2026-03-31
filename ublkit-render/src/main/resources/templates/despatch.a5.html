@@ -71,6 +71,7 @@
     <div class="card grid">
       <div class="col">
         <p><strong>Peso:</strong> {{ receipt.weight }} {{ receipt.unitCode }}</p>
+        {% if receipt.itemsWeight %}<p><strong>Peso items:</strong> {{ receipt.itemsWeight }}</p>{% endif %}
         <p><strong>Bultos:</strong> {{ receipt.packages }}</p>
         <p><strong>Modalidad:</strong> {{ receipt.transportModeCode }} {{ receipt.transportModeName }}</p>
       </div>
@@ -78,6 +79,7 @@
         {% if receipt.address and receipt.address.origin %}<p><strong>Partida:</strong> {{ receipt.address.origin.ubigeo }} {{ receipt.address.origin.line }}</p>{% endif %}
         {% if receipt.address and receipt.address.delivery %}<p><strong>Llegada:</strong> {{ receipt.address.delivery.ubigeo }} {{ receipt.address.delivery.line }}</p>{% endif %}
         <p><strong>M1/L:</strong> {% if receipt.lightVehicle %}SI{% else %}NO{% endif %}</p>
+        {% if receipt.weightReason %}<p><strong>Sustento:</strong> {{ receipt.weightReason }}</p>{% endif %}
       </div>
     </div>
   </div>
@@ -118,13 +120,13 @@
     <p class="title">Bienes</p>
     <table>
       <tr><th style="width:28px;" class="center">#</th><th>Descripcion</th><th style="width:56px;" class="center">Und</th><th style="width:70px;" class="right">Cant</th></tr>
-      {% for item in receipt.items %}<tr><td class="center">{{ loop.index }}</td><td>{{ item.description }}</td><td class="center">{{ item.unitCode }}</td><td class="right">{{ item.quantity }}</td></tr>{% endfor %}
+      {% for item in receipt.items %}<tr><td class="center">{{ loop.index }}</td><td>{{ item.description }}{% if item.sunatCode %}<div class="small">SUNAT {{ item.sunatCode }}</div>{% endif %}</td><td class="center">{{ item.unitCode }}</td><td class="right">{{ item.quantity }}</td></tr>{% endfor %}
     </table>
   </div>
 
   <div class="qr">
     <div><img src="{{ receipt.qr }}" alt="QR" /></div>
-    <div style="padding-left:8px;"><p class="small">Hash: {{ receipt.hash }}</p></div>
+    <div style="padding-left:8px;"><p class="small">Version: {{ receipt.version }}</p>{% if receipt.signer %}<p class="small">Firmante: {{ receipt.signer.identity }}</p>{% endif %}<p class="small">Hash: {{ receipt.hash }}</p></div>
   </div>
 </body>
 </html>

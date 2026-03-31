@@ -94,14 +94,16 @@
     <div class="card grid">
       <div class="col">
         <p><strong>Peso total:</strong> {{ receipt.weight }} {{ receipt.unitCode }}</p>
+        {% if receipt.itemsWeight %}<p><strong>Peso items:</strong> {{ receipt.itemsWeight }}</p>{% endif %}
         <p><strong>Bultos:</strong> {{ receipt.packages }}</p>
         <p><strong>Modalidad:</strong> {{ receipt.transportModeCode }} {{ receipt.transportModeName }}</p>
         <p><strong>Manifiesto:</strong> {{ receipt.manifest }}</p>
       </div>
       <div class="col">
-        {% if receipt.address and receipt.address.origin %}<p><strong>Partida:</strong> {{ receipt.address.origin.ubigeo }} - {{ receipt.address.origin.line }}</p>{% endif %}
-        {% if receipt.address and receipt.address.delivery %}<p><strong>Llegada:</strong> {{ receipt.address.delivery.ubigeo }} - {{ receipt.address.delivery.line }}</p>{% endif %}
+        {% if receipt.address and receipt.address.origin %}<p><strong>Partida:</strong> {{ receipt.address.origin.ubigeo }} - {{ receipt.address.origin.line }}</p><p class="small">Local: {{ receipt.address.origin.code }} | RUC: {{ receipt.address.origin.ruc }}</p>{% endif %}
+        {% if receipt.address and receipt.address.delivery %}<p><strong>Llegada:</strong> {{ receipt.address.delivery.ubigeo }} - {{ receipt.address.delivery.line }}</p><p class="small">Local: {{ receipt.address.delivery.code }} | RUC: {{ receipt.address.delivery.ruc }}</p>{% endif %}
         <p><strong>Vehiculo M1/L:</strong> {% if receipt.lightVehicle %}SI{% else %}NO{% endif %}</p>
+        {% if receipt.weightReason %}<p><strong>Sustento peso:</strong> {{ receipt.weightReason }}</p>{% endif %}
       </div>
     </div>
   </div>
@@ -161,6 +163,7 @@
     <div class="card" style="padding:8px 10px;">
       {% if receipt.port.code %}<p><strong>Puerto:</strong> {{ receipt.port.code }} {{ receipt.port.description }}</p>{% endif %}
       {% if receipt.airport.code %}<p><strong>Aeropuerto:</strong> {{ receipt.airport.code }} {{ receipt.airport.description }}</p>{% endif %}
+      {% if receipt.indicators %}<p><strong>Indicadores:</strong> {% for i in receipt.indicators %}{{ i }}{% if not loop.last %}, {% endif %}{% endfor %}</p>{% endif %}
       {% if receipt.containers %}<p><strong>Contenedores:</strong></p>{% for c in receipt.containers %}<p class="small">{{ c.number }}{% if c.seal %} | Precinto: {{ c.seal }}{% endif %}</p>{% endfor %}{% endif %}
       {% if receipt.customsDeclarations %}<p><strong>Declaraciones aduaneras:</strong></p>{% for c in receipt.customsDeclarations %}<p class="small">{{ c.type }} {{ c.number }} {{ c.customsOffice }}</p>{% endfor %}{% endif %}
     </div>
@@ -189,8 +192,8 @@
       {% for item in receipt.items %}
       <tr>
         <td class="center">{{ loop.index }}</td>
-        <td>{{ item.code }}</td>
-        <td>{{ item.description }}</td>
+        <td>{{ item.code }}{% if item.sunatCode %}<div class="small">SUNAT: {{ item.sunatCode }}</div>{% endif %}</td>
+        <td>{{ item.description }}{% if item.attributes %}{% for a in item.attributes %}<div class="small">{{ a.code }}: {{ a.value }}</div>{% endfor %}{% endif %}</td>
         <td class="center">{{ item.unitCode }}</td>
         <td class="right">{{ item.quantity }}</td>
       </tr>
@@ -206,7 +209,9 @@
     <div><img src="{{ receipt.qr }}" alt="QR" /></div>
     <div style="padding-left:10px;">
       <span class="pill">Representacion impresa</span>
+      <p class="small" style="margin-top:6px;">Version GRE: {{ receipt.version }}</p>
       <p class="small" style="margin-top:6px;">Consulte la validez del documento en SUNAT.</p>
+      {% if receipt.signer %}<p class="small">Firmante: {{ receipt.signer.identity }} {{ receipt.signer.name }}</p>{% endif %}
       <p class="small">Hash: {{ receipt.hash }}</p>
     </div>
   </div>

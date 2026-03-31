@@ -12,6 +12,7 @@ import com.cna.ublkit.ubl.modelo.complemento.CuotaDePago;
 import com.cna.ublkit.ubl.modelo.complemento.Descuento;
 import com.cna.ublkit.ubl.modelo.complemento.DocumentoRelacionado;
 import com.cna.ublkit.ubl.modelo.complemento.GuiaRelacionada;
+import com.cna.ublkit.ubl.modelo.linea.CargoDescuento;
 import com.cna.ublkit.ubl.modelo.linea.LineaDetalle;
 import com.cna.ublkit.ubl.modelo.total.TotalImporte;
 import com.cna.ublkit.ubl.modelo.total.TotalImpuestos;
@@ -75,6 +76,19 @@ public class RenderizadorHtmlFactura implements RenderizadorDocumento<BorradorFa
         invoice.put("hash", txt(contexto.hashDocumento()));
         invoice.put("qr", txt(contexto.qrBase64()));
         invoice.put("logo", "logo.jpg");
+        invoice.put("deliveryAddress", txt(doc.getDireccionEntrega() != null ? doc.getDireccionEntrega().direccion() : ""));
+        invoice.put("taxRates", Map.of(
+                "igv", txt(doc.getTasaIgv()),
+                "ivap", txt(doc.getTasaIvap()),
+                "icb", txt(doc.getTasaIcb())
+        ));
+
+        if (doc.getFirmante() != null) {
+            Map<String, Object> signer = new HashMap<>();
+            signer.put("identity", txt(doc.getFirmante().ruc()));
+            signer.put("name", txt(doc.getFirmante().razonSocial()));
+            invoice.put("signer", signer);
+        }
 
         if (doc.getTipoCambio() != null) {
             Map<String, Object> exchange = new HashMap<>();
@@ -144,6 +158,26 @@ public class RenderizadorHtmlFactura implements RenderizadorDocumento<BorradorFa
             perception.put("total", txt(doc.getPercepcion().montoTotal()));
             invoice.put("perception", perception);
         }
+        if (doc.getGuiaEmbebida() != null) {
+            Map<String, Object> embeddedGuide = new HashMap<>();
+            embeddedGuide.put("arrival", txt(doc.getGuiaEmbebida().llegada() != null ? doc.getGuiaEmbebida().llegada().direccion() : ""));
+            embeddedGuide.put("departure", txt(doc.getGuiaEmbebida().partida() != null ? doc.getGuiaEmbebida().partida().direccion() : ""));
+            embeddedGuide.put("license", txt(doc.getGuiaEmbebida().nroLicencia()));
+            embeddedGuide.put("plate", txt(doc.getGuiaEmbebida().transpPlaca()));
+            embeddedGuide.put("authorization", txt(doc.getGuiaEmbebida().transpCodeAuth()));
+            embeddedGuide.put("brand", txt(doc.getGuiaEmbebida().transpMarca()));
+            embeddedGuide.put("mode", txt(doc.getGuiaEmbebida().modTraslado()));
+            embeddedGuide.put("weight", txt(doc.getGuiaEmbebida().pesoBruto()));
+            embeddedGuide.put("weightUnit", txt(doc.getGuiaEmbebida().undPesoBruto()));
+            if (doc.getGuiaEmbebida().transportista() != null) {
+                Map<String, Object> transport = new HashMap<>();
+                transport.put("name", txt(doc.getGuiaEmbebida().transportista().nombre()));
+                transport.put("documentType", txt(doc.getGuiaEmbebida().transportista().tipoDocIdentidad()));
+                transport.put("identity", txt(doc.getGuiaEmbebida().transportista().numDocIdentidad()));
+                embeddedGuide.put("carrier", transport);
+            }
+            invoice.put("embeddedGuide", embeddedGuide);
+        }
 
         if (doc.getAnticipos() != null && !doc.getAnticipos().isEmpty()) {
             List<Map<String, Object>> advances = new ArrayList<>();
@@ -161,6 +195,10 @@ public class RenderizadorHtmlFactura implements RenderizadorDocumento<BorradorFa
         if (doc.getDescuentos() != null && !doc.getDescuentos().isEmpty()) {
             List<Map<String, Object>> discounts = doc.getDescuentos().stream().map(this::mapDiscount).collect(Collectors.toList());
             invoice.put("discounts", discounts);
+        }
+        if (doc.getCargos() != null && !doc.getCargos().isEmpty()) {
+            List<Map<String, Object>> charges = doc.getCargos().stream().map(this::mapCharge).collect(Collectors.toList());
+            invoice.put("charges", charges);
         }
 
         Map<String, Object> reference = new HashMap<>();
@@ -269,6 +307,15 @@ public class RenderizadorHtmlFactura implements RenderizadorDocumento<BorradorFa
         map.put("amount", txt(d.monto()));
         map.put("factor", txt(d.factor()));
         map.put("base", txt(d.montoBase()));
+        return map;
+    }
+
+    private Map<String, Object> mapCharge(CargoDescuento c) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("type", txt(c.tipo()));
+        map.put("amount", txt(c.monto()));
+        map.put("factor", txt(c.porcentaje()));
+        map.put("document", txt(c.serieNumero()));
         return map;
     }
 

@@ -70,6 +70,7 @@
         <p><strong>Emision:</strong> {{ invoice.issueDate }} {{ invoice.issueTime }}</p>
         {% if invoice.dueDate %}<p><strong>Vencimiento:</strong> {{ invoice.dueDate }}</p>{% endif %}
         <p><strong>Moneda:</strong> {{ invoice.currency }}</p>
+        {% if invoice.exchangeRate %}<p><strong>T/C:</strong> {{ invoice.exchangeRate.value }}</p>{% endif %}
         {% if invoice.operationTypeCode %}<p><strong>Operacion:</strong> {{ invoice.operationTypeCode }}</p>{% endif %}
       </div>
     </div>
@@ -103,6 +104,7 @@
       {% if invoice.detraction %}<p><strong>Detraccion:</strong> {{ invoice.detraction.amount }}</p>{% endif %}
       {% if invoice.perception %}<p><strong>Percepcion:</strong> {{ invoice.perception.amount }}</p>{% endif %}
       {% if invoice.reference.guides %}<p><strong>Guias:</strong></p>{% for g in invoice.reference.guides %}<p class="small">{{ g.type }} {{ g.document }}</p>{% endfor %}{% endif %}
+      {% if invoice.deliveryAddress %}<p><strong>Entrega:</strong> {{ invoice.deliveryAddress }}</p>{% endif %}
       {% if invoice.note %}<p><strong>Obs:</strong> {{ invoice.note }}</p>{% endif %}
     </div>
     <div class="col">
@@ -114,6 +116,8 @@
         <tr><td>IGV</td><td class="right">{{ invoice.summary.igv }}</td></tr>
         <tr><td>ISC</td><td class="right">{{ invoice.summary.isc }}</td></tr>
         <tr><td>ICBPER</td><td class="right">{{ invoice.summary.icb }}</td></tr>
+        <tr><td>Tasa IGV</td><td class="right">{{ invoice.taxRates.igv }}</td></tr>
+        <tr><td>Tasa IVAP</td><td class="right">{{ invoice.taxRates.ivap }}</td></tr>
         <tr><td><strong>Total</strong></td><td class="right"><strong>{{ invoice.summary.total }}</strong></td></tr>
       </table>
       {% if invoice.summary.totalText %}<div class="legend">{{ invoice.summary.totalText }}</div>{% endif %}
@@ -124,6 +128,7 @@
     <div><img src="{{ invoice.qr }}" alt="QR" /></div>
     <div style="padding-left:8px;">
       <span class="pill">Representacion impresa</span>
+      {% if invoice.signer %}<p class="small" style="margin-top:4px;">Firmante: {{ invoice.signer.identity }}</p>{% endif %}
       <p class="small" style="margin-top:4px;">Hash: {{ invoice.hash }}</p>
     </div>
   </div>

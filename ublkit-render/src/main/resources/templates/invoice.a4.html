@@ -76,8 +76,10 @@
         <p><strong>Emision:</strong> {{ invoice.issueDate }} {{ invoice.issueTime }}</p>
         {% if invoice.dueDate %}<p><strong>Vencimiento:</strong> {{ invoice.dueDate }}</p>{% endif %}
         <p><strong>Moneda:</strong> {{ invoice.currency }}</p>
+        {% if invoice.exchangeRate %}<p><strong>Tipo cambio:</strong> {{ invoice.exchangeRate.date }} {{ invoice.exchangeRate.value }}</p>{% endif %}
         {% if invoice.operationTypeCode %}<p><strong>Operacion:</strong> {{ invoice.operationTypeCode }} {{ invoice.operationTypeName }}</p>{% endif %}
         {% if invoice.orderReference %}<p><strong>Orden de compra:</strong> {{ invoice.orderReference }}</p>{% endif %}
+        {% if invoice.deliveryAddress %}<p><strong>Direccion entrega:</strong> {{ invoice.deliveryAddress }}</p>{% endif %}
       </div>
     </div>
   </div>
@@ -150,6 +152,12 @@
       <p style="margin-top:6px;"><strong>Cargos:</strong></p>
       {% for c in invoice.charges %}<p class="small">{{ c.type }}: {{ c.amount }}</p>{% endfor %}
       {% endif %}
+      {% if invoice.embeddedGuide %}
+      <p style="margin-top:6px;"><strong>Factura-Guia:</strong></p>
+      {% if invoice.embeddedGuide.departure %}<p class="small">Partida: {{ invoice.embeddedGuide.departure }}</p>{% endif %}
+      {% if invoice.embeddedGuide.arrival %}<p class="small">Llegada: {{ invoice.embeddedGuide.arrival }}</p>{% endif %}
+      {% if invoice.embeddedGuide.plate %}<p class="small">Placa: {{ invoice.embeddedGuide.plate }} | Licencia: {{ invoice.embeddedGuide.license }}</p>{% endif %}
+      {% endif %}
       {% if invoice.advances %}
       <p style="margin-top:6px;"><strong>Anticipos:</strong></p>
       {% for a in invoice.advances %}<p class="small">{{ a.documentType }} {{ a.document }}: {{ a.amount }}</p>{% endfor %}
@@ -175,6 +183,9 @@
         <tr><td>ISC</td><td class="right">{{ invoice.summary.isc }}</td></tr>
         <tr><td>IVAP</td><td class="right">{{ invoice.summary.ivap }}</td></tr>
         <tr><td>ICBPER</td><td class="right">{{ invoice.summary.icb }}</td></tr>
+        <tr><td>Tasa IGV</td><td class="right">{{ invoice.taxRates.igv }}</td></tr>
+        <tr><td>Tasa IVAP</td><td class="right">{{ invoice.taxRates.ivap }}</td></tr>
+        <tr><td>Tasa ICBPER</td><td class="right">{{ invoice.taxRates.icb }}</td></tr>
         <tr><td>Total impuestos</td><td class="right">{{ invoice.summary.taxTotal }}</td></tr>
         <tr><td><strong>Total a pagar</strong></td><td class="right"><strong>{{ invoice.summary.total }}</strong></td></tr>
       </table>
@@ -187,6 +198,7 @@
     <div style="padding-left:10px;">
       <span class="pill">Representacion impresa</span>
       <p class="small" style="margin-top:6px;">Valide este documento en SUNAT.</p>
+      {% if invoice.signer %}<p class="small">Firmante: {{ invoice.signer.identity }} {{ invoice.signer.name }}</p>{% endif %}
       <p class="small">Hash: {{ invoice.hash }}</p>
     </div>
   </div>

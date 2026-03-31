@@ -63,6 +63,7 @@
       <div class="col">
         <p><strong>Emision:</strong> {{ invoice.issueDate }} {{ invoice.issueTime }}</p>
         <p><strong>Moneda:</strong> {{ invoice.currency }}</p>
+        {% if invoice.exchangeRate %}<p><strong>T/C:</strong> {{ invoice.exchangeRate.value }}</p>{% endif %}
         <p><strong>Tipo:</strong> {{ invoice.noteTypeCode }} {{ invoice.noteTypeName }}</p>
       </div>
     </div>
@@ -97,6 +98,7 @@
 
   <div class="section grid">
     <div class="col card" style="padding:7px 8px;">
+      {% if invoice.charges %}<p><strong>Cargos:</strong></p>{% for c in invoice.charges %}<p class="small">{{ c.type }} {{ c.amount }}</p>{% endfor %}{% endif %}
       {% if invoice.sustento %}<p><strong>Sustento:</strong> {{ invoice.sustento }}</p>{% endif %}
     </div>
     <div class="col">
@@ -106,6 +108,8 @@
         <tr><td>Exonerado</td><td class="right">{{ invoice.summary.exonerated }}</td></tr>
         <tr><td>Inafecto</td><td class="right">{{ invoice.summary.unaffected }}</td></tr>
         <tr><td>IGV</td><td class="right">{{ invoice.summary.igv }}</td></tr>
+        <tr><td>Tasa IGV</td><td class="right">{{ invoice.taxRates.igv }}</td></tr>
+        <tr><td>Tasa IVAP</td><td class="right">{{ invoice.taxRates.ivap }}</td></tr>
         <tr><td><strong>Total</strong></td><td class="right"><strong>{{ invoice.summary.total }}</strong></td></tr>
       </table>
     </div>
@@ -114,6 +118,7 @@
   <div class="qr">
     <div><img src="{{ invoice.qr }}" alt="QR" /></div>
     <div style="padding-left:8px;">
+      {% if invoice.signer %}<p class="small">Firmante: {{ invoice.signer.identity }}</p>{% endif %}
       <p class="small">Hash: {{ invoice.hash }}</p>
     </div>
   </div>
