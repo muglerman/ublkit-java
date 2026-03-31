@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="GuiaRemitente" language="groovy" pageWidth="595" pageHeight="842" columnWidth="511" leftMargin="42" rightMargin="42" topMargin="42" bottomMargin="42" uuid="3ae2cb17-54d7-40cd-9318-eb402950ca02">
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="GuiaRemitente" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="3ae2cb17-54d7-40cd-9318-eb402950ca02">
 	<property name="ireport.zoom" value="1.0"/>
 	<property name="ireport.x" value="0"/>
 	<property name="ireport.y" value="0"/>
@@ -13,32 +13,32 @@
 	<field name="tipoGuia" class="java.lang.String">
 		<fieldDescription><![CDATA[/DespatchAdvice/DespatchAdviceTypeCode]]></fieldDescription>
 	</field>
+	<field name="tipDocEmisor" class="java.lang.String">
+		<fieldDescription><![CDATA[/DespatchAdvice/DespatchSupplierParty/Party/PartyIdentification/ID/@schemeID]]></fieldDescription>
+	</field>
 	<field name="nroDocEmisor" class="java.lang.String">
 		<fieldDescription><![CDATA[/DespatchAdvice/DespatchSupplierParty/Party/PartyIdentification/ID]]></fieldDescription>
-	</field>
-	<field name="nomComercialEmisor" class="java.lang.String">
-		<fieldDescription><![CDATA[/DespatchAdvice/DespatchSupplierParty/Party/PartyName/Name]]></fieldDescription>
 	</field>
 	<field name="rznSocialEmisor" class="java.lang.String">
 		<fieldDescription><![CDATA[/DespatchAdvice/DespatchSupplierParty/Party/PartyLegalEntity/RegistrationName]]></fieldDescription>
 	</field>
+	<field name="tipDocDestinatario" class="java.lang.String">
+		<fieldDescription><![CDATA[/DespatchAdvice/DeliveryCustomerParty/Party/PartyIdentification/ID/@schemeID]]></fieldDescription>
+	</field>
 	<field name="nroDocDestinatario" class="java.lang.String">
 		<fieldDescription><![CDATA[/DespatchAdvice/DeliveryCustomerParty/Party/PartyIdentification/ID]]></fieldDescription>
 	</field>
-	<field name="nomComercialDestinatario" class="java.lang.String">
-		<fieldDescription><![CDATA[/DespatchAdvice/DeliveryCustomerParty/Party/PartyName/Name]]></fieldDescription>
-	</field>
 	<field name="rznSocialDestinatario" class="java.lang.String">
 		<fieldDescription><![CDATA[/DespatchAdvice/DeliveryCustomerParty/Party/PartyLegalEntity/RegistrationName]]></fieldDescription>
+	</field>
+	<field name="fecEmision" class="java.lang.String">
+		<fieldDescription><![CDATA[/DespatchAdvice/IssueDate]]></fieldDescription>
 	</field>
 	<field name="motTrasladoDatosEnvio" class="java.lang.String">
 		<fieldDescription><![CDATA[/DespatchAdvice/Shipment/HandlingCode]]></fieldDescription>
 	</field>
 	<field name="desMotivoTrasladoDatosEnvio" class="java.lang.String">
-		<fieldDescription><![CDATA[/DespatchAdvice/Shipment/Information]]></fieldDescription>
-	</field>
-	<field name="indTransbordoProgDatosEnvio" class="java.lang.String">
-		<fieldDescription><![CDATA[/DespatchAdvice/Shipment/SplitConsignmentIndicator]]></fieldDescription>
+		<fieldDescription><![CDATA[/DespatchAdvice/Shipment/HandlingInstructions]]></fieldDescription>
 	</field>
 	<field name="psoBrutoTotalBienesDatosEnvio" class="java.lang.String">
 		<fieldDescription><![CDATA[/DespatchAdvice/Shipment/GrossWeightMeasure]]></fieldDescription>
@@ -62,19 +62,25 @@
 		<fieldDescription><![CDATA[/DespatchAdvice/Shipment/ShipmentStage/CarrierParty/PartyIdentification/ID/@schemeID]]></fieldDescription>
 	</field>
 	<field name="nomTransportista" class="java.lang.String">
-		<fieldDescription><![CDATA[/DespatchAdvice/Shipment/ShipmentStage/CarrierParty/PartyName/Name]]></fieldDescription>
+		<fieldDescription><![CDATA[/DespatchAdvice/Shipment/ShipmentStage/CarrierParty/PartyLegalEntity/RegistrationName]]></fieldDescription>
 	</field>
 	<field name="numPlacaTransPrivado" class="java.lang.String">
-		<fieldDescription><![CDATA[/DespatchAdvice/Shipment/ShipmentStage/TransportMeans/RoadTransport/LicensePlateID]]></fieldDescription>
+		<fieldDescription><![CDATA[/DespatchAdvice/Shipment/TransportHandlingUnit/TransportEquipment/ID]]></fieldDescription>
 	</field>
 	<field name="numDocIdeConductorTransPrivado" class="java.lang.String">
 		<fieldDescription><![CDATA[/DespatchAdvice/Shipment/ShipmentStage/DriverPerson/ID]]></fieldDescription>
 	</field>
-	<field name="tipDocIdeConductorTransPrivad" class="java.lang.String">
+	<field name="tipDocIdeConductorTransPrivado" class="java.lang.String">
 		<fieldDescription><![CDATA[/DespatchAdvice/Shipment/ShipmentStage/DriverPerson/ID/@schemeID]]></fieldDescription>
 	</field>
 	<field name="nomConductorTransPrivado" class="java.lang.String">
 		<fieldDescription><![CDATA[/DespatchAdvice/Shipment/ShipmentStage/DriverPerson/FirstName]]></fieldDescription>
+	</field>
+	<field name="apeConductorTransPrivado" class="java.lang.String">
+		<fieldDescription><![CDATA[/DespatchAdvice/Shipment/ShipmentStage/DriverPerson/FamilyName]]></fieldDescription>
+	</field>
+	<field name="licConductorTransPrivado" class="java.lang.String">
+		<fieldDescription><![CDATA[/DespatchAdvice/Shipment/ShipmentStage/DriverPerson/IdentityDocumentReference/ID]]></fieldDescription>
 	</field>
 	<field name="ubiLlegada" class="java.lang.String">
 		<fieldDescription><![CDATA[/DespatchAdvice/Shipment/Delivery/DeliveryAddress/ID]]></fieldDescription>
@@ -89,7 +95,7 @@
 		<fieldDescription><![CDATA[/DespatchAdvice/Shipment/Delivery/Despatch/DespatchAddress/AddressLine/Line]]></fieldDescription>
 	</field>
 	<field name="numContenedor" class="java.lang.String">
-		<fieldDescription><![CDATA[/DespatchAdvice/Shipment/TransportHandlingUnit/TransportEquipment/ ID]]></fieldDescription>
+		<fieldDescription><![CDATA[/DespatchAdvice/Shipment/TransportHandlingUnit/TransportEquipment/ID]]></fieldDescription>
 	</field>
 	<field name="codPuerto" class="java.lang.String">
 		<fieldDescription><![CDATA[/DespatchAdvice/Shipment/FirstArrivalPortLocation/ID]]></fieldDescription>
@@ -100,21 +106,6 @@
 	<field name="codTipDocRel" class="java.lang.String">
 		<fieldDescription><![CDATA[/DespatchAdvice/AdditionalDocumentReference/DocumentTypeCode]]></fieldDescription>
 	</field>
-	<field name="numOrdenItem" class="java.lang.String">
-		<fieldDescription><![CDATA[/DespatchAdvice/DespatchLine/OrderLineReference/LineID]]></fieldDescription>
-	</field>
-	<field name="canItem" class="java.lang.String">
-		<fieldDescription><![CDATA[/DespatchAdvice/DespatchLine/DeliveredQuantity]]></fieldDescription>
-	</field>
-	<field name="uniMedidaItem" class="java.lang.String">
-		<fieldDescription><![CDATA[/DespatchAdvice/DespatchLine/DeliveredQuantity/@unitCode]]></fieldDescription>
-	</field>
-	<field name="desItem" class="java.lang.String">
-		<fieldDescription><![CDATA[/DespatchAdvice/DespatchLine/Item/Description]]></fieldDescription>
-	</field>
-	<field name="codItem" class="java.lang.String">
-		<fieldDescription><![CDATA[/DespatchAdvice/DespatchLine/Item/SellersItemIdentification/ID]]></fieldDescription>
-	</field>
 	<field name="idDocBaja" class="java.lang.String">
 		<fieldDescription><![CDATA[/DespatchAdvice/OrderReference/ID]]></fieldDescription>
 	</field>
@@ -124,190 +115,300 @@
 	<field name="tipDocBaja" class="java.lang.String">
 		<fieldDescription><![CDATA[/DespatchAdvice/OrderReference/OrderTypeCode/@name]]></fieldDescription>
 	</field>
-	<field name="tipDocDestinatario" class="java.lang.String">
-		<fieldDescription><![CDATA[/DespatchAdvice/DeliveryCustomerParty/Party/PartyIdentification/ID/@schemeID]]></fieldDescription>
-	</field>
-	<field name="tipDocEmisor" class="java.lang.String">
-		<fieldDescription><![CDATA[/DespatchAdvice/DespatchSupplierParty/Party/PartyIdentification/ID/@schemeID]]></fieldDescription>
-	</field>
-	<field name="fecEmision" class="java.lang.String">
-		<fieldDescription><![CDATA[/DespatchAdvice/IssueDate]]></fieldDescription>
-	</field>
 	<field name="digestValue" class="java.lang.String">
 		<fieldDescription><![CDATA[/DespatchAdvice/UBLExtensions/UBLExtension/ExtensionContent/Signature/SignedInfo/Reference/DigestValue]]></fieldDescription>
 	</field>
-	<variable name="variable1" class="java.lang.String"/>
+	<field name="idItem" class="java.lang.String">
+		<fieldDescription><![CDATA[ID]]></fieldDescription>
+	</field>
+	<field name="numOrdenItem" class="java.lang.String">
+		<fieldDescription><![CDATA[OrderLineReference/LineID]]></fieldDescription>
+	</field>
+	<field name="canItem" class="java.lang.String">
+		<fieldDescription><![CDATA[DeliveredQuantity]]></fieldDescription>
+	</field>
+	<field name="uniMedidaItem" class="java.lang.String">
+		<fieldDescription><![CDATA[DeliveredQuantity/@unitCode]]></fieldDescription>
+	</field>
+	<field name="desItem" class="java.lang.String">
+		<fieldDescription><![CDATA[Item/Description]]></fieldDescription>
+	</field>
+	<field name="codItem" class="java.lang.String">
+		<fieldDescription><![CDATA[Item/SellersItemIdentification/ID]]></fieldDescription>
+	</field>
 	<background>
 		<band splitType="Stretch"/>
 	</background>
-	<pageHeader>
-		<band height="54" splitType="Stretch">
+	<title>
+		<band height="96" splitType="Stretch">
+			<textField isStretchWithOverflow="true">
+				<reportElement x="0" y="0" width="338" height="56" uuid="9f7550a9-49c8-49d8-b83f-1f93b5f86f21"/>
+				<box leftPadding="6" rightPadding="6" topPadding="4" bottomPadding="4">
+					<topPen lineWidth="0.7"/>
+					<leftPen lineWidth="0.7"/>
+					<bottomPen lineWidth="0.7"/>
+					<rightPen lineWidth="0.7"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[($F{rznSocialEmisor} != null ? $F{rznSocialEmisor} : "-") + "\n" +
+"Doc: " + ($F{tipDocEmisor} != null ? $F{tipDocEmisor} : "-") + " " + ($F{nroDocEmisor} != null ? $F{nroDocEmisor} : "-")]]></textFieldExpression>
+			</textField>
 			<textField>
-				<reportElement x="345" y="0" width="166" height="41" uuid="1dbdd592-7509-44f2-aef7-10fbb9489dbb"/>
-				<box topPadding="2" leftPadding="2" bottomPadding="2" rightPadding="2">
+				<reportElement x="362" y="0" width="193" height="56" uuid="e6171b95-0176-4c85-9139-6fe90192d531"/>
+				<box leftPadding="4" rightPadding="4" topPadding="4" bottomPadding="4">
 					<topPen lineWidth="1.0"/>
 					<leftPen lineWidth="1.0"/>
 					<bottomPen lineWidth="1.0"/>
 					<rightPen lineWidth="1.0"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font size="8"/>
+					<font size="9" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[( $F{tipoGuia} == "09" ? "GUIA DE REMISIÓN REMITENTE" : ( $F{tipoGuia} == "31" ? "GUIA DE REMISIÓN TRANSPORTISTA" : "OTRA" ) ) +"\n"+
-"RUC: "+$F{nroDocEmisor} + "\n"+
-$F{ID}]]></textFieldExpression>
-			</textField>
-			<textField isStretchWithOverflow="true">
-				<reportElement x="0" y="0" width="226" height="27" uuid="434b06fd-4e7a-471b-bdbf-744bbbdb3812"/>
-				<box>
-					<topPen lineWidth="1.0"/>
-					<leftPen lineWidth="1.0"/>
-					<bottomPen lineWidth="1.0"/>
-					<rightPen lineWidth="1.0"/>
-				</box>
-				<textFieldExpression><![CDATA[(($F{nomComercialEmisor} != null && !$F{nomComercialEmisor}.trim().isEmpty()) ? $F{nomComercialEmisor} + "\n" : "") +
-($F{rznSocialEmisor} != null ? $F{rznSocialEmisor} : "-")
-]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="0" y="27" width="226" height="27" uuid="0077f3cb-1e9d-40e6-92eb-267758498988"/>
-				<textFieldExpression><![CDATA[$P{ADICIONALTXT}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[( $F{tipoGuia} == "09" ? "GUIA DE REMISION REMITENTE" : ( $F{tipoGuia} == "31" ? "GUIA DE REMISION TRANSPORTISTA" : "GUIA DE REMISION" ) ) +"\n"+
+"RUC: "+($F{nroDocEmisor} != null ? $F{nroDocEmisor} : "-") + "\n"+
+($F{ID} != null ? $F{ID} : "-")]]></textFieldExpression>
 			</textField>
 			<image>
-				<reportElement x="260" y="0" width="54" height="50" uuid="c6980b2b-9e5b-458f-b9ca-8763eb15c8b4"/>
+				<reportElement x="338" y="0" width="24" height="24" uuid="46e11897-63b7-4542-aa5f-3f9c193f930e"/>
 				<imageExpression><![CDATA[com.google.zxing.client.j2se.MatrixToImageWriter.toBufferedImage(
     new com.google.zxing.qrcode.QRCodeWriter().encode(
-$F{tipDocEmisor}+"|"+$F{nroDocEmisor}+"|"+$F{tipDocDestinatario}+"|"+$F{nroDocDestinatario}+"|"+
-$F{tipoGuia}+"|"+$F{ID}+"|"+$F{fecEmision}+"|"+$F{digestValue},
+($F{tipDocEmisor} != null ? $F{tipDocEmisor} : "")+"|"+($F{nroDocEmisor} != null ? $F{nroDocEmisor} : "")+"|"+($F{tipDocDestinatario} != null ? $F{tipDocDestinatario} : "")+"|"+($F{nroDocDestinatario} != null ? $F{nroDocDestinatario} : "")+"|"+
+($F{tipoGuia} != null ? $F{tipoGuia} : "")+"|"+($F{ID} != null ? $F{ID} : "")+"|"+($F{fecEmision} != null ? $F{fecEmision} : "")+"|"+($F{digestValue} != null ? $F{digestValue} : ""),
         com.google.zxing.BarcodeFormat.QR_CODE, 100, 100))]]></imageExpression>
 			</image>
-		</band>
-	</pageHeader>
-	<columnHeader>
-		<band height="109" splitType="Stretch">
-			<textField isStretchWithOverflow="true">
-				<reportElement x="0" y="46" width="511" height="43" isPrintWhenDetailOverflows="true" uuid="6e2b4174-092b-4290-8ef6-9528058c1273"/>
-				<box>
-					<topPen lineWidth="1.0"/>
-					<leftPen lineWidth="1.0"/>
-					<bottomPen lineWidth="1.0"/>
-					<rightPen lineWidth="1.0"/>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="0" y="60" width="555" height="30" uuid="9735317a-fd53-4ed3-a5c7-ff98f8c8f6b9"/>
+				<box leftPadding="6" topPadding="4" bottomPadding="4" rightPadding="6">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
 				</box>
-				<textFieldExpression><![CDATA["Origen: "+"\n"+
-($F{dirPartida} != null ? $F{dirPartida} : "-")+"\n"+
-"Destino: "+"\n"+
-($F{dirLlegada} != null ? $F{dirLlegada} : "-")
-]]></textFieldExpression>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{ADICIONALTXT}]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<pageHeader>
+		<band height="176" splitType="Stretch">
+			<textField isStretchWithOverflow="true">
+				<reportElement x="0" y="0" width="272" height="56" uuid="5d46cc68-055f-4f22-8a30-675c2e17966f"/>
+				<box leftPadding="5" topPadding="4" bottomPadding="4" rightPadding="5">
+					<topPen lineWidth="0.7"/>
+					<leftPen lineWidth="0.7"/>
+					<bottomPen lineWidth="0.7"/>
+					<rightPen lineWidth="0.7"/>
+				</box>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA["DESTINATARIO\n"+
+($F{rznSocialDestinatario} != null ? $F{rznSocialDestinatario} : "-") + "\n"+
+"Doc: " + ($F{tipDocDestinatario} != null ? $F{tipDocDestinatario} : "-") + " " + ($F{nroDocDestinatario} != null ? $F{nroDocDestinatario} : "-") + "\n"+
+"Fecha de emision: " + ($F{fecEmision} != null ? $F{fecEmision} : "-")]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement x="0" y="10" width="226" height="36" uuid="6009b358-b17b-4204-b38f-291ba3da734d"/>
-				<box>
-					<topPen lineWidth="1.0"/>
-					<leftPen lineWidth="1.0"/>
-					<bottomPen lineWidth="1.0"/>
-					<rightPen lineWidth="1.0"/>
+				<reportElement x="283" y="0" width="272" height="56" uuid="e57abed5-b018-4878-a363-aa80b27ff6fe"/>
+				<box leftPadding="5" topPadding="4" bottomPadding="4" rightPadding="5">
+					<topPen lineWidth="0.7"/>
+					<leftPen lineWidth="0.7"/>
+					<bottomPen lineWidth="0.7"/>
+					<rightPen lineWidth="0.7"/>
 				</box>
-				<textFieldExpression><![CDATA["Destinatario: " + ($F{rznSocialDestinatario} != null ? $F{rznSocialDestinatario} : "-") + "\n"+
-"Documento: " + (($F{tipDocDestinatario} == "6") ? "RUC" : (($F{tipDocDestinatario} == "1") ? "DNI" : "OTRO")) + " " +
-($F{nroDocDestinatario} != null ? $F{nroDocDestinatario} : "-") + "\n"+
-"Fecha Emisión: " + ($F{fecEmision} != null ? $F{fecEmision} : "-")
-]]></textFieldExpression>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA["DATOS DE TRASLADO\n"+
+"Motivo: " + ($F{motTrasladoDatosEnvio} != null ? $F{motTrasladoDatosEnvio} : "-") + ( $F{desMotivoTrasladoDatosEnvio} != null ? " - " + $F{desMotivoTrasladoDatosEnvio} : "") + "\n"+
+"Inicio: " + ($F{fecInicioTrasladoDatosEnvio} != null ? $F{fecInicioTrasladoDatosEnvio} : "-") + " | Modalidad: " + ($F{modTrasladoDatosEnvio} != null ? $F{modTrasladoDatosEnvio} : "-") + "\n"+
+"Peso/Bultos: " + ($F{psoBrutoTotalBienesDatosEnvio} != null ? $F{psoBrutoTotalBienesDatosEnvio} : "-") + " " + ($F{uniMedidaPesoBrutoDatosEnvio} != null ? $F{uniMedidaPesoBrutoDatosEnvio} : "") + " / " + ($F{numBultosDatosEnvio} != null ? $F{numBultosDatosEnvio} : "-")]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement x="0" y="62" width="272" height="46" uuid="fb8e92aa-f309-45a5-b327-9b3ccb0dd4fa"/>
+				<box leftPadding="5" topPadding="4" bottomPadding="4" rightPadding="5">
+					<topPen lineWidth="0.7"/>
+					<leftPen lineWidth="0.7"/>
+					<bottomPen lineWidth="0.7"/>
+					<rightPen lineWidth="0.7"/>
+				</box>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA["PUNTO DE PARTIDA\n"+
+"Ubigeo: " + ($F{ubiPartida} != null ? $F{ubiPartida} : "-") + "\n"+
+($F{dirPartida} != null ? $F{dirPartida} : "-")]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement x="283" y="62" width="272" height="46" uuid="9be1fa8e-c0c7-4378-83d1-cbd298a0de5e"/>
+				<box leftPadding="5" topPadding="4" bottomPadding="4" rightPadding="5">
+					<topPen lineWidth="0.7"/>
+					<leftPen lineWidth="0.7"/>
+					<bottomPen lineWidth="0.7"/>
+					<rightPen lineWidth="0.7"/>
+				</box>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA["PUNTO DE LLEGADA\n"+
+"Ubigeo: " + ($F{ubiLlegada} != null ? $F{ubiLlegada} : "-") + "\n"+
+($F{dirLlegada} != null ? $F{dirLlegada} : "-")]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement x="0" y="114" width="555" height="42" uuid="7ef5dd0b-8e0b-428e-a31f-718ecf8687dc"/>
+				<box leftPadding="5" topPadding="3" bottomPadding="3" rightPadding="5">
+					<topPen lineWidth="0.7"/>
+					<leftPen lineWidth="0.7"/>
+					<bottomPen lineWidth="0.7"/>
+					<rightPen lineWidth="0.7"/>
+				</box>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA["TRANSPORTE\n"+
+"Transportista: " + ($F{nomTransportista} != null ? $F{nomTransportista} : "-") + " | Doc: " + ($F{tipDocTransportista} != null ? $F{tipDocTransportista} : "-") + " " + ($F{numDocTransportista} != null ? $F{numDocTransportista} : "-") + " | Placa: " + ($F{numPlacaTransPrivado} != null ? $F{numPlacaTransPrivado} : "-") + "\n"+
+"Conductor: " + ($F{nomConductorTransPrivado} != null ? $F{nomConductorTransPrivado} : "") + " " + ($F{apeConductorTransPrivado} != null ? $F{apeConductorTransPrivado} : "") + " | Doc: " + ($F{tipDocIdeConductorTransPrivado} != null ? $F{tipDocIdeConductorTransPrivado} : "-") + " " + ($F{numDocIdeConductorTransPrivado} != null ? $F{numDocIdeConductorTransPrivado} : "-") + " | Lic: " + ($F{licConductorTransPrivado} != null ? $F{licConductorTransPrivado} : "-")]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="0" y="88" width="62" height="20" backcolor="#00CCCC" uuid="312c2f47-600e-42ba-87a0-7e39d6478524"/>
+				<reportElement x="0" y="156" width="76" height="20" backcolor="#DCEAF7" uuid="5437f99d-c2d8-46aa-b79f-2ad3e32f00ab"/>
 				<box>
-					<topPen lineWidth="1.0"/>
-					<leftPen lineWidth="1.0"/>
-					<bottomPen lineWidth="1.0"/>
-					<rightPen lineWidth="1.0"/>
+					<topPen lineWidth="0.8"/>
+					<leftPen lineWidth="0.8"/>
+					<bottomPen lineWidth="0.8"/>
+					<rightPen lineWidth="0.8"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font isBold="true"/>
+					<font size="8" isBold="true"/>
 				</textElement>
-				<text><![CDATA[Código]]></text>
+				<text><![CDATA[Codigo]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="62" y="88" width="62" height="20" backcolor="#00CCCC" uuid="96f2340c-1ab3-4faf-ae17-43becd31cc5e"/>
+				<reportElement x="76" y="156" width="60" height="20" backcolor="#DCEAF7" uuid="d89eff30-ff8b-4f49-a664-5ec4cdc24e72"/>
 				<box>
-					<topPen lineWidth="1.0"/>
-					<leftPen lineWidth="1.0"/>
-					<bottomPen lineWidth="1.0"/>
-					<rightPen lineWidth="1.0"/>
+					<topPen lineWidth="0.8"/>
+					<leftPen lineWidth="0.8"/>
+					<bottomPen lineWidth="0.8"/>
+					<rightPen lineWidth="0.8"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font isBold="true"/>
+					<font size="8" isBold="true"/>
 				</textElement>
 				<text><![CDATA[Cantidad]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="124" y="88" width="62" height="20" backcolor="#00CCCC" uuid="8d7e4df9-bc30-4d37-a94c-6a6c0e2c06f8"/>
+				<reportElement x="136" y="156" width="54" height="20" backcolor="#DCEAF7" uuid="8bf35de3-e87b-4d2f-9ff4-61afe5543110"/>
 				<box>
-					<topPen lineWidth="1.0"/>
-					<leftPen lineWidth="1.0"/>
-					<bottomPen lineWidth="1.0"/>
-					<rightPen lineWidth="1.0"/>
+					<topPen lineWidth="0.8"/>
+					<leftPen lineWidth="0.8"/>
+					<bottomPen lineWidth="0.8"/>
+					<rightPen lineWidth="0.8"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font isBold="true"/>
+					<font size="8" isBold="true"/>
 				</textElement>
 				<text><![CDATA[U.M.]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="186" y="88" width="325" height="20" backcolor="#00CCCC" uuid="8489fe35-2854-4696-9db9-4965b512337c"/>
-				<box leftPadding="3">
-					<topPen lineWidth="1.0"/>
-					<leftPen lineWidth="1.0"/>
-					<bottomPen lineWidth="1.0"/>
-					<rightPen lineWidth="1.0"/>
+				<reportElement x="190" y="156" width="365" height="20" backcolor="#DCEAF7" uuid="886c47fb-3f04-418c-9c90-209aa147ecbf"/>
+				<box>
+					<topPen lineWidth="0.8"/>
+					<leftPen lineWidth="0.8"/>
+					<bottomPen lineWidth="0.8"/>
+					<rightPen lineWidth="0.8"/>
 				</box>
 				<textElement verticalAlignment="Middle">
-					<font isBold="true"/>
+					<font size="8" isBold="true"/>
 				</textElement>
-				<text><![CDATA[Descripción]]></text>
+				<text><![CDATA[Descripcion]]></text>
 			</staticText>
 		</band>
-	</columnHeader>
+	</pageHeader>
 	<detail>
-		<band height="27" splitType="Stretch">
+		<band height="18" splitType="Stretch">
 			<textField>
-				<reportElement x="62" y="0" width="62" height="20" uuid="006edb9b-bfaa-48fd-b973-15d12c109733"/>
-				<textFieldExpression><![CDATA[$F{canItem}]]></textFieldExpression>
+				<reportElement x="0" y="0" width="76" height="18" uuid="8da2b66b-3568-479c-8558-a2fac355d15b"/>
+				<box leftPadding="2" rightPadding="2">
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{codItem} != null ? $F{codItem} : ($F{idItem} != null ? $F{idItem} : "-")]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="186" y="0" width="325" height="20" uuid="f5b3fd17-6d31-4246-b788-1f22d822e2f4"/>
-				<textFieldExpression><![CDATA[$F{desItem} != null ? $F{desItem} : "-"]]></textFieldExpression>
+				<reportElement x="76" y="0" width="60" height="18" uuid="6ee7ef2e-5063-4517-b2c0-89c2af3fb1d4"/>
+				<box leftPadding="2" rightPadding="2">
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{canItem} != null ? $F{canItem} : "-"]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="0" y="0" width="62" height="20" uuid="02cadcdb-6d2a-4e5b-bb52-a69eace18601"/>
-				<textFieldExpression><![CDATA[$F{codItem} != null ? $F{codItem} : "-"]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="124" y="0" width="62" height="20" uuid="4e849557-d5b3-411f-bb1f-c9a2176502e9"/>
+				<reportElement x="136" y="0" width="54" height="18" uuid="d013b351-f3a6-4495-ab99-e54e3ee4df5e"/>
+				<box leftPadding="2" rightPadding="2">
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
 				<textFieldExpression><![CDATA[$F{uniMedidaItem} != null ? $F{uniMedidaItem} : "-"]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement x="190" y="0" width="365" height="18" uuid="ec8c14d7-52bf-4964-ac1a-9b71194dc0fa"/>
+				<box leftPadding="3" rightPadding="3">
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{desItem} != null ? $F{desItem} : "-"]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>
-	<columnFooter>
-		<band height="45" splitType="Stretch"/>
-	</columnFooter>
 	<pageFooter>
-		<band height="54" splitType="Stretch">
-			<textField>
-				<reportElement x="0" y="11" width="511" height="31" uuid="40d1f911-7cb9-42eb-a6b0-410afc70a127"/>
-				<box>
-					<topPen lineWidth="1.0"/>
-					<leftPen lineWidth="1.0"/>
-					<bottomPen lineWidth="1.0"/>
-					<rightPen lineWidth="1.0"/>
+		<band height="58" splitType="Stretch">
+			<textField isStretchWithOverflow="true">
+				<reportElement x="0" y="0" width="555" height="32" uuid="42fdbf75-bcf8-4fdd-9959-90f3b8f5033e"/>
+				<box leftPadding="5" rightPadding="5" topPadding="3" bottomPadding="3">
+					<topPen lineWidth="0.7"/>
+					<leftPen lineWidth="0.7"/>
+					<bottomPen lineWidth="0.7"/>
+					<rightPen lineWidth="0.7"/>
 				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Doc. relacionado: " + ($F{numDocRel} != null ? $F{numDocRel} : "-") + " (" + ($F{codTipDocRel} != null ? $F{codTipDocRel} : "-") + ")" +
+" | Doc. baja: " + ($F{idDocBaja} != null ? $F{idDocBaja} : "-") + " | Contenedor/Via: " + ($F{numContenedor} != null ? $F{numContenedor} : "-") + " / " + ($F{codPuerto} != null ? $F{codPuerto} : "-")]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="36" width="555" height="20" uuid="0efecc7d-8716-4bc5-b8be-8a4c3cae657f"/>
+				<box>
+					<topPen lineWidth="0.7"/>
+					<leftPen lineWidth="0.7"/>
+					<bottomPen lineWidth="0.7"/>
+					<rightPen lineWidth="0.7"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
 				<textFieldExpression><![CDATA[($F{tipoGuia} == "31"
-? "REPRESENTACION IMPRESA DE LA GUIA DE REMISION TRANSPORTISTA. ELABORADO DESDE EL SISTEMA FACTURADOR SUNAT. PODRÁ CONSULTAR LA GUIA EN SU CLAVE SOL."
-: "REPRESENTACION IMPRESA DE LA GUIA DE REMISION REMITENTE. ELABORADO DESDE EL SISTEMA FACTURADOR SUNAT. PODRÁ CONSULTAR LA GUIA EN SU CLAVE SOL.")]]></textFieldExpression>
+? "REPRESENTACION IMPRESA DE LA GUIA DE REMISION TRANSPORTISTA."
+: "REPRESENTACION IMPRESA DE LA GUIA DE REMISION REMITENTE.") + " PODRA CONSULTARLA EN CLAVE SOL." ]]></textFieldExpression>
 			</textField>
 		</band>
 	</pageFooter>
-	<summary>
-		<band height="42" splitType="Stretch"/>
-	</summary>
 </jasperReport>
