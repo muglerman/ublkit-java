@@ -26,7 +26,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * Convierte un BorradorFactura (o boleta) en HTML usando plantillas Pebble.
@@ -34,6 +33,16 @@ import java.util.stream.Collectors;
  * @since 0.1.0
  */
 public class RenderizadorHtmlFactura implements RenderizadorDocumento<BorradorFactura> {
+    private static final String KEY_TYPE = "type";
+    private static final String KEY_NAME = "name";
+    private static final String KEY_IDENTITY = "identity";
+    private static final String KEY_DOCUMENT_TYPE = "documentType";
+    private static final String KEY_DOCUMENT = "document";
+    private static final String KEY_AMOUNT = "amount";
+    private static final String KEY_TOTAL = "total";
+    private static final String KEY_VALUE = "value";
+    private static final String KEY_EXTRAS = "extras";
+    private static final String LEGEND_TOTAL_TEXT = "1000";
 
     private final PebbleEngine engine;
     private final FormatoImpresion formato;
@@ -61,10 +70,10 @@ public class RenderizadorHtmlFactura implements RenderizadorDocumento<BorradorFa
         BorradorFactura doc = contexto.documento();
 
         Map<String, Object> invoice = new HashMap<>();
-        invoice.put("type", parseInt(doc.getTipoComprobante(), 1));
+        invoice.put(KEY_TYPE, parseInt(doc.getTipoComprobante(), 1));
         invoice.put("typedIdentity", txt(doc.getTipoComprobante()));
-        invoice.put("identity", txt(doc.getSerie()) + "-" + (doc.getNumero() != null ? doc.getNumero() : ""));
-        invoice.put("name", mapearNombreDocumento(doc.getTipoComprobante()));
+        invoice.put(KEY_IDENTITY, txt(doc.getSerie()) + "-" + (doc.getNumero() != null ? doc.getNumero() : ""));
+        invoice.put(KEY_NAME, mapearNombreDocumento(doc.getTipoComprobante()));
         invoice.put("issueDate", txt(doc.getFechaEmision()));
         invoice.put("issueTime", txt(doc.getHoraEmision()));
         invoice.put("dueDate", txt(doc.getFechaVencimiento()));
@@ -85,22 +94,22 @@ public class RenderizadorHtmlFactura implements RenderizadorDocumento<BorradorFa
 
         if (doc.getFirmante() != null) {
             Map<String, Object> signer = new HashMap<>();
-            signer.put("identity", txt(doc.getFirmante().ruc()));
-            signer.put("name", txt(doc.getFirmante().razonSocial()));
+            signer.put(KEY_IDENTITY, txt(doc.getFirmante().ruc()));
+            signer.put(KEY_NAME, txt(doc.getFirmante().razonSocial()));
             invoice.put("signer", signer);
         }
 
         if (doc.getTipoCambio() != null) {
             Map<String, Object> exchange = new HashMap<>();
             exchange.put("date", txt(doc.getTipoCambio().fecha()));
-            exchange.put("value", txt(doc.getTipoCambio().valor()));
+            exchange.put(KEY_VALUE, txt(doc.getTipoCambio().valor()));
             invoice.put("exchangeRate", exchange);
         }
 
         if (doc.getEmisor() != null) {
             Map<String, Object> taxpayer = new HashMap<>();
-            taxpayer.put("identity", txt(doc.getEmisor().ruc()));
-            taxpayer.put("name", txt(doc.getEmisor().razonSocial()));
+            taxpayer.put(KEY_IDENTITY, txt(doc.getEmisor().ruc()));
+            taxpayer.put(KEY_NAME, txt(doc.getEmisor().razonSocial()));
             taxpayer.put("tradeName", txt(doc.getEmisor().nombreComercial()));
             taxpayer.put("address", txt(doc.getEmisor().direccion() != null ? doc.getEmisor().direccion().direccion() : ""));
             taxpayer.put("location", location(doc.getEmisor().direccion()));
@@ -110,9 +119,9 @@ public class RenderizadorHtmlFactura implements RenderizadorDocumento<BorradorFa
 
         if (doc.getReceptor() != null) {
             Map<String, Object> customer = new HashMap<>();
-            customer.put("documentType", txt(doc.getReceptor().tipoDocIdentidad()));
-            customer.put("identity", txt(doc.getReceptor().numDocIdentidad()));
-            customer.put("name", txt(doc.getReceptor().nombre()));
+            customer.put(KEY_DOCUMENT_TYPE, txt(doc.getReceptor().tipoDocIdentidad()));
+            customer.put(KEY_IDENTITY, txt(doc.getReceptor().numDocIdentidad()));
+            customer.put(KEY_NAME, txt(doc.getReceptor().nombre()));
             customer.put("address", txt(doc.getReceptor().direccion() != null ? doc.getReceptor().direccion().direccion() : ""));
             customer.put("location", location(doc.getReceptor().direccion()));
             customer.put("contact", contactMap(doc.getReceptor().contacto()));
@@ -121,13 +130,13 @@ public class RenderizadorHtmlFactura implements RenderizadorDocumento<BorradorFa
 
         if (doc.getFormaDePago() != null) {
             Map<String, Object> payment = new HashMap<>();
-            payment.put("type", txt(doc.getFormaDePago().tipo()));
-            payment.put("total", txt(doc.getFormaDePago().total()));
+            payment.put(KEY_TYPE, txt(doc.getFormaDePago().tipo()));
+            payment.put(KEY_TOTAL, txt(doc.getFormaDePago().total()));
             List<Map<String, Object>> installments = new ArrayList<>();
             if (doc.getFormaDePago().cuotas() != null) {
                 for (CuotaDePago cuota : doc.getFormaDePago().cuotas()) {
                     Map<String, Object> c = new HashMap<>();
-                    c.put("amount", txt(cuota.importe()));
+                    c.put(KEY_AMOUNT, txt(cuota.importe()));
                     c.put("dueDate", txt(cuota.fechaPago()));
                     installments.add(c);
                 }
@@ -151,11 +160,11 @@ public class RenderizadorHtmlFactura implements RenderizadorDocumento<BorradorFa
 
         if (doc.getPercepcion() != null) {
             Map<String, Object> perception = new HashMap<>();
-            perception.put("type", txt(doc.getPercepcion().tipo()));
+            perception.put(KEY_TYPE, txt(doc.getPercepcion().tipo()));
             perception.put("base", txt(doc.getPercepcion().montoBase()));
             perception.put("percent", txt(doc.getPercepcion().porcentaje()));
-            perception.put("amount", txt(doc.getPercepcion().monto()));
-            perception.put("total", txt(doc.getPercepcion().montoTotal()));
+            perception.put(KEY_AMOUNT, txt(doc.getPercepcion().monto()));
+            perception.put(KEY_TOTAL, txt(doc.getPercepcion().montoTotal()));
             invoice.put("perception", perception);
         }
         if (doc.getGuiaEmbebida() != null) {
@@ -171,9 +180,9 @@ public class RenderizadorHtmlFactura implements RenderizadorDocumento<BorradorFa
             embeddedGuide.put("weightUnit", txt(doc.getGuiaEmbebida().undPesoBruto()));
             if (doc.getGuiaEmbebida().transportista() != null) {
                 Map<String, Object> transport = new HashMap<>();
-                transport.put("name", txt(doc.getGuiaEmbebida().transportista().nombre()));
-                transport.put("documentType", txt(doc.getGuiaEmbebida().transportista().tipoDocIdentidad()));
-                transport.put("identity", txt(doc.getGuiaEmbebida().transportista().numDocIdentidad()));
+                transport.put(KEY_NAME, txt(doc.getGuiaEmbebida().transportista().nombre()));
+                transport.put(KEY_DOCUMENT_TYPE, txt(doc.getGuiaEmbebida().transportista().tipoDocIdentidad()));
+                transport.put(KEY_IDENTITY, txt(doc.getGuiaEmbebida().transportista().numDocIdentidad()));
                 embeddedGuide.put("carrier", transport);
             }
             invoice.put("embeddedGuide", embeddedGuide);
@@ -183,21 +192,21 @@ public class RenderizadorHtmlFactura implements RenderizadorDocumento<BorradorFa
             List<Map<String, Object>> advances = new ArrayList<>();
             for (Anticipo a : doc.getAnticipos()) {
                 Map<String, Object> map = new HashMap<>();
-                map.put("type", txt(a.tipo()));
-                map.put("documentType", txt(a.comprobanteTipo()));
-                map.put("document", txt(a.comprobanteSerieNumero()));
-                map.put("amount", txt(a.monto()));
+                map.put(KEY_TYPE, txt(a.tipo()));
+                map.put(KEY_DOCUMENT_TYPE, txt(a.comprobanteTipo()));
+                map.put(KEY_DOCUMENT, txt(a.comprobanteSerieNumero()));
+                map.put(KEY_AMOUNT, txt(a.monto()));
                 advances.add(map);
             }
             invoice.put("advances", advances);
         }
 
         if (doc.getDescuentos() != null && !doc.getDescuentos().isEmpty()) {
-            List<Map<String, Object>> discounts = doc.getDescuentos().stream().map(this::mapDiscount).collect(Collectors.toList());
+            List<Map<String, Object>> discounts = doc.getDescuentos().stream().map(this::mapDiscount).toList();
             invoice.put("discounts", discounts);
         }
         if (doc.getCargos() != null && !doc.getCargos().isEmpty()) {
-            List<Map<String, Object>> charges = doc.getCargos().stream().map(this::mapCharge).collect(Collectors.toList());
+            List<Map<String, Object>> charges = doc.getCargos().stream().map(this::mapCharge).toList();
             invoice.put("charges", charges);
         }
 
@@ -208,8 +217,8 @@ public class RenderizadorHtmlFactura implements RenderizadorDocumento<BorradorFa
             List<Map<String, Object>> guides = new ArrayList<>();
             for (GuiaRelacionada guia : doc.getGuias()) {
                 Map<String, Object> g = new HashMap<>();
-                g.put("type", txt(guia.tipoDocumento()));
-                g.put("document", txt(guia.serieNumero()));
+                g.put(KEY_TYPE, txt(guia.tipoDocumento()));
+                g.put(KEY_DOCUMENT, txt(guia.serieNumero()));
                 guides.add(g);
             }
             reference.put("guides", guides);
@@ -218,8 +227,8 @@ public class RenderizadorHtmlFactura implements RenderizadorDocumento<BorradorFa
             List<Map<String, Object>> docs = new ArrayList<>();
             for (DocumentoRelacionado r : doc.getDocumentosRelacionados()) {
                 Map<String, Object> d = new HashMap<>();
-                d.put("type", txt(r.tipoDocumento()));
-                d.put("document", txt(r.serieNumero()));
+                d.put(KEY_TYPE, txt(r.tipoDocumento()));
+                d.put(KEY_DOCUMENT, txt(r.serieNumero()));
                 docs.add(d);
             }
             reference.put("documents", docs);
@@ -238,7 +247,7 @@ public class RenderizadorHtmlFactura implements RenderizadorDocumento<BorradorFa
                 item.put("code", txt(linea.getCodigoProducto()));
                 item.put("sunatCode", txt(linea.getCodigoProductoSunat()));
                 item.put("gs1Code", txt(linea.getCodigoProductoGS1()));
-                item.put("value", txt(linea.getPrecio()));
+                item.put(KEY_VALUE, txt(linea.getPrecio()));
                 item.put("price", txt(linea.getPrecio()));
                 item.put("referencePrice", txt(linea.getPrecioReferencia()));
                 item.put("referencePriceType", txt(linea.getPrecioReferenciaTipo()));
@@ -295,8 +304,8 @@ public class RenderizadorHtmlFactura implements RenderizadorDocumento<BorradorFa
             summary.put("taxableFre", txt(totalTax.inafectoBaseImponible()));
             summary.put("taxableVat", txt(totalTax.exoneradoBaseImponible()));
         }
-        if (leyendas != null && leyendas.containsKey("1000")) {
-            summary.put("totalText", leyendas.get("1000"));
+        if (leyendas != null && leyendas.containsKey(LEGEND_TOTAL_TEXT)) {
+            summary.put("totalText", leyendas.get(LEGEND_TOTAL_TEXT));
         } else {
             summary.put("totalText", "");
         }
@@ -305,8 +314,8 @@ public class RenderizadorHtmlFactura implements RenderizadorDocumento<BorradorFa
 
     private Map<String, Object> mapDiscount(Descuento d) {
         Map<String, Object> map = new HashMap<>();
-        map.put("type", txt(d.tipo()));
-        map.put("amount", txt(d.monto()));
+        map.put(KEY_TYPE, txt(d.tipo()));
+        map.put(KEY_AMOUNT, txt(d.monto()));
         map.put("factor", txt(d.factor()));
         map.put("base", txt(d.montoBase()));
         return map;
@@ -314,10 +323,10 @@ public class RenderizadorHtmlFactura implements RenderizadorDocumento<BorradorFa
 
     private Map<String, Object> mapCharge(CargoDescuento c) {
         Map<String, Object> map = new HashMap<>();
-        map.put("type", txt(c.tipo()));
-        map.put("amount", txt(c.monto()));
+        map.put(KEY_TYPE, txt(c.tipo()));
+        map.put(KEY_AMOUNT, txt(c.monto()));
         map.put("factor", txt(c.porcentaje()));
-        map.put("document", txt(c.serieNumero()));
+        map.put(KEY_DOCUMENT, txt(c.serieNumero()));
         return map;
     }
 
@@ -340,7 +349,7 @@ public class RenderizadorHtmlFactura implements RenderizadorDocumento<BorradorFa
         List<Map<String, Object>> values = new ArrayList<>();
         if (leyendas == null || leyendas.isEmpty()) return values;
         leyendas.forEach((code, value) -> {
-            if ("1000".equals(code)) return;
+            if (LEGEND_TOTAL_TEXT.equals(code)) return;
             Map<String, Object> item = new HashMap<>();
             item.put("code", txt(code));
             item.put("value", txt(value));
@@ -353,17 +362,17 @@ public class RenderizadorHtmlFactura implements RenderizadorDocumento<BorradorFa
         if (attrs == null || attrs.isEmpty()) return;
         invoice.put("header", txt(attrs.get("header")));
         invoice.put("footer", txt(attrs.get("footer")));
-        Object extras = attrs.get("extras");
+        Object extras = attrs.get(KEY_EXTRAS);
         if (extras instanceof List<?> list) {
-            invoice.put("extras", list);
+            invoice.put(KEY_EXTRAS, list);
         } else {
-            invoice.put("extras", List.of());
+            invoice.put(KEY_EXTRAS, List.of());
         }
     }
 
     private Map<String, Object> contactMap(Contacto contacto) {
         Map<String, Object> c = new HashMap<>();
-        c.put("name", txt(contacto != null ? contacto.nombre() : ""));
+        c.put(KEY_NAME, txt(contacto != null ? contacto.nombre() : ""));
         c.put("telephone", txt(contacto != null ? contacto.telefono() : ""));
         c.put("email", txt(contacto != null ? contacto.email() : ""));
         c.put("web", "");

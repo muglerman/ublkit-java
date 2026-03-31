@@ -15,6 +15,7 @@ import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -28,7 +29,7 @@ import java.util.regex.Pattern;
  */
 public class ProveedorTokenNativo implements ProveedorToken {
     private static final Logger log = Logger.getLogger(ProveedorTokenNativo.class.getName());
-    private static final String TOKEN_IMPL_REV = "2026-03-31-gre-ct-fix";
+    private static final String AUTH_IMPL_REV = "2026-03-31-gre-ct-fix";
 
     private static final Pattern PATRON_TOKEN = Pattern.compile("\"access_token\"\\s*:\\s*\"([^\"]+)\"");
     private static final Pattern PATRON_EXPIRES_IN = Pattern.compile("\"expires_in\"\\s*:\\s*(\\d+)");
@@ -56,26 +57,30 @@ public class ProveedorTokenNativo implements ProveedorToken {
         String claveCache = claveCache(credenciales, ambiente);
         TokenCacheado cacheado = cacheTokens.get(claveCache);
         if (cacheado != null && !cacheado.expirado()) {
-            log.info(String.format(
-                    "[UBLKIT][TOKEN] cacheHit ambiente=%s, cacheKey=%s, expiraEn=%s, usernameConcatenado=%s",
-                    ambiente, mask(claveCache), cacheado.expiraEn(), mask(credenciales.getUsernameConcatenado())));
+            if (log.isLoggable(Level.INFO)) {
+                log.info(String.format(
+                        "[UBLKIT][TOKEN] cacheHit ambiente=%s, cacheKey=%s, expiraEn=%s, usernameConcatenado=%s",
+                        ambiente, mask(claveCache), cacheado.expiraEn(), mask(credenciales.getUsernameConcatenado())));
+            }
             return cacheado.token();
         }
 
         String url = ResolvedorEndpoints.urlRestToken(ambiente, credenciales.clientId());
         String body = buildUrlEncodedParams(credenciales);
-        log.info(String.format(
-                "[UBLKIT][TOKEN] rev=%s, solicitandoToken ambiente=%s, url=%s, contentType=%s, ruc=%s, usuarioSol=%s, usernameConcatenado=%s, clientId=%s, clientSecret=%s, bodyPreview=%s",
-                TOKEN_IMPL_REV,
-                ambiente,
-                url,
-                CONTENT_TYPE_FORM_URLENCODED,
-                mask(credenciales.ruc()),
-                mask(credenciales.usuarioSol()),
-                mask(credenciales.getUsernameConcatenado()),
-                mask(credenciales.clientId()),
-                mask(credenciales.clientSecret()),
-                maskFormBody(body)));
+        if (log.isLoggable(Level.INFO)) {
+            log.info(String.format(
+                    "[UBLKIT][TOKEN] rev=%s, solicitandoToken ambiente=%s, url=%s, contentType=%s, ruc=%s, usuarioSol=%s, usernameConcatenado=%s, clientId=%s, clientSecret=%s, bodyPreview=%s",
+                    AUTH_IMPL_REV,
+                    ambiente,
+                    url,
+                    CONTENT_TYPE_FORM_URLENCODED,
+                    mask(credenciales.ruc()),
+                    mask(credenciales.usuarioSol()),
+                    mask(credenciales.getUsernameConcatenado()),
+                    mask(credenciales.clientId()),
+                    mask(credenciales.clientSecret()),
+                    maskFormBody(body)));
+        }
 
         try {
             HttpRequest request = HttpRequest.newBuilder()
@@ -88,8 +93,10 @@ public class ProveedorTokenNativo implements ProveedorToken {
                     .build();
 
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-            log.info(String.format("[UBLKIT][TOKEN] respuestaToken status=%s, body=%s",
-                    response.statusCode(), sanitizeBody(response.body())));
+            if (log.isLoggable(Level.INFO)) {
+                log.info(String.format("[UBLKIT][TOKEN] respuestaToken status=%s, body=%s",
+                        response.statusCode(), sanitizeBody(response.body())));
+            }
             
             if (response.statusCode() != 200) {
                 throw new ExcepcionUblKit("Error al solicitar token. HTTP " + response.statusCode() + ": " + response.body());
@@ -103,8 +110,10 @@ public class ProveedorTokenNativo implements ProveedorToken {
             long expiresIn = extraerExpiresIn(response.body());
             Instant expiraEn = Instant.now().plusSeconds(Math.max(1, expiresIn - MARGEN_SEGURIDAD_SEGUNDOS));
             cacheTokens.put(claveCache, new TokenCacheado(token, expiraEn));
-            log.info(String.format("[UBLKIT][TOKEN] tokenObtenido ambiente=%s, expiraEn=%s, tokenMask=%s",
-                    ambiente, expiraEn, mask(token)));
+            if (log.isLoggable(Level.INFO)) {
+                log.info(String.format("[UBLKIT][TOKEN] tokenObtenido ambiente=%s, expiraEn=%s, tokenMask=%s",
+                        ambiente, expiraEn, mask(token)));
+            }
             return token;
 
         } catch (ExcepcionUblKit e) {

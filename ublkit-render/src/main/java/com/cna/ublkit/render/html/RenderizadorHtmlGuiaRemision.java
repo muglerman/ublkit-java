@@ -18,7 +18,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * Convierte un BorradorGuiaRemision en HTML utilizando la plantilla Pebble de despacho (despatch.html).
@@ -28,6 +27,15 @@ import java.util.stream.Collectors;
  * @since 0.1.0
  */
 public class RenderizadorHtmlGuiaRemision implements RenderizadorDocumento<BorradorGuiaRemision> {
+    private static final String KEY_TYPE = "type";
+    private static final String KEY_NAME = "name";
+    private static final String KEY_CODE = "code";
+    private static final String KEY_IDENTITY = "identity";
+    private static final String KEY_DOCUMENT_TYPE = "documentType";
+    private static final String KEY_ADDRESS = "address";
+    private static final String KEY_DESCRIPTION = "description";
+    private static final String KEY_NUMBER = "number";
+    private static final String KEY_EXTRAS = "extras";
 
     private final PebbleEngine engine;
     private final FormatoImpresion formato;
@@ -55,10 +63,10 @@ public class RenderizadorHtmlGuiaRemision implements RenderizadorDocumento<Borra
         Map<String, Object> receipt = new HashMap<>();
 
         // Identificadores y fechas.
-        receipt.put("type", parseTipo(doc.getTipoComprobante()));
+        receipt.put(KEY_TYPE, parseTipo(doc.getTipoComprobante()));
         receipt.put("typedIdentity", texto(doc.getTipoComprobante()));
-        receipt.put("identity", (texto(doc.getSerie()).isBlank() ? "-" : texto(doc.getSerie())) + "-" + (doc.getNumero() != null ? doc.getNumero() : "-"));
-        receipt.put("name", "31".equals(doc.getTipoComprobante()) ? "GUÍA DE REMISIÓN TRANSPORTISTA" : "GUÍA DE REMISIÓN REMITENTE");
+        receipt.put(KEY_IDENTITY, (texto(doc.getSerie()).isBlank() ? "-" : texto(doc.getSerie())) + "-" + (doc.getNumero() != null ? doc.getNumero() : "-"));
+        receipt.put(KEY_NAME, "31".equals(doc.getTipoComprobante()) ? "GUÍA DE REMISIÓN TRANSPORTISTA" : "GUÍA DE REMISIÓN REMITENTE");
         receipt.put("version", texto(doc.getVersion()));
         receipt.put("issueDate", texto(doc.getFechaEmision()));
         receipt.put("issueTime", texto(doc.getHoraEmision()));
@@ -70,17 +78,17 @@ public class RenderizadorHtmlGuiaRemision implements RenderizadorDocumento<Borra
         receipt.put("logo", "logo.jpg");
         if (doc.getFirmante() != null) {
             Map<String, Object> signer = new HashMap<>();
-            signer.put("identity", texto(doc.getFirmante().ruc()));
-            signer.put("name", texto(doc.getFirmante().razonSocial()));
+            signer.put(KEY_IDENTITY, texto(doc.getFirmante().ruc()));
+            signer.put(KEY_NAME, texto(doc.getFirmante().razonSocial()));
             receipt.put("signer", signer);
         }
 
         // Taxpayer / Remitente.
         if (doc.getRemitente() != null) {
             Map<String, Object> taxpayer = new HashMap<>();
-            taxpayer.put("identity", texto(doc.getRemitente().ruc()));
-            taxpayer.put("name", texto(doc.getRemitente().razonSocial()));
-            taxpayer.put("address", doc.getEnvio() != null && doc.getEnvio().getPartida() != null
+            taxpayer.put(KEY_IDENTITY, texto(doc.getRemitente().ruc()));
+            taxpayer.put(KEY_NAME, texto(doc.getRemitente().razonSocial()));
+            taxpayer.put(KEY_ADDRESS, doc.getEnvio() != null && doc.getEnvio().getPartida() != null
                     ? texto(doc.getEnvio().getPartida().direccion())
                     : "");
 
@@ -96,10 +104,10 @@ public class RenderizadorHtmlGuiaRemision implements RenderizadorDocumento<Borra
         // Customer / Destinatario.
         if (doc.getDestinatario() != null) {
             Map<String, Object> customer = new HashMap<>();
-            customer.put("documentType", texto(doc.getDestinatario().tipoDocumentoIdentidad()));
-            customer.put("identity", texto(doc.getDestinatario().numeroDocumentoIdentidad()));
-            customer.put("name", texto(doc.getDestinatario().nombre()));
-            customer.put("address", doc.getEnvio() != null && doc.getEnvio().getDestino() != null
+            customer.put(KEY_DOCUMENT_TYPE, texto(doc.getDestinatario().tipoDocumentoIdentidad()));
+            customer.put(KEY_IDENTITY, texto(doc.getDestinatario().numeroDocumentoIdentidad()));
+            customer.put(KEY_NAME, texto(doc.getDestinatario().nombre()));
+            customer.put(KEY_ADDRESS, doc.getEnvio() != null && doc.getEnvio().getDestino() != null
                     ? texto(doc.getEnvio().getDestino().direccion())
                     : "");
             receipt.put("customer", customer);
@@ -107,17 +115,17 @@ public class RenderizadorHtmlGuiaRemision implements RenderizadorDocumento<Borra
 
         if (doc.getTercero() != null) {
             Map<String, Object> third = new HashMap<>();
-            third.put("documentType", texto(doc.getTercero().tipoDocumentoIdentidad()));
-            third.put("identity", texto(doc.getTercero().numeroDocumentoIdentidad()));
-            third.put("name", texto(doc.getTercero().nombre()));
+            third.put(KEY_DOCUMENT_TYPE, texto(doc.getTercero().tipoDocumentoIdentidad()));
+            third.put(KEY_IDENTITY, texto(doc.getTercero().numeroDocumentoIdentidad()));
+            third.put(KEY_NAME, texto(doc.getTercero().nombre()));
             receipt.put("thirdParty", third);
         }
 
         if (doc.getComprador() != null) {
             Map<String, Object> buyer = new HashMap<>();
-            buyer.put("documentType", texto(doc.getComprador().tipoDocumentoIdentidad()));
-            buyer.put("identity", texto(doc.getComprador().numeroDocumentoIdentidad()));
-            buyer.put("name", texto(doc.getComprador().nombre()));
+            buyer.put(KEY_DOCUMENT_TYPE, texto(doc.getComprador().tipoDocumentoIdentidad()));
+            buyer.put(KEY_IDENTITY, texto(doc.getComprador().numeroDocumentoIdentidad()));
+            buyer.put(KEY_NAME, texto(doc.getComprador().nombre()));
             receipt.put("buyer", buyer);
         }
 
@@ -142,7 +150,7 @@ public class RenderizadorHtmlGuiaRemision implements RenderizadorDocumento<Borra
                 Map<String, String> origin = new HashMap<>();
                 origin.put("ubigeo", texto(doc.getEnvio().getPartida().ubigeo()));
                 origin.put("line", texto(doc.getEnvio().getPartida().direccion()));
-                origin.put("code", texto(doc.getEnvio().getPartida().codigoLocal()));
+                origin.put(KEY_CODE, texto(doc.getEnvio().getPartida().codigoLocal()));
                 origin.put("ruc", texto(doc.getEnvio().getPartida().ruc()));
                 address.put("origin", origin);
             }
@@ -150,7 +158,7 @@ public class RenderizadorHtmlGuiaRemision implements RenderizadorDocumento<Borra
                 Map<String, String> delivery = new HashMap<>();
                 delivery.put("ubigeo", texto(doc.getEnvio().getDestino().ubigeo()));
                 delivery.put("line", texto(doc.getEnvio().getDestino().direccion()));
-                delivery.put("code", texto(doc.getEnvio().getDestino().codigoLocal()));
+                delivery.put(KEY_CODE, texto(doc.getEnvio().getDestino().codigoLocal()));
                 delivery.put("ruc", texto(doc.getEnvio().getDestino().ruc()));
                 address.put("delivery", delivery);
             }
@@ -158,9 +166,9 @@ public class RenderizadorHtmlGuiaRemision implements RenderizadorDocumento<Borra
 
             if (doc.getEnvio().getTransportista() != null) {
                 Map<String, Object> carrier = new HashMap<>();
-                carrier.put("name", texto(doc.getEnvio().getTransportista().nombre()));
-                carrier.put("identity", texto(doc.getEnvio().getTransportista().numeroDocumentoIdentidad()));
-                carrier.put("documentType", texto(doc.getEnvio().getTransportista().tipoDocumentoIdentidad()));
+                carrier.put(KEY_NAME, texto(doc.getEnvio().getTransportista().nombre()));
+                carrier.put(KEY_IDENTITY, texto(doc.getEnvio().getTransportista().numeroDocumentoIdentidad()));
+                carrier.put(KEY_DOCUMENT_TYPE, texto(doc.getEnvio().getTransportista().tipoDocumentoIdentidad()));
                 carrier.put("mtc", texto(doc.getEnvio().getTransportista().numeroRegistroMTC()));
                 receipt.put("carrier", carrier);
             }
@@ -179,7 +187,7 @@ public class RenderizadorHtmlGuiaRemision implements RenderizadorDocumento<Borra
             if (doc.getEnvio().getChoferes() != null) {
                 List<Map<String, Object>> drivers = doc.getEnvio().getChoferes().stream()
                         .map(this::conductorMap)
-                        .collect(Collectors.toList());
+                        .toList();
                 receipt.put("drivers", drivers);
             }
 
@@ -187,7 +195,7 @@ public class RenderizadorHtmlGuiaRemision implements RenderizadorDocumento<Borra
                 List<Map<String, Object>> containers = new ArrayList<>();
                 for (Contenedor c : doc.getEnvio().getContenedores()) {
                     Map<String, Object> container = new HashMap<>();
-                    container.put("number", texto(c.numero()));
+                    container.put(KEY_NUMBER, texto(c.numero()));
                     container.put("seal", texto(c.precinto()));
                     containers.add(container);
                 }
@@ -198,8 +206,8 @@ public class RenderizadorHtmlGuiaRemision implements RenderizadorDocumento<Borra
                 List<Map<String, Object>> customsDeclarations = new ArrayList<>();
                 for (DeclaracionAduanera da : doc.getEnvio().getDeclaracionesAduaneras()) {
                     Map<String, Object> d = new HashMap<>();
-                    d.put("type", texto(da.tipoDocumento()));
-                    d.put("number", texto(da.numero()));
+                    d.put(KEY_TYPE, texto(da.tipoDocumento()));
+                    d.put(KEY_NUMBER, texto(da.numero()));
                     d.put("customsOffice", texto(da.serieAduana()));
                     customsDeclarations.add(d);
                 }
@@ -208,15 +216,15 @@ public class RenderizadorHtmlGuiaRemision implements RenderizadorDocumento<Borra
 
             if (doc.getEnvio().getPuerto() != null) {
                 Map<String, Object> port = new HashMap<>();
-                port.put("code", texto(doc.getEnvio().getPuerto().codigo()));
-                port.put("description", texto(doc.getEnvio().getPuerto().descripcion()));
+                port.put(KEY_CODE, texto(doc.getEnvio().getPuerto().codigo()));
+                port.put(KEY_DESCRIPTION, texto(doc.getEnvio().getPuerto().descripcion()));
                 receipt.put("port", port);
             }
 
             if (doc.getEnvio().getAeropuerto() != null) {
                 Map<String, Object> airport = new HashMap<>();
-                airport.put("code", texto(doc.getEnvio().getAeropuerto().codigo()));
-                airport.put("description", texto(doc.getEnvio().getAeropuerto().descripcion()));
+                airport.put(KEY_CODE, texto(doc.getEnvio().getAeropuerto().codigo()));
+                airport.put(KEY_DESCRIPTION, texto(doc.getEnvio().getAeropuerto().descripcion()));
                 receipt.put("airport", airport);
             }
         }
@@ -228,7 +236,7 @@ public class RenderizadorHtmlGuiaRemision implements RenderizadorDocumento<Borra
             List<Map<String, Object>> relatedDocuments = new ArrayList<>();
             doc.getDocumentosRelacionados().forEach(r -> {
                 Map<String, Object> d = new HashMap<>();
-                d.put("type", texto(r.tipoDocumento()));
+                d.put(KEY_TYPE, texto(r.tipoDocumento()));
                 d.put("document", texto(r.serieNumero()));
                 relatedDocuments.add(d);
             });
@@ -238,7 +246,7 @@ public class RenderizadorHtmlGuiaRemision implements RenderizadorDocumento<Borra
             List<Map<String, Object>> additionalDocuments = new ArrayList<>();
             doc.getDocumentosAdicionales().forEach(r -> {
                 Map<String, Object> d = new HashMap<>();
-                d.put("type", texto(r.tipoDocumento()));
+                d.put(KEY_TYPE, texto(r.tipoDocumento()));
                 d.put("document", texto(r.serieNumero()));
                 d.put("issuer", texto(r.emisor()));
                 additionalDocuments.add(d);
@@ -253,21 +261,21 @@ public class RenderizadorHtmlGuiaRemision implements RenderizadorDocumento<Borra
                 Map<String, Object> item = new HashMap<>();
                 item.put("quantity", texto(linea.cantidad()));
                 item.put("unitCode", texto(linea.unidadMedida()));
-                item.put("description", texto(linea.descripcion()));
-                item.put("code", texto(linea.codigo()));
+                item.put(KEY_DESCRIPTION, texto(linea.descripcion()));
+                item.put(KEY_CODE, texto(linea.codigo()));
                 item.put("sunatCode", texto(linea.codigoSunat()));
                 if (linea.atributos() != null) {
                     List<Map<String, Object>> attributes = new ArrayList<>();
                     linea.atributos().forEach(a -> {
                         Map<String, Object> attr = new HashMap<>();
-                        attr.put("code", texto(a.codigo()));
+                        attr.put(KEY_CODE, texto(a.codigo()));
                         attr.put("value", texto(a.valor()));
                         attributes.add(attr);
                     });
                     item.put("attributes", attributes);
                 }
                 return item;
-            }).collect(Collectors.toList());
+            }).toList();
             receipt.put("items", items);
         }
 
@@ -374,11 +382,11 @@ public class RenderizadorHtmlGuiaRemision implements RenderizadorDocumento<Borra
         if (attrs == null || attrs.isEmpty()) return;
         receipt.put("header", texto(attrs.get("header")));
         receipt.put("footer", texto(attrs.get("footer")));
-        Object extras = attrs.get("extras");
+        Object extras = attrs.get(KEY_EXTRAS);
         if (extras instanceof List<?> list) {
-            receipt.put("extras", list);
+            receipt.put(KEY_EXTRAS, list);
         } else {
-            receipt.put("extras", List.of());
+            receipt.put(KEY_EXTRAS, List.of());
         }
     }
 }
