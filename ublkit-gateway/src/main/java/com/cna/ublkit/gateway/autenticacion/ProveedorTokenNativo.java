@@ -31,6 +31,8 @@ public class ProveedorTokenNativo implements ProveedorToken {
 
     private static final Pattern PATRON_TOKEN = Pattern.compile("\"access_token\"\\s*:\\s*\"([^\"]+)\"");
     private static final Pattern PATRON_EXPIRES_IN = Pattern.compile("\"expires_in\"\\s*:\\s*(\\d+)");
+    private static final String CONTENT_TYPE_FORM_URLENCODED = "application/x-www-form-urlencoded";
+    private static final String USER_AGENT = "UBLKit/1.0";
     private static final long MARGEN_SEGURIDAD_SEGUNDOS = 30;
 
     private final HttpClient httpClient;
@@ -65,7 +67,7 @@ public class ProveedorTokenNativo implements ProveedorToken {
                 "[UBLKIT][TOKEN] solicitandoToken ambiente=%s, url=%s, contentType=%s, ruc=%s, usuarioSol=%s, usernameConcatenado=%s, clientId=%s, clientSecret=%s, bodyPreview=%s",
                 ambiente,
                 url,
-                "application/x-www-form-urlencoded; charset=UTF-8",
+                CONTENT_TYPE_FORM_URLENCODED,
                 mask(credenciales.ruc()),
                 mask(credenciales.usuarioSol()),
                 mask(credenciales.getUsernameConcatenado()),
@@ -77,8 +79,9 @@ public class ProveedorTokenNativo implements ProveedorToken {
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(url))
                     .timeout(Duration.ofSeconds(30))
-                    .header("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
+                    .header("Content-Type", CONTENT_TYPE_FORM_URLENCODED)
                     .header("Accept", "application/json")
+                    .header("User-Agent", USER_AGENT)
                     .POST(HttpRequest.BodyPublishers.ofString(body, StandardCharsets.UTF_8))
                     .build();
 
@@ -92,7 +95,7 @@ public class ProveedorTokenNativo implements ProveedorToken {
 
             String token = extraerToken(response.body());
             if (token == null) {
-                throw new ExcepcionUblKit("El token no se encontró en la respuesta JSON: " + response.body());
+                throw new ExcepcionUblKit("La respuesta de autenticación no contiene access_token: " + response.body());
             }
 
             long expiresIn = extraerExpiresIn(response.body());

@@ -26,6 +26,7 @@ import java.util.regex.Pattern;
  */
 public class HttpClienteNativoRest implements ClienteRest {
     private static final Logger log = Logger.getLogger(HttpClienteNativoRest.class.getName());
+    private static final String USER_AGENT = "UBLKit/1.0";
 
     private final HttpClient httpClient;
 
@@ -64,6 +65,7 @@ public class HttpClienteNativoRest implements ClienteRest {
                     .uri(URI.create(endpointUrl))
                     .timeout(Duration.ofMinutes(1))
                     .header("Content-Type", "application/json")
+                    .header("User-Agent", USER_AGENT)
                     .header("Authorization", "Bearer " + tokenBearer)
                     .POST(HttpRequest.BodyPublishers.ofString(jsonPayload))
                     .build();
@@ -99,6 +101,7 @@ public class HttpClienteNativoRest implements ClienteRest {
                     .uri(URI.create(endpointUrl + numeroTicket))
                     .timeout(Duration.ofSeconds(30))
                     .header("Content-Type", "application/json")
+                    .header("User-Agent", USER_AGENT)
                     .header("Authorization", "Bearer " + tokenBearer)
                     .GET()
                     .build();
