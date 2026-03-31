@@ -14,6 +14,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.Base64;
+import java.util.Map;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -27,6 +28,22 @@ import java.util.regex.Pattern;
 public class HttpClienteNativoRest implements ClienteRest {
     private static final Logger log = Logger.getLogger(HttpClienteNativoRest.class.getName());
     private static final String USER_AGENT = "UBLKit/1.0";
+    private static final Map<String, String> SUNAT_GRE_ERROR_DESCRIPTIONS = Map.ofEntries(
+            // Ticket / procesamiento (documentación SUNAT CódigosRetorno)
+            Map.entry("0126", "El ticket no le pertenece al usuario"),
+            Map.entry("0127", "El ticket no existe"),
+            Map.entry("0130", "No se pudo obtener el ticket de proceso"),
+            Map.entry("0155", "El archivo ZIP está vacío"),
+            Map.entry("0156", "El archivo ZIP está corrupto"),
+            Map.entry("0250", "Error desconocido al hacer unzip"),
+            // GRE validaciones frecuentes
+            Map.entry("3383", "Debe consignar el número de documento de identidad del remitente"),
+            Map.entry("3384", "El número de documento de identidad del remitente no cumple el formato"),
+            Map.entry("3385", "El número de RUC del remitente no existe"),
+            Map.entry("3386", "El número de DNI del remitente no existe"),
+            Map.entry("3387", "Debe consignar el nombre o razón social del remitente"),
+            Map.entry("3433", "La GRE remitente no existe"),
+            Map.entry("3434", "Destinatario no coincide con la GRE remitente relacionada"));
 
     private final HttpClient httpClient;
 
@@ -131,8 +148,8 @@ public class HttpClienteNativoRest implements ClienteRest {
 
                 // Error de negocio
                 String arcCdr = extraerCampoJson(response.body(), "arcCdr");
-                String errorMsg = extraerCampoJson(response.body(), "msgError");
-                return ResultadoConsulta.error(codRespuesta, errorMsg != null ? errorMsg : "Sin detalles. CDR Presente: " + (arcCdr != null));
+                String errorMsg = construirMensajeErrorTicket(response.body(), codRespuesta, indCdrGenerado, arcCdr);
+                return ResultadoConsulta.error(codRespuesta, errorMsg);
             }
 
             return ResultadoConsulta.error(String.valueOf(response.statusCode()), response.body());
@@ -166,5 +183,61 @@ public class HttpClienteNativoRest implements ClienteRest {
             return "***";
         }
         return value.substring(0, 4) + "***" + value.substring(value.length() - 4);
+    }
+
+    private String construirMensajeErrorTicket(String body, String codRespuesta, String indCdrGenerado, String arcCdr) {
+        String msgError = extraerCampoJson(body, "msgError");
+        if (msgError != null && !msgError.isBlank()) {
+            return msgError;
+        }
+
+        String numError = extraerCampoJson(body, "numError");
+        String desError = extraerCampoJson(body, "desError");
+        String descripcionCatalogo = numError != null ? SUNAT_GRE_ERROR_DESCRIPTIONS.get(numError) : null;
+        String sugerencia = construirSugerencia(numError);
+
+        StringBuilder message = new StringBuilder();
+        message.append("Consulta ticket GRE sin CDR");
+        if (codRespuesta != null) {
+            message.append(" (codRespuesta=").append(codRespuesta).append(")");
+        }
+        if (numError != null && !numError.isBlank()) {
+            message.append(", numError=").append(numError);
+        }
+        if (descripcionCatalogo != null) {
+            message.append(", sunatCatalogo=").append(descripcionCatalogo);
+        }
+        if (desError != null && !desError.isBlank()) {
+            message.append(", desError=").append(desError);
+        }
+        if (indCdrGenerado != null) {
+            message.append(", indCdrGenerado=").append(indCdrGenerado);
+        }
+        message.append(", cdrPresente=").append(arcCdr != null);
+
+        if ("3383".equals(numError)) {
+            message.append(" [SUNAT informó estado sin CDR definitivo]");
+        }
+        if (sugerencia != null) {
+            message.append(" | accionSugerida=").append(sugerencia);
+        }
+        return message.toString();
+    }
+
+    private String construirSugerencia(String numError) {
+        if (numError == null || numError.isBlank()) {
+            return null;
+        }
+        return switch (numError) {
+            case "0126" -> "Verificar credenciales SOL/OAuth y RUC emisor del ticket";
+            case "0127" -> "Confirmar ticket, ambiente y endpoint; podría ser ticket inválido o expirado";
+            case "0130" -> "Reintentar consulta; si persiste, escalar como incidencia SUNAT";
+            case "0155", "0156", "0250" -> "Revisar ZIP/XML enviado y volver a enviar la GRE";
+            case "3383", "3384", "3385", "3386", "3387" ->
+                    "Corregir datos del remitente en la GRE (tipo/número/nombre) y emitir nueva guía";
+            case "3433", "3434" ->
+                    "Validar documento relacionado GRE remitente y consistencia de datos del destinatario";
+            default -> null;
+        };
     }
 }
