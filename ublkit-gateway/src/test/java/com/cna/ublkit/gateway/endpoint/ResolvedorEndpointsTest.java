@@ -31,6 +31,24 @@ class ResolvedorEndpointsTest {
     }
 
     @Test
+    void testUrlRestEnvioBetaYProduccion() {
+        assertThat(ResolvedorEndpoints.urlRestEnvio(TipoAmbiente.BETA))
+                .isEqualTo("https://gre-test.nubefact.com/v1/contribuyente/gem/comprobantes/");
+
+        assertThat(ResolvedorEndpoints.urlRestEnvio(TipoAmbiente.PRODUCCION))
+                .isEqualTo("https://api-cpe.sunat.gob.pe/v1/contribuyente/gem/comprobantes/");
+    }
+
+    @Test
+    void testUrlRestTicketBetaYProduccion() {
+        assertThat(ResolvedorEndpoints.urlRestTicket(TipoAmbiente.BETA))
+                .isEqualTo("https://gre-test.nubefact.com/v1/contribuyente/gem/comprobantes/envios/");
+
+        assertThat(ResolvedorEndpoints.urlRestTicket(TipoAmbiente.PRODUCCION))
+                .isEqualTo("https://api-cpe.sunat.gob.pe/v1/contribuyente/gem/comprobantes/envios/");
+    }
+
+    @Test
     void testUrlRestTokenFallaSinClientId() {
         assertThatThrownBy(() -> ResolvedorEndpoints.urlRestToken(TipoAmbiente.PRODUCCION, ""))
                 .isInstanceOf(ExcepcionUblKit.class)

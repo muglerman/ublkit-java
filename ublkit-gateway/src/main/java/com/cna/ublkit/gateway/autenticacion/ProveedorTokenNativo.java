@@ -21,7 +21,8 @@ import java.util.regex.Pattern;
 
 /**
  * Proveedor de Token por defecto que utiliza {@link HttpClient} nativo.
- * Consume el API de seguridad de SUNAT (/v1/clientessol/{client_id}/oauth2/token).
+ * Consume el endpoint OAuth2 resuelto por ambiente
+ * (`SUNAT` en producción y `gre-test.nubefact.com` para GRE en BETA).
  * <p>
  * @since 0.1.0
  */

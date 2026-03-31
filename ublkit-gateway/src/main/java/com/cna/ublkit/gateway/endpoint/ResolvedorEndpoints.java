@@ -45,6 +45,8 @@ public final class ResolvedorEndpoints {
 
     /**
      * Resuelve el endpoint REST para obtener el token OAuth2.
+     * Para GRE en BETA se usa el servidor de pruebas de Nubefact
+     * (`https://gre-test.nubefact.com/...`), no el de SUNAT.
      * @param clientId El Client ID (requerido para armar la URL final).
      */
     public static String urlRestToken(TipoAmbiente ambiente, String clientId) {
@@ -60,6 +62,7 @@ public final class ResolvedorEndpoints {
 
     /**
      * Resuelve el endpoint REST base para el envío de Guías de Remisión.
+     * En BETA apunta al servidor de pruebas de GRE de Nubefact.
      * Al usar, es probable que deba agregarse el patrón: `{numRucEmisor}-{codCpe}-{numSerie}-{numCpe}` final.
      */
     public static String urlRestEnvio(TipoAmbiente ambiente) {
@@ -71,6 +74,7 @@ public final class ResolvedorEndpoints {
 
     /**
      * Resuelve el endpoint REST base para la consulta de tickets GRE.
+     * En BETA apunta al servidor de pruebas de GRE de Nubefact.
      * Al usar, es probable que deba agregarse el patrón: `{numTicket}` final.
      */
     public static String urlRestTicket(TipoAmbiente ambiente) {
