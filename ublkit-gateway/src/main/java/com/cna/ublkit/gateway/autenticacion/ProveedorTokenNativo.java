@@ -12,6 +12,7 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
@@ -47,35 +48,38 @@ public class ProveedorTokenNativo implements ProveedorToken {
         if (credenciales.clientId() == null || credenciales.clientSecret() == null) {
             throw new ExcepcionUblKit("Faltan credenciales OAuth2 (clientId/clientSecret) para solicitar token REST");
         }
+        CredencialesEmpresa credencialesNormalizadas = normalizarCredencialesParaAmbiente(credenciales, ambiente);
 
-        String claveCache = claveCache(credenciales, ambiente);
+        String claveCache = claveCache(credencialesNormalizadas, ambiente);
         TokenCacheado cacheado = cacheTokens.get(claveCache);
         if (cacheado != null && !cacheado.expirado()) {
             log.info(String.format(
                     "[UBLKIT][TOKEN] cacheHit ambiente=%s, cacheKey=%s, expiraEn=%s, usernameConcatenado=%s",
-                    ambiente, mask(claveCache), cacheado.expiraEn(), mask(credenciales.getUsernameConcatenado())));
+                    ambiente, mask(claveCache), cacheado.expiraEn(), mask(credencialesNormalizadas.getUsernameConcatenado())));
             return cacheado.token();
         }
 
-        String url = ResolvedorEndpoints.urlRestToken(ambiente, credenciales.clientId());
-        String body = buildUrlEncodedParams(credenciales);
+        String url = ResolvedorEndpoints.urlRestToken(ambiente, credencialesNormalizadas.clientId());
+        String body = buildUrlEncodedParams(credencialesNormalizadas);
         log.info(String.format(
-                "[UBLKIT][TOKEN] solicitandoToken ambiente=%s, url=%s, ruc=%s, usuarioSol=%s, usernameConcatenado=%s, clientId=%s, clientSecret=%s, bodyPreview=%s",
+                "[UBLKIT][TOKEN] solicitandoToken ambiente=%s, url=%s, contentType=%s, ruc=%s, usuarioSol=%s, usernameConcatenado=%s, clientId=%s, clientSecret=%s, bodyPreview=%s",
                 ambiente,
                 url,
-                mask(credenciales.ruc()),
-                mask(credenciales.usuarioSol()),
-                mask(credenciales.getUsernameConcatenado()),
-                mask(credenciales.clientId()),
-                mask(credenciales.clientSecret()),
+                "application/x-www-form-urlencoded; charset=UTF-8",
+                mask(credencialesNormalizadas.ruc()),
+                mask(credencialesNormalizadas.usuarioSol()),
+                mask(credencialesNormalizadas.getUsernameConcatenado()),
+                mask(credencialesNormalizadas.clientId()),
+                mask(credencialesNormalizadas.clientSecret()),
                 maskFormBody(body)));
 
         try {
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(url))
                     .timeout(Duration.ofSeconds(30))
-                    .header("Content-Type", "application/x-www-form-urlencoded")
-                    .POST(HttpRequest.BodyPublishers.ofString(body))
+                    .header("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
+                    .header("Accept", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(body, StandardCharsets.UTF_8))
                     .build();
 
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
@@ -106,17 +110,53 @@ public class ProveedorTokenNativo implements ProveedorToken {
     }
 
     private String buildUrlEncodedParams(CredencialesEmpresa cred) {
-        String username = URLEncoder.encode(cred.getUsernameConcatenado(), StandardCharsets.UTF_8);
-        String password = URLEncoder.encode(cred.claveSol(), StandardCharsets.UTF_8);
-        String clientId = URLEncoder.encode(cred.clientId(), StandardCharsets.UTF_8);
-        String clientSecret = URLEncoder.encode(cred.clientSecret(), StandardCharsets.UTF_8);
+        Map<String, String> params = new LinkedHashMap<>();
+        params.put("grant_type", "password");
+        params.put("scope", "https://api-cpe.sunat.gob.pe");
+        params.put("client_id", cred.clientId());
+        params.put("client_secret", cred.clientSecret());
+        params.put("username", cred.getUsernameConcatenado());
+        params.put("password", cred.claveSol());
 
-        return "grant_type=password" +
-               "&scope=https://api-cpe.sunat.gob.pe" +
-               "&client_id=" + clientId +
-               "&client_secret=" + clientSecret +
-               "&username=" + username +
-               "&password=" + password;
+        StringBuilder body = new StringBuilder();
+        for (Map.Entry<String, String> entry : params.entrySet()) {
+            if (!body.isEmpty()) {
+                body.append('&');
+            }
+            body.append(URLEncoder.encode(entry.getKey(), StandardCharsets.UTF_8));
+            body.append('=');
+            body.append(URLEncoder.encode(entry.getValue(), StandardCharsets.UTF_8));
+        }
+        return body.toString();
+    }
+
+    private CredencialesEmpresa normalizarCredencialesParaAmbiente(CredencialesEmpresa credenciales, TipoAmbiente ambiente) {
+        if (ambiente != TipoAmbiente.BETA) {
+            return credenciales;
+        }
+        String clientId = asegurarPrefijoTest(credenciales.clientId());
+        String clientSecret = asegurarPrefijoTest(credenciales.clientSecret());
+        if (!clientId.equals(credenciales.clientId()) || !clientSecret.equals(credenciales.clientSecret())) {
+            log.info(String.format(
+                    "[UBLKIT][TOKEN] normalizandoCredencialesBeta clientIdOriginal=%s clientIdUsado=%s clientSecretOriginal=%s clientSecretUsado=%s",
+                    mask(credenciales.clientId()),
+                    mask(clientId),
+                    mask(credenciales.clientSecret()),
+                    mask(clientSecret)));
+        }
+        return new CredencialesEmpresa(
+                credenciales.ruc(),
+                credenciales.usuarioSol(),
+                credenciales.claveSol(),
+                clientId,
+                clientSecret);
+    }
+
+    private String asegurarPrefijoTest(String value) {
+        if (value == null || value.isBlank() || value.startsWith("test-")) {
+            return value;
+        }
+        return "test-" + value;
     }
 
     private String claveCache(CredencialesEmpresa cred, TipoAmbiente ambiente) {
