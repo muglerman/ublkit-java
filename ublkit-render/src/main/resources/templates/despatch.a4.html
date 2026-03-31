@@ -124,7 +124,7 @@
   </div>
   {% endif %}
 
-  {% if receipt.vehicles %}
+  {% if receipt.vehicles is not empty %}
   <div class="section">
     <p class="title">Vehiculos</p>
     <table>
@@ -141,7 +141,7 @@
   </div>
   {% endif %}
 
-  {% if receipt.drivers %}
+  {% if receipt.drivers is not empty %}
   <div class="section">
     <p class="title">Conductores</p>
     <table>
@@ -158,15 +158,15 @@
   </div>
   {% endif %}
 
-  {% if receipt.containers or receipt.customsDeclarations or receipt.port.code or receipt.airport.code %}
+  {% if (receipt.containers is not empty) or (receipt.customsDeclarations is not empty) or receipt.port.code or receipt.airport.code %}
   <div class="section">
     <p class="title">Logistica y Aduana</p>
     <div class="card" style="padding:8px 10px;">
       {% if receipt.port.code %}<p><strong>Puerto:</strong> {{ receipt.port.code }} {{ receipt.port.description }}</p>{% endif %}
       {% if receipt.airport.code %}<p><strong>Aeropuerto:</strong> {{ receipt.airport.code }} {{ receipt.airport.description }}</p>{% endif %}
       {% if receipt.indicators %}<p><strong>Indicadores:</strong> {% for i in receipt.indicators %}{{ i }}{% if not loop.last %}, {% endif %}{% endfor %}</p>{% endif %}
-      {% if receipt.containers %}<p><strong>Contenedores:</strong></p>{% for c in receipt.containers %}<p class="small">{{ c.number }}{% if c.seal %} | Precinto: {{ c.seal }}{% endif %}</p>{% endfor %}{% endif %}
-      {% if receipt.customsDeclarations %}<p><strong>Declaraciones aduaneras:</strong></p>{% for c in receipt.customsDeclarations %}<p class="small">{{ c.type }} {{ c.number }} {{ c.customsOffice }}</p>{% endfor %}{% endif %}
+      {% if receipt.containers is not empty %}<p><strong>Contenedores:</strong></p>{% for c in receipt.containers %}<p class="small">{{ c.number }}{% if c.seal %} | Precinto: {{ c.seal }}{% endif %}</p>{% endfor %}{% endif %}
+      {% if receipt.customsDeclarations is not empty %}<p><strong>Declaraciones aduaneras:</strong></p>{% for c in receipt.customsDeclarations %}<p class="small">{{ c.type }} {{ c.number }} {{ c.customsOffice }}</p>{% endfor %}{% endif %}
     </div>
   </div>
   {% endif %}
@@ -204,7 +204,7 @@
 
   <div class="section card" style="padding:8px 10px;">
     <strong>Observacion:</strong> {% if receipt.note %}{{ receipt.note }}{% else %}-{% endif %}
-    {% if receipt.extras %}{% for e in receipt.extras %}<p class="small">{{ e.name }}: {{ e.value }}</p>{% endfor %}{% endif %}
+    {% if receipt.extras is not empty %}{% for e in receipt.extras %}<p class="small">{{ e.name }}: {{ e.value }}</p>{% endfor %}{% endif %}
   </div>
 
   <div class="qr">

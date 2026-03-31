@@ -92,7 +92,7 @@
   </div>
   {% endif %}
 
-  {% if receipt.vehicles %}
+  {% if receipt.vehicles is not empty %}
   <div class="section">
     <p class="title">Vehiculos</p>
     <table>
@@ -102,7 +102,7 @@
   </div>
   {% endif %}
 
-  {% if receipt.drivers %}
+  {% if receipt.drivers is not empty %}
   <div class="section">
     <p class="title">Conductores</p>
     <table>
@@ -115,7 +115,7 @@
   <div class="section card" style="padding:7px 8px;">
     {% if receipt.reference.note %}<p><strong>Documento relacionado:</strong> {{ receipt.reference.note }}</p>{% endif %}
     {% if receipt.note %}<p><strong>Observacion:</strong> {{ receipt.note }}</p>{% endif %}
-    {% if receipt.extras %}{% for e in receipt.extras %}<p class="small">{{ e.name }}: {{ e.value }}</p>{% endfor %}{% endif %}
+    {% if receipt.extras is not empty %}{% for e in receipt.extras %}<p class="small">{{ e.name }}: {{ e.value }}</p>{% endfor %}{% endif %}
   </div>
 
   <div class="section">

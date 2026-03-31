@@ -113,11 +113,11 @@
     <div class="col card" style="padding:8px 10px;">
       <p><strong>Motivo del ajuste:</strong></p>
       <p class="small">{{ invoice.noteTypeCode }} - {{ invoice.noteTypeName }}</p>
-      {% if invoice.charges %}<p style="margin-top:6px;"><strong>Cargos:</strong></p>{% for c in invoice.charges %}<p class="small">{{ c.type }} {{ c.amount }}</p>{% endfor %}{% endif %}
-      {% if invoice.reference.guides %}<p style="margin-top:6px;"><strong>Guias rel.:</strong></p>{% for g in invoice.reference.guides %}<p class="small">{{ g.type }} {{ g.document }}</p>{% endfor %}{% endif %}
-      {% if invoice.reference.documents %}<p style="margin-top:6px;"><strong>Docs rel.:</strong></p>{% for d in invoice.reference.documents %}<p class="small">{{ d.type }} {{ d.document }}</p>{% endfor %}{% endif %}
-      {% if invoice.legends %}<p style="margin-top:6px;"><strong>Leyendas:</strong></p>{% for l in invoice.legends %}<p class="small">{{ l.code }}: {{ l.value }}</p>{% endfor %}{% endif %}
-      {% if invoice.extras %}<p style="margin-top:6px;"><strong>Informacion adicional:</strong></p>{% for e in invoice.extras %}<p class="small">{{ e.name }}: {{ e.value }}</p>{% endfor %}{% endif %}
+      {% if invoice.charges is not empty %}<p style="margin-top:6px;"><strong>Cargos:</strong></p>{% for c in invoice.charges %}<p class="small">{{ c.type }} {{ c.amount }}</p>{% endfor %}{% endif %}
+      {% if invoice.reference.guides is not empty %}<p style="margin-top:6px;"><strong>Guias rel.:</strong></p>{% for g in invoice.reference.guides %}<p class="small">{{ g.type }} {{ g.document }}</p>{% endfor %}{% endif %}
+      {% if invoice.reference.documents is not empty %}<p style="margin-top:6px;"><strong>Docs rel.:</strong></p>{% for d in invoice.reference.documents %}<p class="small">{{ d.type }} {{ d.document }}</p>{% endfor %}{% endif %}
+      {% if invoice.legends is not empty %}<p style="margin-top:6px;"><strong>Leyendas:</strong></p>{% for l in invoice.legends %}<p class="small">{{ l.code }}: {{ l.value }}</p>{% endfor %}{% endif %}
+      {% if invoice.extras is not empty %}<p style="margin-top:6px;"><strong>Informacion adicional:</strong></p>{% for e in invoice.extras %}<p class="small">{{ e.name }}: {{ e.value }}</p>{% endfor %}{% endif %}
       {% if invoice.sustento %}<p style="margin-top:6px;">{{ invoice.sustento }}</p>{% endif %}
     </div>
     <div class="col">
