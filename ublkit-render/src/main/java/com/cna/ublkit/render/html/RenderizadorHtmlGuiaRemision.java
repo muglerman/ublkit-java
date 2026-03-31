@@ -100,10 +100,11 @@ public class RenderizadorHtmlGuiaRemision implements RenderizadorDocumento<Borra
             receipt.put("weight", texto(doc.getEnvio().getPesoTotal()));
             receipt.put("unitCode", texto(doc.getEnvio().getPesoTotalUnidadMedida()));
             receipt.put("packages", doc.getEnvio().getNumeroDeBultos());
-            receipt.put("handling", formatoMotivoTraslado(doc.getEnvio().getTipoTraslado(), doc.getEnvio().getMotivoTraslado()));
+            receipt.put("handling", descripcionMotivoTraslado(doc.getEnvio().getTipoTraslado(), doc.getEnvio().getMotivoTraslado()));
             receipt.put("lightVehicle", esVehiculoM1L(doc.getEnvio().getIndicadores()));
             receipt.put("ownTransport", "01".equals(doc.getEnvio().getTipoModalidadTraslado()));
             receipt.put("transportModeCode", texto(doc.getEnvio().getTipoModalidadTraslado()));
+            receipt.put("transportModeName", descripcionModalidadTraslado(doc.getEnvio().getTipoModalidadTraslado()));
 
             Map<String, Object> address = new HashMap<>();
             if (doc.getEnvio().getPartida() != null) {
@@ -191,13 +192,33 @@ public class RenderizadorHtmlGuiaRemision implements RenderizadorDocumento<Borra
         return valor == null ? "" : valor.toString();
     }
 
-    private String formatoMotivoTraslado(String tipo, String descripcion) {
+    private String descripcionMotivoTraslado(String tipo, String descripcion) {
         String cod = texto(tipo);
         String desc = texto(descripcion);
+        String catalogo = switch (cod) {
+            case "01" -> "Venta";
+            case "02" -> "Compra";
+            case "04" -> "Traslado entre establecimientos";
+            case "08" -> "Importación";
+            case "09" -> "Exportación";
+            case "13" -> "Otros";
+            default -> "";
+        };
+        if (desc.isBlank()) {
+            desc = catalogo;
+        }
         if (!cod.isBlank() && !desc.isBlank()) {
             return cod + " - " + desc;
         }
         return !desc.isBlank() ? desc : cod;
+    }
+
+    private String descripcionModalidadTraslado(String tipoModalidad) {
+        return switch (texto(tipoModalidad)) {
+            case "01" -> "Privado";
+            case "02" -> "Público";
+            default -> "";
+        };
     }
 
     private boolean esVehiculoM1L(List<String> indicadores) {

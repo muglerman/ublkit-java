@@ -176,7 +176,9 @@
 			<div class="header-cell company-cell card" style="padding: 10px;">
 				<p class="company-name">{{ receipt.taxpayer.name }}</p>
 				<p class="meta">{{ receipt.taxpayer.address }}</p>
+				{% if receipt.taxpayer.contact.web or receipt.taxpayer.contact.email or receipt.taxpayer.contact.telephone %}
 				<p class="meta">{{ receipt.taxpayer.contact.web }} {{ receipt.taxpayer.contact.email }} {{ receipt.taxpayer.contact.telephone }}</p>
+				{% endif %}
 			</div>
 			<div class="header-cell doc-cell">
 				<div class="doc-card">
@@ -211,14 +213,7 @@
 					<p class="meta"><strong>Número de bultos:</strong> {{ receipt.packages }}</p>
 				</div>
 				<div class="grid-col">
-					<p class="meta"><strong>Modalidad:</strong>
-						{% if receipt.ownTransport %}
-						Transporte privado
-						{% else %}
-						Transporte público
-						{% endif %}
-						({{ receipt.transportModeCode }})
-					</p>
+					<p class="meta"><strong>Modalidad:</strong> {{ receipt.transportModeName }} {% if receipt.transportModeCode %}({{ receipt.transportModeCode }}){% endif %}</p>
 					<p class="meta"><strong>Vehículo M1/L:</strong> {% if receipt.lightVehicle %}Sí{% else %}No{% endif %}</p>
 					<p class="meta"><strong>Punto de partida:</strong> {{ receipt.address.origin.ubigeo }} - {{ receipt.address.origin.line }}</p>
 					<p class="meta"><strong>Punto de llegada:</strong> {{ receipt.address.delivery.ubigeo }} - {{ receipt.address.delivery.line }}</p>
@@ -287,7 +282,7 @@
 
 		<div class="section">
 			<p class="section-title">Documento relacionado</p>
-			<div class="card" style="padding: 8px 10px;">{{ receipt.reference.note }}</div>
+			<div class="card" style="padding: 8px 10px;">{% if receipt.reference.note %}{{ receipt.reference.note }}{% else %}-{% endif %}</div>
 		</div>
 
 		<div class="section">
@@ -313,7 +308,7 @@
 		</div>
 
 		<div class="section card" style="padding: 8px 10px;">
-			<strong>Nota u observación:</strong> {{ receipt.note }}
+			<strong>Nota u observación:</strong> {% if receipt.note %}{{ receipt.note }}{% else %}-{% endif %}
 		</div>
 
 		<div class="qr-area">

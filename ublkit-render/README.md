@@ -26,14 +26,10 @@ ResultadoRender pdf = render.renderizar(ContextoRender.of(factura));
 byte[] bytes = pdf.contenidoPdf();
 ```
 
-## Parámetros personalizados para JRXML
-- Por contexto:
+## Personalización de plantillas HTML
+Puedes pasar atributos adicionales por contexto para ser usados por tus plantillas:
 ```java
 ContextoRender<BorradorFactura> ctx = ContextoRender.of(
     factura, "hash", "qrBase64", Map.of("CAMPO_EXTRA", "Valor")
 );
-```
-- Por JVM:
-```bash
--Dublkit.render.jasper.param.CAMPO_EXTRA=Valor
 ```

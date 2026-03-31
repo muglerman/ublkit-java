@@ -14,7 +14,7 @@ El propósito principal es ofrecer una solución integral, estructurada bajo **a
 *   ✅ Validación estructurada de documentos (8 validadores).
 *   ✅ Firma digital de XML con estándar X509 RSA-SHA1.
 *   ✅ Integración con Pasarela SUNAT (SOAP nativo + REST GRE + OAuth2).
-*   ✅ Renderizado multiformato (HTML Pebble, PDF OpenHTMLtoPDF, Ticket 58mm/80mm) + compatibilidad con formatos SUNAT `.jrxml` para Factura/Boleta.
+*   ✅ Renderizado multiformato (HTML Pebble, PDF OpenHTMLtoPDF, Ticket 58mm/80mm).
 *   ✅ Testkit con fixtures, mocks y aserciones.
 *   ✅ Adaptadores oficiales para **Spring Boot** y **Quarkus**.
 *   ✅ 72+ tests, 0 failures.
@@ -103,29 +103,9 @@ Ejecución de validación XSL SUNAT:
 - `-Dublkit.validation.sunat.enabled=true` para activar la homologación XSL oficial.
 - Sin esa propiedad, solo aplica validación funcional de UBLKit.
 
-### PDF oficial (`FORM/*.jrxml`)
-Renderizadores PDF soportan plantillas JRXML de referencia SUNAT.
-- `Plantilla_reporte_factura.jrxml`
-- `Plantilla_reporte_boleta.jrxml`
-- `Plantilla_reporte_factura_subtotal.jrxml`
-- `Plantilla_reporte_factura_impuesto.jrxml`
-- `Plantilla_reporte_notacredito.jrxml`
-- `Plantilla_reporte_notacredito_subtotal.jrxml`
-- `Plantilla_reporte_notacredito_impuesto.jrxml`
-- `Plantilla_reporte_notadebito.jrxml`
-- `Plantilla_reporte_notadebito_subtotal.jrxml`
-- `Plantilla_reporte_notadebito_impuesto.jrxml`
-- `Plantilla_reporte_guiaRemitente.jrxml`
-
-Activación explícita:
-- `-Dublkit.render.pdf.sunat.enabled=true|false`
-
-Si no se puede renderizar con Jasper/SUNAT (o está desactivado), se aplica fallback seguro al PDF HTML actual.
-
-### Campos adicionales en JRXML
-Puedes enviar parámetros extra a la plantilla por dos vías:
-- `ContextoRender.of(documento, hash, qr, Map.of("MI_CAMPO", "valor"))`
-- Propiedades JVM con prefijo `ublkit.render.jasper.param.*` (ej. `-Dublkit.render.jasper.param.MI_CAMPO=valor`)
+### Render PDF
+Renderizadores PDF usan una sola estrategia: plantillas HTML (Pebble/Twig) + OpenHTMLtoPDF.
+No se utiliza JasperReports/JRXML en esta versión.
 
 ## Instalación
 

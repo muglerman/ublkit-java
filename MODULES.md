@@ -32,11 +32,10 @@ UBLKit se divide en unidades compuestas de manera jerárquica para evitar librer
 - **Contenido:** PasarelaSunat (interfaz + impl), ClienteSoap/ClienteRest (nativos con java.net.http), ProveedorToken (OAuth2), ResolvedorEndpoints, LectorCdr, ZipHelper, HashHelper.
 - **Modelo de respuesta:** ResultadoEnvio, ResultadoConsulta, ArchivoCdr, EstadoEnvio.
 
-### 7. `ublkit-render` (15 clases + templates HTML y SUNAT, 3 tests)
+### 7. `ublkit-render` (15 clases + templates HTML, 3 tests)
 - **Responsabilidad:** Representación humana de los documentos.
-- **Soporte:** HTML (Pebble templates), PDF (OpenHTMLtoPDF/JasperReports) y Tickets térmicos (58mm/80mm).
+- **Soporte:** HTML (Pebble templates), PDF (OpenHTMLtoPDF) y Tickets térmicos (58mm/80mm).
 - **Renderizadores:** Factura (HTML/PDF/Ticket), Nota (HTML/PDF), GuiaRemision (HTML/PDF), ResumenDiario (HTML/PDF), ComunicacionBaja (HTML/PDF).
-- **Plantillas SUNAT:** incluye `.jrxml` de referencia para Factura/Boleta, Notas Crédito/Débito y Guía de Remisión empaquetadas en `ublkit-render`.
 
 ### 8. `ublkit-testkit` (9 clases)
 - **Responsabilidad:** Acelerar el desarrollo con mocks de pasarela, fixtures de documentos y aserciones personalizadas.
