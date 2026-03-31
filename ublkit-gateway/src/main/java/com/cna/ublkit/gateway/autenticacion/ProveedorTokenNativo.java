@@ -28,6 +28,7 @@ import java.util.regex.Pattern;
  */
 public class ProveedorTokenNativo implements ProveedorToken {
     private static final Logger log = Logger.getLogger(ProveedorTokenNativo.class.getName());
+    private static final String TOKEN_IMPL_REV = "2026-03-31-gre-ct-fix";
 
     private static final Pattern PATRON_TOKEN = Pattern.compile("\"access_token\"\\s*:\\s*\"([^\"]+)\"");
     private static final Pattern PATRON_EXPIRES_IN = Pattern.compile("\"expires_in\"\\s*:\\s*(\\d+)");
@@ -64,7 +65,8 @@ public class ProveedorTokenNativo implements ProveedorToken {
         String url = ResolvedorEndpoints.urlRestToken(ambiente, credenciales.clientId());
         String body = buildUrlEncodedParams(credenciales);
         log.info(String.format(
-                "[UBLKIT][TOKEN] solicitandoToken ambiente=%s, url=%s, contentType=%s, ruc=%s, usuarioSol=%s, usernameConcatenado=%s, clientId=%s, clientSecret=%s, bodyPreview=%s",
+                "[UBLKIT][TOKEN] rev=%s, solicitandoToken ambiente=%s, url=%s, contentType=%s, ruc=%s, usuarioSol=%s, usernameConcatenado=%s, clientId=%s, clientSecret=%s, bodyPreview=%s",
+                TOKEN_IMPL_REV,
                 ambiente,
                 url,
                 CONTENT_TYPE_FORM_URLENCODED,
