@@ -89,20 +89,20 @@ public class RenderizadorPdfNota implements RenderizadorDocumento<Object> {
 
     private ResultadoRender renderizarConJasperSunat(ContextoRender<Object> contexto) throws Exception {
         Object doc = contexto.documento();
-        String xml;
+        String xmlFallback;
         String plantillaPrincipal;
         String subreportSubtotal;
         String subreportImpuesto;
         String queryRaiz;
 
         if (doc instanceof BorradorNotaCredito nc) {
-            xml = serializadorNotaCredito.serializar(nc);
+            xmlFallback = serializadorNotaCredito.serializar(nc);
             plantillaPrincipal = "Plantilla_reporte_notacredito.jrxml";
             subreportSubtotal = "Plantilla_reporte_notacredito_subtotal.jrxml";
             subreportImpuesto = "Plantilla_reporte_notacredito_impuesto.jrxml";
             queryRaiz = "/CreditNote/CreditNoteLine";
         } else if (doc instanceof BorradorNotaDebito nd) {
-            xml = serializadorNotaDebito.serializar(nd);
+            xmlFallback = serializadorNotaDebito.serializar(nd);
             plantillaPrincipal = "Plantilla_reporte_notadebito.jrxml";
             subreportSubtotal = "Plantilla_reporte_notadebito_subtotal.jrxml";
             subreportImpuesto = "Plantilla_reporte_notadebito_impuesto.jrxml";
@@ -111,6 +111,7 @@ public class RenderizadorPdfNota implements RenderizadorDocumento<Object> {
             throw new IllegalArgumentException("El documento debe ser BorradorNotaCredito o BorradorNotaDebito");
         }
 
+        String xml = xmlFuente(contexto, xmlFallback);
         String xmlSinNamespaces = removerNamespaces(xml);
 
         DocumentBuilderFactory f = DocumentBuilderFactory.newInstance();
@@ -138,6 +139,16 @@ public class RenderizadorPdfNota implements RenderizadorDocumento<Object> {
             }
         }
         throw new IllegalStateException("No se pudo generar PDF de Nota con Jasper/SUNAT");
+    }
+
+    private String xmlFuente(ContextoRender<Object> contexto, String xmlFallback) {
+        Object xmlFromContext = contexto.atributosPlantilla() != null
+                ? contexto.atributosPlantilla().get("xmlFuente")
+                : null;
+        if (xmlFromContext instanceof String xml && !xml.isBlank()) {
+            return xml;
+        }
+        return xmlFallback;
     }
 
     private void compilarPlantillaSunat(String nombrePlantilla, Path destinoDir) throws Exception {

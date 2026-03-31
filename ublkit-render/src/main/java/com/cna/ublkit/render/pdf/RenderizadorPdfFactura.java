@@ -93,7 +93,7 @@ public class RenderizadorPdfFactura implements RenderizadorDocumento<BorradorFac
 
     private ResultadoRender renderizarConJasperSunat(ContextoRender<BorradorFactura> contexto) throws Exception {
         BorradorFactura doc = contexto.documento();
-        String xml = serializadorXmlFactura.serializar(doc);
+        String xml = xmlFuente(contexto, doc);
         String xmlSinNamespaces = removerNamespaces(xml);
 
         DocumentBuilderFactory f = DocumentBuilderFactory.newInstance();
@@ -125,6 +125,16 @@ public class RenderizadorPdfFactura implements RenderizadorDocumento<BorradorFac
             }
         }
         throw new IllegalStateException("No se pudo generar PDF con Jasper/SUNAT");
+    }
+
+    private String xmlFuente(ContextoRender<BorradorFactura> contexto, BorradorFactura doc) {
+        Object xmlFromContext = contexto.atributosPlantilla() != null
+                ? contexto.atributosPlantilla().get("xmlFuente")
+                : null;
+        if (xmlFromContext instanceof String xml && !xml.isBlank()) {
+            return xml;
+        }
+        return serializadorXmlFactura.serializar(doc);
     }
 
     private void compilarPlantillaSunat(String nombrePlantilla, Path destinoDir) throws Exception {

@@ -165,8 +165,8 @@ $F{ID}]]></textFieldExpression>
 					<bottomPen lineWidth="1.0"/>
 					<rightPen lineWidth="1.0"/>
 				</box>
-				<textFieldExpression><![CDATA[$F{nomComercialEmisor} +"\n"+
-$F{rznSocialEmisor}
+				<textFieldExpression><![CDATA[(($F{nomComercialEmisor} != null && !$F{nomComercialEmisor}.trim().isEmpty()) ? $F{nomComercialEmisor} + "\n" : "") +
+($F{rznSocialEmisor} != null ? $F{rznSocialEmisor} : "-")
 ]]></textFieldExpression>
 			</textField>
 			<textField>
@@ -194,10 +194,9 @@ $F{tipoGuia}+"|"+$F{ID}+"|"+$F{fecEmision}+"|"+$F{digestValue},
 					<rightPen lineWidth="1.0"/>
 				</box>
 				<textFieldExpression><![CDATA["Origen: "+"\n"+
-$F{dirPartida}+"\n"+
+($F{dirPartida} != null ? $F{dirPartida} : "-")+"\n"+
 "Destino: "+"\n"+
-$F{dirLlegada}
-
+($F{dirLlegada} != null ? $F{dirLlegada} : "-")
 ]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
@@ -208,11 +207,10 @@ $F{dirLlegada}
 					<bottomPen lineWidth="1.0"/>
 					<rightPen lineWidth="1.0"/>
 				</box>
-				<textFieldExpression><![CDATA["Destinatario: \n"+
-($F{tipDocDestinatario} == "6"? "RUC" :
-($F{tipDocDestinatario} == "1"? "DNI" : "OTRO" )) +
-$F{rznSocialDestinatario} +"\n"+
-"Fecha Emisión: "+ $F{fecEmision}
+				<textFieldExpression><![CDATA["Destinatario: " + ($F{rznSocialDestinatario} != null ? $F{rznSocialDestinatario} : "-") + "\n"+
+"Documento: " + (($F{tipDocDestinatario} == "6") ? "RUC" : (($F{tipDocDestinatario} == "1") ? "DNI" : "OTRO")) + " " +
+($F{nroDocDestinatario} != null ? $F{nroDocDestinatario} : "-") + "\n"+
+"Fecha Emisión: " + ($F{fecEmision} != null ? $F{fecEmision} : "-")
 ]]></textFieldExpression>
 			</textField>
 			<staticText>
@@ -277,15 +275,15 @@ $F{rznSocialDestinatario} +"\n"+
 			</textField>
 			<textField>
 				<reportElement x="186" y="0" width="325" height="20" uuid="f5b3fd17-6d31-4246-b788-1f22d822e2f4"/>
-				<textFieldExpression><![CDATA[$F{desItem}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{desItem} != null ? $F{desItem} : "-"]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="0" y="0" width="62" height="20" uuid="02cadcdb-6d2a-4e5b-bb52-a69eace18601"/>
-				<textFieldExpression><![CDATA[$F{codItem}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{codItem} != null ? $F{codItem} : "-"]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="124" y="0" width="62" height="20" uuid="4e849557-d5b3-411f-bb1f-c9a2176502e9"/>
-				<textFieldExpression><![CDATA[$F{uniMedidaItem}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{uniMedidaItem} != null ? $F{uniMedidaItem} : "-"]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>
@@ -294,7 +292,7 @@ $F{rznSocialDestinatario} +"\n"+
 	</columnFooter>
 	<pageFooter>
 		<band height="54" splitType="Stretch">
-			<staticText>
+			<textField>
 				<reportElement x="0" y="11" width="511" height="31" uuid="40d1f911-7cb9-42eb-a6b0-410afc70a127"/>
 				<box>
 					<topPen lineWidth="1.0"/>
@@ -303,8 +301,10 @@ $F{rznSocialDestinatario} +"\n"+
 					<rightPen lineWidth="1.0"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle"/>
-				<text><![CDATA[REPRESENTACION IMPRESA DE LA GUIA DE REMISION REMITENTE. ELABORADO DESDE EL SISTEMA FACTURADOR SUNAT. PODRÁ CONSULTAR LA GUIA EN SU CLAVE SOL.]]></text>
-			</staticText>
+				<textFieldExpression><![CDATA[($F{tipoGuia} == "31"
+? "REPRESENTACION IMPRESA DE LA GUIA DE REMISION TRANSPORTISTA. ELABORADO DESDE EL SISTEMA FACTURADOR SUNAT. PODRÁ CONSULTAR LA GUIA EN SU CLAVE SOL."
+: "REPRESENTACION IMPRESA DE LA GUIA DE REMISION REMITENTE. ELABORADO DESDE EL SISTEMA FACTURADOR SUNAT. PODRÁ CONSULTAR LA GUIA EN SU CLAVE SOL.")]]></textFieldExpression>
+			</textField>
 		</band>
 	</pageFooter>
 	<summary>
