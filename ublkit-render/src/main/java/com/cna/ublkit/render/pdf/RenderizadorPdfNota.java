@@ -21,6 +21,8 @@ import net.sf.jasperreports.engine.util.JRSaver;
 import net.sf.jasperreports.engine.xml.JRXmlLoader;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -43,6 +45,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
  * @since 0.1.0
  */
 public class RenderizadorPdfNota implements RenderizadorDocumento<Object> {
+    private static final Logger log = LoggerFactory.getLogger(RenderizadorPdfNota.class);
 
     private final RenderizadorHtmlNota renderizadorHtml;
     private final SerializadorXmlNotaCredito serializadorNotaCredito;
@@ -63,8 +66,8 @@ public class RenderizadorPdfNota implements RenderizadorDocumento<Object> {
         if (usarPdfSunatJasper()) {
             try {
                 return renderizarConJasperSunat(contexto);
-            } catch (Exception ignored) {
-                // Fallback seguro al render actual.
+            } catch (Exception e) {
+                log.warn("Fallo render Jasper/SUNAT para Nota. Se usará fallback HTML: {}", e.getMessage());
             }
         }
 

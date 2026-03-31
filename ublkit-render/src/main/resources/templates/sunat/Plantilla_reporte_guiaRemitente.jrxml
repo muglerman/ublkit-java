@@ -5,7 +5,7 @@
 	<property name="ireport.y" value="0"/>
 	<parameter name="ADICIONALTXT" class="java.lang.String"/>
 	<queryString language="xPath">
-		<![CDATA[/DespatchAdvice/cac:DespatchLine]]>
+		<![CDATA[/DespatchAdvice/DespatchLine]]>
 	</queryString>
 	<field name="ID" class="java.lang.String">
 		<fieldDescription><![CDATA[/DespatchAdvice/ID]]></fieldDescription>
@@ -14,7 +14,7 @@
 		<fieldDescription><![CDATA[/DespatchAdvice/DespatchAdviceTypeCode]]></fieldDescription>
 	</field>
 	<field name="nroDocEmisor" class="java.lang.String">
-		<fieldDescription><![CDATA[/DespatchAdvice/DespatchSupplierParty/CustomerAssignedAccountID]]></fieldDescription>
+		<fieldDescription><![CDATA[/DespatchAdvice/DespatchSupplierParty/Party/PartyIdentification/ID]]></fieldDescription>
 	</field>
 	<field name="nomComercialEmisor" class="java.lang.String">
 		<fieldDescription><![CDATA[/DespatchAdvice/DespatchSupplierParty/Party/PartyName/Name]]></fieldDescription>
@@ -23,7 +23,7 @@
 		<fieldDescription><![CDATA[/DespatchAdvice/DespatchSupplierParty/Party/PartyLegalEntity/RegistrationName]]></fieldDescription>
 	</field>
 	<field name="nroDocDestinatario" class="java.lang.String">
-		<fieldDescription><![CDATA[/DespatchAdvice/DeliveryCustomerParty/CustomerAssignedAccountID]]></fieldDescription>
+		<fieldDescription><![CDATA[/DespatchAdvice/DeliveryCustomerParty/Party/PartyIdentification/ID]]></fieldDescription>
 	</field>
 	<field name="nomComercialDestinatario" class="java.lang.String">
 		<fieldDescription><![CDATA[/DespatchAdvice/DeliveryCustomerParty/Party/PartyName/Name]]></fieldDescription>
@@ -80,13 +80,13 @@
 		<fieldDescription><![CDATA[/DespatchAdvice/Shipment/Delivery/DeliveryAddress/ID]]></fieldDescription>
 	</field>
 	<field name="dirLlegada" class="java.lang.String">
-		<fieldDescription><![CDATA[/DespatchAdvice/Shipment/Delivery/DeliveryAddress/StreetName]]></fieldDescription>
+		<fieldDescription><![CDATA[/DespatchAdvice/Shipment/Delivery/DeliveryAddress/AddressLine/Line]]></fieldDescription>
 	</field>
 	<field name="ubiPartida" class="java.lang.String">
-		<fieldDescription><![CDATA[/DespatchAdvice/Shipment/OriginAddress/ID]]></fieldDescription>
+		<fieldDescription><![CDATA[/DespatchAdvice/Shipment/Delivery/Despatch/DespatchAddress/ID]]></fieldDescription>
 	</field>
 	<field name="dirPartida" class="java.lang.String">
-		<fieldDescription><![CDATA[/DespatchAdvice/Shipment/OriginAddress/StreetName]]></fieldDescription>
+		<fieldDescription><![CDATA[/DespatchAdvice/Shipment/Delivery/Despatch/DespatchAddress/AddressLine/Line]]></fieldDescription>
 	</field>
 	<field name="numContenedor" class="java.lang.String">
 		<fieldDescription><![CDATA[/DespatchAdvice/Shipment/TransportHandlingUnit/TransportEquipment/ ID]]></fieldDescription>
@@ -101,7 +101,7 @@
 		<fieldDescription><![CDATA[/DespatchAdvice/AdditionalDocumentReference/DocumentTypeCode]]></fieldDescription>
 	</field>
 	<field name="numOrdenItem" class="java.lang.String">
-		<fieldDescription><![CDATA[/DespatchAdvice/DespatchLine/OrderLineReference/ID]]></fieldDescription>
+		<fieldDescription><![CDATA[/DespatchAdvice/DespatchLine/OrderLineReference/LineID]]></fieldDescription>
 	</field>
 	<field name="canItem" class="java.lang.String">
 		<fieldDescription><![CDATA[/DespatchAdvice/DespatchLine/DeliveredQuantity]]></fieldDescription>
@@ -110,7 +110,7 @@
 		<fieldDescription><![CDATA[/DespatchAdvice/DespatchLine/DeliveredQuantity/@unitCode]]></fieldDescription>
 	</field>
 	<field name="desItem" class="java.lang.String">
-		<fieldDescription><![CDATA[/DespatchAdvice/DespatchLine/Item/Name]]></fieldDescription>
+		<fieldDescription><![CDATA[/DespatchAdvice/DespatchLine/Item/Description]]></fieldDescription>
 	</field>
 	<field name="codItem" class="java.lang.String">
 		<fieldDescription><![CDATA[/DespatchAdvice/DespatchLine/Item/SellersItemIdentification/ID]]></fieldDescription>
@@ -125,10 +125,10 @@
 		<fieldDescription><![CDATA[/DespatchAdvice/OrderReference/OrderTypeCode/@name]]></fieldDescription>
 	</field>
 	<field name="tipDocDestinatario" class="java.lang.String">
-		<fieldDescription><![CDATA[/DespatchAdvice/DeliveryCustomerParty/CustomerAssignedAccountID/@schemeID]]></fieldDescription>
+		<fieldDescription><![CDATA[/DespatchAdvice/DeliveryCustomerParty/Party/PartyIdentification/ID/@schemeID]]></fieldDescription>
 	</field>
 	<field name="tipDocEmisor" class="java.lang.String">
-		<fieldDescription><![CDATA[/DespatchAdvice/DespatchSupplierParty/CustomerAssignedAccountID/@schemeID]]></fieldDescription>
+		<fieldDescription><![CDATA[/DespatchAdvice/DespatchSupplierParty/Party/PartyIdentification/ID/@schemeID]]></fieldDescription>
 	</field>
 	<field name="fecEmision" class="java.lang.String">
 		<fieldDescription><![CDATA[/DespatchAdvice/IssueDate]]></fieldDescription>
@@ -153,7 +153,7 @@
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[( $F{tipoGuia} == "09" ? "GUIA DE REMISIÓN REMITENTE" : "OTRA" ) +"\n"+
+				<textFieldExpression><![CDATA[( $F{tipoGuia} == "09" ? "GUIA DE REMISIÓN REMITENTE" : ( $F{tipoGuia} == "31" ? "GUIA DE REMISIÓN TRANSPORTISTA" : "OTRA" ) ) +"\n"+
 "RUC: "+$F{nroDocEmisor} + "\n"+
 $F{ID}]]></textFieldExpression>
 			</textField>

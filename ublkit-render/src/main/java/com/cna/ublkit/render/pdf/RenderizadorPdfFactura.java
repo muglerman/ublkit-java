@@ -27,6 +27,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.xml.sax.InputSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Convierte un {@link BorradorFactura} en un documento PDF.
@@ -39,6 +41,7 @@ import org.xml.sax.InputSource;
  * @since 0.1.0
  */
 public class RenderizadorPdfFactura implements RenderizadorDocumento<BorradorFactura> {
+    private static final Logger log = LoggerFactory.getLogger(RenderizadorPdfFactura.class);
 
     private final RenderizadorHtmlFactura renderizadorHtml;
     private final SerializadorXmlFactura serializadorXmlFactura;
@@ -65,8 +68,8 @@ public class RenderizadorPdfFactura implements RenderizadorDocumento<BorradorFac
         if (usarPdfSunatJasper()) {
             try {
                 return renderizarConJasperSunat(contexto);
-            } catch (Exception ignored) {
-                // Fallback seguro al render actual.
+            } catch (Exception e) {
+                log.warn("Fallo render Jasper/SUNAT para Factura-Boleta. Se usará fallback HTML: {}", e.getMessage());
             }
         }
 

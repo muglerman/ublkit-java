@@ -29,6 +29,12 @@
 			<artifactId>jasperreports</artifactId>
 			<version>6.21.3</version>
 		</dependency>
+		<!-- JasperReports usa Groovy para compilar expresiones de plantillas JRXML -->
+		<dependency>
+			<groupId>org.codehaus.groovy</groupId>
+			<artifactId>groovy</artifactId>
+			<version>3.0.21</version>
+		</dependency>
 		<dependency>
 			<groupId>jaxen</groupId>
 			<artifactId>jaxen</artifactId>

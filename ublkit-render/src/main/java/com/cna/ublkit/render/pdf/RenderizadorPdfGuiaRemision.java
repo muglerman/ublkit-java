@@ -16,6 +16,8 @@ import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.engine.data.JRXmlDataSource;
 import net.sf.jasperreports.engine.design.JasperDesign;
 import net.sf.jasperreports.engine.xml.JRXmlLoader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -33,6 +35,7 @@ import java.util.Map;
  * @since 0.1.0
  */
 public class RenderizadorPdfGuiaRemision implements RenderizadorDocumento<BorradorGuiaRemision> {
+    private static final Logger log = LoggerFactory.getLogger(RenderizadorPdfGuiaRemision.class);
 
     private final RenderizadorHtmlGuiaRemision renderizadorHtml;
     private final SerializadorXmlGuiaRemision serializadorXmlGuiaRemision;
@@ -51,8 +54,8 @@ public class RenderizadorPdfGuiaRemision implements RenderizadorDocumento<Borrad
         if (usarPdfSunatJasper()) {
             try {
                 return renderizarConJasperSunat(contexto);
-            } catch (Exception ignored) {
-                // Fallback seguro al render actual.
+            } catch (Exception e) {
+                log.warn("Fallo render Jasper/SUNAT para Guía. Se usará fallback HTML: {}", e.getMessage());
             }
         }
 
@@ -74,8 +77,17 @@ public class RenderizadorPdfGuiaRemision implements RenderizadorDocumento<Borrad
 
     private ResultadoRender renderizarConJasperSunat(ContextoRender<BorradorGuiaRemision> contexto) throws Exception {
         BorradorGuiaRemision doc = contexto.documento();
-        String xml = serializadorXmlGuiaRemision.serializar(doc);
+        String xml = xmlFuente(contexto, doc);
         String xmlSinNamespaces = removerNamespaces(xml);
+        log.info("[UBLKIT][PDF][JASPER][GUIA] serieNumero={}-{}, tipo={}, hashPresent={}, qrPresent={}, xmlBytes={}",
+                doc.getSerie(),
+                doc.getNumero(),
+                doc.getTipoComprobante(),
+                contexto.hashDocumento() != null && !contexto.hashDocumento().isBlank(),
+                contexto.qrBase64() != null && !contexto.qrBase64().isBlank(),
+                xmlSinNamespaces.getBytes(StandardCharsets.UTF_8).length);
+        log.debug("[UBLKIT][PDF][JASPER][GUIA] xmlPreview={}",
+                xmlSinNamespaces.length() > 1200 ? xmlSinNamespaces.substring(0, 1200) : xmlSinNamespaces);
 
         JasperReport principal = cargarYCompilarPlantilla("Plantilla_reporte_guiaRemitente.jrxml");
         Map<String, Object> params = new HashMap<>(ParametrosJasper.construir(contexto));
@@ -91,6 +103,16 @@ public class RenderizadorPdfGuiaRemision implements RenderizadorDocumento<Borrad
             }
         }
         throw new IllegalStateException("No se pudo generar PDF de Guía con Jasper/SUNAT");
+    }
+
+    private String xmlFuente(ContextoRender<BorradorGuiaRemision> contexto, BorradorGuiaRemision doc) {
+        Object xmlFromContext = contexto.atributosPlantilla() != null
+                ? contexto.atributosPlantilla().get("xmlFuente")
+                : null;
+        if (xmlFromContext instanceof String xml && !xml.isBlank()) {
+            return xml;
+        }
+        return serializadorXmlGuiaRemision.serializar(doc);
     }
 
     private JasperReport cargarYCompilarPlantilla(String nombrePlantilla) throws Exception {

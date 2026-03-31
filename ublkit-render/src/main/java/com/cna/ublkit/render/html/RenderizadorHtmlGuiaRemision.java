@@ -88,6 +88,7 @@ public class RenderizadorHtmlGuiaRemision implements RenderizadorDocumento<Borra
             receipt.put("startDate", doc.getEnvio().getFechaTraslado());
             receipt.put("weight", doc.getEnvio().getPesoTotal());
             receipt.put("unitCode", doc.getEnvio().getPesoTotalUnidadMedida());
+            receipt.put("packages", doc.getEnvio().getNumeroDeBultos());
             // receipt.put("handling", doc.getEnvio().getMotivoTraslado()); // Requiere resolver catálogo 20
 
             Map<String, Object> address = new HashMap<>();
