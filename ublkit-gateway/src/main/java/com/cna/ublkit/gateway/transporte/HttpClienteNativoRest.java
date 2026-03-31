@@ -14,6 +14,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.Base64;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -24,6 +25,7 @@ import java.util.regex.Pattern;
  * @since 0.1.0
  */
 public class HttpClienteNativoRest implements ClienteRest {
+    private static final Logger log = Logger.getLogger(HttpClienteNativoRest.class.getName());
 
     private final HttpClient httpClient;
 
@@ -53,6 +55,9 @@ public class HttpClienteNativoRest implements ClienteRest {
                         }
                     }
                     """.formatted(nombreZip, hashZip, base64Zip);
+            log.info(String.format(
+                    "[UBLKIT][REST] enviarGuia endpoint=%s, archivoXml=%s, archivoZip=%s, hashZip=%s, zipBytes=%s, tokenMask=%s",
+                    endpointUrl, nombreArchivo, nombreZip, hashZip, zipBytes.length, mask(tokenBearer)));
 
             // 3. Ejecutar POST
             HttpRequest request = HttpRequest.newBuilder()
@@ -64,6 +69,8 @@ public class HttpClienteNativoRest implements ClienteRest {
                     .build();
 
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            log.info(String.format("[UBLKIT][REST] enviarGuia status=%s, body=%s",
+                    response.statusCode(), sanitizeBody(response.body())));
 
             if (response.statusCode() == 200) {
                 String ticket = extraerCampoJson(response.body(), "numTicket");
@@ -86,6 +93,8 @@ public class HttpClienteNativoRest implements ClienteRest {
     @Override
     public ResultadoConsulta consultarTicket(String numeroTicket, String endpointUrl, String tokenBearer) {
         try {
+            log.info(String.format("[UBLKIT][REST] consultarTicket endpoint=%s, ticket=%s, tokenMask=%s",
+                    endpointUrl + numeroTicket, numeroTicket, mask(tokenBearer)));
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(endpointUrl + numeroTicket))
                     .timeout(Duration.ofSeconds(30))
@@ -95,6 +104,8 @@ public class HttpClienteNativoRest implements ClienteRest {
                     .build();
 
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            log.info(String.format("[UBLKIT][REST] consultarTicket status=%s, body=%s",
+                    response.statusCode(), sanitizeBody(response.body())));
 
             if (response.statusCode() == 200) {
                 // Posibles estados: 0=Aprobado, 98=En Proceso, 99=Error
@@ -135,5 +146,22 @@ public class HttpClienteNativoRest implements ClienteRest {
             return m.group(1);
         }
         return null;
+    }
+
+    private static String sanitizeBody(String body) {
+        if (body == null) {
+            return null;
+        }
+        return body.replaceAll("(\"arcCdr\"\\s*:\\s*\")([^\"]+)(\")", "$1***$3");
+    }
+
+    private static String mask(String value) {
+        if (value == null || value.isBlank()) {
+            return "null";
+        }
+        if (value.length() <= 8) {
+            return "***";
+        }
+        return value.substring(0, 4) + "***" + value.substring(value.length() - 4);
     }
 }

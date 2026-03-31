@@ -12,6 +12,7 @@ import com.cna.ublkit.gateway.transporte.ClienteSoap;
 import com.cna.ublkit.gateway.transporte.HttpClienteNativoRest;
 import com.cna.ublkit.gateway.transporte.HttpClienteNativoSoap;
 
+import java.util.logging.Logger;
 import java.util.function.Supplier;
 
 /**
@@ -22,6 +23,7 @@ import java.util.function.Supplier;
  */
 public class PasarelaSunatDefecto implements PasarelaSunat {
     private static final int MAX_INTENTOS = 3;
+    private static final Logger log = Logger.getLogger(PasarelaSunatDefecto.class.getName());
 
     private final ClienteSoap clienteSoap;
     private final ClienteRest clienteRest;
@@ -76,6 +78,9 @@ public class PasarelaSunatDefecto implements PasarelaSunat {
         String urlBase = ResolvedorEndpoints.urlRestEnvio(ambiente);
         String nameWithoutExtension = nombreArchivo.replace(".xml", "");
         String finalEndpoint = urlBase.endsWith("/") ? urlBase + nameWithoutExtension : urlBase + "/" + nameWithoutExtension;
+        log.info(String.format(
+                "[UBLKIT][GRE] ambiente=%s, archivo=%s, urlBase=%s, finalEndpoint=%s, usernameConcatenado=%s, tokenMask=%s",
+                ambiente, nombreArchivo, urlBase, finalEndpoint, mask(credenciales.getUsernameConcatenado()), mask(token)));
 
         // 3. Enviar
         return conRetry(() -> clienteRest.enviarGuia(xmlFirmado, nombreArchivo, finalEndpoint, token));
@@ -92,6 +97,9 @@ public class PasarelaSunatDefecto implements PasarelaSunat {
         String token = proveedorToken.obtenerToken(credenciales, ambiente);
         String urlBase = ResolvedorEndpoints.urlRestTicket(ambiente);
         String finalEndpoint = urlBase.endsWith("/") ? urlBase : urlBase + "/";
+        log.info(String.format(
+                "[UBLKIT][GRE] ambiente=%s, ticket=%s, urlBase=%s, finalEndpoint=%s, usernameConcatenado=%s, tokenMask=%s",
+                ambiente, ticket, urlBase, finalEndpoint + ticket, mask(credenciales.getUsernameConcatenado()), mask(token)));
         return conRetry(() -> clienteRest.consultarTicket(ticket, finalEndpoint, token));
     }
 
@@ -130,5 +138,15 @@ public class PasarelaSunatDefecto implements PasarelaSunat {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
+    }
+
+    private static String mask(String value) {
+        if (value == null || value.isBlank()) {
+            return "null";
+        }
+        if (value.length() <= 8) {
+            return "***";
+        }
+        return value.substring(0, 4) + "***" + value.substring(value.length() - 4);
     }
 }
