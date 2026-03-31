@@ -28,10 +28,10 @@ public final class ConstantesEndpoint {
     // --- REST (Guías de Remisión Electrónica - GRE) ---
 
     // Autenticación (Obtención de Token)
-    public static final String REST_BETA_TOKEN = "https://gre-test.nubefact.com/v1/clientessol/{client_id}/oauth2/token"; 
-    // ^ Usando URL de test común ya que la original de gre-test de Sunat suele dar problemas, pero la oficial documentada es:
-    // "https://gre-test.nubefact.com/v1/clientessol/{client_id}/oauth2/token" según referencia de fractuyo.
-    public static final String REST_PROD_TOKEN = "https://api-seguridad.sunat.gob.pe/v1/clientessol/{client_id}/oauth2/token";
+    // SUNAT documenta la generación del token en api-seguridad.sunat.gob.pe.
+    // El slash final es importante para respetar la forma publicada del recurso.
+    public static final String REST_BETA_TOKEN = "https://api-seguridad.sunat.gob.pe/v1/clientessol/{client_id}/oauth2/token/";
+    public static final String REST_PROD_TOKEN = "https://api-seguridad.sunat.gob.pe/v1/clientessol/{client_id}/oauth2/token/";
 
     // Envío GRE
     public static final String REST_BETA_ENVIO = "https://gre-test.nubefact.com/v1/contribuyente/gem/comprobantes/"; //+{numRucEmisor}-{codCpe}-{numSerie}-{numCpe}
