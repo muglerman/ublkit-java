@@ -4,7 +4,8 @@ PROJECT_NAME ?= ublkit-java
 PERSEO_ROOT ?= $(shell cd "$(dir $(realpath $(MAKEFILE_LIST)))" && pwd)/..
 SONAR_HOST ?= http://localhost:9000
 SONAR_ENABLED ?= false
-SONAR_TOKEN ?= sqa_36af8b04c1ecb627fad9ae71d721d15210e1a500
+SONAR_TOKEN ?= squ_a2ec42f9af0f21c87b30716902c738bc3effc428
+ENABLE_SONAR ?= false
 
 # ublkit-java modules (10 total)
 MODULES := ublkit-core ublkit-ubl ublkit-sign ublkit-gateway ublkit-render \
@@ -31,9 +32,11 @@ help:
 	@echo "  export-issues      - Export dependencies for all"
 
 build:
-	@echo "📦 Building $(PROJECT_NAME) (parent + 10 modules)..."
-	@mvn -q clean compile 2>&1 | tee /tmp/build.log | grep -E "BUILD|ERROR" || true
-	@if grep -q "ERROR" /tmp/build.log; then echo "❌ Build FAILED"; grep "ERROR" /tmp/build.log | head -3; exit 1; else echo "✅ Build successful"; fi
+	@SONAR_FLAG=''; \
+	if [ "$(ENABLE_SONAR)" = "true" ]; then SONAR_FLAG='-Dskip.sonar=false''; fi; \
+	echo "📦 Building ${PROJECT_NAME}..."; \
+	mvn -q clean verify $$SONAR_FLAG 2>&1 | tee /tmp/build.log | grep -E "BUILD|ERROR" || true; \
+	if grep -q "ERROR" /tmp/build.log; then echo "❌ Build FAILED"; exit 1; else echo "✅ Build successful"; fi
 
 test:
 	@echo "🧪 Testing $(PROJECT_NAME) (10 modules)..."
@@ -68,6 +71,7 @@ sonar-parent:
 	@echo "🔍 SonarQube: Parent (ublkit-parent)..."
 	@mkdir -p $(PERSEO_ROOT)/reports
 	@mvn -q sonar:sonar -Dsonar.host.url=$(SONAR_HOST) -Dsonar.token=$(SONAR_TOKEN) -Dsonar.projectKey=$(PROJECT_NAME)-parent 2>&1 | tee /tmp/sonar_parent.log
+ENABLE_SONAR ?= false
 	@if grep -q "ERROR\|FAILURE\|Not authorized" /tmp/sonar_parent.log; then echo "❌ FAILED"; exit 1; else echo "✅ Done"; fi
 
 sonar-modules:
@@ -80,6 +84,7 @@ sonar-modules:
 	@for module in $(MODULES); do \
 		echo "   🔍 $$module..."; \
 		mvn -q sonar:sonar -f $$module/pom.xml -Dsonar.host.url=$(SONAR_HOST) -Dsonar.token=$(SONAR_TOKEN) -Dsonar.projectKey=$(PROJECT_NAME)-$$module 2>&1 | tee /tmp/sonar_$$module.log; \
+ENABLE_SONAR ?= false
 		if grep -q "ERROR\|FAILURE\|Not authorized" /tmp/sonar_$$module.log; then \
 			echo "      ❌ FAILED"; \
 		else \

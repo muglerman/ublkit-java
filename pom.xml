@@ -28,6 +28,12 @@
 	</scm>
 	<properties>
 		<java.version>21</java.version>
+		<!-- SonarQube -->
+		<sonar.host.url>http://localhost:9000</sonar.host.url>
+		<sonar.login>squ_a2ec42f9af0f21c87b30716902c738bc3effc428</sonar.login>
+		<sonar.projectKey>com.cna:${project.artifactId}</sonar.projectKey>
+		<sonar.projectName>${project.artifactId}</sonar.projectName>
+		<skip.sonar>true</skip.sonar>
 	</properties>
 
 	<dependencies>
