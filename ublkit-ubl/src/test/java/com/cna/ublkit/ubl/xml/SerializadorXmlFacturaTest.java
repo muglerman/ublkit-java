@@ -44,7 +44,7 @@ class SerializadorXmlFacturaTest {
 
         String xml = serializador.serializar(factura);
         Document doc = parsear(xml);
-        XPath xpath = crearXPath(doc);
+        XPath xpath = crearXPath();
 
         // UBL Version
         assertEquals("2.1", evalXPath(xpath, doc, "//cbc:UBLVersionID"));
@@ -157,7 +157,7 @@ class SerializadorXmlFacturaTest {
 
         String xml = serializador.serializar(boleta);
         Document doc = parsear(xml);
-        XPath xpath = crearXPath(doc);
+        XPath xpath = crearXPath();
 
         assertEquals("03", evalXPath(xpath, doc, "//cbc:InvoiceTypeCode"));
         assertEquals("1000", evalXPath(xpath, doc, "(//cbc:Note/@languageLocaleID)[1]"));
@@ -176,7 +176,7 @@ class SerializadorXmlFacturaTest {
         }
     }
 
-    private XPath crearXPath(Document doc) {
+    private XPath crearXPath() {
         XPathFactory xpathFactory = XPathFactory.newInstance();
         XPath xpath = xpathFactory.newXPath();
         xpath.setNamespaceContext(new javax.xml.namespace.NamespaceContext() {

@@ -79,7 +79,7 @@ class SerializadorXmlGuiaRemisionTest {
         BorradorGuiaRemision guia = crearGuiaMinima();
         String xml = serializador.serializar(guia);
         Document doc = parsear(xml);
-        XPath xpath = crearXPath(doc);
+        XPath xpath = crearXPath();
 
         assertEquals("2.1", evalXPath(xpath, doc, "//cbc:UBLVersionID"));
         assertEquals("T001-123", evalXPath(xpath, doc, "//*[local-name()='DespatchAdvice']/cbc:ID"));
@@ -113,7 +113,7 @@ class SerializadorXmlGuiaRemisionTest {
         BorradorGuiaRemision guia = crearGuiaMinima();
         String xml = serializador.serializar(guia);
         Document doc = parsear(xml);
-        XPath xpath = crearXPath(doc);
+        XPath xpath = crearXPath();
 
         // HandlingCode (motivo traslado)
         assertEquals("01", evalXPath(xpath, doc, "//cac:Shipment/cbc:HandlingCode"));
@@ -268,7 +268,7 @@ class SerializadorXmlGuiaRemisionTest {
         }
     }
 
-    private XPath crearXPath(Document doc) {
+    private XPath crearXPath() {
         XPath xpath = XPathFactory.newInstance().newXPath();
         xpath.setNamespaceContext(new javax.xml.namespace.NamespaceContext() {
             private static final Map<String, String> NS = Map.of(
