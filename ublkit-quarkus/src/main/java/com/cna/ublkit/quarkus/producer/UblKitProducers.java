@@ -10,7 +10,6 @@ import com.cna.ublkit.render.pdf.RenderizadorPdfFactura;
 import com.cna.ublkit.render.pdf.RenderizadorPdfGuiaRemision;
 import com.cna.ublkit.render.pdf.RenderizadorPdfNota;
 import com.cna.ublkit.render.pdf.RenderizadorPdfResumenDiario;
-import com.cna.ublkit.sign.xml.FirmadorXml;
 import com.cna.ublkit.ubl.xml.SerializadorXmlComunicacionBaja;
 import com.cna.ublkit.ubl.xml.SerializadorXmlFactura;
 import com.cna.ublkit.ubl.xml.SerializadorXmlGuiaRemision;
@@ -38,12 +37,6 @@ import jakarta.inject.Singleton;
  */
 @ApplicationScoped
 public class UblKitProducers {
-
-    @Produces
-    @Singleton
-    public FirmadorXml produceFirmadorXml() {
-        return new FirmadorXml();
-    }
 
     @Produces
     @Singleton

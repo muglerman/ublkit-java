@@ -15,6 +15,7 @@ import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.Base64;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -73,9 +74,11 @@ public class HttpClienteNativoRest implements ClienteRest {
                         }
                     }
                     """.formatted(nombreZip, hashZip, base64Zip);
-            log.info(String.format(
-                    "[UBLKIT][REST] enviarGuia endpoint=%s, archivoXml=%s, archivoZip=%s, hashZip=%s, zipBytes=%s, tokenMask=%s",
-                    endpointUrl, nombreArchivo, nombreZip, hashZip, zipBytes.length, mask(tokenBearer)));
+            if (log.isLoggable(Level.INFO)) {
+                log.info(String.format(
+                        "[UBLKIT][REST] enviarGuia endpoint=%s, archivoXml=%s, archivoZip=%s, hashZip=%s, zipBytes=%s, tokenMask=%s",
+                        endpointUrl, nombreArchivo, nombreZip, hashZip, zipBytes.length, mask(tokenBearer)));
+            }
 
             // 3. Ejecutar POST
             HttpRequest request = HttpRequest.newBuilder()
@@ -88,8 +91,10 @@ public class HttpClienteNativoRest implements ClienteRest {
                     .build();
 
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-            log.info(String.format("[UBLKIT][REST] enviarGuia status=%s, body=%s",
-                    response.statusCode(), sanitizeBody(response.body())));
+            if (log.isLoggable(Level.INFO)) {
+                log.info(String.format("[UBLKIT][REST] enviarGuia status=%s, body=%s",
+                        response.statusCode(), sanitizeBody(response.body())));
+            }
 
             if (response.statusCode() == 200) {
                 String ticket = extraerCampoJson(response.body(), "numTicket");
@@ -104,6 +109,9 @@ public class HttpClienteNativoRest implements ClienteRest {
             return ResultadoEnvio.error(codError != null ? codError : String.valueOf(response.statusCode()),
                                         msgError != null ? msgError : response.body());
 
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return ResultadoEnvio.error("IO_ERROR", e.getMessage());
         } catch (Exception e) {
             return ResultadoEnvio.error("IO_ERROR", e.getMessage());
         }
@@ -112,8 +120,10 @@ public class HttpClienteNativoRest implements ClienteRest {
     @Override
     public ResultadoConsulta consultarTicket(String numeroTicket, String endpointUrl, String tokenBearer) {
         try {
-            log.info(String.format("[UBLKIT][REST] consultarTicket endpoint=%s, ticket=%s, tokenMask=%s",
-                    endpointUrl + numeroTicket, numeroTicket, mask(tokenBearer)));
+            if (log.isLoggable(Level.INFO)) {
+                log.info(String.format("[UBLKIT][REST] consultarTicket endpoint=%s, ticket=%s, tokenMask=%s",
+                        endpointUrl + numeroTicket, numeroTicket, mask(tokenBearer)));
+            }
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(endpointUrl + numeroTicket))
                     .timeout(Duration.ofSeconds(30))
@@ -124,8 +134,10 @@ public class HttpClienteNativoRest implements ClienteRest {
                     .build();
 
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-            log.info(String.format("[UBLKIT][REST] consultarTicket status=%s, body=%s",
-                    response.statusCode(), sanitizeBody(response.body())));
+            if (log.isLoggable(Level.INFO)) {
+                log.info(String.format("[UBLKIT][REST] consultarTicket status=%s, body=%s",
+                        response.statusCode(), sanitizeBody(response.body())));
+            }
 
             if (response.statusCode() == 200) {
                 // Posibles estados: 0=Aprobado, 98=En Proceso, 99=Error
@@ -154,6 +166,9 @@ public class HttpClienteNativoRest implements ClienteRest {
 
             return ResultadoConsulta.error(String.valueOf(response.statusCode()), response.body());
 
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return ResultadoConsulta.error("IO_ERROR", e.getMessage());
         } catch (Exception e) {
             return ResultadoConsulta.error("IO_ERROR", e.getMessage());
         }

@@ -36,7 +36,12 @@ import java.util.Collections;
  */
 public final class FirmadorXml {
 
-    public FirmadorXml() {
+    private static final String TAG_UBL_EXTENSIONS = "ext:UBLExtensions";
+    private static final String TAG_UBL_EXTENSION = "ext:UBLExtension";
+    private static final String TAG_EXTENSION_CONTENT = "ext:ExtensionContent";
+
+    private FirmadorXml() {
+        throw new UnsupportedOperationException("Clase utilitaria, no instanciable");
     }
 
     /**
@@ -123,29 +128,29 @@ public final class FirmadorXml {
     // ── Estructura UBL Extensions ────────────────────────────────
 
     private static void asegurarUBLExtensions(Document documento) {
-        NodeList lista = documento.getDocumentElement().getElementsByTagName("ext:UBLExtensions");
+        NodeList lista = documento.getDocumentElement().getElementsByTagName(TAG_UBL_EXTENSIONS);
         if (lista.item(0) == null) {
             Element documentElement = documento.getDocumentElement();
-            Node nodo = documento.createElement("ext:UBLExtensions");
+            Node nodo = documento.createElement(TAG_UBL_EXTENSIONS);
             documentElement.insertBefore(nodo, documentElement.getFirstChild());
         }
     }
 
     private static void asegurarUBLExtension(Document documento) {
-        NodeList listaExtensions = documento.getDocumentElement().getElementsByTagName("ext:UBLExtensions");
-        NodeList listaExtension = documento.getDocumentElement().getElementsByTagName("ext:UBLExtension");
+        NodeList listaExtensions = documento.getDocumentElement().getElementsByTagName(TAG_UBL_EXTENSIONS);
+        NodeList listaExtension = documento.getDocumentElement().getElementsByTagName(TAG_UBL_EXTENSION);
         if (listaExtension.item(0) == null) {
-            Node nodo = documento.createElement("ext:UBLExtension");
+            Node nodo = documento.createElement(TAG_UBL_EXTENSION);
             listaExtensions.item(0).appendChild(nodo);
         }
     }
 
     private static Node asegurarExtensionContent(Document documento) {
-        NodeList listaExtension = documento.getDocumentElement().getElementsByTagName("ext:UBLExtension");
-        NodeList listaContent = documento.getDocumentElement().getElementsByTagName("ext:ExtensionContent");
+        NodeList listaExtension = documento.getDocumentElement().getElementsByTagName(TAG_UBL_EXTENSION);
+        NodeList listaContent = documento.getDocumentElement().getElementsByTagName(TAG_EXTENSION_CONTENT);
         Node nodoContenido = listaContent.item(0);
         if (nodoContenido == null) {
-            nodoContenido = documento.createElement("ext:ExtensionContent");
+            nodoContenido = documento.createElement(TAG_EXTENSION_CONTENT);
             listaExtension.item(0).appendChild(nodoContenido);
         }
         return nodoContenido;

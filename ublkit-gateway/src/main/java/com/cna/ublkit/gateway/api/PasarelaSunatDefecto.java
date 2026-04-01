@@ -13,6 +13,7 @@ import com.cna.ublkit.gateway.transporte.HttpClienteNativoRest;
 import com.cna.ublkit.gateway.transporte.HttpClienteNativoSoap;
 
 import java.util.logging.Logger;
+import java.util.logging.Level;
 import java.util.function.Supplier;
 
 /**
@@ -74,9 +75,11 @@ public class PasarelaSunatDefecto implements PasarelaSunat {
         String urlBase = ResolvedorEndpoints.urlRestEnvio(ambiente);
         String nameWithoutExtension = nombreArchivo.replace(".xml", "");
         String finalEndpoint = urlBase.endsWith("/") ? urlBase + nameWithoutExtension : urlBase + "/" + nameWithoutExtension;
-        log.info(String.format(
-                "[UBLKIT][GRE] ambiente=%s, archivo=%s, urlBase=%s, finalEndpoint=%s, usernameConcatenado=%s, tokenMask=%s",
-                ambiente, nombreArchivo, urlBase, finalEndpoint, mask(credenciales.getUsernameConcatenado()), mask(token)));
+        if (log.isLoggable(Level.INFO)) {
+            log.info(String.format(
+                    "[UBLKIT][GRE] ambiente=%s, archivo=%s, urlBase=%s, finalEndpoint=%s, usernameConcatenado=%s, tokenMask=%s",
+                    ambiente, nombreArchivo, urlBase, finalEndpoint, mask(credenciales.getUsernameConcatenado()), mask(token)));
+        }
         return conRetry(() -> clienteRest.enviarGuia(xmlFirmado, nombreArchivo, finalEndpoint, token));
     }
 
@@ -91,9 +94,11 @@ public class PasarelaSunatDefecto implements PasarelaSunat {
         String token = proveedorToken.obtenerToken(credenciales, ambiente);
         String urlBase = ResolvedorEndpoints.urlRestTicket(ambiente);
         String finalEndpoint = urlBase.endsWith("/") ? urlBase : urlBase + "/";
-        log.info(String.format(
-                "[UBLKIT][GRE] ambiente=%s, ticket=%s, urlBase=%s, finalEndpoint=%s, usernameConcatenado=%s, tokenMask=%s",
-                ambiente, ticket, urlBase, finalEndpoint + ticket, mask(credenciales.getUsernameConcatenado()), mask(token)));
+        if (log.isLoggable(Level.INFO)) {
+            log.info(String.format(
+                    "[UBLKIT][GRE] ambiente=%s, ticket=%s, urlBase=%s, finalEndpoint=%s, usernameConcatenado=%s, tokenMask=%s",
+                    ambiente, ticket, urlBase, finalEndpoint + ticket, mask(credenciales.getUsernameConcatenado()), mask(token)));
+        }
         return conRetry(() -> clienteRest.consultarTicket(ticket, finalEndpoint, token));
     }
 
@@ -127,7 +132,7 @@ public class PasarelaSunatDefecto implements PasarelaSunat {
 
     private void dormirBackoff(int intento) {
         try {
-            long esperaMs = (long) Math.pow(2, intento - 1) * 250L;
+            long esperaMs = (long) Math.pow(2D, intento - 1D) * 250L;
             Thread.sleep(esperaMs);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();

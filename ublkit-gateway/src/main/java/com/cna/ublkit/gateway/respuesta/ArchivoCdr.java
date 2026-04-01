@@ -1,6 +1,8 @@
 package com.cna.ublkit.gateway.respuesta;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Representa el Constancia de Recepción (CDR) u otra constancia XML/ZIP
@@ -19,4 +21,40 @@ public record ArchivoCdr(
         String descripcion,
         List<String> notas
 ) {
+    public ArchivoCdr {
+        archivoBytes = archivoBytes == null ? null : archivoBytes.clone();
+        notas = notas == null ? List.of() : List.copyOf(notas);
+    }
+
+    @Override
+    public byte[] archivoBytes() {
+        return archivoBytes == null ? null : archivoBytes.clone();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (!(obj instanceof ArchivoCdr other)) return false;
+        return Arrays.equals(this.archivoBytes, other.archivoBytes)
+                && Objects.equals(this.codigoRegreso, other.codigoRegreso)
+                && Objects.equals(this.descripcion, other.descripcion)
+                && Objects.equals(this.notas, other.notas);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Arrays.hashCode(archivoBytes);
+        result = 31 * result + Objects.hash(codigoRegreso, descripcion, notas);
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "ArchivoCdr[" +
+                "archivoBytes(length)=" + (archivoBytes == null ? 0 : archivoBytes.length) +
+                ", codigoRegreso=" + codigoRegreso +
+                ", descripcion=" + descripcion +
+                ", notas=" + notas +
+                ']';
+    }
 }

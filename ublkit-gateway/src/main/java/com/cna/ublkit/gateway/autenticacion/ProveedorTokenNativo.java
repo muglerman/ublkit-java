@@ -116,6 +116,9 @@ public class ProveedorTokenNativo implements ProveedorToken {
             }
             return token;
 
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new ExcepcionUblKit("Solicitud de token interrumpida", e);
         } catch (ExcepcionUblKit e) {
             throw e;
         } catch (Exception e) {

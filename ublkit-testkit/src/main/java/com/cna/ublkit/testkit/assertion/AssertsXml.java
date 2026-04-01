@@ -3,6 +3,7 @@ package com.cna.ublkit.testkit.assertion;
 import org.junit.jupiter.api.Assertions;
 import org.w3c.dom.Document;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.xpath.XPath;
@@ -29,9 +30,7 @@ public final class AssertsXml {
      */
     public static void assertXPath(String xml, String xpathExpression, String expectedValue) {
         try {
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            factory.setNamespaceAware(false); // Ignorar namespaces para simplificar acceso en tests
-            DocumentBuilder builder = factory.newDocumentBuilder();
+            DocumentBuilder builder = crearBuilderSeguro();
             Document doc = builder.parse(new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8)));
 
             XPath xpath = XPathFactory.newInstance().newXPath();
@@ -52,9 +51,7 @@ public final class AssertsXml {
      */
     public static void assertElementExists(String xml, String xpathExpression) {
         try {
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            factory.setNamespaceAware(false);
-            DocumentBuilder builder = factory.newDocumentBuilder();
+            DocumentBuilder builder = crearBuilderSeguro();
             Document doc = builder.parse(new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8)));
 
             XPath xpath = XPathFactory.newInstance().newXPath();
@@ -64,5 +61,20 @@ public final class AssertsXml {
         } catch (Exception e) {
             Assertions.fail("Error validando existencia de XPath '" + xpathExpression + "': " + e.getMessage());
         }
+    }
+
+    private static DocumentBuilder crearBuilderSeguro() throws Exception {
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        factory.setNamespaceAware(false); // Ignorar namespaces para simplificar acceso en tests
+        factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+        factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+        factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+        factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+        factory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+        factory.setXIncludeAware(false);
+        factory.setExpandEntityReferences(false);
+        factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+        factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+        return factory.newDocumentBuilder();
     }
 }

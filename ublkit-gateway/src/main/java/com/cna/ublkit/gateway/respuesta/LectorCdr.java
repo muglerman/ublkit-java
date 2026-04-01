@@ -4,6 +4,7 @@ import com.cna.ublkit.core.error.ExcepcionUblKit;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.ByteArrayInputStream;
@@ -49,11 +50,8 @@ public final class LectorCdr {
         }
     }
 
-    private static ArchivoCdr parsearXmlCdr(byte[] zipBase, byte[] xmlBytes) throws Exception {
-        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-        dbf.setNamespaceAware(true);
-        DocumentBuilder db = dbf.newDocumentBuilder();
-        Document doc = db.parse(new ByteArrayInputStream(xmlBytes));
+    private static ArchivoCdr parsearXmlCdr(byte[] zipBase, byte[] xmlBytes) {
+        Document doc = parsearXmlSeguro(xmlBytes);
 
         // cbc:ResponseCode
         String responseCode = extraerValorNodo(doc, "cbc:ResponseCode");
@@ -69,6 +67,26 @@ public final class LectorCdr {
         }
 
         return new ArchivoCdr(zipBase, responseCode, descripcion, notas);
+    }
+
+    private static Document parsearXmlSeguro(byte[] xmlBytes) {
+        try {
+            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            dbf.setNamespaceAware(true);
+            dbf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+            dbf.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+            dbf.setFeature("http://xml.org/sax/features/external-general-entities", false);
+            dbf.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+            dbf.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+            dbf.setXIncludeAware(false);
+            dbf.setExpandEntityReferences(false);
+            dbf.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+            dbf.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+            DocumentBuilder db = dbf.newDocumentBuilder();
+            return db.parse(new ByteArrayInputStream(xmlBytes));
+        } catch (Exception e) {
+            throw new ExcepcionUblKit("Error al parsear XML del CDR: " + e.getMessage(), e);
+        }
     }
 
     private static String extraerValorNodo(Document doc, String tagName) {

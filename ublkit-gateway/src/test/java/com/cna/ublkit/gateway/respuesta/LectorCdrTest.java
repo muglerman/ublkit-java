@@ -3,8 +3,6 @@ package com.cna.ublkit.gateway.respuesta;
 import com.cna.ublkit.gateway.api.ZipHelper;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 class LectorCdrTest {

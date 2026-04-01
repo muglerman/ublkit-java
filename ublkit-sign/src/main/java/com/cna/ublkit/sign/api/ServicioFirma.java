@@ -7,7 +7,7 @@ import com.cna.ublkit.sign.xml.XmlHelper;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 
-import java.util.Base64;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Servicio de alto nivel para firmar documentos XML UBL.
@@ -59,7 +59,7 @@ public final class ServicioFirma {
             Document documentoFirmado = FirmadorXml.firmar(xml, idReferencia, certificado);
 
             byte[] bytes = XmlHelper.documentoABytes(documentoFirmado);
-            String xmlStr = new String(bytes, "ISO-8859-1");
+            String xmlStr = new String(bytes, StandardCharsets.ISO_8859_1);
             String digestValue = extraerDigestValue(documentoFirmado);
 
             return ResultadoFirma.exitoso(bytes, xmlStr, digestValue);

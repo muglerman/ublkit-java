@@ -15,7 +15,6 @@ import com.cna.ublkit.render.pdf.RenderizadorPdfFactura;
 import com.cna.ublkit.render.pdf.RenderizadorPdfGuiaRemision;
 import com.cna.ublkit.render.pdf.RenderizadorPdfNota;
 import com.cna.ublkit.render.pdf.RenderizadorPdfResumenDiario;
-import com.cna.ublkit.sign.xml.FirmadorXml;
 import com.cna.ublkit.ubl.xml.*;
 import com.cna.ublkit.validation.validador.*;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -29,12 +28,6 @@ import org.springframework.context.annotation.Bean;
  */
 @AutoConfiguration
 public class UblKitAutoConfiguration {
-
-    @Bean
-    @ConditionalOnMissingBean
-    public FirmadorXml firmadorXml() {
-        return new FirmadorXml();
-    }
 
     @Bean
     @ConditionalOnMissingBean
