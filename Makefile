@@ -86,19 +86,23 @@ all: install build test
 
 sonar-parent:
 	@if [ "$(SONAR_ENABLED)" = "true" ]; then \
+		if [ -z "$(SONAR_TOKEN)" ]; then \
+			echo "❌ ERROR: SONAR_TOKEN required"; \
+			echo "Usage: SONAR_TOKEN=xxx make sonar-parent"; \
+			exit 1; \
+		fi; \
 		echo "🔍 Running SonarQube analysis on parent..."; \
 		mvn -q sonar:sonar \
 			-Dsonar.host.url=$(SONAR_HOST) \
 			-Dsonar.projectKey=ublkit-parent \
-			$(if $(SONAR_TOKEN),-Dsonar.login=$(SONAR_TOKEN),) \
-			2>&1 | grep -E "BUILD|sonar|ERROR" || true; \
+			-Dsonar.token=$(SONAR_TOKEN) \
+			2>&1 | grep -E "BUILD|ERROR|SUCCESS" || true; \
 		echo "✅ Parent analysis complete"; \
 	else \
 		echo "⏭️  SonarQube DISABLED for parent"; \
 		echo ""; \
 		echo "Enable with:"; \
-		echo "  make sonar-parent SONAR_ENABLED=true"; \
-		echo "  make sonar-parent SONAR_ENABLED=true SONAR_HOST=http://localhost:9000"; \
+		echo "  make sonar-parent SONAR_ENABLED=true SONAR_TOKEN=xxx"; \
 	fi
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -107,6 +111,11 @@ sonar-parent:
 
 sonar-modules:
 	@if [ "$(SONAR_ENABLED)" = "true" ]; then \
+		if [ -z "$(SONAR_TOKEN)" ]; then \
+			echo "❌ ERROR: SONAR_TOKEN required"; \
+			echo "Usage: SONAR_TOKEN=xxx make sonar-modules"; \
+			exit 1; \
+		fi; \
 		echo ""; \
 		echo "🔍 Running SonarQube analysis on each module separately..."; \
 		echo "   Each module → independent project in SonarQube"; \
@@ -116,7 +125,7 @@ sonar-modules:
 			mvn -q -pl $$module sonar:sonar \
 				-Dsonar.host.url=$(SONAR_HOST) \
 				-Dsonar.projectKey=ublkit-$$module \
-				$(if $(SONAR_TOKEN),-Dsonar.login=$(SONAR_TOKEN),) \
+				-Dsonar.token=$(SONAR_TOKEN) \
 				2>&1 | grep -E "BUILD|ERROR" || true; \
 		done; \
 		echo ""; \
@@ -125,8 +134,7 @@ sonar-modules:
 		echo "⏭️  SonarQube DISABLED for modules"; \
 		echo ""; \
 		echo "Enable with:"; \
-		echo "  make sonar-modules SONAR_ENABLED=true"; \
-		echo "  make sonar-modules SONAR_ENABLED=true SONAR_HOST=http://localhost:9000"; \
+		echo "  make sonar-modules SONAR_ENABLED=true SONAR_TOKEN=xxx"; \
 	fi
 
 # ════════════════════════════════════════════════════════════════════════════
