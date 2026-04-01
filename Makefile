@@ -4,7 +4,7 @@
 PROJECT_NAME ?= ublkit-java
 PERSEO_ROOT ?= $(shell git rev-parse --show-toplevel 2>/dev/null || echo ../..)
 SONAR_HOST ?= http://localhost:9000
-SONAR_TOKEN ?=
+SONAR_TOKEN ?= sqa_36af8b04c1ecb627fad9ae71d721d15210e1a500
 SONAR_ENABLED ?= false
 
 # UBLKit modules
