@@ -1,175 +1,108 @@
-.PHONY: help build clean install test sonar sonar-parent sonar-modules export-issues \
-         rebuild all package test-verbose
+.PHONY: help build clean install test sonar sonar-parent sonar-modules export-issues rebuild all package test-verbose
 
 PROJECT_NAME ?= ublkit-java
-PERSEO_ROOT ?= $(shell git rev-parse --show-toplevel 2>/dev/null || echo ../..)
+PERSEO_ROOT ?= $(shell cd "$(dir $(realpath $(MAKEFILE_LIST)))" && pwd)/..
 SONAR_HOST ?= http://localhost:9000
-SONAR_TOKEN ?= sqa_36af8b04c1ecb627fad9ae71d721d15210e1a500
 SONAR_ENABLED ?= false
+SONAR_TOKEN ?= sqa_36af8b04c1ecb627fad9ae71d721d15210e1a500
 
-# UBLKit modules
+# ublkit-java modules (10 total)
 MODULES := ublkit-core ublkit-ubl ublkit-sign ublkit-gateway ublkit-render \
            ublkit-validation ublkit-catalogs ublkit-testkit ublkit-spring-boot-starter ublkit-quarkus
 
 help:
 	@echo "╔════════════════════════════════════════════════════════════════╗"
-	@echo "║  $(PROJECT_NAME) - Multi-Module Build System                   ║"
+	@echo "║  $(PROJECT_NAME) - Multi-Module Build (10 modules)            ║"
 	@echo "╚════════════════════════════════════════════════════════════════╝"
 	@echo ""
-	@echo "🔨 BUILD TARGETS"
-	@echo "──────────────────────────────────────────────────────────────────"
-	@echo "  build             - Compile all modules"
-	@echo "  test              - Run tests for all modules"
-	@echo "  test-verbose      - Run tests with full output"
-	@echo "  clean             - Clean all build artifacts"
-	@echo "  install           - Install all dependencies"
-	@echo "  package           - Package all modules (JAR/WAR)"
-	@echo "  rebuild           - Clean + build"
-	@echo "  all               - Install + build + test"
+	@echo "🔨 BUILD (all modules)"
+	@echo "  build              - Compile parent + all 10 modules"
+	@echo "  test               - Run tests for all modules"
+	@echo "  test-verbose       - Verbose test output"
+	@echo "  clean              - Clean all artifacts"
+	@echo "  install            - Install all modules"
+	@echo "  package            - Package all JARs"
+	@echo "  rebuild            - Clean + build"
 	@echo ""
-	@echo "🔍 SONARQUBE ANALYSIS (Multi-Module Special)"
-	@echo "──────────────────────────────────────────────────────────────────"
-	@echo "  sonar             - Analyze parent + each module separately"
-	@echo "  sonar-parent      - Analyze only parent"
-	@echo "  sonar-modules     - Analyze each module as independent project"
-	@echo ""
-	@echo "📊 REPORTING"
-	@echo "──────────────────────────────────────────────────────────────────"
-	@echo "  export-issues     - Export dependency trees for all modules"
-	@echo ""
-	@echo "📦 MODULES (10 total)"
-	@echo "──────────────────────────────────────────────────────────────────"
-	@for m in $(MODULES); do echo "   • $$m"; done
-	@echo ""
-	@echo "💡 EXAMPLES"
-	@echo "──────────────────────────────────────────────────────────────────"
-	@echo "  make build                                    # Build all"
-	@echo "  make test                                     # Test all"
-	@echo "  make sonar-modules SONAR_ENABLED=true         # Modules → SQ"
-	@echo "  make sonar SONAR_ENABLED=true SONAR_HOST=http://localhost:9000"
-	@echo "  make export-issues                            # Export reports"
+	@echo "📊 ANALYSIS & REPORTING"
+	@echo "  sonar              - SonarQube: parent + each module (full)"
+	@echo "  sonar-parent       - SonarQube: only parent"
+	@echo "  sonar-modules      - SonarQube: each of 10 modules separately"
+	@echo "  export-issues      - Export dependencies for all"
 
 build:
-	@echo "📦 Building $(PROJECT_NAME) (all modules)..."
-	@mvn -q clean compile 2>&1 | grep -E "BUILD|ERROR" || echo "✅ Build successful"
+	@echo "📦 Building $(PROJECT_NAME) (parent + 10 modules)..."
+	@mvn -q clean compile 2>&1 | tee /tmp/build.log | grep -E "BUILD|ERROR" || true
+	@if grep -q "ERROR" /tmp/build.log; then echo "❌ Build FAILED"; grep "ERROR" /tmp/build.log | head -3; exit 1; else echo "✅ Build successful"; fi
 
 test:
-	@echo "🧪 Testing $(PROJECT_NAME) (all modules)..."
-	@mvn -q test 2>&1 | grep -E "BUILD|ERROR|Tests run:|Failures:|Errors:" | tail -10 || echo "✅ All tests passed"
+	@echo "🧪 Testing $(PROJECT_NAME) (10 modules)..."
+	@mvn -q test 2>&1 | grep -E "BUILD|ERROR|Tests run:|Failures:" | tail -10 || echo "✅ Tests passed"
 
 test-verbose:
-	@echo "🧪 Testing $(PROJECT_NAME) (verbose output)..."
+	@echo "🧪 Testing (verbose)..."
 	@mvn test
 
 clean:
-	@echo "🧹 Cleaning $(PROJECT_NAME)..."
-	@mvn -q clean
-	@echo "✅ Cleanup complete"
+	@echo "🧹 Cleaning..."; mvn -q clean; echo "✅ Done"
 
 install:
-	@echo "📥 Installing dependencies..."
-	@mvn -q install -DskipTests 2>&1 | grep -E "BUILD|ERROR" || echo "✅ Installed"
+	@echo "📥 Installing..."; mvn -q install -DskipTests 2>&1 | grep -E "BUILD|ERROR" || echo "✅ Done"
 
 package:
-	@echo "📦 Packaging all modules..."
-	@mvn -q package -DskipTests 2>&1 | grep -E "BUILD|ERROR" || echo "✅ Packaged"
+	@echo "📦 Packaging..."; mvn -q package -DskipTests 2>&1 | grep -E "BUILD|ERROR" || echo "✅ Done"
 
 rebuild: clean build
-	@echo "✅ Rebuild complete"
 
 all: install build test
-	@echo ""; echo "🎉 Complete for $(PROJECT_NAME) (all modules)"
+	@echo "🎉 Complete"
 
-# ════════════════════════════════════════════════════════════════════════════
-# SONARQUBE - Parent Project Only
-# ════════════════════════════════════════════════════════════════════════════
+################################################################################
+# SonarQube Analysis
+################################################################################
 
 sonar-parent:
-	@if [ "$(SONAR_ENABLED)" = "true" ]; then \
-		if [ -z "$(SONAR_TOKEN)" ]; then \
-			echo "❌ ERROR: SONAR_TOKEN required"; \
-			echo "Usage: SONAR_TOKEN=xxx make sonar-parent"; \
-			exit 1; \
-		fi; \
-		echo "🔍 Running SonarQube analysis on parent..."; \
-		mvn -q sonar:sonar \
-			-Dsonar.host.url=$(SONAR_HOST) \
-			-Dsonar.projectKey=ublkit-parent \
-			-Dsonar.token=$(SONAR_TOKEN) \
-			2>&1 | grep -E "BUILD|ERROR|SUCCESS" || true; \
-		echo "✅ Parent analysis complete"; \
-	else \
-		echo "⏭️  SonarQube DISABLED for parent"; \
-		echo ""; \
-		echo "Enable with:"; \
-		echo "  make sonar-parent SONAR_ENABLED=true SONAR_TOKEN=xxx"; \
+	@if [ "$(SONAR_ENABLED)" != "true" ]; then \
+		echo "⏭️  SonarQube disabled"; exit 0; \
 	fi
-
-# ════════════════════════════════════════════════════════════════════════════
-# SONARQUBE - Each Module as Separate Project
-# ════════════════════════════════════════════════════════════════════════════
+	@echo "🔍 SonarQube: Parent (ublkit-parent)..."
+	@mkdir -p $(PERSEO_ROOT)/reports
+	@mvn -q sonar:sonar -Dsonar.host.url=$(SONAR_HOST) -Dsonar.token=$(SONAR_TOKEN) -Dsonar.projectKey=$(PROJECT_NAME)-parent 2>&1 | tee /tmp/sonar_parent.log
+	@if grep -q "ERROR\|FAILURE\|Not authorized" /tmp/sonar_parent.log; then echo "❌ FAILED"; exit 1; else echo "✅ Done"; fi
 
 sonar-modules:
-	@if [ "$(SONAR_ENABLED)" = "true" ]; then \
-		if [ -z "$(SONAR_TOKEN)" ]; then \
-			echo "❌ ERROR: SONAR_TOKEN required"; \
-			echo "Usage: SONAR_TOKEN=xxx make sonar-modules"; \
-			exit 1; \
-		fi; \
-		echo ""; \
-		echo "🔍 Running SonarQube analysis on each module separately..."; \
-		echo "   Each module → independent project in SonarQube"; \
-		echo ""; \
-		for module in $(MODULES); do \
-			echo "   📍 $$module → ublkit-$$module"; \
-			mvn -q -pl $$module sonar:sonar \
-				-Dsonar.host.url=$(SONAR_HOST) \
-				-Dsonar.projectKey=ublkit-$$module \
-				-Dsonar.token=$(SONAR_TOKEN) \
-				2>&1 | grep -E "BUILD|ERROR" || true; \
-		done; \
-		echo ""; \
-		echo "✅ Module analysis complete"; \
-	else \
-		echo "⏭️  SonarQube DISABLED for modules"; \
-		echo ""; \
-		echo "Enable with:"; \
-		echo "  make sonar-modules SONAR_ENABLED=true SONAR_TOKEN=xxx"; \
+	@if [ "$(SONAR_ENABLED)" != "true" ]; then \
+		echo "⏭️  SonarQube disabled"; exit 0; \
 	fi
-
-# ════════════════════════════════════════════════════════════════════════════
-# SONARQUBE - Parent + All Modules
-# ════════════════════════════════════════════════════════════════════════════
-
-sonar: sonar-parent sonar-modules
-	@echo ""; echo "╔════════════════════════════════════════════════╗"; \
-	echo "║  ✅ SonarQube Analysis Complete                ║"; \
-	echo "║  📦 Parent + 10 modules analyzed              ║"; \
-	echo "╚════════════════════════════════════════════════╝"
-
-# ════════════════════════════════════════════════════════════════════════════
-# EXPORT ISSUES - Dependencies and Vulnerabilities
-# ════════════════════════════════════════════════════════════════════════════
-
-export-issues:
-	@echo "📊 Exporting dependencies & vulnerabilities..."
+	@echo "🔍 SonarQube: Analyzing 10 modules separately..."
 	@mkdir -p $(PERSEO_ROOT)/reports
 	@echo ""
-	@echo "📋 Parent Module:"
-	@mvn -q dependency:tree > $(PERSEO_ROOT)/reports/$(PROJECT_NAME)-parent-dependencies.txt 2>&1
-	@echo "   ✅ $(PROJECT_NAME)-parent-dependencies.txt"
-	@echo ""
-	@echo "📋 Individual Modules:"
 	@for module in $(MODULES); do \
-		mvn -q -pl $$module dependency:tree > $(PERSEO_ROOT)/reports/$(PROJECT_NAME)-$$module-dependencies.txt 2>&1; \
-		echo "   ✅ $(PROJECT_NAME)-$$module-dependencies.txt"; \
+		echo "   🔍 $$module..."; \
+		mvn -q sonar:sonar -f $$module/pom.xml -Dsonar.host.url=$(SONAR_HOST) -Dsonar.token=$(SONAR_TOKEN) -Dsonar.projectKey=$(PROJECT_NAME)-$$module 2>&1 | tee /tmp/sonar_$$module.log; \
+		if grep -q "ERROR\|FAILURE\|Not authorized" /tmp/sonar_$$module.log; then \
+			echo "      ❌ FAILED"; \
+		else \
+			echo "      ✅ OK"; \
+		fi; \
 	done
 	@echo ""
-	@echo "📊 Creating manifest..."
-	@echo "UBLKit-Java Multi-Module Project" > $(PERSEO_ROOT)/reports/$(PROJECT_NAME)-manifest.txt
-	@echo "Generated: $$(date)" >> $(PERSEO_ROOT)/reports/$(PROJECT_NAME)-manifest.txt
-	@echo "" >> $(PERSEO_ROOT)/reports/$(PROJECT_NAME)-manifest.txt
-	@echo "Modules (10):" >> $(PERSEO_ROOT)/reports/$(PROJECT_NAME)-manifest.txt
-	@for m in $(MODULES); do echo "  - $$m" >> $(PERSEO_ROOT)/reports/$(PROJECT_NAME)-manifest.txt; done
+	@echo "✅ All modules analyzed"
+
+sonar: sonar-parent sonar-modules
 	@echo ""
-	@echo "✅ All reports exported to $(PERSEO_ROOT)/reports/"
+	@echo "✅ Full SonarQube analysis complete (parent + 10 modules)"
+
+export-issues:
+	@echo "📊 Exporting $(PROJECT_NAME) (parent + 10 modules)..."
+	@mkdir -p $(PERSEO_ROOT)/reports
+	@echo ""
+	@echo "   📋 Parent..."
+	@mvn -q dependency:tree > $(PERSEO_ROOT)/reports/$(PROJECT_NAME)-parent-dependencies.txt 2>&1
+	@echo "   📋 Modules:"
+	@for module in $(MODULES); do \
+		echo "      • $$module"; \
+		mvn -q dependency:tree -f $$module/pom.xml > $(PERSEO_ROOT)/reports/$(PROJECT_NAME)-$$module-dependencies.txt 2>&1; \
+	done
+	@echo ""
+	@echo "✅ All reports exported"
