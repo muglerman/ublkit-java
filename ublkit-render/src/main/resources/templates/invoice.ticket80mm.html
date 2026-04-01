@@ -139,7 +139,7 @@ Height: 170mm
 				<p><strong>Documento Ref.:</strong> {{ invoice.relatedDocument.document }}</p>
 			{% endif %}
 				<p><strong>Tipo de Moneda:</strong> {{ invoice.currency }}</p>
-			{% if invoice.reference %}
+			{% if invoice.reference.order %}
 				<!-- generado tal vez por software contable -->
 				<p><strong>N° de Operación:</strong> {{ invoice.reference.order }} - {{ invoice.reference.note }}</p>
 			{% endif %}

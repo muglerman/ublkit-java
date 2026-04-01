@@ -70,18 +70,18 @@
     </div>
   </div>
 
-  {% if receipt.thirdParty != null or receipt.buyer != null %}
+  {% if receipt.thirdParty.name or receipt.buyer.name %}
   <div class="section">
     <p class="title">Actores Adicionales</p>
     <div class="card grid">
       <div class="col">
-        {% if receipt.thirdParty %}
+        {% if receipt.thirdParty.name %}
         <p><strong>Tercero:</strong> {{ receipt.thirdParty.name }}</p>
         <p>{{ receipt.thirdParty.documentType }} {{ receipt.thirdParty.identity }}</p>
         {% endif %}
       </div>
       <div class="col">
-        {% if receipt.buyer %}
+        {% if receipt.buyer.name %}
         <p><strong>Comprador:</strong> {{ receipt.buyer.name }}</p>
         <p>{{ receipt.buyer.documentType }} {{ receipt.buyer.identity }}</p>
         {% endif %}
@@ -101,15 +101,15 @@
         <p><strong>Manifiesto:</strong> {{ receipt.manifest }}</p>
       </div>
       <div class="col">
-        {% if receipt.address and receipt.address.origin %}<p><strong>Partida:</strong> {{ receipt.address.origin.ubigeo }} - {{ receipt.address.origin.line }}</p><p class="small">Local: {{ receipt.address.origin.code }} | RUC: {{ receipt.address.origin.ruc }}</p>{% endif %}
-        {% if receipt.address and receipt.address.delivery %}<p><strong>Llegada:</strong> {{ receipt.address.delivery.ubigeo }} - {{ receipt.address.delivery.line }}</p><p class="small">Local: {{ receipt.address.delivery.code }} | RUC: {{ receipt.address.delivery.ruc }}</p>{% endif %}
+        {% if receipt.address.origin %}<p><strong>Partida:</strong> {{ receipt.address.origin.ubigeo }} - {{ receipt.address.origin.line }}</p><p class="small">Local: {{ receipt.address.origin.code }} | RUC: {{ receipt.address.origin.ruc }}</p>{% endif %}
+        {% if receipt.address.delivery %}<p><strong>Llegada:</strong> {{ receipt.address.delivery.ubigeo }} - {{ receipt.address.delivery.line }}</p><p class="small">Local: {{ receipt.address.delivery.code }} | RUC: {{ receipt.address.delivery.ruc }}</p>{% endif %}
         <p><strong>Vehiculo M1/L:</strong> {% if receipt.lightVehicle %}SI{% else %}NO{% endif %}</p>
         {% if receipt.weightReason %}<p><strong>Sustento peso:</strong> {{ receipt.weightReason }}</p>{% endif %}
       </div>
     </div>
   </div>
 
-  {% if receipt.carrier %}
+  {% if receipt.carrier.name %}
   <div class="section">
     <p class="title">Transportista</p>
     <div class="card grid">
@@ -213,7 +213,7 @@
       <span class="pill">Representacion impresa</span>
       <p class="small" style="margin-top:6px;">Version GRE: {{ receipt.version }}</p>
       <p class="small" style="margin-top:6px;">Consulte la validez del documento en SUNAT.</p>
-      {% if receipt.signer %}<p class="small">Firmante: {{ receipt.signer.identity }} {{ receipt.signer.name }}</p>{% endif %}
+      {% if receipt.signer.identity %}<p class="small">Firmante: {{ receipt.signer.identity }} {{ receipt.signer.name }}</p>{% endif %}
       <p class="small">Hash: {{ receipt.hash }}</p>
     </div>
   </div>
