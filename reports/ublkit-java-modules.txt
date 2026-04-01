@@ -1,0 +1,10 @@
+   - ublkit-core
+   - ublkit-ubl
+   - ublkit-sign
+   - ublkit-gateway
+   - ublkit-render
+   - ublkit-validation
+   - ublkit-catalogs
+   - ublkit-testkit
+   - ublkit-spring-boot-starter
+   - ublkit-quarkus
