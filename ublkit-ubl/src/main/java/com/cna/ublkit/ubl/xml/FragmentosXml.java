@@ -29,6 +29,27 @@ final class FragmentosXml {
     private FragmentosXml() {
     }
 
+    private static final String TAG_PARTY_IDENTIFICATION = "PartyIdentification";
+    private static final String TAG_TAX_TOTAL = "TaxTotal";
+    private static final String TAG_TAX_SUBTOTAL = "TaxSubtotal";
+    private static final String TAG_TAXABLE_AMOUNT = "TaxableAmount";
+    private static final String TAG_TAX_AMOUNT = "TaxAmount";
+    private static final String TAG_TAX_CATEGORY = "TaxCategory";
+    private static final String TAG_TAX_SCHEME = "TaxScheme";
+    private static final String TAG_TAX_TYPE_CODE = "TaxTypeCode";
+    private static final String ATTR_SCHEME_ID = "schemeID";
+    private static final String ATTR_SCHEME_NAME = "schemeName";
+    private static final String ATTR_SCHEME_AGENCY_NAME = "schemeAgencyName";
+    private static final String ATTR_LIST_AGENCY_NAME = "listAgencyName";
+    private static final String ATTR_LIST_NAME = "listName";
+    private static final String VALUE_DOC_IDENTIDAD = "Documento de Identidad";
+    private static final String VALUE_PE_SUNAT = "PE:SUNAT";
+    private static final String VALUE_UN_ECE_5305 = "UN/ECE 5305";
+    private static final String VALUE_TAX_CATEGORY_IDENTIFIER = "Tax Category Identifier";
+    private static final String VALUE_UN_ECE_5153 = "UN/ECE 5153";
+    private static final String VALUE_CODIGO_TRIBUTOS = "Codigo de tributos";
+    private static final String VALUE_UN_ECE_AGENCY = "United Nations Economic Commission for Europe";
+
     // ── UBL Extensions ───────────────────────────────────────────
 
     static void agregarExtensiones(Document doc, Element raiz) {
@@ -65,7 +86,7 @@ final class FragmentosXml {
         signature.appendChild(cbc(doc, "ID", firmante.ruc()));
 
         Element signatoryParty = cac(doc, "SignatoryParty");
-        Element partyId = cac(doc, "PartyIdentification");
+        Element partyId = cac(doc, TAG_PARTY_IDENTIFICATION);
         partyId.appendChild(cbc(doc, "ID", firmante.ruc()));
         signatoryParty.appendChild(partyId);
 
@@ -92,11 +113,11 @@ final class FragmentosXml {
         Element party = cac(doc, "Party");
 
         // PartyIdentification
-        Element partyId = cac(doc, "PartyIdentification");
+        Element partyId = cac(doc, TAG_PARTY_IDENTIFICATION);
         Element id = cbcConAtributos(doc, "ID", emisor.ruc(),
-                "schemeID", "6",
-                "schemeName", "Documento de Identidad",
-                "schemeAgencyName", "PE:SUNAT",
+                ATTR_SCHEME_ID, "6",
+                ATTR_SCHEME_NAME, VALUE_DOC_IDENTIDAD,
+                ATTR_SCHEME_AGENCY_NAME, VALUE_PE_SUNAT,
                 "schemeURI", "urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo06");
         partyId.appendChild(id);
         party.appendChild(partyId);
@@ -136,11 +157,11 @@ final class FragmentosXml {
         Element party = cac(doc, "Party");
 
         // PartyIdentification
-        Element partyId = cac(doc, "PartyIdentification");
+        Element partyId = cac(doc, TAG_PARTY_IDENTIFICATION);
         Element id = cbcConAtributos(doc, "ID", receptor.numDocIdentidad(),
-                "schemeID", receptor.tipoDocIdentidad(),
-                "schemeName", "Documento de Identidad",
-                "schemeAgencyName", "PE:SUNAT",
+                ATTR_SCHEME_ID, receptor.tipoDocIdentidad(),
+                ATTR_SCHEME_NAME, VALUE_DOC_IDENTIDAD,
+                ATTR_SCHEME_AGENCY_NAME, VALUE_PE_SUNAT,
                 "schemeURI", "urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo06");
         partyId.appendChild(id);
         party.appendChild(partyId);
@@ -239,8 +260,8 @@ final class FragmentosXml {
     static void agregarTotalImpuestos(Document doc, Element raiz, TotalImpuestos imp, String moneda) {
         if (imp == null) return;
 
-        Element taxTotal = cac(doc, "TaxTotal");
-        taxTotal.appendChild(cbcMonto(doc, "TaxAmount", imp.total(), moneda));
+        Element taxTotal = cac(doc, TAG_TAX_TOTAL);
+        taxTotal.appendChild(cbcMonto(doc, TAG_TAX_AMOUNT, imp.total(), moneda));
 
         // ISC
         if (imp.iscImporte() != null) {
@@ -254,7 +275,7 @@ final class FragmentosXml {
         if (imp.gravadoBaseImponible() != null) {
             taxTotal.appendChild(crearSubtotalImpuesto(doc, moneda,
                     imp.gravadoBaseImponible(), imp.gravadoImporte(),
-                    "S", "UN/ECE 5305", "Tax Category Identifier",
+                    "S", VALUE_UN_ECE_5305, VALUE_TAX_CATEGORY_IDENTIFIER,
                     "1000", "IGV", "VAT"));
         }
 
@@ -262,7 +283,7 @@ final class FragmentosXml {
         if (imp.inafectoBaseImponible() != null) {
             taxTotal.appendChild(crearSubtotalImpuesto(doc, moneda,
                     imp.inafectoBaseImponible(), imp.inafectoImporte(),
-                    "S", "UN/ECE 5305", "Tax Category Identifier",
+                    "S", VALUE_UN_ECE_5305, VALUE_TAX_CATEGORY_IDENTIFIER,
                     "9998", "INA", "FRE"));
         }
 
@@ -270,7 +291,7 @@ final class FragmentosXml {
         if (imp.exoneradoBaseImponible() != null) {
             taxTotal.appendChild(crearSubtotalImpuesto(doc, moneda,
                     imp.exoneradoBaseImponible(), imp.exoneradoImporte(),
-                    "S", "UN/ECE 5305", "Tax Category Identifier",
+                    "S", VALUE_UN_ECE_5305, VALUE_TAX_CATEGORY_IDENTIFIER,
                     "9997", "EXO", "VAT"));
         }
 
@@ -278,7 +299,7 @@ final class FragmentosXml {
         if (imp.gratuitoBaseImponible() != null) {
             taxTotal.appendChild(crearSubtotalImpuesto(doc, moneda,
                     imp.gratuitoBaseImponible(), imp.gratuitoImporte(),
-                    "S", "UN/ECE 5305", "Tax Category Identifier",
+                    "S", VALUE_UN_ECE_5305, VALUE_TAX_CATEGORY_IDENTIFIER,
                     "9996", "GRA", "FRE"));
         }
 
@@ -294,7 +315,7 @@ final class FragmentosXml {
         if (imp.ivapBaseImponible() != null) {
             taxTotal.appendChild(crearSubtotalImpuesto(doc, moneda,
                     imp.ivapBaseImponible(), imp.ivapImporte(),
-                    "S", "UN/ECE 5305", "Tax Category Identifier",
+                    "S", VALUE_UN_ECE_5305, VALUE_TAX_CATEGORY_IDENTIFIER,
                     "1016", "IVAP", "VAT"));
         }
 
@@ -310,29 +331,29 @@ final class FragmentosXml {
                                                   BigDecimal base, BigDecimal monto,
                                                   String catId, String catSchemeId, String catSchemeName,
                                                   String tribCode, String tribName, String tribTypeCode) {
-        Element subtotal = cac(doc, "TaxSubtotal");
+        Element subtotal = cac(doc, TAG_TAX_SUBTOTAL);
         if (base != null) {
-            subtotal.appendChild(cbcMonto(doc, "TaxableAmount", base, moneda));
+            subtotal.appendChild(cbcMonto(doc, TAG_TAXABLE_AMOUNT, base, moneda));
         }
-        subtotal.appendChild(cbcMonto(doc, "TaxAmount", monto, moneda));
+        subtotal.appendChild(cbcMonto(doc, TAG_TAX_AMOUNT, monto, moneda));
 
-        Element category = cac(doc, "TaxCategory");
+        Element category = cac(doc, TAG_TAX_CATEGORY);
         if (catId != null) {
             Element categoryId = cbcConAtributos(doc, "ID", catId,
-                    "schemeAgencyName", "United Nations Economic Commission for Europe",
-                    "schemeID", catSchemeId,
-                    "schemeName", catSchemeName);
+                    ATTR_SCHEME_AGENCY_NAME, VALUE_UN_ECE_AGENCY,
+                    ATTR_SCHEME_ID, catSchemeId,
+                    ATTR_SCHEME_NAME, catSchemeName);
             category.appendChild(categoryId);
         }
 
-        Element scheme = cac(doc, "TaxScheme");
+        Element scheme = cac(doc, TAG_TAX_SCHEME);
         Element schemeId = cbcConAtributos(doc, "ID", tribCode,
-                "schemeAgencyName", "PE:SUNAT",
-                "schemeID", "UN/ECE 5153",
-                "schemeName", "Codigo de tributos");
+                ATTR_SCHEME_AGENCY_NAME, VALUE_PE_SUNAT,
+                ATTR_SCHEME_ID, VALUE_UN_ECE_5153,
+                ATTR_SCHEME_NAME, VALUE_CODIGO_TRIBUTOS);
         scheme.appendChild(schemeId);
         scheme.appendChild(cbc(doc, "Name", tribName));
-        scheme.appendChild(cbc(doc, "TaxTypeCode", tribTypeCode));
+        scheme.appendChild(cbc(doc, TAG_TAX_TYPE_CODE, tribTypeCode));
         category.appendChild(scheme);
 
         subtotal.appendChild(category);
@@ -340,22 +361,22 @@ final class FragmentosXml {
     }
 
     private static Element crearSubtotalIcbper(Document doc, String moneda, BigDecimal monto) {
-        Element subtotal = cac(doc, "TaxSubtotal");
-        subtotal.appendChild(cbcMonto(doc, "TaxAmount", monto, moneda));
+        Element subtotal = cac(doc, TAG_TAX_SUBTOTAL);
+        subtotal.appendChild(cbcMonto(doc, TAG_TAX_AMOUNT, monto, moneda));
 
-        Element category = cac(doc, "TaxCategory");
+        Element category = cac(doc, TAG_TAX_CATEGORY);
         category.appendChild(cbcConAtributos(doc, "ID", "S",
-                "schemeAgencyName", "United Nations Economic Commission for Europe",
-                "schemeID", "UN/ECE 5305",
-                "schemeName", "Tax Category Identifier"));
+                ATTR_SCHEME_AGENCY_NAME, VALUE_UN_ECE_AGENCY,
+                ATTR_SCHEME_ID, VALUE_UN_ECE_5305,
+                ATTR_SCHEME_NAME, VALUE_TAX_CATEGORY_IDENTIFIER));
 
-        Element scheme = cac(doc, "TaxScheme");
+        Element scheme = cac(doc, TAG_TAX_SCHEME);
         scheme.appendChild(cbcConAtributos(doc, "ID", "7152",
-                "schemeAgencyName", "PE:SUNAT",
-                "schemeID", "UN/ECE 5153",
-                "schemeName", "Codigo de tributos"));
+                ATTR_SCHEME_AGENCY_NAME, VALUE_PE_SUNAT,
+                ATTR_SCHEME_ID, VALUE_UN_ECE_5153,
+                ATTR_SCHEME_NAME, VALUE_CODIGO_TRIBUTOS));
         scheme.appendChild(cbc(doc, "Name", "ICBPER"));
-        scheme.appendChild(cbc(doc, "TaxTypeCode", "OTH"));
+        scheme.appendChild(cbc(doc, TAG_TAX_TYPE_CODE, "OTH"));
         category.appendChild(scheme);
 
         subtotal.appendChild(category);
@@ -365,25 +386,25 @@ final class FragmentosXml {
     // ── Línea de detalle (TaxTotal de la línea) ──────────────────
 
     static void agregarImpuestosLinea(Document doc, Element lineaXml, LineaDetalle linea, String moneda) {
-        Element taxTotal = cac(doc, "TaxTotal");
-        taxTotal.appendChild(cbcMonto(doc, "TaxAmount", orZero(linea.getTotalImpuestos()), moneda));
+        Element taxTotal = cac(doc, TAG_TAX_TOTAL);
+        taxTotal.appendChild(cbcMonto(doc, TAG_TAX_AMOUNT, orZero(linea.getTotalImpuestos()), moneda));
 
         // ISC
         if (linea.getIsc() != null) {
-            Element subtotal = cac(doc, "TaxSubtotal");
-            subtotal.appendChild(cbcMonto(doc, "TaxableAmount", orZero(linea.getIscBaseImponible()), moneda));
-            subtotal.appendChild(cbcMonto(doc, "TaxAmount", linea.getIsc(), moneda));
+            Element subtotal = cac(doc, TAG_TAX_SUBTOTAL);
+            subtotal.appendChild(cbcMonto(doc, TAG_TAXABLE_AMOUNT, orZero(linea.getIscBaseImponible()), moneda));
+            subtotal.appendChild(cbcMonto(doc, TAG_TAX_AMOUNT, linea.getIsc(), moneda));
 
-            Element category = cac(doc, "TaxCategory");
+            Element category = cac(doc, TAG_TAX_CATEGORY);
             category.appendChild(cbcConAtributos(doc, "Percent",
                     escalar(linea.getTasaIsc() != null ? linea.getTasaIsc().multiply(new BigDecimal("100")) : BigDecimal.ZERO)));
             if (linea.getIscTipo() != null) {
                 category.appendChild(cbc(doc, "TierRange", linea.getIscTipo()));
             }
-            Element scheme = cac(doc, "TaxScheme");
+            Element scheme = cac(doc, TAG_TAX_SCHEME);
             scheme.appendChild(cbc(doc, "ID", "2000"));
             scheme.appendChild(cbc(doc, "Name", "ISC"));
-            scheme.appendChild(cbc(doc, "TaxTypeCode", "EXC"));
+            scheme.appendChild(cbc(doc, TAG_TAX_TYPE_CODE, "EXC"));
             category.appendChild(scheme);
 
             subtotal.appendChild(category);
@@ -392,30 +413,30 @@ final class FragmentosXml {
 
         // IGV
         {
-            Element subtotal = cac(doc, "TaxSubtotal");
-            subtotal.appendChild(cbcMonto(doc, "TaxableAmount", orZero(linea.getIgvBaseImponible()), moneda));
-            subtotal.appendChild(cbcMonto(doc, "TaxAmount", orZero(linea.getIgv()), moneda));
+            Element subtotal = cac(doc, TAG_TAX_SUBTOTAL);
+            subtotal.appendChild(cbcMonto(doc, TAG_TAXABLE_AMOUNT, orZero(linea.getIgvBaseImponible()), moneda));
+            subtotal.appendChild(cbcMonto(doc, TAG_TAX_AMOUNT, orZero(linea.getIgv()), moneda));
 
-            Element category = cac(doc, "TaxCategory");
+            Element category = cac(doc, TAG_TAX_CATEGORY);
             CategoriaIgv cat = CategoriaIgv.obtener(linea.getIgvTipo());
             category.appendChild(cbcConAtributos(doc, "ID", cat.categoriaId(),
-                    "schemeAgencyName", "United Nations Economic Commission for Europe",
-                    "schemeID", "UN/ECE 5305",
-                    "schemeName", "Tax Category Identifier"));
+                    ATTR_SCHEME_AGENCY_NAME, VALUE_UN_ECE_AGENCY,
+                    ATTR_SCHEME_ID, VALUE_UN_ECE_5305,
+                    ATTR_SCHEME_NAME, VALUE_TAX_CATEGORY_IDENTIFIER));
             category.appendChild(cbcConAtributos(doc, "Percent",
                     escalar(linea.getTasaIgv() != null ? linea.getTasaIgv().multiply(new BigDecimal("100")) : BigDecimal.ZERO)));
             category.appendChild(cbcConAtributos(doc, "TaxExemptionReasonCode", linea.getIgvTipo(),
-                    "listAgencyName", "PE:SUNAT",
-                    "listName", "Afectacion del IGV",
+                    ATTR_LIST_AGENCY_NAME, VALUE_PE_SUNAT,
+                    ATTR_LIST_NAME, "Afectacion del IGV",
                     "listURI", "urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo07"));
 
-            Element scheme = cac(doc, "TaxScheme");
+            Element scheme = cac(doc, TAG_TAX_SCHEME);
             scheme.appendChild(cbcConAtributos(doc, "ID", cat.tribCode(),
-                    "schemeAgencyName", "PE:SUNAT",
-                    "schemeID", "UN/ECE 5153",
-                    "schemeName", "Codigo de tributos"));
+                    ATTR_SCHEME_AGENCY_NAME, VALUE_PE_SUNAT,
+                    ATTR_SCHEME_ID, VALUE_UN_ECE_5153,
+                    ATTR_SCHEME_NAME, VALUE_CODIGO_TRIBUTOS));
             scheme.appendChild(cbc(doc, "Name", cat.tribName()));
-            scheme.appendChild(cbc(doc, "TaxTypeCode", cat.tribTypeCode()));
+            scheme.appendChild(cbc(doc, TAG_TAX_TYPE_CODE, cat.tribTypeCode()));
             category.appendChild(scheme);
 
             subtotal.appendChild(category);
@@ -424,22 +445,22 @@ final class FragmentosXml {
 
         // ICBPER
         if (linea.getIcb() != null) {
-            Element subtotal = cac(doc, "TaxSubtotal");
-            subtotal.appendChild(cbcMonto(doc, "TaxAmount", linea.getIcb(), moneda));
+            Element subtotal = cac(doc, TAG_TAX_SUBTOTAL);
+            subtotal.appendChild(cbcMonto(doc, TAG_TAX_AMOUNT, linea.getIcb(), moneda));
             subtotal.appendChild(cbcCantidad(doc, "BaseUnitMeasure",
                     linea.getCantidad() != null ? linea.getCantidad() : BigDecimal.ONE,
                     linea.getUnidadMedida() != null ? linea.getUnidadMedida() : "NIU"));
 
-            Element category = cac(doc, "TaxCategory");
+            Element category = cac(doc, TAG_TAX_CATEGORY);
             category.appendChild(cbcMonto(doc, "PerUnitAmount", orZero(linea.getTasaIcb()), moneda));
 
-            Element scheme = cac(doc, "TaxScheme");
+            Element scheme = cac(doc, TAG_TAX_SCHEME);
             scheme.appendChild(cbcConAtributos(doc, "ID", "7152",
-                    "schemeAgencyName", "PE:SUNAT",
-                    "schemeID", "UN/ECE 5153",
-                    "schemeName", "Codigo de tributos"));
+                    ATTR_SCHEME_AGENCY_NAME, VALUE_PE_SUNAT,
+                    ATTR_SCHEME_ID, VALUE_UN_ECE_5153,
+                    ATTR_SCHEME_NAME, VALUE_CODIGO_TRIBUTOS));
             scheme.appendChild(cbc(doc, "Name", "ICBPER"));
-            scheme.appendChild(cbc(doc, "TaxTypeCode", "OTH"));
+            scheme.appendChild(cbc(doc, TAG_TAX_TYPE_CODE, "OTH"));
             category.appendChild(scheme);
 
             subtotal.appendChild(category);

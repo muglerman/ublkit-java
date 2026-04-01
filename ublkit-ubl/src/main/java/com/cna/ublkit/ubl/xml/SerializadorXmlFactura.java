@@ -25,6 +25,12 @@ import static com.cna.ublkit.ubl.xml.XmlUblHelper.*;
  */
 public final class SerializadorXmlFactura implements SerializadorXml<BorradorFactura> {
 
+    private static final String ATTR_LIST_AGENCY_NAME = "listAgencyName";
+    private static final String ATTR_LIST_NAME = "listName";
+    private static final String VALUE_PE_SUNAT = "PE:SUNAT";
+    private static final String TAG_PAYMENT_TERMS = "PaymentTerms";
+    private static final String TAG_PAYMENT_MEANS_ID = "PaymentMeansID";
+
     @Override
     public String serializar(BorradorFactura factura) {
         Document doc = crearDocumento(NS_INVOICE, "Invoice");
@@ -45,8 +51,8 @@ public final class SerializadorXmlFactura implements SerializadorXml<BorradorFac
         Element typeCode = cbcConAtributos(doc, "InvoiceTypeCode",
                 factura.getTipoComprobante() != null ? factura.getTipoComprobante() : "01",
                 "listID", factura.getTipoOperacion() != null ? factura.getTipoOperacion() : "0101",
-                "listAgencyName", "PE:SUNAT",
-                "listName", "Tipo de Documento",
+                ATTR_LIST_AGENCY_NAME, VALUE_PE_SUNAT,
+                ATTR_LIST_NAME, "Tipo de Documento",
                 "listURI", "urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo01");
         raiz.appendChild(typeCode);
 
@@ -60,8 +66,8 @@ public final class SerializadorXmlFactura implements SerializadorXml<BorradorFac
         raiz.appendChild(cbcConAtributos(doc, "DocumentCurrencyCode",
                 factura.getMoneda() != null ? factura.getMoneda() : "PEN",
                 "listID", "ISO 4217 Alpha",
-                "listAgencyName", "United Nations Economic Commission for Europe",
-                "listName", "Currency"));
+                ATTR_LIST_AGENCY_NAME, "United Nations Economic Commission for Europe",
+                ATTR_LIST_NAME, "Currency"));
 
         // 7. OrderReference
         if (factura.getOrdenDeCompra() != null) {
@@ -148,12 +154,12 @@ public final class SerializadorXmlFactura implements SerializadorXml<BorradorFac
             Element ref = cac(doc, "AdditionalDocumentReference");
             ref.appendChild(cbc(doc, "ID", anticipo.comprobanteSerieNumero()));
             ref.appendChild(cbcConAtributos(doc, "DocumentTypeCode", anticipo.comprobanteTipo(),
-                    "listAgencyName", "PE:SUNAT",
-                    "listName", "Documento Relacionado",
+                    ATTR_LIST_AGENCY_NAME, VALUE_PE_SUNAT,
+                    ATTR_LIST_NAME, "Documento Relacionado",
                     "listURI", "urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo12"));
             ref.appendChild(cbcConAtributos(doc, "DocumentStatusCode", String.valueOf(idx),
-                    "listName", "Anticipo",
-                    "listAgencyName", "PE:SUNAT"));
+                    ATTR_LIST_NAME, "Anticipo",
+                    ATTR_LIST_AGENCY_NAME, VALUE_PE_SUNAT));
 
             if (factura.getEmisor() != null) {
                 Element issuer = cac(doc, "IssuerParty");
@@ -161,7 +167,7 @@ public final class SerializadorXmlFactura implements SerializadorXml<BorradorFac
                 partyId.appendChild(cbcConAtributos(doc, "ID", factura.getEmisor().ruc(),
                         "schemeID", "6",
                         "schemeName", "Documento de Identidad",
-                        "schemeAgencyName", "PE:SUNAT",
+                        "schemeAgencyName", VALUE_PE_SUNAT,
                         "schemeURI", "urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo06"));
                 issuer.appendChild(partyId);
                 ref.appendChild(issuer);
@@ -202,9 +208,9 @@ public final class SerializadorXmlFactura implements SerializadorXml<BorradorFac
         raiz.appendChild(pm);
 
         // PaymentTerms
-        Element pt = cac(doc, "PaymentTerms");
+        Element pt = cac(doc, TAG_PAYMENT_TERMS);
         pt.appendChild(cbc(doc, "ID", "Detraccion"));
-        pt.appendChild(cbc(doc, "PaymentMeansID", det.tipoBienDetraido()));
+        pt.appendChild(cbc(doc, TAG_PAYMENT_MEANS_ID, det.tipoBienDetraido()));
         pt.appendChild(cbc(doc, "PaymentPercent",
                 escalar(det.porcentaje().multiply(new BigDecimal("100")))));
         pt.appendChild(cbcMonto(doc, "Amount", det.monto(), moneda(factura)));
@@ -216,7 +222,7 @@ public final class SerializadorXmlFactura implements SerializadorXml<BorradorFac
     private void agregarPercepcionTerms(Document doc, Element raiz, BorradorFactura factura) {
         Percepcion perc = factura.getPercepcion();
         if (perc == null) return;
-        Element pt = cac(doc, "PaymentTerms");
+        Element pt = cac(doc, TAG_PAYMENT_TERMS);
         pt.appendChild(cbc(doc, "ID", "Percepcion"));
         pt.appendChild(cbcMonto(doc, "Amount", perc.montoTotal(), "PEN"));
         raiz.appendChild(pt);
@@ -228,9 +234,9 @@ public final class SerializadorXmlFactura implements SerializadorXml<BorradorFac
         FormaDePago fdp = factura.getFormaDePago();
         if (fdp == null) return;
 
-        Element pt = cac(doc, "PaymentTerms");
+        Element pt = cac(doc, TAG_PAYMENT_TERMS);
         pt.appendChild(cbc(doc, "ID", "FormaPago"));
-        pt.appendChild(cbc(doc, "PaymentMeansID", fdp.tipo()));
+        pt.appendChild(cbc(doc, TAG_PAYMENT_MEANS_ID, fdp.tipo()));
         if ("Credito".equals(fdp.tipo()) && fdp.total() != null) {
             pt.appendChild(cbcMonto(doc, "Amount", fdp.total(), moneda(factura)));
         }
@@ -240,9 +246,9 @@ public final class SerializadorXmlFactura implements SerializadorXml<BorradorFac
         if (fdp.cuotas() != null) {
             int idx = 1;
             for (CuotaDePago cuota : fdp.cuotas()) {
-                Element cuotaEl = cac(doc, "PaymentTerms");
+                Element cuotaEl = cac(doc, TAG_PAYMENT_TERMS);
                 cuotaEl.appendChild(cbc(doc, "ID", "FormaPago"));
-                cuotaEl.appendChild(cbc(doc, "PaymentMeansID", String.format("Cuota%03d", idx)));
+                cuotaEl.appendChild(cbc(doc, TAG_PAYMENT_MEANS_ID, String.format("Cuota%03d", idx)));
                 cuotaEl.appendChild(cbcMonto(doc, "Amount", cuota.importe(), moneda(factura)));
                 cuotaEl.appendChild(cbc(doc, "PaymentDueDate", cuota.fechaPago()));
                 raiz.appendChild(cuotaEl);

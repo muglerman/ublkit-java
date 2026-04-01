@@ -25,7 +25,7 @@ class SerializadorXmlComunicacionBajaTest {
     private final SerializadorXmlComunicacionBaja serializador = new SerializadorXmlComunicacionBaja();
 
     @Test
-    void serializar_comunicacionBajaMinima_generaXmlValido() throws Exception {
+    void serializar_comunicacionBajaMinima_generaXmlValido() {
         ComunicacionBaja baja = crearBajaMinima();
         EnsambladorComunicacionBaja.ensamblar(baja);
 
@@ -40,7 +40,7 @@ class SerializadorXmlComunicacionBajaTest {
     }
 
     @Test
-    void serializar_contieneVersionYCustomizacion() throws Exception {
+    void serializar_contieneVersionYCustomizacion() {
         ComunicacionBaja baja = crearBajaMinima();
         EnsambladorComunicacionBaja.ensamblar(baja);
 
@@ -51,7 +51,7 @@ class SerializadorXmlComunicacionBajaTest {
     }
 
     @Test
-    void serializar_generaIdConFormatoCorrecto() throws Exception {
+    void serializar_generaIdConFormatoCorrecto() {
         ComunicacionBaja baja = crearBajaMinima();
         baja.setFechaEmision(LocalDate.of(2026, 4, 15));
         baja.setNumero(3);
@@ -63,7 +63,7 @@ class SerializadorXmlComunicacionBajaTest {
     }
 
     @Test
-    void serializar_reversionGeneraPrefijoRR() throws Exception {
+    void serializar_reversionGeneraPrefijoRR() {
         Reversion reversion = new Reversion();
         reversion.setFechaEmision(LocalDate.of(2026, 4, 15));
         reversion.setFechaEmisionComprobantes(LocalDate.of(2026, 4, 14));
@@ -79,7 +79,7 @@ class SerializadorXmlComunicacionBajaTest {
     }
 
     @Test
-    void serializar_contieneReferenceDateEIssueDate() throws Exception {
+    void serializar_contieneReferenceDateEIssueDate() {
         ComunicacionBaja baja = crearBajaMinima();
         baja.setFechaEmision(LocalDate.of(2026, 4, 15));
         baja.setFechaEmisionComprobantes(LocalDate.of(2026, 4, 14));
@@ -92,7 +92,7 @@ class SerializadorXmlComunicacionBajaTest {
     }
 
     @Test
-    void serializar_contieneEmisor() throws Exception {
+    void serializar_contieneEmisor() {
         ComunicacionBaja baja = crearBajaMinima();
         EnsambladorComunicacionBaja.ensamblar(baja);
 
@@ -105,7 +105,7 @@ class SerializadorXmlComunicacionBajaTest {
     }
 
     @Test
-    void serializar_contieneFirma() throws Exception {
+    void serializar_contieneFirma() {
         ComunicacionBaja baja = crearBajaMinima();
         EnsambladorComunicacionBaja.ensamblar(baja);
 
@@ -117,7 +117,7 @@ class SerializadorXmlComunicacionBajaTest {
     }
 
     @Test
-    void serializar_contieneLineasDeBaja() throws Exception {
+    void serializar_contieneLineasDeBaja() {
         ComunicacionBaja baja = crearBajaMinima();
         EnsambladorComunicacionBaja.ensamblar(baja);
 
@@ -134,7 +134,7 @@ class SerializadorXmlComunicacionBajaTest {
     }
 
     @Test
-    void serializar_multipleLineas_generaLineIdsSecuenciales() throws Exception {
+    void serializar_multipleLineas_generaLineIdsSecuenciales() {
         ComunicacionBaja baja = crearBajaMinima();
         baja.setComprobantes(List.of(
                 new ItemBaja("F001", 100, "01", "Motivo 1"),
@@ -151,7 +151,7 @@ class SerializadorXmlComunicacionBajaTest {
     }
 
     @Test
-    void serializar_contieneNamespaceVoidedDocuments() throws Exception {
+    void serializar_contieneNamespaceVoidedDocuments() {
         ComunicacionBaja baja = crearBajaMinima();
         EnsambladorComunicacionBaja.ensamblar(baja);
 
@@ -161,7 +161,7 @@ class SerializadorXmlComunicacionBajaTest {
     }
 
     @Test
-    void serializar_contieneExtensionsParaFirma() throws Exception {
+    void serializar_contieneExtensionsParaFirma() {
         ComunicacionBaja baja = crearBajaMinima();
         EnsambladorComunicacionBaja.ensamblar(baja);
 
@@ -189,10 +189,14 @@ class SerializadorXmlComunicacionBajaTest {
         return new EmisorDocumento("20123456789", "EMPRESA PRUEBA S.A.C.", "EMPRESA PRUEBA S.A.C.", null, null);
     }
 
-    private Document parsear(String xml) throws Exception {
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        factory.setNamespaceAware(true);
-        DocumentBuilder builder = factory.newDocumentBuilder();
-        return builder.parse(new InputSource(new StringReader(xml)));
+    private Document parsear(String xml) {
+        try {
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            factory.setNamespaceAware(true);
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            return builder.parse(new InputSource(new StringReader(xml)));
+        } catch (Exception e) {
+            throw new IllegalStateException("No se pudo parsear XML de prueba", e);
+        }
     }
 }

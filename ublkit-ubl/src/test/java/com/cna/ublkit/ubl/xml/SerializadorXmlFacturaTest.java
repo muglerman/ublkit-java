@@ -22,7 +22,7 @@ class SerializadorXmlFacturaTest {
     private final SerializadorXmlFactura serializador = new SerializadorXmlFactura();
 
     @Test
-    void serializar_facturaMinima_generaXmlValido() throws Exception {
+    void serializar_facturaMinima_generaXmlValido() {
         BorradorFactura factura = EnsambladorFacturaTest.crearFacturaMinima();
         EnsambladorFactura.ensamblar(factura);
 
@@ -38,7 +38,7 @@ class SerializadorXmlFacturaTest {
     }
 
     @Test
-    void serializar_contieneElementosRequeridos() throws Exception {
+    void serializar_contieneElementosRequeridos() {
         BorradorFactura factura = EnsambladorFacturaTest.crearFacturaMinima();
         EnsambladorFactura.ensamblar(factura);
 
@@ -64,7 +64,7 @@ class SerializadorXmlFacturaTest {
     }
 
     @Test
-    void serializar_contieneEmisorYReceptor() throws Exception {
+    void serializar_contieneEmisorYReceptor() {
         BorradorFactura factura = EnsambladorFacturaTest.crearFacturaMinima();
         EnsambladorFactura.ensamblar(factura);
 
@@ -80,7 +80,7 @@ class SerializadorXmlFacturaTest {
     }
 
     @Test
-    void serializar_contieneImpuestosYTotales() throws Exception {
+    void serializar_contieneImpuestosYTotales() {
         BorradorFactura factura = EnsambladorFacturaTest.crearFacturaMinima();
         EnsambladorFactura.ensamblar(factura);
 
@@ -99,7 +99,7 @@ class SerializadorXmlFacturaTest {
     }
 
     @Test
-    void serializar_contieneLineasDetalle() throws Exception {
+    void serializar_contieneLineasDetalle() {
         BorradorFactura factura = EnsambladorFacturaTest.crearFacturaMinima();
         EnsambladorFactura.ensamblar(factura);
 
@@ -114,7 +114,7 @@ class SerializadorXmlFacturaTest {
     }
 
     @Test
-    void serializar_contieneNamespacesCorrectos() throws Exception {
+    void serializar_contieneNamespacesCorrectos() {
         BorradorFactura factura = EnsambladorFacturaTest.crearFacturaMinima();
         EnsambladorFactura.ensamblar(factura);
 
@@ -127,7 +127,7 @@ class SerializadorXmlFacturaTest {
     }
 
     @Test
-    void serializar_contieneExtensionsParaFirma() throws Exception {
+    void serializar_contieneExtensionsParaFirma() {
         BorradorFactura factura = EnsambladorFacturaTest.crearFacturaMinima();
         EnsambladorFactura.ensamblar(factura);
 
@@ -138,7 +138,7 @@ class SerializadorXmlFacturaTest {
     }
 
     @Test
-    void serializar_contieneFormaDePago() throws Exception {
+    void serializar_contieneFormaDePago() {
         BorradorFactura factura = EnsambladorFacturaTest.crearFacturaMinima();
         EnsambladorFactura.ensamblar(factura);
 
@@ -149,7 +149,7 @@ class SerializadorXmlFacturaTest {
     }
 
     @Test
-    void serializar_boleta_conLeyendas_generaInvoiceType03YNote() throws Exception {
+    void serializar_boleta_conLeyendas_generaInvoiceType03YNote() {
         BorradorFactura boleta = EnsambladorFacturaTest.crearFacturaMinima();
         boleta.setSerie("B001");
         boleta.setLeyendas(Map.of("1000", "SON: DOSCIENTOS TREINTA Y SEIS CON 00/100 SOLES"));
@@ -165,11 +165,15 @@ class SerializadorXmlFacturaTest {
 
     // ── Utilidades ───────────────────────────────────────────────
 
-    private Document parsear(String xml) throws Exception {
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        factory.setNamespaceAware(true);
-        DocumentBuilder builder = factory.newDocumentBuilder();
-        return builder.parse(new InputSource(new StringReader(xml)));
+    private Document parsear(String xml) {
+        try {
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            factory.setNamespaceAware(true);
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            return builder.parse(new InputSource(new StringReader(xml)));
+        } catch (Exception e) {
+            throw new IllegalStateException("No se pudo parsear XML de prueba", e);
+        }
     }
 
     private XPath crearXPath(Document doc) {
@@ -195,7 +199,11 @@ class SerializadorXmlFacturaTest {
         return xpath;
     }
 
-    private String evalXPath(XPath xpath, Document doc, String expr) throws Exception {
-        return (String) xpath.evaluate(expr, doc, XPathConstants.STRING);
+    private String evalXPath(XPath xpath, Document doc, String expr) {
+        try {
+            return (String) xpath.evaluate(expr, doc, XPathConstants.STRING);
+        } catch (Exception e) {
+            throw new IllegalStateException("No se pudo evaluar XPath de prueba: " + expr, e);
+        }
     }
 }

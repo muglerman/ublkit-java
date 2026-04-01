@@ -62,7 +62,7 @@ class SerializadorXmlGuiaRemisionTest {
     }
 
     @Test
-    void serializar_guiaMinima_generaXmlValido() throws Exception {
+    void serializar_guiaMinima_generaXmlValido() {
         BorradorGuiaRemision guia = crearGuiaMinima();
         String xml = serializador.serializar(guia);
 
@@ -75,7 +75,7 @@ class SerializadorXmlGuiaRemisionTest {
     }
 
     @Test
-    void serializar_contieneDatosGenerales() throws Exception {
+    void serializar_contieneDatosGenerales() {
         BorradorGuiaRemision guia = crearGuiaMinima();
         String xml = serializador.serializar(guia);
         Document doc = parsear(xml);
@@ -89,7 +89,7 @@ class SerializadorXmlGuiaRemisionTest {
     }
 
     @Test
-    void serializar_contieneRemitente() throws Exception {
+    void serializar_contieneRemitente() {
         BorradorGuiaRemision guia = crearGuiaMinima();
         String xml = serializador.serializar(guia);
 
@@ -99,7 +99,7 @@ class SerializadorXmlGuiaRemisionTest {
     }
 
     @Test
-    void serializar_contieneDestinatario() throws Exception {
+    void serializar_contieneDestinatario() {
         BorradorGuiaRemision guia = crearGuiaMinima();
         String xml = serializador.serializar(guia);
 
@@ -109,7 +109,7 @@ class SerializadorXmlGuiaRemisionTest {
     }
 
     @Test
-    void serializar_contieneShipment() throws Exception {
+    void serializar_contieneShipment() {
         BorradorGuiaRemision guia = crearGuiaMinima();
         String xml = serializador.serializar(guia);
         Document doc = parsear(xml);
@@ -131,7 +131,7 @@ class SerializadorXmlGuiaRemisionTest {
     }
 
     @Test
-    void serializar_contieneChoferYVehiculo() throws Exception {
+    void serializar_contieneChoferYVehiculo() {
         BorradorGuiaRemision guia = crearGuiaMinima();
         String xml = serializador.serializar(guia);
 
@@ -146,7 +146,7 @@ class SerializadorXmlGuiaRemisionTest {
     }
 
     @Test
-    void serializar_contieneDirecciones() throws Exception {
+    void serializar_contieneDirecciones() {
         BorradorGuiaRemision guia = crearGuiaMinima();
         String xml = serializador.serializar(guia);
 
@@ -160,7 +160,7 @@ class SerializadorXmlGuiaRemisionTest {
     }
 
     @Test
-    void serializar_contieneLineas() throws Exception {
+    void serializar_contieneLineas() {
         BorradorGuiaRemision guia = crearGuiaMinima();
         String xml = serializador.serializar(guia);
 
@@ -172,7 +172,7 @@ class SerializadorXmlGuiaRemisionTest {
     }
 
     @Test
-    void serializar_conTransportista() throws Exception {
+    void serializar_conTransportista() {
         BorradorGuiaRemision guia = crearGuiaMinima();
         guia.getEnvio().setTransportista(
                 new TransportistaGuia("6", "20300000003", "Transportes SAC", "0001-MTC"));
@@ -185,7 +185,7 @@ class SerializadorXmlGuiaRemisionTest {
     }
 
     @Test
-    void serializar_conCompradorYTercero() throws Exception {
+    void serializar_conCompradorYTercero() {
         BorradorGuiaRemision guia = crearGuiaMinima();
         guia.setComprador(new CompradorGuia("6", "20400000004", "Comprador SAC"));
         guia.setTercero(new TerceroGuia("6", "20500000005", "Tercero SAC"));
@@ -202,7 +202,7 @@ class SerializadorXmlGuiaRemisionTest {
     }
 
     @Test
-    void serializar_conContenedores() throws Exception {
+    void serializar_conContenedores() {
         BorradorGuiaRemision guia = crearGuiaMinima();
         guia.getEnvio().setContenedores(List.of(
                 new Contenedor("CONT001", "PREC001"),
@@ -216,7 +216,7 @@ class SerializadorXmlGuiaRemisionTest {
     }
 
     @Test
-    void serializar_conPuerto() throws Exception {
+    void serializar_conPuerto() {
         BorradorGuiaRemision guia = crearGuiaMinima();
         guia.getEnvio().setPuerto(new Puerto("CAL", "Puerto del Callao"));
 
@@ -228,7 +228,7 @@ class SerializadorXmlGuiaRemisionTest {
     }
 
     @Test
-    void serializar_conDocumentoBaja() throws Exception {
+    void serializar_conDocumentoBaja() {
         BorradorGuiaRemision guia = crearGuiaMinima();
         guia.setDocumentoBaja(new DocumentoBajaGuia("09", "T001-100"));
 
@@ -239,7 +239,7 @@ class SerializadorXmlGuiaRemisionTest {
     }
 
     @Test
-    void serializar_conDocumentosRelacionados() throws Exception {
+    void serializar_conDocumentosRelacionados() {
         BorradorGuiaRemision guia = crearGuiaMinima();
         guia.setDocumentoRelacionado(new DocumentoRelacionadoGuia("01", "F001-1"));
         guia.setDocumentosRelacionados(List.of(
@@ -257,11 +257,15 @@ class SerializadorXmlGuiaRemisionTest {
 
     // ── Helpers ──────────────────────────────────────────────────
 
-    private Document parsear(String xml) throws Exception {
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        factory.setNamespaceAware(true);
-        DocumentBuilder builder = factory.newDocumentBuilder();
-        return builder.parse(new InputSource(new StringReader(xml)));
+    private Document parsear(String xml) {
+        try {
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            factory.setNamespaceAware(true);
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            return builder.parse(new InputSource(new StringReader(xml)));
+        } catch (Exception e) {
+            throw new IllegalStateException("No se pudo parsear XML de prueba", e);
+        }
     }
 
     private XPath crearXPath(Document doc) {
@@ -287,7 +291,11 @@ class SerializadorXmlGuiaRemisionTest {
         return xpath;
     }
 
-    private String evalXPath(XPath xpath, Document doc, String expression) throws Exception {
-        return (String) xpath.evaluate(expression, doc, XPathConstants.STRING);
+    private String evalXPath(XPath xpath, Document doc, String expression) {
+        try {
+            return (String) xpath.evaluate(expression, doc, XPathConstants.STRING);
+        } catch (Exception e) {
+            throw new IllegalStateException("No se pudo evaluar XPath de prueba: " + expression, e);
+        }
     }
 }

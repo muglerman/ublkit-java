@@ -24,7 +24,7 @@ class SerializadorXmlNotaCreditoTest {
     private final SerializadorXmlNotaCredito serializador = new SerializadorXmlNotaCredito();
 
     @Test
-    void serializar_notaCreditoMinima_generaXmlValido() throws Exception {
+    void serializar_notaCreditoMinima_generaXmlValido() {
         BorradorNotaCredito nota = crearNotaCreditoMinima();
         EnsambladorNota.ensamblar(nota);
 
@@ -120,10 +120,14 @@ class SerializadorXmlNotaCreditoTest {
         return nota;
     }
 
-    private Document parsear(String xml) throws Exception {
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        factory.setNamespaceAware(true);
-        DocumentBuilder builder = factory.newDocumentBuilder();
-        return builder.parse(new InputSource(new StringReader(xml)));
+    private Document parsear(String xml) {
+        try {
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            factory.setNamespaceAware(true);
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            return builder.parse(new InputSource(new StringReader(xml)));
+        } catch (Exception e) {
+            throw new IllegalStateException("No se pudo parsear XML de prueba", e);
+        }
     }
 }

@@ -22,7 +22,7 @@ class SerializadorXmlResumenDiarioTest {
     private final SerializadorXmlResumenDiario serializador = new SerializadorXmlResumenDiario();
 
     @Test
-    void serializar_resumenMinimo_generaXmlValido() throws Exception {
+    void serializar_resumenMinimo_generaXmlValido() {
         ResumenDiario resumen = crearResumenMinimo();
         EnsambladorResumenDiario.ensamblar(resumen);
 
@@ -37,7 +37,7 @@ class SerializadorXmlResumenDiarioTest {
     }
 
     @Test
-    void serializar_contieneVersionYCustomizacion() throws Exception {
+    void serializar_contieneVersionYCustomizacion() {
         ResumenDiario resumen = crearResumenMinimo();
         EnsambladorResumenDiario.ensamblar(resumen);
 
@@ -48,7 +48,7 @@ class SerializadorXmlResumenDiarioTest {
     }
 
     @Test
-    void serializar_generaIdConFormatoCorrecto() throws Exception {
+    void serializar_generaIdConFormatoCorrecto() {
         ResumenDiario resumen = crearResumenMinimo();
         resumen.setFechaEmision(LocalDate.of(2026, 4, 15));
         resumen.setNumero(5);
@@ -60,7 +60,7 @@ class SerializadorXmlResumenDiarioTest {
     }
 
     @Test
-    void serializar_contieneReferenceDateEIssueDate() throws Exception {
+    void serializar_contieneReferenceDateEIssueDate() {
         ResumenDiario resumen = crearResumenMinimo();
         resumen.setFechaEmision(LocalDate.of(2026, 4, 15));
         resumen.setFechaEmisionComprobantes(LocalDate.of(2026, 4, 14));
@@ -73,7 +73,7 @@ class SerializadorXmlResumenDiarioTest {
     }
 
     @Test
-    void serializar_contieneEmisorSunat() throws Exception {
+    void serializar_contieneEmisorSunat() {
         ResumenDiario resumen = crearResumenMinimo();
         EnsambladorResumenDiario.ensamblar(resumen);
 
@@ -85,7 +85,7 @@ class SerializadorXmlResumenDiarioTest {
     }
 
     @Test
-    void serializar_contieneFirma() throws Exception {
+    void serializar_contieneFirma() {
         ResumenDiario resumen = crearResumenMinimo();
         EnsambladorResumenDiario.ensamblar(resumen);
 
@@ -96,7 +96,7 @@ class SerializadorXmlResumenDiarioTest {
     }
 
     @Test
-    void serializar_contieneLineaResumen() throws Exception {
+    void serializar_contieneLineaResumen() {
         ResumenDiario resumen = crearResumenMinimo();
         EnsambladorResumenDiario.ensamblar(resumen);
 
@@ -109,7 +109,7 @@ class SerializadorXmlResumenDiarioTest {
     }
 
     @Test
-    void serializar_contieneCliente() throws Exception {
+    void serializar_contieneCliente() {
         ResumenDiario resumen = crearResumenMinimo();
         EnsambladorResumenDiario.ensamblar(resumen);
 
@@ -121,7 +121,7 @@ class SerializadorXmlResumenDiarioTest {
     }
 
     @Test
-    void serializar_contieneConditionCode() throws Exception {
+    void serializar_contieneConditionCode() {
         ResumenDiario resumen = crearResumenMinimo();
         EnsambladorResumenDiario.ensamblar(resumen);
 
@@ -131,7 +131,7 @@ class SerializadorXmlResumenDiarioTest {
     }
 
     @Test
-    void serializar_contieneTotalAmount() throws Exception {
+    void serializar_contieneTotalAmount() {
         ResumenDiario resumen = crearResumenMinimo();
         EnsambladorResumenDiario.ensamblar(resumen);
 
@@ -142,7 +142,7 @@ class SerializadorXmlResumenDiarioTest {
     }
 
     @Test
-    void serializar_contieneBillingPaymentGravado() throws Exception {
+    void serializar_contieneBillingPaymentGravado() {
         ResumenDiario resumen = crearResumenMinimo();
         EnsambladorResumenDiario.ensamblar(resumen);
 
@@ -155,7 +155,7 @@ class SerializadorXmlResumenDiarioTest {
     }
 
     @Test
-    void serializar_contieneIgvTaxTotal() throws Exception {
+    void serializar_contieneIgvTaxTotal() {
         ResumenDiario resumen = crearResumenMinimo();
         EnsambladorResumenDiario.ensamblar(resumen);
 
@@ -168,7 +168,7 @@ class SerializadorXmlResumenDiarioTest {
     }
 
     @Test
-    void serializar_contieneNamespaceSummaryDocuments() throws Exception {
+    void serializar_contieneNamespaceSummaryDocuments() {
         ResumenDiario resumen = crearResumenMinimo();
         EnsambladorResumenDiario.ensamblar(resumen);
 
@@ -178,7 +178,7 @@ class SerializadorXmlResumenDiarioTest {
     }
 
     @Test
-    void serializar_contieneNamespacePerception() throws Exception {
+    void serializar_contieneNamespacePerception() {
         ResumenDiario resumen = crearResumenMinimo();
         EnsambladorResumenDiario.ensamblar(resumen);
 
@@ -188,7 +188,7 @@ class SerializadorXmlResumenDiarioTest {
     }
 
     @Test
-    void serializar_conComprobanteAfectado() throws Exception {
+    void serializar_conComprobanteAfectado() {
         ResumenDiario resumen = crearResumenMinimo();
         ComprobanteResumen comp = resumen.getComprobantes().getFirst().comprobante();
         comp.setTipoComprobante("07");
@@ -202,7 +202,7 @@ class SerializadorXmlResumenDiarioTest {
     }
 
     @Test
-    void serializar_conPercepcion() throws Exception {
+    void serializar_conPercepcion() {
         ResumenDiario resumen = crearResumenMinimo();
         resumen.getComprobantes().getFirst().comprobante().setPercepcion(
                 new PercepcionResumen("01", new BigDecimal("2.00"),
@@ -219,7 +219,7 @@ class SerializadorXmlResumenDiarioTest {
     }
 
     @Test
-    void serializar_multipleLineas() throws Exception {
+    void serializar_multipleLineas() {
         ResumenDiario resumen = crearResumenMinimo();
         ComprobanteResumen comp2 = crearComprobanteBasico("B001-2", "87654321", "MARIA LOPEZ");
         resumen.setComprobantes(List.of(
@@ -235,7 +235,7 @@ class SerializadorXmlResumenDiarioTest {
     }
 
     @Test
-    void serializar_conExoneradoEInafecto() throws Exception {
+    void serializar_conExoneradoEInafecto() {
         ResumenDiario resumen = crearResumenMinimo();
         resumen.getComprobantes().getFirst().comprobante().setValorVenta(
                 new ComprobanteValorVenta(new BigDecimal("100.00"), null,
@@ -250,7 +250,7 @@ class SerializadorXmlResumenDiarioTest {
     }
 
     @Test
-    void serializar_conOtrosCargos() throws Exception {
+    void serializar_conOtrosCargos() {
         ResumenDiario resumen = crearResumenMinimo();
         resumen.getComprobantes().getFirst().comprobante().setValorVenta(
                 new ComprobanteValorVenta(new BigDecimal("128.00"), new BigDecimal("10.00"),
@@ -266,7 +266,7 @@ class SerializadorXmlResumenDiarioTest {
     }
 
     @Test
-    void serializar_conIcbper() throws Exception {
+    void serializar_conIcbper() {
         ResumenDiario resumen = crearResumenMinimo();
         resumen.getComprobantes().getFirst().comprobante().setImpuestos(
                 new ComprobanteImpuestos(new BigDecimal("18.00"), new BigDecimal("0.18"),
@@ -313,10 +313,14 @@ class SerializadorXmlResumenDiarioTest {
         return comp;
     }
 
-    private Document parsear(String xml) throws Exception {
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        factory.setNamespaceAware(true);
-        DocumentBuilder builder = factory.newDocumentBuilder();
-        return builder.parse(new InputSource(new StringReader(xml)));
+    private Document parsear(String xml) {
+        try {
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            factory.setNamespaceAware(true);
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            return builder.parse(new InputSource(new StringReader(xml)));
+        } catch (Exception e) {
+            throw new IllegalStateException("No se pudo parsear XML de prueba", e);
+        }
     }
 }

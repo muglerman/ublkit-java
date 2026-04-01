@@ -63,7 +63,7 @@ class RenderizadorPdfFacturaTest {
     }
 
     @Test
-    void debeGenerarPdfConFormatoA5() throws IOException {
+    void debeGenerarPdfConFormatoA5() {
         BorradorFactura factura = crearFacturaEjemplo();
         ContextoRender<BorradorFactura> contexto = ContextoRender.of(factura, "hash456", null);
 
