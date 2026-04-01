@@ -32,10 +32,12 @@ help:
 	@echo "  export-issues      - Export dependencies for all"
 
 build:
-	@SONAR_FLAG=''; \
-	if [ "$(ENABLE_SONAR)" = "true" ]; then SONAR_FLAG='-Dskip.sonar=false''; fi; \
-	echo "📦 Building ${PROJECT_NAME}..."; \
-	mvn -q clean verify $$SONAR_FLAG 2>&1 | tee /tmp/build.log | grep -E "BUILD|ERROR" || true; \
+	@echo "📦 Building..."; \
+	if [ "$(ENABLE_SONAR)" = "true" ]; then \
+		mvn -q clean verify -Dskip.sonar=false 2>&1 | tee /tmp/build.log | grep -E "BUILD|ERROR" || true; \
+	else \
+		mvn -q clean verify 2>&1 | tee /tmp/build.log | grep -E "BUILD|ERROR" || true; \
+	fi; \
 	if grep -q "ERROR" /tmp/build.log; then echo "❌ Build FAILED"; exit 1; else echo "✅ Build successful"; fi
 
 test:
@@ -69,9 +71,7 @@ sonar-parent:
 		echo "⏭️  SonarQube disabled"; exit 0; \
 	fi
 	@echo "🔍 SonarQube: Parent (ublkit-parent)..."
-	@mkdir -p $(PERSEO_ROOT)/reports
 	@mvn -q sonar:sonar -Dsonar.host.url=$(SONAR_HOST) -Dsonar.token=$(SONAR_TOKEN) -Dsonar.projectKey=$(PROJECT_NAME)-parent 2>&1 | tee /tmp/sonar_parent.log
-ENABLE_SONAR ?= false
 	@if grep -q "ERROR\|FAILURE\|Not authorized" /tmp/sonar_parent.log; then echo "❌ FAILED"; exit 1; else echo "✅ Done"; fi
 
 sonar-modules:
@@ -79,12 +79,10 @@ sonar-modules:
 		echo "⏭️  SonarQube disabled"; exit 0; \
 	fi
 	@echo "🔍 SonarQube: Analyzing 10 modules separately..."
-	@mkdir -p $(PERSEO_ROOT)/reports
 	@echo ""
 	@for module in $(MODULES); do \
 		echo "   🔍 $$module..."; \
 		mvn -q sonar:sonar -f $$module/pom.xml -Dsonar.host.url=$(SONAR_HOST) -Dsonar.token=$(SONAR_TOKEN) -Dsonar.projectKey=$(PROJECT_NAME)-$$module 2>&1 | tee /tmp/sonar_$$module.log; \
-ENABLE_SONAR ?= false
 		if grep -q "ERROR\|FAILURE\|Not authorized" /tmp/sonar_$$module.log; then \
 			echo "      ❌ FAILED"; \
 		else \
@@ -100,14 +98,11 @@ sonar: sonar-parent sonar-modules
 
 export-issues:
 	@echo "📊 Exporting $(PROJECT_NAME) (parent + 10 modules)..."
-	@mkdir -p $(PERSEO_ROOT)/reports
 	@echo ""
 	@echo "   📋 Parent..."
-	@mvn -q dependency:tree > $(PERSEO_ROOT)/reports/$(PROJECT_NAME)-parent-dependencies.txt 2>&1
 	@echo "   📋 Modules:"
 	@for module in $(MODULES); do \
 		echo "      • $$module"; \
-		mvn -q dependency:tree -f $$module/pom.xml > $(PERSEO_ROOT)/reports/$(PROJECT_NAME)-$$module-dependencies.txt 2>&1; \
 	done
 	@echo ""
-	@echo "✅ All reports exported"
+	@echo "✅ Ready to extract with: ./scripts/sonar-extract-issues.sh"
