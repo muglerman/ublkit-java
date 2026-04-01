@@ -1,13 +1,7 @@
 package com.cna.ublkit.gateway.transporte;
 
-import com.cna.ublkit.gateway.api.HashHelper;
-import com.cna.ublkit.gateway.api.ZipHelper;
-import com.cna.ublkit.gateway.respuesta.ArchivoCdr;
-import com.cna.ublkit.gateway.respuesta.EstadoEnvio;
-import com.cna.ublkit.gateway.respuesta.LectorCdr;
-import com.cna.ublkit.gateway.respuesta.ResultadoConsulta;
-import com.cna.ublkit.gateway.respuesta.ResultadoEnvio;
-
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -19,6 +13,15 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.zip.ZipInputStream;
+
+import com.cna.ublkit.gateway.api.HashHelper;
+import com.cna.ublkit.gateway.api.ZipHelper;
+import com.cna.ublkit.gateway.respuesta.ArchivoCdr;
+import com.cna.ublkit.gateway.respuesta.EstadoEnvio;
+import com.cna.ublkit.gateway.respuesta.LectorCdr;
+import com.cna.ublkit.gateway.respuesta.ResultadoConsulta;
+import com.cna.ublkit.gateway.respuesta.ResultadoEnvio;
 
 /**
  * Implementación de {@link ClienteRest} utilizando {@link HttpClient} nativo.
@@ -64,7 +67,15 @@ public class HttpClienteNativoRest implements ClienteRest {
             String hashZip = HashHelper.sha256Hex(zipBytes);
             String nombreZip = nombreArchivo.replace(".xml", ".zip");
 
-            // 2. Construir payload JSON
+            // 2. Validar contenido del ZIP
+            if (log.isLoggable(Level.INFO)) {
+                String zipContentInfo = validateAndDescribeZip(zipBytes);
+                log.info(String.format(
+                        "[UBLKIT][REST] enviarGuia endpoint=%s, archivoXml=%s, archivoZip=%s, hashZip=%s, zipBytes=%s, contenido={%s}, tokenMask=%s",
+                        endpointUrl, nombreArchivo, nombreZip, hashZip, zipBytes.length, zipContentInfo, mask(tokenBearer)));
+            }
+
+            // 3. Construir payload JSON
             String jsonPayload = """
                     {
                         "archivo": {
@@ -74,11 +85,6 @@ public class HttpClienteNativoRest implements ClienteRest {
                         }
                     }
                     """.formatted(nombreZip, hashZip, base64Zip);
-            if (log.isLoggable(Level.INFO)) {
-                log.info(String.format(
-                        "[UBLKIT][REST] enviarGuia endpoint=%s, archivoXml=%s, archivoZip=%s, hashZip=%s, zipBytes=%s, tokenMask=%s",
-                        endpointUrl, nombreArchivo, nombreZip, hashZip, zipBytes.length, mask(tokenBearer)));
-            }
 
             // 3. Ejecutar POST
             HttpRequest request = HttpRequest.newBuilder()
@@ -254,5 +260,44 @@ public class HttpClienteNativoRest implements ClienteRest {
                     "Validar documento relacionado GRE remitente y consistencia de datos del destinatario";
             default -> null;
         };
+    }
+
+    /**
+     * Valida y describe el contenido del ZIP para debugging.
+     * Intenta descomprimirlo y listar archivos internos.
+     */
+    private String validateAndDescribeZip(byte[] zipBytes) {
+        if (zipBytes == null || zipBytes.length == 0) {
+            return "empty";
+        }
+
+        try (ByteArrayInputStream bais = new ByteArrayInputStream(zipBytes);
+             ZipInputStream zis = new ZipInputStream(bais)) {
+
+            StringBuilder description = new StringBuilder();
+            description.append("bytes=").append(zipBytes.length);
+            int fileCount = 0;
+            java.util.zip.ZipEntry entry;
+
+            while ((entry = zis.getNextEntry()) != null) {
+                fileCount++;
+                if (fileCount == 1) {
+                    description.append(", entries=[");
+                }
+                if (fileCount > 1) {
+                    description.append(", ");
+                }
+                description.append(entry.getName()).append("(").append(entry.getSize()).append("b)");
+            }
+
+            if (fileCount == 0) {
+                description.append(", entries=[]");
+            } else {
+                description.append("]");
+            }
+            return description.toString();
+        } catch (IOException e) {
+            return "zip_invalid(" + e.getMessage() + ")";
+        }
     }
 }
