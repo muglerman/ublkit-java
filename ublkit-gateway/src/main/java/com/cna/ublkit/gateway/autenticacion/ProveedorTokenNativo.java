@@ -1,9 +1,5 @@
 package com.cna.ublkit.gateway.autenticacion;
 
-import com.cna.ublkit.core.enumerado.TipoAmbiente;
-import com.cna.ublkit.core.error.ExcepcionUblKit;
-import com.cna.ublkit.gateway.endpoint.ResolvedorEndpoints;
-
 import java.net.URI;
 import java.net.URLEncoder;
 import java.net.http.HttpClient;
@@ -20,11 +16,15 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.cna.ublkit.core.enumerado.TipoAmbiente;
+import com.cna.ublkit.core.error.ExcepcionUblKit;
+import com.cna.ublkit.gateway.endpoint.ResolvedorEndpoints;
+
 /**
- * Proveedor de Token por defecto que utiliza {@link HttpClient} nativo.
- * Consume el endpoint OAuth2 resuelto por ambiente
- * (`SUNAT` en producción y `gre-test.nubefact.com` para GRE en BETA).
+ * Proveedor de Token por defecto que utiliza {@link HttpClient} nativo. Consume el endpoint OAuth2 resuelto por
+ * ambiente (`SUNAT` en producción y `gre-test.nubefact.com` para GRE en BETA).
  * <p>
+ *
  * @since 0.1.0
  */
 public class ProveedorTokenNativo implements ProveedorToken {
@@ -70,16 +70,9 @@ public class ProveedorTokenNativo implements ProveedorToken {
         if (log.isLoggable(Level.INFO)) {
             log.info(String.format(
                     "[UBLKIT][TOKEN] rev=%s, solicitandoToken ambiente=%s, url=%s, contentType=%s, ruc=%s, usuarioSol=%s, usernameConcatenado=%s, clientId=%s, clientSecret=%s, bodyPreview=%s",
-                    AUTH_IMPL_REV,
-                    ambiente,
-                    url,
-                    CONTENT_TYPE_FORM_URLENCODED,
-                    mask(credenciales.ruc()),
-                    mask(credenciales.usuarioSol()),
-                    mask(credenciales.getUsernameConcatenado()),
-                    mask(credenciales.clientId()),
-                    mask(credenciales.clientSecret()),
-                    maskFormBody(body)));
+                    AUTH_IMPL_REV, ambiente, url, CONTENT_TYPE_FORM_URLENCODED, mask(credenciales.ruc()),
+                    mask(credenciales.usuarioSol()), mask(credenciales.getUsernameConcatenado()),
+                    mask(credenciales.clientId()), mask(credenciales.clientSecret()), maskFormBody(body)));
         }
 
         try {
@@ -94,12 +87,13 @@ public class ProveedorTokenNativo implements ProveedorToken {
 
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
             if (log.isLoggable(Level.INFO)) {
-                log.info(String.format("[UBLKIT][TOKEN] respuestaToken status=%s, body=%s",
-                        response.statusCode(), sanitizeBody(response.body())));
+                log.info(String.format("[UBLKIT][TOKEN] respuestaToken status=%s, body=%s", response.statusCode(),
+                        sanitizeBody(response.body())));
             }
-            
+
             if (response.statusCode() != 200) {
-                throw new ExcepcionUblKit("Error al solicitar token. HTTP " + response.statusCode() + ": " + response.body());
+                throw new ExcepcionUblKit(
+                        "Error al solicitar token. HTTP " + response.statusCode() + ": " + response.body());
             }
 
             String token = extraerToken(response.body());
@@ -111,8 +105,8 @@ public class ProveedorTokenNativo implements ProveedorToken {
             Instant expiraEn = Instant.now().plusSeconds(Math.max(1, expiresIn - MARGEN_SEGURIDAD_SEGUNDOS));
             cacheTokens.put(claveCache, new TokenCacheado(token, expiraEn));
             if (log.isLoggable(Level.INFO)) {
-                log.info(String.format("[UBLKIT][TOKEN] tokenObtenido ambiente=%s, expiraEn=%s, tokenMask=%s",
-                        ambiente, expiraEn, mask(token)));
+                log.info(String.format("[UBLKIT][TOKEN] tokenObtenido ambiente=%s, expiraEn=%s, tokenMask=%s", ambiente,
+                        expiraEn, mask(token)));
             }
             return token;
 
@@ -158,7 +152,8 @@ public class ProveedorTokenNativo implements ProveedorToken {
 
     private long extraerExpiresIn(String json) {
         Matcher m = PATRON_EXPIRES_IN.matcher(json);
-        if (!m.find()) return 3600L;
+        if (!m.find())
+            return 3600L;
         try {
             return Long.parseLong(m.group(1));
         } catch (NumberFormatException e) {
@@ -176,8 +171,7 @@ public class ProveedorTokenNativo implements ProveedorToken {
         if (body == null) {
             return null;
         }
-        return body
-                .replaceAll("(\"access_token\"\\s*:\\s*\")([^\"]+)(\")", "$1***$3")
+        return body.replaceAll("(\"access_token\"\\s*:\\s*\")([^\"]+)(\")", "$1***$3")
                 .replaceAll("(\"refresh_token\"\\s*:\\s*\")([^\"]+)(\")", "$1***$3");
     }
 
@@ -185,9 +179,7 @@ public class ProveedorTokenNativo implements ProveedorToken {
         if (body == null) {
             return null;
         }
-        return body
-                .replaceAll("(client_secret=)([^&]+)", "$1***")
-                .replaceAll("(password=)([^&]+)", "$1***");
+        return body.replaceAll("(client_secret=)([^&]+)", "$1***").replaceAll("(password=)([^&]+)", "$1***");
     }
 
     private static String mask(String value) {
