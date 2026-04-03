@@ -30,6 +30,9 @@ import com.cna.ublkit.gateway.endpoint.ResolvedorEndpoints;
 public class ProveedorTokenNativo implements ProveedorToken {
     private static final Logger log = Logger.getLogger(ProveedorTokenNativo.class.getName());
     private static final String AUTH_IMPL_REV = "2026-03-31-gre-ct-fix";
+    private static final String BETA_SOL_USUARIO = "MODDATOS";
+    private static final String BETA_SOL_CLAVE = "MODDATOS";
+    private static final String BETA_CREDENTIAL_PREFIX = "test-";
 
     private static final Pattern PATRON_TOKEN = Pattern.compile("\"access_token\"\\s*:\\s*\"([^\"]+)\"");
     private static final Pattern PATRON_EXPIRES_IN = Pattern.compile("\"expires_in\"\\s*:\\s*(\\d+)");
@@ -50,29 +53,30 @@ public class ProveedorTokenNativo implements ProveedorToken {
 
     @Override
     public String obtenerToken(CredencialesEmpresa credenciales, TipoAmbiente ambiente) {
-        if (credenciales.clientId() == null || credenciales.clientSecret() == null) {
+        CredencialesEmpresa credencialesNormalizadas = normalizarCredencialesParaAmbiente(credenciales, ambiente);
+        if (credencialesNormalizadas.clientId() == null || credencialesNormalizadas.clientSecret() == null) {
             throw new ExcepcionUblKit("Faltan credenciales OAuth2 (clientId/clientSecret) para solicitar token REST");
         }
 
-        String claveCache = claveCache(credenciales, ambiente);
+        String claveCache = claveCache(credencialesNormalizadas, ambiente);
         TokenCacheado cacheado = cacheTokens.get(claveCache);
         if (cacheado != null && !cacheado.expirado()) {
             if (log.isLoggable(Level.INFO)) {
                 log.info(String.format(
                         "[UBLKIT][TOKEN] cacheHit ambiente=%s, cacheKey=%s, expiraEn=%s, usernameConcatenado=%s",
-                        ambiente, mask(claveCache), cacheado.expiraEn(), mask(credenciales.getUsernameConcatenado())));
+                        ambiente, mask(claveCache), cacheado.expiraEn(), mask(credencialesNormalizadas.getUsernameConcatenado())));
             }
             return cacheado.token();
         }
 
-        String url = ResolvedorEndpoints.urlRestToken(ambiente, credenciales.clientId());
-        String body = buildUrlEncodedParams(credenciales);
+        String url = ResolvedorEndpoints.urlRestToken(ambiente, credencialesNormalizadas.clientId());
+        String body = buildUrlEncodedParams(credencialesNormalizadas);
         if (log.isLoggable(Level.INFO)) {
             log.info(String.format(
                     "[UBLKIT][TOKEN] rev=%s, solicitandoToken ambiente=%s, url=%s, contentType=%s, ruc=%s, usuarioSol=%s, usernameConcatenado=%s, clientId=%s, clientSecret=%s, bodyPreview=%s",
-                    AUTH_IMPL_REV, ambiente, url, CONTENT_TYPE_FORM_URLENCODED, mask(credenciales.ruc()),
-                    mask(credenciales.usuarioSol()), mask(credenciales.getUsernameConcatenado()),
-                    mask(credenciales.clientId()), mask(credenciales.clientSecret()), maskFormBody(body)));
+                    AUTH_IMPL_REV, ambiente, url, CONTENT_TYPE_FORM_URLENCODED, mask(credencialesNormalizadas.ruc()),
+                    mask(credencialesNormalizadas.usuarioSol()), mask(credencialesNormalizadas.getUsernameConcatenado()),
+                    mask(credencialesNormalizadas.clientId()), mask(credencialesNormalizadas.clientSecret()), maskFormBody(body)));
         }
 
         try {
@@ -139,6 +143,44 @@ public class ProveedorTokenNativo implements ProveedorToken {
             body.append(URLEncoder.encode(entry.getValue(), StandardCharsets.UTF_8));
         }
         return body.toString();
+    }
+
+    private CredencialesEmpresa normalizarCredencialesParaAmbiente(CredencialesEmpresa credenciales, TipoAmbiente ambiente) {
+        if (ambiente != TipoAmbiente.BETA) {
+            return credenciales;
+        }
+
+        String clientId = asegurarPrefijoTest(credenciales.clientId());
+        String clientSecret = asegurarPrefijoTest(credenciales.clientSecret());
+        if (!BETA_SOL_USUARIO.equals(credenciales.usuarioSol())
+                || !BETA_SOL_CLAVE.equals(credenciales.claveSol())
+                || !sameText(clientId, credenciales.clientId())
+                || !sameText(clientSecret, credenciales.clientSecret())) {
+            log.warning(String.format(
+                    "[UBLKIT][TOKEN] BETA detectado: se forzara usuarioSOL=MODDATOS y client_id/client_secret con prefijo test-. ruc=%s, usuarioOriginal=%s, clientIdOriginal=%s, clientIdUsado=%s",
+                    mask(credenciales.ruc()),
+                    mask(credenciales.usuarioSol()),
+                    mask(credenciales.clientId()),
+                    mask(clientId)));
+        }
+
+        return new CredencialesEmpresa(
+                credenciales.ruc(),
+                BETA_SOL_USUARIO,
+                BETA_SOL_CLAVE,
+                clientId,
+                clientSecret);
+    }
+
+    private String asegurarPrefijoTest(String value) {
+        if (value == null || value.isBlank() || value.startsWith(BETA_CREDENTIAL_PREFIX)) {
+            return value;
+        }
+        return BETA_CREDENTIAL_PREFIX + value;
+    }
+
+    private boolean sameText(String left, String right) {
+        return left == null ? right == null : left.equals(right);
     }
 
     private String claveCache(CredencialesEmpresa cred, TipoAmbiente ambiente) {
