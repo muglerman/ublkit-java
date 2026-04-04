@@ -53,6 +53,7 @@ public class ProveedorTokenNativo implements ProveedorToken {
 
     @Override
     public String obtenerToken(CredencialesEmpresa credenciales, TipoAmbiente ambiente) {
+        boolean mostrarSensiblesEnLog = ambiente == TipoAmbiente.BETA;
         CredencialesEmpresa credencialesNormalizadas = normalizarCredencialesParaAmbiente(credenciales, ambiente);
         if (credencialesNormalizadas.clientId() == null || credencialesNormalizadas.clientSecret() == null) {
             throw new ExcepcionUblKit("Faltan credenciales OAuth2 (clientId/clientSecret) para solicitar token REST");
@@ -64,7 +65,9 @@ public class ProveedorTokenNativo implements ProveedorToken {
             if (log.isLoggable(Level.INFO)) {
                 log.info(String.format(
                         "[UBLKIT][TOKEN] cacheHit ambiente=%s, cacheKey=%s, expiraEn=%s, usernameConcatenado=%s",
-                        ambiente, mask(claveCache), cacheado.expiraEn(), mask(credencialesNormalizadas.getUsernameConcatenado())));
+                        ambiente, mostrarSensiblesEnLog ? claveCache : mask(claveCache), cacheado.expiraEn(),
+                        mostrarSensiblesEnLog ? credencialesNormalizadas.getUsernameConcatenado()
+                                : mask(credencialesNormalizadas.getUsernameConcatenado())));
             }
             return cacheado.token();
         }
@@ -74,9 +77,17 @@ public class ProveedorTokenNativo implements ProveedorToken {
         if (log.isLoggable(Level.INFO)) {
             log.info(String.format(
                     "[UBLKIT][TOKEN] rev=%s, solicitandoToken ambiente=%s, url=%s, contentType=%s, ruc=%s, usuarioSol=%s, usernameConcatenado=%s, clientId=%s, clientSecret=%s, bodyPreview=%s",
-                    AUTH_IMPL_REV, ambiente, url, CONTENT_TYPE_FORM_URLENCODED, mask(credencialesNormalizadas.ruc()),
-                    mask(credencialesNormalizadas.usuarioSol()), mask(credencialesNormalizadas.getUsernameConcatenado()),
-                    mask(credencialesNormalizadas.clientId()), mask(credencialesNormalizadas.clientSecret()), maskFormBody(body)));
+                    AUTH_IMPL_REV, ambiente, url, CONTENT_TYPE_FORM_URLENCODED,
+                    mostrarSensiblesEnLog ? credencialesNormalizadas.ruc() : mask(credencialesNormalizadas.ruc()),
+                    mostrarSensiblesEnLog ? credencialesNormalizadas.usuarioSol()
+                            : mask(credencialesNormalizadas.usuarioSol()),
+                    mostrarSensiblesEnLog ? credencialesNormalizadas.getUsernameConcatenado()
+                            : mask(credencialesNormalizadas.getUsernameConcatenado()),
+                    mostrarSensiblesEnLog ? credencialesNormalizadas.clientId()
+                            : mask(credencialesNormalizadas.clientId()),
+                    mostrarSensiblesEnLog ? credencialesNormalizadas.clientSecret()
+                            : mask(credencialesNormalizadas.clientSecret()),
+                    mostrarSensiblesEnLog ? body : maskFormBody(body)));
         }
 
         try {
@@ -92,7 +103,7 @@ public class ProveedorTokenNativo implements ProveedorToken {
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
             if (log.isLoggable(Level.INFO)) {
                 log.info(String.format("[UBLKIT][TOKEN] respuestaToken status=%s, body=%s", response.statusCode(),
-                        sanitizeBody(response.body())));
+                        mostrarSensiblesEnLog ? response.body() : sanitizeBody(response.body())));
             }
 
             if (response.statusCode() != 200) {
@@ -110,7 +121,7 @@ public class ProveedorTokenNativo implements ProveedorToken {
             cacheTokens.put(claveCache, new TokenCacheado(token, expiraEn));
             if (log.isLoggable(Level.INFO)) {
                 log.info(String.format("[UBLKIT][TOKEN] tokenObtenido ambiente=%s, expiraEn=%s, tokenMask=%s", ambiente,
-                        expiraEn, mask(token)));
+                        expiraEn, mostrarSensiblesEnLog ? token : mask(token)));
             }
             return token;
 
@@ -145,31 +156,23 @@ public class ProveedorTokenNativo implements ProveedorToken {
         return body.toString();
     }
 
-    private CredencialesEmpresa normalizarCredencialesParaAmbiente(CredencialesEmpresa credenciales, TipoAmbiente ambiente) {
+    private CredencialesEmpresa normalizarCredencialesParaAmbiente(CredencialesEmpresa credenciales,
+            TipoAmbiente ambiente) {
         if (ambiente != TipoAmbiente.BETA) {
             return credenciales;
         }
 
         String clientId = asegurarPrefijoTest(credenciales.clientId());
         String clientSecret = asegurarPrefijoTest(credenciales.clientSecret());
-        if (!BETA_SOL_USUARIO.equals(credenciales.usuarioSol())
-                || !BETA_SOL_CLAVE.equals(credenciales.claveSol())
+        if (!BETA_SOL_USUARIO.equals(credenciales.usuarioSol()) || !BETA_SOL_CLAVE.equals(credenciales.claveSol())
                 || !sameText(clientId, credenciales.clientId())
                 || !sameText(clientSecret, credenciales.clientSecret())) {
             log.warning(String.format(
                     "[UBLKIT][TOKEN] BETA detectado: se forzara usuarioSOL=MODDATOS y client_id/client_secret con prefijo test-. ruc=%s, usuarioOriginal=%s, clientIdOriginal=%s, clientIdUsado=%s",
-                    mask(credenciales.ruc()),
-                    mask(credenciales.usuarioSol()),
-                    mask(credenciales.clientId()),
-                    mask(clientId)));
+                    credenciales.ruc(), credenciales.usuarioSol(), credenciales.clientId(), clientId));
         }
 
-        return new CredencialesEmpresa(
-                credenciales.ruc(),
-                BETA_SOL_USUARIO,
-                BETA_SOL_CLAVE,
-                clientId,
-                clientSecret);
+        return new CredencialesEmpresa(credenciales.ruc(), BETA_SOL_USUARIO, BETA_SOL_CLAVE, clientId, clientSecret);
     }
 
     private String asegurarPrefijoTest(String value) {
