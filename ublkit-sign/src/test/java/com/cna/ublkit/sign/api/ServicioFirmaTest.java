@@ -67,7 +67,7 @@ class ServicioFirmaTest {
 
         assertThat(resultado).isNotNull();
         assertThat(resultado.exitoso()).isTrue();
-        assertThat(resultado.xmlFirmadoStr()).contains("ID=\"" + idReferencia + "\"");
+        assertThat(resultado.xmlFirmadoStr()).contains("Id=\"" + idReferencia + "\"");
         assertThat(resultado.digestValue()).isNotBlank();
     }
 
@@ -115,7 +115,7 @@ class ServicioFirmaTest {
         for (String idRef : idsEspeciales) {
             ResultadoFirma resultado = ServicioFirma.firmarXml(XML_FACTURA_MINIMA, idRef, certificado);
             assertThat(resultado.exitoso()).isTrue();
-            assertThat(resultado.xmlFirmadoStr()).contains("ID=\"" + idRef + "\"");
+            assertThat(resultado.xmlFirmadoStr()).contains("Id=\"" + idRef + "\"");
         }
     }
 

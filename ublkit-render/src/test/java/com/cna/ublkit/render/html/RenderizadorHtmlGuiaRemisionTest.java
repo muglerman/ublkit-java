@@ -376,7 +376,7 @@ class RenderizadorHtmlGuiaRemisionTest {
             BorradorGuiaRemision guia = crearGuiaBasica();
             List<LineaGuia> lineas = new java.util.ArrayList<>();
             for (int i = 1; i <= 50; i++) {
-                LineaGuia linea = new LineaGuia(null, "Product " + i, "ZZ", "10", null, null);
+                LineaGuia linea = new LineaGuia(null, new java.math.BigDecimal("10"), "Product " + i, "ZZ", null, null);
                 lineas.add(linea);
             }
             guia.setDetalles(lineas);
@@ -416,13 +416,13 @@ class RenderizadorHtmlGuiaRemisionTest {
         ));
 
         // Recipient
-        guia.setDestinatario(new com.cna.ublkit.ubl.modelo.guia.ActorGuia(
+        guia.setDestinatario(new com.cna.ublkit.ubl.modelo.guia.DestinatarioGuia(
                 "1", "10123456789", "Cliente B"
         ));
 
         // Line items
         List<LineaGuia> lineas = new java.util.ArrayList<>();
-        LineaGuia linea = new LineaGuia(null, "Product 1", "ZZ", "10", null, null);
+        LineaGuia linea = new LineaGuia(null, new java.math.BigDecimal("10"), "Product 1", "ZZ", null, null);
         lineas.add(linea);
         guia.setDetalles(lineas);
 

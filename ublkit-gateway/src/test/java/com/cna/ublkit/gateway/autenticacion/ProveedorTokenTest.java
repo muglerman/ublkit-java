@@ -43,7 +43,7 @@ class ProveedorTokenTest {
      * Test that obtenerToken method takes CredencialesEmpresa and TipoAmbiente.
      */
     @Test
-    void interface_obtenerTokenMethodSignatureIsCorrect() {
+    void interface_obtenerTokenMethodSignatureIsCorrect() throws NoSuchMethodException {
         var method = ProveedorToken.class.getDeclaredMethod("obtenerToken",
                 CredencialesEmpresa.class, TipoAmbiente.class);
 

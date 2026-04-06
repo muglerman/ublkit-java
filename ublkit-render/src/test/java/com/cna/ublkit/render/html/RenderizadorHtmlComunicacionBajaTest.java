@@ -292,7 +292,7 @@ class RenderizadorHtmlComunicacionBajaTest {
             ComunicacionBaja baja = crearComunicacionBasica();
             List<ItemBaja> items = new java.util.ArrayList<>();
             for (int i = 1; i <= 50; i++) {
-                ItemBaja item = new ItemBaja("01", "F0" + (i / 10), i, "Reason " + i);
+                ItemBaja item = new ItemBaja("F0" + (i / 10), i, "01", "Reason " + i);
                 items.add(item);
             }
             baja.setComprobantes(items);
@@ -353,12 +353,12 @@ class RenderizadorHtmlComunicacionBajaTest {
         );
         baja.setEmisor(emisor);
 
-        EmisorDocumento firmante = new EmisorDocumento(
-                "20123456789", "Empresa Test", "Empresa Comercial", null, null
+        com.cna.ublkit.ubl.modelo.actor.FirmanteDocumento firmante = new com.cna.ublkit.ubl.modelo.actor.FirmanteDocumento(
+                "20123456789", "Empresa Test"
         );
         baja.setFirmante(firmante);
 
-        ItemBaja item = new ItemBaja("01", "F001", 100, "Cancelación");
+        ItemBaja item = new ItemBaja("F001", 100, "01", "Cancelación");
         baja.setComprobantes(List.of(item));
 
         return baja;

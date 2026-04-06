@@ -55,6 +55,9 @@ public final class ServicioFirma {
      * @return Resultado con el XML firmado, el hash y el estado.
      */
     public static ResultadoFirma firmarXml(String xml, String idReferencia, DetallesCertificado certificado) {
+        if (certificado == null) {
+            throw new NullPointerException("Certificado no puede ser null");
+        }
         try {
             Document documentoFirmado = FirmadorXml.firmar(xml, idReferencia, certificado);
 

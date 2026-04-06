@@ -366,10 +366,10 @@ class RenderizadorHtmlResumenDiarioTest {
             ResumenDiario resumen = crearResumenBasico();
             List<ItemResumenDiario> items = new java.util.ArrayList<>();
             for (int i = 1; i <= 50; i++) {
-                ComprobanteResumen comprobante = new ComprobanteResumen(
-                        "01", "F001-" + i, "PEN",
-                        null, null, null, null, null
-                );
+                ComprobanteResumen comprobante = new ComprobanteResumen();
+                comprobante.setTipoComprobante("01");
+                comprobante.setSerieNumero("F001-" + i);
+                comprobante.setMoneda("PEN");
                 ItemResumenDiario item = new ItemResumenDiario("01", comprobante);
                 items.add(item);
             }
@@ -431,16 +431,18 @@ class RenderizadorHtmlResumenDiarioTest {
         );
         resumen.setEmisor(emisor);
 
-        EmisorDocumento firmante = new EmisorDocumento(
-                "20123456789", "Empresa Test", "Empresa Comercial", null, null
+        com.cna.ublkit.ubl.modelo.actor.FirmanteDocumento firmante = new com.cna.ublkit.ubl.modelo.actor.FirmanteDocumento(
+                "20123456789", "Empresa Test"
         );
         resumen.setFirmante(firmante);
 
-        ComprobanteResumen comprobante = new ComprobanteResumen(
-                "01", "F001-100", "PEN",
-                new com.cna.ublkit.ubl.modelo.sunat.resumen.ClienteResumen("1", "10123456789", "Cliente Test"),
-                null, null, null, null
-        );
+        ComprobanteResumen comprobante = new ComprobanteResumen();
+        comprobante.setTipoComprobante("01");
+        comprobante.setSerieNumero("F001-100");
+        comprobante.setMoneda("PEN");
+        comprobante.setCliente(new com.cna.ublkit.ubl.modelo.actor.ReceptorDocumento(
+                "1", "10123456789", "Cliente Test", null, null
+        ));
         ItemResumenDiario item = new ItemResumenDiario("01", comprobante);
         resumen.setComprobantes(List.of(item));
 

@@ -57,7 +57,7 @@ class ArchivoCdrTest {
         retrieved[0] = 99;
 
         byte[] retrieved2 = cdr.archivoBytes();
-        assertThat(retrieved2[0]).isEqualTo(1);
+        assertThat(retrieved2[0]).as("bytes should be defensively copied").isEqualTo((byte) 1);
     }
 
     /**
@@ -247,7 +247,7 @@ class ArchivoCdrTest {
 
         ArchivoCdr cdr = new ArchivoCdr(largeArray, "0", "Test", List.of());
 
-        assertThat(cdr.archivoBytes()).hasLength(10000);
+        assertThat(cdr.archivoBytes()).hasSize(10000);
     }
 
     /**
