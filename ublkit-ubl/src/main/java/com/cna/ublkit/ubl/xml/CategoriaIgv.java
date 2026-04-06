@@ -26,19 +26,41 @@ record CategoriaIgv(
     private static final CategoriaIgv IVAP = new CategoriaIgv("S", "1016", "IVAP", "VAT");
 
     /**
-     * Obtiene la categoría de impuesto según el código de afectación IGV (Catálogo 07).
+     * Obtiene la categoría de impuesto según el código de afectación IGV (Catálogo 07 SUNAT).
+     *
+     * Códigos soportados:
+     * - 10-16: Gravado (con variantes)
+     * - 17: IVAP (Impuesto Valor Agregado Promocional)
+     * - 20-22: Exonerado (operaciones onerosas, transferencias y retiros gratuitos)
+     * - 30-37: Inafecto (operaciones no gravadas, retiros y transferencias)
+     * - 40: Exportación
      */
     static CategoriaIgv obtener(String igvTipo) {
         if (igvTipo == null) return GRAVADO;
         return switch (igvTipo) {
+            // Códigos Gravados (10-16)
             case "10", "11", "12", "13", "14", "15", "16" -> GRAVADO;
+
+            // Código 17: Gravado - IVAP
             case "17" -> IVAP;
-            // TODO: Agregar código "22" (Exonerado - Retiro por premio) cuando se actualicen los XMLs de validación
+
+            // Códigos Exonerados (20-22)
+            // 20: Exonerado - Operación Onerosa
+            // 21: Exonerado - Transferencia gratuita
+            // 22: Exonerado - Retiro por premio (SUNAT Catalog 7, added Q1 2024)
             case "20", "21", "22" -> EXONERADO;
+
+            // Códigos Inafectos (30-37)
+            // 30: Inafecto - Operación Onerosa
+            // 31-36: Inafecto - Retiros y variantes
+            // 37: Inafecto - Transferencia gratuita (SUNAT Catalog 7, added Q1 2024)
             case "30", "31", "32", "33", "34", "35", "36", "37" -> INAFECTO;
+
+            // Código 40: Exportación
             case "40" -> EXPORTACION;
+
+            // Fallback para códigos no explícitos (gratuitos que empiezan con 1 o 3)
             default -> {
-                // Gratuito codes that map to GRA
                 if (igvTipo.startsWith("1") || igvTipo.startsWith("3")) {
                     yield GRATUITO;
                 }
