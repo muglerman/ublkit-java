@@ -11,6 +11,8 @@
 <c id="17" iva="1" gra="1">Gravado - IVAP</c>
 <c id="20" exo="1">Exonerado - Operación Onerosa</c>
 <c id="21" gra="1">Exonerado - Transferencia gratuita</c>
+<!-- TODO: Verificar código 22 con SUNAT - no está en spec oficial pero sí en catalog_sunat.md -->
+<c id="22" gra="1">Exonerado - Retiro por premio</c>
 <c id="30" ina="1">Inafecto - Operación Onerosa</c>
 <c id="31" gra="1">Inafecto – Retiro por Bonificación</c>
 <c id="32" gra="1">Inafecto – Retiro</c>

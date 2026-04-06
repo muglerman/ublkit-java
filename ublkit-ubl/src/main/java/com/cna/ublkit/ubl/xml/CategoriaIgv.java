@@ -33,7 +33,8 @@ record CategoriaIgv(
         return switch (igvTipo) {
             case "10", "11", "12", "13", "14", "15", "16" -> GRAVADO;
             case "17" -> IVAP;
-            case "20", "21" -> EXONERADO;
+            // TODO: Agregar código "22" (Exonerado - Retiro por premio) cuando se actualicen los XMLs de validación
+            case "20", "21", "22" -> EXONERADO;
             case "30", "31", "32", "33", "34", "35", "36", "37" -> INAFECTO;
             case "40" -> EXPORTACION;
             default -> {

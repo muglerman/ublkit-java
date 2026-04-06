@@ -11,6 +11,8 @@
 <item numero="17" >Gravado – IVAP</item>
 <item numero="20" >Exonerado - Operación Onerosa</item>
 <item numero="21" >Exonerado – Transferencia Gratuita</item>
+<!-- TODO: Verificar código 22 con SUNAT - no está en spec oficial pero sí en catalog_sunat.md -->
+<item numero="22" >Exonerado – Retiro por premio</item>
 <item numero="30" >Inafecto - Operación Onerosa</item>
 <item numero="31" >Inafecto – Retiro por Bonificacion</item>
 <item numero="32" >Inafecto – Retiro</item>
