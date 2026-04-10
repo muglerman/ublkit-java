@@ -29,168 +29,251 @@ import com.cna.ublkit.validation.validador.ValidadorResumenDiario;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
 import jakarta.inject.Singleton;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Productores CDI para integrar los componentes de UBLKit en aplicaciones Quarkus.
+ * Cachea instancias para mantener singletons tanto en contexto CDI como en tests.
  *
  * @since 0.1.0
  */
 @ApplicationScoped
 public class UblKitProducers {
 
+    private static final Map<String, Object> cache = new HashMap<>();
+
     @Produces
     @Singleton
     public RenderizadorPdfFactura produceRenderizadorPdfFactura() {
-        return new RenderizadorPdfFactura();
+        return (RenderizadorPdfFactura) cache.computeIfAbsent(
+            "RenderizadorPdfFactura",
+            k -> new RenderizadorPdfFactura()
+        );
     }
 
     @Produces
     @Singleton
     public RenderizadorHtmlFactura produceRenderizadorHtmlFactura() {
-        return new RenderizadorHtmlFactura();
+        return (RenderizadorHtmlFactura) cache.computeIfAbsent(
+            "RenderizadorHtmlFactura",
+            k -> new RenderizadorHtmlFactura()
+        );
     }
 
     @Produces
     @Singleton
     public RenderizadorPdfNota produceRenderizadorPdfNota() {
-        return new RenderizadorPdfNota();
+        return (RenderizadorPdfNota) cache.computeIfAbsent(
+            "RenderizadorPdfNota",
+            k -> new RenderizadorPdfNota()
+        );
     }
 
     @Produces
     @Singleton
     public RenderizadorHtmlNota produceRenderizadorHtmlNota() {
-        return new RenderizadorHtmlNota();
+        return (RenderizadorHtmlNota) cache.computeIfAbsent(
+            "RenderizadorHtmlNota",
+            k -> new RenderizadorHtmlNota()
+        );
     }
 
     @Produces
     @Singleton
     public RenderizadorPdfGuiaRemision produceRenderizadorPdfGuiaRemision() {
-        return new RenderizadorPdfGuiaRemision();
+        return (RenderizadorPdfGuiaRemision) cache.computeIfAbsent(
+            "RenderizadorPdfGuiaRemision",
+            k -> new RenderizadorPdfGuiaRemision()
+        );
     }
 
     @Produces
     @Singleton
     public RenderizadorHtmlGuiaRemision produceRenderizadorHtmlGuiaRemision() {
-        return new RenderizadorHtmlGuiaRemision();
+        return (RenderizadorHtmlGuiaRemision) cache.computeIfAbsent(
+            "RenderizadorHtmlGuiaRemision",
+            k -> new RenderizadorHtmlGuiaRemision()
+        );
     }
 
     @Produces
     @Singleton
     public RenderizadorPdfResumenDiario produceRenderizadorPdfResumenDiario() {
-        return new RenderizadorPdfResumenDiario();
+        return (RenderizadorPdfResumenDiario) cache.computeIfAbsent(
+            "RenderizadorPdfResumenDiario",
+            k -> new RenderizadorPdfResumenDiario()
+        );
     }
 
     @Produces
     @Singleton
     public RenderizadorHtmlResumenDiario produceRenderizadorHtmlResumenDiario() {
-        return new RenderizadorHtmlResumenDiario();
+        return (RenderizadorHtmlResumenDiario) cache.computeIfAbsent(
+            "RenderizadorHtmlResumenDiario",
+            k -> new RenderizadorHtmlResumenDiario()
+        );
     }
 
     @Produces
     @Singleton
     public RenderizadorPdfComunicacionBaja produceRenderizadorPdfComunicacionBaja() {
-        return new RenderizadorPdfComunicacionBaja();
+        return (RenderizadorPdfComunicacionBaja) cache.computeIfAbsent(
+            "RenderizadorPdfComunicacionBaja",
+            k -> new RenderizadorPdfComunicacionBaja()
+        );
     }
 
     @Produces
     @Singleton
     public RenderizadorHtmlComunicacionBaja produceRenderizadorHtmlComunicacionBaja() {
-        return new RenderizadorHtmlComunicacionBaja();
+        return (RenderizadorHtmlComunicacionBaja) cache.computeIfAbsent(
+            "RenderizadorHtmlComunicacionBaja",
+            k -> new RenderizadorHtmlComunicacionBaja()
+        );
     }
 
     @Produces
     @Singleton
     public SerializadorXmlFactura produceSerializadorXmlFactura() {
-        return new SerializadorXmlFactura();
+        return (SerializadorXmlFactura) cache.computeIfAbsent(
+            "SerializadorXmlFactura",
+            k -> new SerializadorXmlFactura()
+        );
     }
 
     @Produces
     @Singleton
     public SerializadorXmlNotaCredito produceSerializadorXmlNotaCredito() {
-        return new SerializadorXmlNotaCredito();
+        return (SerializadorXmlNotaCredito) cache.computeIfAbsent(
+            "SerializadorXmlNotaCredito",
+            k -> new SerializadorXmlNotaCredito()
+        );
     }
 
     @Produces
     @Singleton
     public SerializadorXmlNotaDebito produceSerializadorXmlNotaDebito() {
-        return new SerializadorXmlNotaDebito();
+        return (SerializadorXmlNotaDebito) cache.computeIfAbsent(
+            "SerializadorXmlNotaDebito",
+            k -> new SerializadorXmlNotaDebito()
+        );
     }
 
     @Produces
     @Singleton
     public SerializadorXmlGuiaRemision produceSerializadorXmlGuiaRemision() {
-        return new SerializadorXmlGuiaRemision();
+        return (SerializadorXmlGuiaRemision) cache.computeIfAbsent(
+            "SerializadorXmlGuiaRemision",
+            k -> new SerializadorXmlGuiaRemision()
+        );
     }
 
     @Produces
     @Singleton
     public SerializadorXmlComunicacionBaja produceSerializadorXmlComunicacionBaja() {
-        return new SerializadorXmlComunicacionBaja();
+        return (SerializadorXmlComunicacionBaja) cache.computeIfAbsent(
+            "SerializadorXmlComunicacionBaja",
+            k -> new SerializadorXmlComunicacionBaja()
+        );
     }
 
     @Produces
     @Singleton
     public SerializadorXmlResumenDiario produceSerializadorXmlResumenDiario() {
-        return new SerializadorXmlResumenDiario();
+        return (SerializadorXmlResumenDiario) cache.computeIfAbsent(
+            "SerializadorXmlResumenDiario",
+            k -> new SerializadorXmlResumenDiario()
+        );
     }
 
     @Produces
     @Singleton
     public SerializadorXmlPercepcion produceSerializadorXmlPercepcion() {
-        return new SerializadorXmlPercepcion();
+        return (SerializadorXmlPercepcion) cache.computeIfAbsent(
+            "SerializadorXmlPercepcion",
+            k -> new SerializadorXmlPercepcion()
+        );
     }
 
     @Produces
     @Singleton
     public SerializadorXmlRetencion produceSerializadorXmlRetencion() {
-        return new SerializadorXmlRetencion();
+        return (SerializadorXmlRetencion) cache.computeIfAbsent(
+            "SerializadorXmlRetencion",
+            k -> new SerializadorXmlRetencion()
+        );
     }
 
     @Produces
     @Singleton
     public ValidadorFactura produceValidadorFactura() {
-        return new ValidadorFactura();
+        return (ValidadorFactura) cache.computeIfAbsent(
+            "ValidadorFactura",
+            k -> new ValidadorFactura()
+        );
     }
 
     @Produces
     @Singleton
     public ValidadorNotaCredito produceValidadorNotaCredito() {
-        return new ValidadorNotaCredito();
+        return (ValidadorNotaCredito) cache.computeIfAbsent(
+            "ValidadorNotaCredito",
+            k -> new ValidadorNotaCredito()
+        );
     }
 
     @Produces
     @Singleton
     public ValidadorNotaDebito produceValidadorNotaDebito() {
-        return new ValidadorNotaDebito();
+        return (ValidadorNotaDebito) cache.computeIfAbsent(
+            "ValidadorNotaDebito",
+            k -> new ValidadorNotaDebito()
+        );
     }
 
     @Produces
     @Singleton
     public ValidadorGuiaRemision produceValidadorGuiaRemision() {
-        return new ValidadorGuiaRemision();
+        return (ValidadorGuiaRemision) cache.computeIfAbsent(
+            "ValidadorGuiaRemision",
+            k -> new ValidadorGuiaRemision()
+        );
     }
 
     @Produces
     @Singleton
     public ValidadorResumenDiario produceValidadorResumenDiario() {
-        return new ValidadorResumenDiario();
+        return (ValidadorResumenDiario) cache.computeIfAbsent(
+            "ValidadorResumenDiario",
+            k -> new ValidadorResumenDiario()
+        );
     }
 
     @Produces
     @Singleton
     public ValidadorComunicacionBaja produceValidadorComunicacionBaja() {
-        return new ValidadorComunicacionBaja();
+        return (ValidadorComunicacionBaja) cache.computeIfAbsent(
+            "ValidadorComunicacionBaja",
+            k -> new ValidadorComunicacionBaja()
+        );
     }
 
     @Produces
     @Singleton
     public ValidadorPercepcion produceValidadorPercepcion() {
-        return new ValidadorPercepcion();
+        return (ValidadorPercepcion) cache.computeIfAbsent(
+            "ValidadorPercepcion",
+            k -> new ValidadorPercepcion()
+        );
     }
 
     @Produces
     @Singleton
     public ValidadorRetencion produceValidadorRetencion() {
-        return new ValidadorRetencion();
+        return (ValidadorRetencion) cache.computeIfAbsent(
+            "ValidadorRetencion",
+            k -> new ValidadorRetencion()
+        );
     }
 }
