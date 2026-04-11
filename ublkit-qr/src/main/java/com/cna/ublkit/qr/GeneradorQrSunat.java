@@ -5,11 +5,11 @@ import com.cna.ublkit.ubl.modelo.BorradorNotaCredito;
 import com.cna.ublkit.ubl.modelo.BorradorNotaDebito;
 import com.cna.ublkit.ubl.modelo.DocumentoBase;
 import com.google.zxing.BarcodeFormat;
-import com.google.zxing.client.j2se.MatrixToImageWriter;
+
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
 
-import java.io.ByteArrayOutputStream;
+
 import java.math.BigDecimal;
 import java.time.format.DateTimeFormatter;
 import java.util.Base64;
@@ -85,10 +85,29 @@ public class GeneradorQrSunat {
             QRCodeWriter qrCodeWriter = new QRCodeWriter();
             BitMatrix bitMatrix = qrCodeWriter.encode(texto, BarcodeFormat.QR_CODE, 200, 200);
 
-            ByteArrayOutputStream pngOutputStream = new ByteArrayOutputStream();
-            MatrixToImageWriter.writeToStream(bitMatrix, "PNG", pngOutputStream);
-            byte[] pngData = pngOutputStream.toByteArray();
-            return Base64.getEncoder().encodeToString(pngData);
+            int width = bitMatrix.getWidth();
+            int height = bitMatrix.getHeight();
+
+            StringBuilder svg = new StringBuilder();
+            svg.append("<svg xmlns=\"http://www.w3.org/2000/svg\" ");
+            svg.append("width=\"").append(width).append("\" ");
+            svg.append("height=\"").append(height).append("\" ");
+            svg.append("viewBox=\"0 0 ").append(width).append(" ").append(height).append("\">");
+            svg.append("<path d=\"");
+
+            for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width; x++) {
+                    if (bitMatrix.get(x, y)) {
+                        svg.append("M").append(x).append(",").append(y).append("h1v1h-1z ");
+                    }
+                }
+            }
+
+            svg.append("\" fill=\"#000000\"/>");
+            svg.append("</svg>");
+
+            byte[] svgData = svg.toString().getBytes(java.nio.charset.StandardCharsets.UTF_8);
+            return Base64.getEncoder().encodeToString(svgData);
         } catch (Exception e) {
             throw new RuntimeException("Error al generar QR", e);
         }

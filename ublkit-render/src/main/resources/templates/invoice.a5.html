@@ -126,7 +126,7 @@
   </div>
 
   <div class="qr">
-    <div><img src="{{ invoice.qr }}" alt="QR" /></div>
+    <div><img src="data:image/svg+xml;base64,{{ invoice.qr }}" alt="QR" /></div>
     <div style="padding-left:8px;">
       <span class="pill">Representacion impresa</span>
       {% if invoice.signer %}<p class="small" style="margin-top:4px;">Firmante: {{ invoice.signer.identity }}</p>{% endif %}

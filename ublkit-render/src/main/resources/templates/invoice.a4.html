@@ -41,7 +41,7 @@
   </style>
 </head>
 <body>
-<div class="shell">
+<div class="shell {% if invoice.estado == 'BORRADOR' %}watermark-borrador{% elseif invoice.estado == 'ANULADO' %}watermark-anulado{% endif %}">
   {% if invoice.header %}<div class="card" style="padding:7px 10px; margin-bottom:8px;">{{ invoice.header }}</div>{% endif %}
   <div class="header">
     <div class="cell logo"><img src="{{ invoice.logo }}" alt="Logo" /></div>
@@ -166,6 +166,12 @@
       <p style="margin-top:6px;"><strong>Detraccion:</strong> {{ invoice.detraction.amount }}</p>
       <p class="small">Bien/Servicio: {{ invoice.detraction.serviceCode }} | Medio pago: {{ invoice.detraction.method }} | Cuenta BN: {{ invoice.detraction.financialAccount }}</p>
       {% endif %}
+      {% if invoice.cuentasBancarias is not empty %}
+      <p style="margin-top:6px;"><strong>Cuentas Bancarias:</strong></p>
+      {% for cb in invoice.cuentasBancarias %}
+      <p class="small">{{ cb.banco }} - {{ cb.numero }} {% if cb.cci %}(CCI: {{ cb.cci }}){% endif %}</p>
+      {% endfor %}
+      {% endif %}
       {% if invoice.perception %}
       <p style="margin-top:6px;"><strong>Percepcion:</strong> {{ invoice.perception.amount }} ({{ invoice.perception.percent }})</p>
       {% endif %}
@@ -196,7 +202,7 @@
   </div>
 
   <div class="qr">
-    <div><img src="{{ invoice.qr }}" alt="QR" /></div>
+    <div><img src="data:image/svg+xml;base64,{{ invoice.qr }}" alt="QR" /></div>
     <div style="padding-left:10px;">
       <span class="pill">Representacion impresa</span>
       <p class="small" style="margin-top:6px;">Valide este documento en SUNAT.</p>
