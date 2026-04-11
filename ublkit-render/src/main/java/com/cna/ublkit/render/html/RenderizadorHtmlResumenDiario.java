@@ -24,7 +24,7 @@ import java.util.Map;
  */
 public class RenderizadorHtmlResumenDiario implements RenderizadorDocumento<ResumenDiario> {
 
-    private final PebbleEngine engine = new PebbleEngine.Builder().build();
+    private final PebbleEngine engine = new PebbleEngine.Builder().loader(new io.pebbletemplates.pebble.loader.ClasspathLoader()).build();
 
     @Override
     public ResultadoRender renderizar(ContextoRender<ResumenDiario> contexto) {

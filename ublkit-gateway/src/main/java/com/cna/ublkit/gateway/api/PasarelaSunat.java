@@ -72,4 +72,16 @@ public interface PasarelaSunat {
      */
     ResultadoConsulta consultarTicketRest(String ticket, CredencialesEmpresa credenciales, TipoAmbiente ambiente);
 
+    /**
+     * Consulta el estado de un ticket de forma asíncrona, implementando polling con backoff
+     * exponencial hasta que SUNAT procese el ticket (estado diferente de EN_PROCESO).
+     * Útil para no bloquear los hilos principales.
+     *
+     * @param ticket Ticket a consultar.
+     * @param credenciales Credenciales de la empresa.
+     * @param ambiente Ambiente.
+     * @param esRest Si es true, usa el endpoint REST (Guías). Si es false, usa SOAP (Resúmenes/Bajas).
+     * @return Un CompletableFuture que se completará con el resultado de la consulta.
+     */
+    java.util.concurrent.CompletableFuture<ResultadoConsulta> consultarTicketAsincrono(String ticket, CredencialesEmpresa credenciales, TipoAmbiente ambiente, boolean esRest);
 }

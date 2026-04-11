@@ -45,7 +45,7 @@ public class RenderizadorHtmlGuiaRemision implements RenderizadorDocumento<Borra
     }
 
     public RenderizadorHtmlGuiaRemision(FormatoImpresion formato) {
-         this.engine = new PebbleEngine.Builder().build();
+         this.engine = new PebbleEngine.Builder().loader(new io.pebbletemplates.pebble.loader.ClasspathLoader()).build();
          this.formato = formato;
     }
 
