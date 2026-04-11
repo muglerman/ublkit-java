@@ -7,25 +7,25 @@
   <style>
     * { box-sizing:border-box; }
     body { margin:0; padding:18px; font-family:"Helvetica Neue",Helvetica,Arial,sans-serif; color:#0f172a; font-size:12px; line-height:1.35; }
-    .card { border:1px solid #cbd5e1; border-radius:8px; background:#fff; }
+    .card { border:1px solid {% if invoice.color %}{{invoice.color}}{% else %}#cbd5e1{% endif %}; border-radius:8px; background:#fff; }
     .header { display:table; width:100%; border-collapse:separate; border-spacing:10px 0; }
     .cell { display:table-cell; vertical-align:top; }
     .logo { width:90px; }
     .logo img { max-width:78px; max-height:78px; }
     .issuer { padding:10px; }
     .issuer h1 { margin:0 0 4px; font-size:16px; }
-    .doc { width:230px; border:2px solid #0f172a; border-radius:10px; overflow:hidden; }
+    .doc { width:230px; border:2px solid {% if invoice.color %}{{invoice.color}}{% else %}#0f172a{% endif %}; border-radius:10px; overflow:hidden; }
     .doc p { margin:0; padding:8px 10px; text-align:center; font-weight:700; }
     .doc .type { background:#ffedd5; color:#7c2d12; }
     .section { margin-top:10px; }
-    .title { margin:0 0 5px; font-size:11px; text-transform:uppercase; letter-spacing:.3px; color:#334155; font-weight:700; }
+    .title { margin:0 0 5px; font-size:11px; text-transform:uppercase; letter-spacing:.3px; color:{% if invoice.color %}{{invoice.color}}{% else %}#334155{% endif %}; font-weight:700; }
     .grid { display:table; width:100%; }
     .col { display:table-cell; width:50%; vertical-align:top; padding:8px 10px; }
     .col + .col { border-left:1px solid #e2e8f0; }
     p { margin:0 0 4px; }
     .small { color:#475569; font-size:11px; }
     table { width:100%; border-collapse:collapse; }
-    th, td { border:1px solid #cbd5e1; padding:6px 7px; vertical-align:top; }
+    th, td { border:1px solid {% if invoice.color %}{{invoice.color}}{% else %}#cbd5e1{% endif %}; padding:6px 7px; vertical-align:top; }
     th { background:#fff7ed; color:#0b1324; font-size:11px; text-align:left; }
     .center { text-align:center; }
     .right { text-align:right; }

@@ -87,5 +87,27 @@ public class RenderizadorHtmlComunicacionBaja implements RenderizadorDocumento<C
         if (attrs == null || attrs.isEmpty()) return;
         voided.put("header", txt(attrs.get("header")));
         voided.put("footer", txt(attrs.get("footer")));
+
+        if (attrs.containsKey("color")) {
+            voided.put("color", txt(attrs.get("color")));
+        }
+
+        if (attrs.containsKey("logo")) {
+            Object logoObj = attrs.get("logo");
+            if (logoObj instanceof String s) {
+                voided.put("logo", s);
+            } else if (logoObj instanceof java.io.InputStream is) {
+                try (is) {
+                    byte[] bytes = is.readAllBytes();
+                    String b64 = java.util.Base64.getEncoder().encodeToString(bytes);
+                    voided.put("logo", "data:image/png;base64," + b64);
+                } catch (java.io.IOException e) {
+                    // Fallback to default
+                }
+            } else if (logoObj instanceof byte[] bytes) {
+                String b64 = java.util.Base64.getEncoder().encodeToString(bytes);
+                voided.put("logo", "data:image/png;base64," + b64);
+            }
+        }
     }
 }

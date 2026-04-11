@@ -129,5 +129,27 @@ public class RenderizadorHtmlResumenDiario implements RenderizadorDocumento<Resu
         if (attrs == null || attrs.isEmpty()) return;
         summary.put("header", txt(attrs.get("header")));
         summary.put("footer", txt(attrs.get("footer")));
+
+        if (attrs.containsKey("color")) {
+            summary.put("color", txt(attrs.get("color")));
+        }
+
+        if (attrs.containsKey("logo")) {
+            Object logoObj = attrs.get("logo");
+            if (logoObj instanceof String s) {
+                summary.put("logo", s);
+            } else if (logoObj instanceof java.io.InputStream is) {
+                try (is) {
+                    byte[] bytes = is.readAllBytes();
+                    String b64 = java.util.Base64.getEncoder().encodeToString(bytes);
+                    summary.put("logo", "data:image/png;base64," + b64);
+                } catch (java.io.IOException e) {
+                    // Fallback to default
+                }
+            } else if (logoObj instanceof byte[] bytes) {
+                String b64 = java.util.Base64.getEncoder().encodeToString(bytes);
+                summary.put("logo", "data:image/png;base64," + b64);
+            }
+        }
     }
 }

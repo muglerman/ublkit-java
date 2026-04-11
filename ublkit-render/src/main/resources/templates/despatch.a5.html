@@ -18,14 +18,14 @@
     .doc p { margin:0; padding:6px 8px; text-align:center; font-weight:700; }
     .doc .type { background:#eff6ff; color:#1e3a8a; }
     .section { margin-top:8px; }
-    .title { margin:0 0 4px; font-size:10px; text-transform:uppercase; letter-spacing:.3px; color:#334155; font-weight:700; }
+    .title { margin:0 0 4px; font-size:10px; text-transform:uppercase; letter-spacing:.3px; color:{% if receipt.color %}{{receipt.color}}{% else %}#334155{% endif %}; font-weight:700; }
     .grid { display:table; width:100%; }
     .col { display:table-cell; width:50%; vertical-align:top; padding:7px 8px; }
     .col + .col { border-left:1px solid #e2e8f0; }
     p { margin:0 0 3px; }
     .small { color:#475569; font-size:10px; }
     table { width:100%; border-collapse:collapse; }
-    th, td { border:1px solid #cbd5e1; padding:5px; vertical-align:top; }
+    th, td { border:1px solid {% if receipt.color %}{{receipt.color}}{% else %}#cbd5e1{% endif %}; padding:5px; vertical-align:top; }
     th { background:#eff6ff; font-size:9.8px; text-align:left; }
     .center { text-align:center; }
     .right { text-align:right; }

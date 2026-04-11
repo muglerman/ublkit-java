@@ -7,7 +7,7 @@
   <style>
     * { box-sizing:border-box; }
     body { margin:0; padding:18px; font-family:"Helvetica Neue",Helvetica,Arial,sans-serif; color:#0f172a; font-size:12px; line-height:1.35; }
-    .card { border:1px solid #cbd5e1; border-radius:8px; background:#fff; }
+    .card { border:1px solid {% if voided.color %}{{voided.color}}{% else %}#cbd5e1{% endif %}; border-radius:8px; background:#fff; }
     .header { padding:12px; }
     h1 { margin:0 0 6px; font-size:18px; }
     p { margin:0 0 4px; }
@@ -15,8 +15,8 @@
     .meta { display:table; width:100%; margin-top:8px; }
     .meta > div { display:table-cell; width:50%; vertical-align:top; }
     table { width:100%; border-collapse:collapse; margin-top:10px; }
-    th, td { border:1px solid #cbd5e1; padding:6px 7px; vertical-align:top; }
-    th { background:#fef2f2; font-size:11px; text-align:left; }
+    th, td { border:1px solid {% if voided.color %}{{voided.color}}{% else %}#cbd5e1{% endif %}; padding:6px 7px; vertical-align:top; }
+    th { background:{% if voided.color %}{{voided.color}}{% else %}#fef2f2{% endif %}; color:{% if voided.color %}#ffffff{% else %}#000000{% endif %}; font-size:11px; text-align:left; }
     .center { text-align:center; }
   </style>
 </head>
