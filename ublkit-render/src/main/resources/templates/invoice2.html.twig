@@ -285,7 +285,7 @@
             </div>
         </div>
         <div id="qrcode">
-            <img src="{{ qrCode(doc)|image_b64('svg+xml') }}">
+            <img src="data:image/svg+xml;base64,{{ invoice.qr | default(doc.qr) }}">
         </div>
     </div>
 </main>
