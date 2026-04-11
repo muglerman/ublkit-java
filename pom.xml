@@ -84,6 +84,7 @@
         <module>ublkit-ubl</module>
         <module>ublkit-sign</module>
         <module>ublkit-gateway</module>
+        <module>ublkit-qr</module>
         <module>ublkit-render</module>
         <module>ublkit-validation</module>
         <module>ublkit-catalogs</module>

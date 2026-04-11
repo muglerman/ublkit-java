@@ -7,29 +7,22 @@
 		<artifactId>ublkit-parent</artifactId>
 		<version>1.0.0-SNAPSHOT</version>
 	</parent>
-	<artifactId>ublkit-render</artifactId>
-	<name>ublkit-render</name>
-	<description>Render framework-agnostic module</description>
+	<artifactId>ublkit-qr</artifactId>
+	<name>ublkit-qr</name>
+	<description>Módulo de generación de código QR para representación gráfica</description>
 
 	<dependencies>
+		<!-- ZXing core para generación de QR -->
 		<dependency>
-			<groupId>com.cna</groupId>
-			<artifactId>ublkit-qr</artifactId>
-			<version>${project.version}</version>
+			<groupId>com.google.zxing</groupId>
+			<artifactId>core</artifactId>
+			<version>3.5.3</version>
 		</dependency>
-		<!-- Template Engine (Java Puro) -->
 		<dependency>
-			<groupId>io.pebbletemplates</groupId>
-			<artifactId>pebble</artifactId>
-			<version>3.2.2</version>
+			<groupId>com.google.zxing</groupId>
+			<artifactId>javase</artifactId>
+			<version>3.5.3</version>
 		</dependency>
-		<!-- HTML to PDF (Java Puro, basado en PDFBox) -->
-		<dependency>
-			<groupId>io.github.openhtmltopdf</groupId>
-			<artifactId>openhtmltopdf-pdfbox</artifactId>
-			<version>1.1.37</version>
-		</dependency>
-		<!-- Domain Model -->
 		<dependency>
 			<groupId>com.cna</groupId>
 			<artifactId>ublkit-ubl</artifactId>
