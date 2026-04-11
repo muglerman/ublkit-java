@@ -74,7 +74,7 @@ public class RenderizadorHtmlGuiaRemision implements RenderizadorDocumento<Borra
 
         // Metadatos y firmas.
         receipt.put("hash", texto(contexto.hashDocumento()));
-        receipt.put("qr", texto(contexto.qrBase64()));
+        receipt.put("qr", "data:image/png;base64," + texto(contexto.qrBase64()));
         receipt.put("logo", "logo.jpg");
         if (doc.getFirmante() != null) {
             Map<String, Object> signer = new HashMap<>();
