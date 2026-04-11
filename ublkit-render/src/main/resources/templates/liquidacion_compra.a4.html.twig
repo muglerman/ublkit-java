@@ -422,7 +422,7 @@
                             </blockquote>
                         </td>
                         <td width="15%" align="right">
-                            <img src="{{ qrCode(doc)|image_b64('svg+xml') }}" alt="Qr Image">
+                            <img src="data:image/svg+xml;base64,{{ invoice.qr | default(doc.qr) }}" alt="Qr Image">
                         </td>
                     </tr>
                     </tbody>
