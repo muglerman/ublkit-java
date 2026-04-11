@@ -52,7 +52,7 @@ public class RenderizadorHtmlFactura implements RenderizadorDocumento<BorradorFa
     }
 
     public RenderizadorHtmlFactura(FormatoImpresion formato) {
-        this.engine = new PebbleEngine.Builder().build();
+        this.engine = new PebbleEngine.Builder().loader(new io.pebbletemplates.pebble.loader.ClasspathLoader()).build();
         this.formato = formato;
     }
 
