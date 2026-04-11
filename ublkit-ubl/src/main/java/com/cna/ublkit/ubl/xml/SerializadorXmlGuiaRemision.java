@@ -23,6 +23,9 @@ public final class SerializadorXmlGuiaRemision implements SerializadorXml<Borrad
 
     @Override
     public String serializar(BorradorGuiaRemision guia) {
+        if (guia == null) return null;
+        com.cna.ublkit.ubl.ensamblador.EnsambladorGuia.ensamblar(guia);
+
         Document doc = crearDocumento(NS_DESPATCH, "DespatchAdvice");
         Element raiz = doc.getDocumentElement();
 

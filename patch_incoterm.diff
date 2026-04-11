@@ -1,0 +1,11 @@
+<<<<<<< SEARCH
+    // ── Reglas Exportación ───────────────────────────────────────
+
+    private static void aplicarReglasExportacion(BorradorFactura factura) {
+        boolean esExportacion = "0200".equals(factura.getTipoOperacion());
+=======
+    // ── Reglas Exportación ───────────────────────────────────────
+
+    private static void aplicarReglasExportacion(BorradorFactura factura) {
+        boolean esExportacion = "0200".equals(factura.getTipoOperacion());
+>>>>>>> REPLACE
