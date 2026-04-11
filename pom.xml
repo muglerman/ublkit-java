@@ -1,95 +1,91 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<parent>
-		<groupId>org.springframework.boot</groupId>
-		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>4.0.5</version>
-		<relativePath/> <!-- lookup parent from repository -->
-	</parent>
-	<groupId>com.cna</groupId>
-	<artifactId>ublkit-parent</artifactId>
-	<version>1.0.0-SNAPSHOT</version>
-    <packaging>pom</packaging>
-	<name>ublkit-parent</name>
-	<description>Parent POM for UBLKit Java</description>
-	<licenses>
-		<license/>
-	</licenses>
-	<developers>
-		<developer/>
-	</developers>
-	<scm>
-		<connection/>
-		<developerConnection/>
-		<tag/>
-		<url/>
-	</scm>
-	<properties>
-		<java.version>21</java.version>
-		<!-- SonarQube -->
-		<sonar.host.url>http://localhost:9000</sonar.host.url>
-		<sonar.login>squ_a2ec42f9af0f21c87b30716902c738bc3effc428</sonar.login>
-		<sonar.projectKey>com.cna:${project.artifactId}</sonar.projectKey>
-		<sonar.projectName>${project.artifactId}</sonar.projectName>
-		<skip.sonar>true</skip.sonar>
-	</properties>
-
-	<dependencies>
-		<!-- Testing dependencies -->
-		<dependency>
-			<groupId>org.junit.jupiter</groupId>
-			<artifactId>junit-jupiter</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.mockito</groupId>
-			<artifactId>mockito-core</artifactId>
-			<scope>test</scope>
-		</dependency>
-        <dependency>
-            <groupId>org.assertj</groupId>
-            <artifactId>assertj-core</artifactId>
-            <scope>test</scope>
-        </dependency>
-	</dependencies>
-
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.jacoco</groupId>
-				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.8.10</version>
-				<executions>
-					<execution>
-						<goals>
-							<goal>prepare-agent</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>report</id>
-						<phase>test</phase>
-						<goals>
-							<goal>report</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
-	</build>
-
-    <modules>
-        <module>ublkit-core</module>
-        <module>ublkit-ubl</module>
-        <module>ublkit-sign</module>
-        <module>ublkit-gateway</module>
-        <module>ublkit-render</module>
-        <module>ublkit-validation</module>
-        <module>ublkit-catalogs</module>
-        <module>ublkit-testkit</module>
-        <module>ublkit-spring-boot-starter</module>
-        <module>ublkit-quarkus</module>
-    </modules>
-
+<?xml version="1.0" encoding="UTF-8"?><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>4.0.5</version>
+    <relativePath/>
+    <!-- lookup parent from repository -->
+  </parent>
+  <groupId>com.cna</groupId>
+  <artifactId>ublkit-parent</artifactId>
+  <version>1.0.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
+  <name>ublkit-parent</name>
+  <description>Parent POM for UBLKit Java</description>
+  <licenses>
+    <license/>
+  </licenses>
+  <developers>
+    <developer/>
+  </developers>
+  <scm>
+    <connection/>
+    <developerConnection/>
+    <tag/>
+    <url/>
+  </scm>
+  <properties>
+    <java.version>21</java.version>
+    <!-- SonarQube -->
+    <sonar.host.url>http://localhost:9000</sonar.host.url>
+    <sonar.login>squ_a2ec42f9af0f21c87b30716902c738bc3effc428</sonar.login>
+    <sonar.projectKey>com.cna:${project.artifactId}</sonar.projectKey>
+    <sonar.projectName>${project.artifactId}</sonar.projectName>
+    <skip.sonar>true</skip.sonar>
+  </properties>
+  <dependencies>
+    <!-- Testing dependencies -->
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.assertj</groupId>
+      <artifactId>assertj-core</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <version>0.8.10</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>prepare-agent</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>report</id>
+            <phase>test</phase>
+            <goals>
+              <goal>report</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+  <modules>
+    <module>ublkit-core</module>
+    <module>ublkit-ubl</module>
+    <module>ublkit-sign</module>
+    <module>ublkit-gateway</module>
+    <module>ublkit-render</module>
+    <module>ublkit-validation</module>
+    <module>ublkit-catalogs</module>
+    <module>ublkit-testkit</module>
+    <module>ublkit-spring-boot-starter</module>
+    <module>ublkit-quarkus</module>
+    <module>ublkit-storage</module>
+  </modules>
 </project>

@@ -68,6 +68,7 @@ if (resultado.esValido()) {
 - [ublkit-render](./ublkit-render): Generación de PDF, HTML y Tickets.
 - [ublkit-catalogs](./ublkit-catalogs): Catálogos normativos SUNAT.
 - [ublkit-testkit](./ublkit-testkit): Herramientas para pruebas unitarias.
+- [ublkit-storage](./ublkit-storage): Almacenamiento de documentos (S3, GCS, Local).
 - [ublkit-spring-boot-starter](./ublkit-spring-boot-starter): Adaptador Spring Boot.
 - [ublkit-quarkus](./ublkit-quarkus): Adaptador Quarkus.
 
