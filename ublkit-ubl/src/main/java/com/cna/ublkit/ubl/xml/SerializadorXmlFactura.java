@@ -261,13 +261,11 @@ public final class SerializadorXmlFactura implements SerializadorXml<BorradorFac
 
     private void agregarAnticiposPrepaid(Document doc, Element raiz, BorradorFactura factura) {
         if (factura.getAnticipos() == null) return;
-        int idx = 1;
         for (Anticipo anticipo : factura.getAnticipos()) {
             Element prepaid = cac(doc, "PrepaidPayment");
-            prepaid.appendChild(cbc(doc, "ID", String.valueOf(idx)));
+            prepaid.appendChild(cbc(doc, "ID", anticipo.comprobanteSerieNumero()));
             prepaid.appendChild(cbcMonto(doc, "PaidAmount", anticipo.monto(), moneda(factura)));
             raiz.appendChild(prepaid);
-            idx++;
         }
     }
 

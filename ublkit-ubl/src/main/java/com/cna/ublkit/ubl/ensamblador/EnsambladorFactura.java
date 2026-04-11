@@ -3,6 +3,8 @@ package com.cna.ublkit.ubl.ensamblador;
 import com.cna.ublkit.ubl.modelo.BorradorFactura;
 import com.cna.ublkit.ubl.modelo.DocumentoBase;
 import com.cna.ublkit.ubl.modelo.actor.ReceptorDocumento;
+import com.cna.ublkit.ubl.modelo.complemento.Detraccion;
+import com.cna.ublkit.ubl.modelo.complemento.FormaDePago;
 import com.cna.ublkit.ubl.modelo.linea.LineaDetalle;
 import com.cna.ublkit.ubl.modelo.total.TotalImporte;
 import com.cna.ublkit.ubl.modelo.total.TotalImpuestos;
@@ -45,13 +47,95 @@ public final class EnsambladorFactura {
      * @return el mismo borrador ensamblado
      */
     public static BorradorFactura ensamblar(BorradorFactura factura) {
+        aplicarReglasExportacion(factura);
         aplicarDefectos(factura);
         ensamblarLineas(factura);
         ensamblarTotalImpuestos(factura);
         ensamblarTotalImporte(factura);
         aplicarReglasBoleta(factura);
+        aplicarReglasFormaPago(factura);
+        aplicarReglasDetraccion(factura);
         ensamblarLeyendasSunat(factura);
         return factura;
+    }
+
+    // ── Reglas Forma Pago Crédito ───────────────────────────────────
+
+    private static void aplicarReglasFormaPago(BorradorFactura factura) {
+        FormaDePago fdp = factura.getFormaDePago();
+        if (fdp != null && "Credito".equals(fdp.tipo())) {
+            if (fdp.total() == null && fdp.cuotas() != null) {
+                BigDecimal total = BigDecimal.ZERO;
+                for (var cuota : fdp.cuotas()) {
+                    if (cuota.importe() != null) {
+                        total = total.add(cuota.importe());
+                    }
+                }
+                factura.setFormaDePago(new FormaDePago(fdp.tipo(), total, fdp.cuotas()));
+            }
+        }
+    }
+
+    // ── Detracciones ──────────────────────────────────────────────────
+
+    private static void aplicarReglasDetraccion(BorradorFactura factura) {
+        Detraccion det = factura.getDetraccion();
+        if (det != null && esOperacionDetraccion(factura.getTipoOperacion())) {
+            BigDecimal porcentaje = det.porcentaje();
+            if (porcentaje == null && det.tipoBienDetraido() != null) {
+                porcentaje = CatalogoDetracciones.obtenerPorcentaje(det.tipoBienDetraido());
+            }
+
+            BigDecimal monto = det.monto();
+            if (monto == null && porcentaje != null) {
+                BigDecimal total = montoTotalDocumento(factura);
+                monto = total.multiply(porcentaje).setScale(ESCALA, REDONDEO);
+            }
+
+            String cuenta = det.cuentaBancaria();
+            if (cuenta == null && factura.getEmisor() != null && factura.getEmisor().cuentaBancoNacionDetraccion() != null) {
+                cuenta = factura.getEmisor().cuentaBancoNacionDetraccion();
+            }
+
+            factura.setDetraccion(new Detraccion(
+                    det.medioDePago(),
+                    cuenta,
+                    det.tipoBienDetraido(),
+                    porcentaje,
+                    monto
+            ));
+        }
+    }
+
+    // ── Reglas Exportación ───────────────────────────────────────
+
+    private static void aplicarReglasExportacion(BorradorFactura factura) {
+        boolean esExportacion = "0200".equals(factura.getTipoOperacion());
+        if (!esExportacion && factura.getDetalles() != null) {
+            for (var linea : factura.getDetalles()) {
+                if ("40".equals(linea.getIgvTipo())) {
+                    esExportacion = true;
+                    break;
+                }
+            }
+        }
+
+        if (esExportacion) {
+            factura.setTipoOperacion("0200");
+            if (factura.getMoneda() == null) {
+                factura.setMoneda("USD");
+            }
+            if (factura.getDetalles() != null) {
+                for (var linea : factura.getDetalles()) {
+                    if (linea.getIgvTipo() == null || !"40".equals(linea.getIgvTipo())) {
+                        linea.setIgvTipo("40");
+                    }
+                    if (linea.getIgv() != null && linea.getIgv().compareTo(java.math.BigDecimal.ZERO) > 0) {
+                        linea.setIgv(java.math.BigDecimal.ZERO);
+                    }
+                }
+            }
+        }
     }
 
     // ── Defectos ─────────────────────────────────────────────────

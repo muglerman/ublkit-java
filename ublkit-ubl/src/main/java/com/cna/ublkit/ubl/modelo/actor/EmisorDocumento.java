@@ -20,6 +20,10 @@ public record EmisorDocumento(
         String nombreComercial,
         String razonSocial,
         Direccion direccion,
-        Contacto contacto
+        Contacto contacto,
+        String cuentaBancoNacionDetraccion
 ) {
+    public EmisorDocumento(String ruc, String nombreComercial, String razonSocial, Direccion direccion, Contacto contacto) {
+        this(ruc, nombreComercial, razonSocial, direccion, contacto, null);
+    }
 }
