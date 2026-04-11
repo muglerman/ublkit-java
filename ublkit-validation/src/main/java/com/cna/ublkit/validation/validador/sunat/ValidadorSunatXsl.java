@@ -6,6 +6,7 @@ import com.cna.ublkit.validation.modelo.SeveridadValidacion;
 
 import javax.xml.transform.ErrorListener;
 import javax.xml.transform.Source;
+import javax.xml.transform.Templates;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
@@ -19,6 +20,8 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -32,6 +35,34 @@ public final class ValidadorSunatXsl {
     private static final String PARAM_NOMBRE_ARCHIVO = "nombreArchivoEnviado";
     private static final String PROP_VALIDACION_SUNAT = "ublkit.validation.sunat.enabled";
 
+    private static final Map<ReglaSunatXsl, Templates> templatesCache = new ConcurrentHashMap<>();
+
+    static {
+        try {
+            TransformerFactory factory = crearFactorySaxon();
+            factory.setURIResolver(new ResolverSunatClasspath());
+
+            for (ReglaSunatXsl regla : ReglaSunatXsl.values()) {
+                InputStream xslStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(regla.recursoClasspath());
+                if (xslStream != null) {
+                    try (InputStream in = xslStream) {
+                        String xslContenido = new String(in.readAllBytes(), StandardCharsets.UTF_8)
+                                .replace("current-date()", "date:date()");
+                        StreamSource xslSource = new StreamSource(new StringReader(xslContenido));
+                        xslSource.setSystemId(regla.recursoClasspath());
+                        Templates templates = factory.newTemplates(xslSource);
+                        templatesCache.put(regla, templates);
+                    }
+                } else {
+                    System.err.println("Advertencia: No se encontró recurso XSL de validación para precompilar: " + regla.recursoClasspath());
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Error al precompilar templates XSL de SUNAT: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
     public ResultadoValidacion validarXml(String xml, String nombreArchivo, ReglaSunatXsl regla) {
         ResultadoValidacion resultado = new ResultadoValidacion();
         if (!isValidacionSunatHabilitada()) {
@@ -42,24 +73,17 @@ public final class ValidadorSunatXsl {
             return resultado;
         }
 
-        InputStream xslStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(regla.recursoClasspath());
-        if (xslStream == null) {
+        Templates templates = templatesCache.get(regla);
+        if (templates == null) {
             resultado.agregar(new IncidenciaValidacion("SUNAT-001",
-                    "No se encontró recurso XSL de validación: " + regla.recursoClasspath(),
+                    "No se encontró recurso XSL precompilado de validación: " + regla.recursoClasspath(),
                     SeveridadValidacion.ADVERTENCIA));
             return resultado;
         }
 
         List<MensajeTransformacion> mensajes = new ArrayList<>();
-        try (InputStream in = xslStream) {
-            TransformerFactory factory = crearFactorySaxon();
-            factory.setURIResolver(new ResolverSunatClasspath());
-
-            String xslContenido = new String(in.readAllBytes(), StandardCharsets.UTF_8)
-                    .replace("current-date()", "date:date()");
-            StreamSource xslSource = new StreamSource(new StringReader(xslContenido));
-            xslSource.setSystemId(regla.recursoClasspath());
-            Transformer transformer = factory.newTransformer(xslSource);
+        try {
+            Transformer transformer = templates.newTransformer();
             transformer.setErrorListener(new ListenerMensajes(mensajes));
             transformer.setParameter(PARAM_NOMBRE_ARCHIVO, nombreArchivo);
             transformer.transform(
