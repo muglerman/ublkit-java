@@ -6,6 +6,7 @@ import com.cna.ublkit.render.modelo.ContextoRender;
 import com.cna.ublkit.render.modelo.ResultadoRender;
 import com.cna.ublkit.ubl.modelo.sunat.baja.ComunicacionBaja;
 import com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
+import com.openhtmltopdf.svgsupport.BatikSVGDrawer;
 
 import java.io.ByteArrayOutputStream;
 
@@ -24,6 +25,7 @@ public class RenderizadorPdfComunicacionBaja implements RenderizadorDocumento<Co
         try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
             PdfRendererBuilder builder = new PdfRendererBuilder();
             builder.useFastMode();
+            builder.useSVGDrawer(new BatikSVGDrawer());
             builder.withHtmlContent(html, null);
             builder.toStream(os);
             builder.run();

@@ -265,9 +265,12 @@ public class RenderizadorHtmlFactura implements RenderizadorDocumento<BorradorFa
         invoice.put("summary", summary);
         invoice.put("legends", legends(doc.getLeyendas()));
         applyTemplateAttributes(invoice, contexto.atributosPlantilla());
+        invoice.put("estado", contexto.estado());
+        invoice.put("cuentasBancarias", contexto.cuentasBancarias());
 
         Map<String, Object> scope = new HashMap<>();
         scope.put("invoice", invoice);
+        scope.put("doc", invoice); // Alias para las plantillas twig
 
         try {
             PebbleTemplate compiledTemplate = engine.getTemplate(obtenerRutaPlantilla());
