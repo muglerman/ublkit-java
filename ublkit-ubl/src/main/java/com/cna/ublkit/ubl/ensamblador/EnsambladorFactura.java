@@ -78,18 +78,20 @@ public final class EnsambladorFactura {
 
     // ── Líneas ───────────────────────────────────────────────────
 
-    private static void ensamblarLineas(DocumentoBase documento) {
-        List<LineaDetalle> detalles = documento.getDetalles();
-        if (detalles == null) return;
+private static void ensamblarLineas(DocumentoBase documento) {
+    List<LineaDetalle> detalles = documento.getDetalles();
+    if (detalles == null) return;
 
-        BigDecimal tasaIgvGlobal = documento.getTasaIgv() != null
-                ? documento.getTasaIgv()
-                : TASA_IGV_DEFECTO;
+    BigDecimal tasaIgvGlobal = documento.getTasaIgv() != null
+            ? documento.getTasaIgv()
+            : TASA_IGV_DEFECTO;
 
-        for (LineaDetalle linea : detalles) {
-            ensamblarLinea(linea, tasaIgvGlobal, documento.getTasaIcb());
-        }
+    for (LineaDetalle linea : detalles) {
+        ensamblarLinea(linea, tasaIgvGlobal, documento.getTasaIcb());
     }
+
+    ajustarRedondeoLineas(detalles);
+}
 
     static void ensamblarLinea(LineaDetalle linea, BigDecimal tasaIgvGlobal, BigDecimal tasaIcbGlobal) {
         // Unidad de medida por defecto
@@ -118,7 +120,7 @@ public final class EnsambladorFactura {
             }
             linea.setPrecio(precioUnitario.setScale(10, REDONDEO));
             linea.setIgvBaseImponible(
-                    linea.getCantidad().multiply(precioUnitario).setScale(ESCALA, REDONDEO)
+                    linea.getCantidad().multiply(precioUnitario).setScale(10, REDONDEO)
             );
         }
 
@@ -126,10 +128,10 @@ public final class EnsambladorFactura {
             String tipo = linea.getIgvTipo();
             if (esGravado(tipo)) {
                 linea.setIgv(
-                        linea.getIgvBaseImponible().multiply(tasaIgv).setScale(ESCALA, REDONDEO)
+                        linea.getIgvBaseImponible().multiply(tasaIgv).setScale(10, REDONDEO)
                 );
             } else {
-                linea.setIgv(BigDecimal.ZERO.setScale(ESCALA, REDONDEO));
+                linea.setIgv(BigDecimal.ZERO.setScale(10, REDONDEO));
             }
         }
 
@@ -141,7 +143,7 @@ public final class EnsambladorFactura {
         }
         if (linea.getIsc() == null && linea.getTasaIsc() != null && linea.getIscBaseImponible() != null) {
             linea.setIsc(
-                    linea.getIscBaseImponible().multiply(linea.getTasaIsc()).setScale(ESCALA, REDONDEO)
+                    linea.getIscBaseImponible().multiply(linea.getTasaIsc()).setScale(10, REDONDEO)
             );
         }
 
@@ -151,7 +153,7 @@ public final class EnsambladorFactura {
             if (tasaIcb != null) {
                 linea.setTasaIcb(tasaIcb);
                 linea.setIcb(
-                        linea.getCantidad().multiply(tasaIcb).setScale(ESCALA, REDONDEO)
+                        linea.getCantidad().multiply(tasaIcb).setScale(10, REDONDEO)
                 );
             }
         }
@@ -162,7 +164,7 @@ public final class EnsambladorFactura {
             if (linea.getIgv() != null) total = total.add(linea.getIgv());
             if (linea.getIsc() != null) total = total.add(linea.getIsc());
             if (linea.getIcb() != null) total = total.add(linea.getIcb());
-            linea.setTotalImpuestos(total.setScale(ESCALA, REDONDEO));
+            linea.setTotalImpuestos(total.setScale(10, REDONDEO));
         }
 
         // Precio de referencia (para PricingReference en XML)
@@ -170,18 +172,139 @@ public final class EnsambladorFactura {
                 && linea.getCantidad().compareTo(BigDecimal.ZERO) > 0
                 && linea.getIgvBaseImponible() != null) {
             if (esGratuito(linea.getIgvTipo())) {
-                linea.setPrecioReferencia(BigDecimal.ZERO.setScale(ESCALA, REDONDEO));
+                linea.setPrecioReferencia(BigDecimal.ZERO.setScale(10, REDONDEO));
                 linea.setPrecioReferenciaTipo("02");
             } else {
                 BigDecimal base = linea.getIgvBaseImponible();
                 BigDecimal igv = linea.getIgv() != null ? linea.getIgv() : BigDecimal.ZERO;
                 linea.setPrecioReferencia(
-                        base.add(igv).divide(linea.getCantidad(), ESCALA, REDONDEO)
+                        base.add(igv).divide(linea.getCantidad(), 10, REDONDEO)
                 );
                 linea.setPrecioReferenciaTipo("01");
             }
         }
     }
+
+public static void ajustarRedondeoLineas(List<LineaDetalle> detalles) {
+    if (detalles == null || detalles.isEmpty()) return;
+
+    BigDecimal exactIgvBaseImponible = BigDecimal.ZERO;
+    BigDecimal exactIgv = BigDecimal.ZERO;
+    BigDecimal exactIscBaseImponible = BigDecimal.ZERO;
+    BigDecimal exactIsc = BigDecimal.ZERO;
+    BigDecimal exactIcb = BigDecimal.ZERO;
+
+    for (LineaDetalle linea : detalles) {
+        exactIgvBaseImponible = exactIgvBaseImponible.add(orZero(linea.getIgvBaseImponible()));
+        exactIgv = exactIgv.add(orZero(linea.getIgv()));
+        exactIscBaseImponible = exactIscBaseImponible.add(orZero(linea.getIscBaseImponible()));
+        exactIsc = exactIsc.add(orZero(linea.getIsc()));
+        exactIcb = exactIcb.add(orZero(linea.getIcb()));
+    }
+
+    BigDecimal targetIgvBaseImponible = exactIgvBaseImponible.setScale(ESCALA, REDONDEO);
+    BigDecimal targetIgv = exactIgv.setScale(ESCALA, REDONDEO);
+    BigDecimal targetIscBaseImponible = exactIscBaseImponible.setScale(ESCALA, REDONDEO);
+    BigDecimal targetIsc = exactIsc.setScale(ESCALA, REDONDEO);
+    BigDecimal targetIcb = exactIcb.setScale(ESCALA, REDONDEO);
+
+    BigDecimal sumRoundedIgvBaseImponible = BigDecimal.ZERO;
+    BigDecimal sumRoundedIgv = BigDecimal.ZERO;
+    BigDecimal sumRoundedIscBaseImponible = BigDecimal.ZERO;
+    BigDecimal sumRoundedIsc = BigDecimal.ZERO;
+    BigDecimal sumRoundedIcb = BigDecimal.ZERO;
+
+    for (LineaDetalle linea : detalles) {
+        if (linea.getIgvBaseImponible() != null) linea.setIgvBaseImponible(linea.getIgvBaseImponible().setScale(ESCALA, REDONDEO));
+        if (linea.getIgv() != null) linea.setIgv(linea.getIgv().setScale(ESCALA, REDONDEO));
+        if (linea.getIscBaseImponible() != null) linea.setIscBaseImponible(linea.getIscBaseImponible().setScale(ESCALA, REDONDEO));
+        if (linea.getIsc() != null) linea.setIsc(linea.getIsc().setScale(ESCALA, REDONDEO));
+        if (linea.getIcb() != null) linea.setIcb(linea.getIcb().setScale(ESCALA, REDONDEO));
+
+        sumRoundedIgvBaseImponible = sumRoundedIgvBaseImponible.add(orZero(linea.getIgvBaseImponible()));
+        sumRoundedIgv = sumRoundedIgv.add(orZero(linea.getIgv()));
+        sumRoundedIscBaseImponible = sumRoundedIscBaseImponible.add(orZero(linea.getIscBaseImponible()));
+        sumRoundedIsc = sumRoundedIsc.add(orZero(linea.getIsc()));
+        sumRoundedIcb = sumRoundedIcb.add(orZero(linea.getIcb()));
+    }
+
+    BigDecimal diffIgvBaseImponible = targetIgvBaseImponible.subtract(sumRoundedIgvBaseImponible);
+    BigDecimal diffIgv = targetIgv.subtract(sumRoundedIgv);
+    BigDecimal diffIscBaseImponible = targetIscBaseImponible.subtract(sumRoundedIscBaseImponible);
+    BigDecimal diffIsc = targetIsc.subtract(sumRoundedIsc);
+    BigDecimal diffIcb = targetIcb.subtract(sumRoundedIcb);
+
+    if (diffIgvBaseImponible.compareTo(BigDecimal.ZERO) != 0 || diffIgv.compareTo(BigDecimal.ZERO) != 0) {
+        LineaDetalle highestIgv = detalles.get(0);
+        BigDecimal maxVal = orZero(highestIgv.getIgvBaseImponible());
+        for (LineaDetalle linea : detalles) {
+            BigDecimal val = orZero(linea.getIgvBaseImponible());
+            if (val.compareTo(maxVal) > 0) {
+                highestIgv = linea;
+                maxVal = val;
+            }
+        }
+        if (highestIgv.getIgvBaseImponible() != null) highestIgv.setIgvBaseImponible(highestIgv.getIgvBaseImponible().add(diffIgvBaseImponible));
+        if (highestIgv.getIgv() != null) highestIgv.setIgv(highestIgv.getIgv().add(diffIgv));
+    }
+
+    if (diffIscBaseImponible.compareTo(BigDecimal.ZERO) != 0 || diffIsc.compareTo(BigDecimal.ZERO) != 0) {
+        LineaDetalle highestIsc = null;
+        BigDecimal maxVal = BigDecimal.ZERO;
+        for (LineaDetalle linea : detalles) {
+            if (linea.getIscBaseImponible() != null) {
+                BigDecimal val = linea.getIscBaseImponible();
+                if (highestIsc == null || val.compareTo(maxVal) > 0) {
+                    highestIsc = linea;
+                    maxVal = val;
+                }
+            }
+        }
+        if (highestIsc != null) {
+            if (highestIsc.getIscBaseImponible() != null) highestIsc.setIscBaseImponible(highestIsc.getIscBaseImponible().add(diffIscBaseImponible));
+            if (highestIsc.getIsc() != null) highestIsc.setIsc(highestIsc.getIsc().add(diffIsc));
+        }
+    }
+
+    if (diffIcb.compareTo(BigDecimal.ZERO) != 0) {
+        LineaDetalle highestIcb = null;
+        BigDecimal maxVal = BigDecimal.ZERO;
+        for (LineaDetalle linea : detalles) {
+            if (linea.getIcb() != null) {
+                BigDecimal val = linea.getIcb();
+                if (highestIcb == null || val.compareTo(maxVal) > 0) {
+                    highestIcb = linea;
+                    maxVal = val;
+                }
+            }
+        }
+        if (highestIcb != null) {
+            highestIcb.setIcb(highestIcb.getIcb().add(diffIcb));
+        }
+    }
+
+    // Recalculate totalImpuestos and precioReferencia after adjustments
+    for (LineaDetalle linea : detalles) {
+        BigDecimal total = BigDecimal.ZERO;
+        if (linea.getIgv() != null) total = total.add(linea.getIgv());
+        if (linea.getIsc() != null) total = total.add(linea.getIsc());
+        if (linea.getIcb() != null) total = total.add(linea.getIcb());
+        linea.setTotalImpuestos(total.setScale(ESCALA, REDONDEO));
+
+        if (linea.getPrecioReferencia() != null && linea.getCantidad() != null
+                && linea.getCantidad().compareTo(BigDecimal.ZERO) > 0) {
+            if (esGratuito(linea.getIgvTipo())) {
+                linea.setPrecioReferencia(BigDecimal.ZERO.setScale(ESCALA, REDONDEO));
+            } else {
+                BigDecimal base = orZero(linea.getIgvBaseImponible());
+                BigDecimal igv = orZero(linea.getIgv());
+                linea.setPrecioReferencia(
+                        base.add(igv).divide(linea.getCantidad(), ESCALA, REDONDEO)
+                );
+            }
+        }
+    }
+}
 
     // ── Totales de impuestos ─────────────────────────────────────
 

@@ -54,15 +54,17 @@ public final class EnsambladorNota {
         }
     }
 
-    private static void ensamblarLineas(DocumentoBase documento) {
-        List<LineaDetalle> detalles = documento.getDetalles();
-        if (detalles == null) return;
+private static void ensamblarLineas(DocumentoBase documento) {
+    List<LineaDetalle> detalles = documento.getDetalles();
+    if (detalles == null) return;
 
-        BigDecimal tasaIgv = documento.getTasaIgv() != null ? documento.getTasaIgv() : TASA_IGV_DEFECTO;
-        for (LineaDetalle linea : detalles) {
-            EnsambladorFactura.ensamblarLinea(linea, tasaIgv, documento.getTasaIcb());
-        }
+    BigDecimal tasaIgv = documento.getTasaIgv() != null ? documento.getTasaIgv() : TASA_IGV_DEFECTO;
+    for (LineaDetalle linea : detalles) {
+        EnsambladorFactura.ensamblarLinea(linea, tasaIgv, documento.getTasaIcb());
     }
+
+    EnsambladorFactura.ajustarRedondeoLineas(detalles);
+}
 
     private static void ensamblarTotalImpuestos(DocumentoBase documento) {
         if (documento.getTotalImpuestos() != null) return;
