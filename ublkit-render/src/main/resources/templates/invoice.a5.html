@@ -5,17 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{{ invoice.identity }}</title>
   <style>
-    :root { --ink:#0f172a; --muted:#475569; --line:#cbd5e1; --soft:#f8fafc; --accent:#0f766e; }
     * { box-sizing:border-box; }
-    body { margin:0; padding:12px; font-family:"Helvetica Neue",Helvetica,Arial,sans-serif; color:var(--ink); font-size:10.5px; line-height:1.32; }
-    .card { border:1px solid var(--line); border-radius:7px; background:#fff; }
+    body { margin:0; padding:12px; font-family:"Helvetica Neue",Helvetica,Arial,sans-serif; color:#0f172a; font-size:10.5px; line-height:1.32; }
+    .card { border:1px solid #cbd5e1; border-radius:7px; background:#fff; }
     .header { display:table; width:100%; border-collapse:separate; border-spacing:8px 0; }
     .cell { display:table-cell; vertical-align:top; }
     .logo { width:68px; }
     .logo img { max-width:58px; max-height:58px; }
     .issuer { padding:8px; }
     .issuer h1 { margin:0 0 3px; font-size:13px; }
-    .doc { width:190px; border:2px solid var(--ink); border-radius:9px; overflow:hidden; }
+    .doc { width:190px; border:2px solid #0f172a; border-radius:9px; overflow:hidden; }
     .doc p { margin:0; padding:6px 8px; text-align:center; font-weight:700; }
     .doc .type { background:#e6f4f1; }
     .section { margin-top:8px; }
@@ -24,15 +23,15 @@
     .col { display:table-cell; width:50%; vertical-align:top; padding:7px 8px; }
     .col + .col { border-left:1px solid #e2e8f0; }
     p { margin:0 0 3px; }
-    .small { color:var(--muted); font-size:10px; }
+    .small { color:#475569; font-size:10px; }
     .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
     table { width:100%; border-collapse:collapse; }
-    th, td { border:1px solid var(--line); padding:5px; vertical-align:top; }
+    th, td { border:1px solid #cbd5e1; padding:5px; vertical-align:top; }
     th { background:#e6f4f1; font-size:9.8px; text-align:left; }
     .center { text-align:center; }
     .right { text-align:right; }
     .totals td { border:0; padding:2px 0; }
-    .totals td:first-child { color:var(--muted); }
+    .totals td:first-child { color:#475569; }
     .legend { margin-top:4px; color:#334155; font-weight:600; }
     .qr { margin-top:10px; display:table; width:100%; }
     .qr div { display:table-cell; vertical-align:top; }
