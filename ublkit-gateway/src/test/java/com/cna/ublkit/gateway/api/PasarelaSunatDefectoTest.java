@@ -313,4 +313,24 @@ class PasarelaSunatDefectoTest {
             return "token_mock_123456";
         }
     }
+    @org.junit.jupiter.api.Test
+    void conRetry_whenHttp5xx_retriesUpToMaxIntentos() {
+        var config = com.cna.ublkit.gateway.config.ConfiguracionGateway.porDefecto();
+        var failingRest = new ClienteRest() {
+            int count = 0;
+            public ResultadoEnvio enviarGuia(String xml, String nombre, String url, String token) {
+                count++;
+                return ResultadoEnvio.error("HTTP_5XX", "Error temporal");
+            }
+            public ResultadoConsulta consultarTicket(String ticket, String url, String token) {
+                return null;
+            }
+        };
+        var gatewayRetry = new PasarelaSunatDefecto(mockClienteSoap, failingRest, mockProveedorToken, config);
+        var result = gatewayRetry.enviarGuiaRemision("xml", "file.xml", new com.cna.ublkit.gateway.autenticacion.CredencialesEmpresa("20000000000", "USER", "PASS", "clientId", "clientSecret"), TipoAmbiente.BETA);
+
+        org.assertj.core.api.Assertions.assertThat(result.estado()).isEqualTo(EstadoEnvio.EXCEPCION);
+        org.assertj.core.api.Assertions.assertThat(result.codigoError()).isEqualTo("HTTP_5XX");
+                org.assertj.core.api.Assertions.assertThat(failingRest.count).isEqualTo(3);
+    }
 }
