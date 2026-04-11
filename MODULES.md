@@ -43,6 +43,12 @@ UBLKit se divide en unidades compuestas de manera jerárquica para evitar librer
 
 ---
 
+### 9. `ublkit-storage`
+- **Responsabilidad:** Almacenamiento de documentos XML, CDR y representaciones impresas (PDF/Tickets).
+- **Contenido:** Interfaz `AlmacenDocumentos` y adaptadores (S3, GCS, LocalStorage).
+
+---
+
 ### Integraciones (Spring Boot & Quarkus)
 Proveen autoconfiguración (`Beans`, inyección, propiedades) basadas en los *ports* y servicios exportados de los módulos listados previamente.
 - **Spring Boot Starter**: Autoconfigura serializadores XML, firmador y renderizadores.

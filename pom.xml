@@ -91,6 +91,8 @@
         <module>ublkit-testkit</module>
         <module>ublkit-spring-boot-starter</module>
         <module>ublkit-quarkus</module>
+    
+    <module>ublkit-storage</module>
     </modules>
 
 </project>
