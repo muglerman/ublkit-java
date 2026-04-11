@@ -70,18 +70,20 @@ public final class FirmadorXml {
      * @param documento     Documento DOM a firmar.
      * @param idReferencia  ID de la referencia de firma.
      * @param certificado   Detalles del certificado con clave privada.
-     * @return Documento DOM firmado (mismo objeto, modificado in-place).
+     * @return Nuevo Documento DOM firmado (clonado, se preserva la inmutabilidad del original).
      * @throws ExcepcionUblKit si ocurre un error al firmar.
      */
     public static Document firmar(Document documento, String idReferencia, DetallesCertificado certificado) {
         try {
-            asegurarUBLExtensions(documento);
-            asegurarUBLExtension(documento);
-            Node nodoContenido = asegurarExtensionContent(documento);
+            Document docFirma = (Document) documento.cloneNode(true);
+
+            asegurarUBLExtensions(docFirma);
+            asegurarUBLExtension(docFirma);
+            Node nodoContenido = asegurarExtensionContent(docFirma);
 
             DOMSignContext contextoFirma = new DOMSignContext(
                     certificado.clavePrivada(),
-                    documento.getDocumentElement()
+                    docFirma.getDocumentElement()
             );
             contextoFirma.setDefaultNamespacePrefix("ds");
             contextoFirma.setParent(nodoContenido);
@@ -116,7 +118,7 @@ public final class FirmadorXml {
             XMLSignature firma = fabrica.newXMLSignature(infoFirmada, keyInfo, null, idReferencia, null);
             firma.sign(contextoFirma);
 
-            return documento;
+            return docFirma;
 
         } catch (ExcepcionUblKit e) {
             throw e;
