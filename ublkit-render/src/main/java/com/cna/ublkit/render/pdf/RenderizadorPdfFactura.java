@@ -6,6 +6,8 @@ import com.cna.ublkit.render.modelo.ContextoRender;
 import com.cna.ublkit.render.modelo.FormatoImpresion;
 import com.cna.ublkit.render.modelo.ResultadoRender;
 import com.cna.ublkit.ubl.modelo.BorradorFactura;
+import com.cna.ublkit.qr.GeneradorQrSunat;
+
 import com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
 
 import java.io.ByteArrayOutputStream;
@@ -29,6 +31,12 @@ public class RenderizadorPdfFactura implements RenderizadorDocumento<BorradorFac
 
     @Override
     public ResultadoRender renderizar(ContextoRender<BorradorFactura> contexto) {
+        if (contexto.qrBase64() == null || contexto.qrBase64().isEmpty()) {
+            GeneradorQrSunat generadorQr = new GeneradorQrSunat();
+            String qrBase64 = generadorQr.generarQrBase64(contexto.documento(), contexto.hashDocumento());
+            contexto = ContextoRender.of(contexto.documento(), contexto.hashDocumento(), qrBase64, contexto.atributosPlantilla());
+        }
+
         ResultadoRender resultadoHtml = renderizadorHtml.renderizar(contexto);
         String html = resultadoHtml.contenidoHtml();
 

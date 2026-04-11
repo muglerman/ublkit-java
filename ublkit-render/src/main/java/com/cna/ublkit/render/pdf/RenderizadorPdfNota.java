@@ -5,6 +5,9 @@ import com.cna.ublkit.render.html.RenderizadorHtmlNota;
 import com.cna.ublkit.render.modelo.ContextoRender;
 import com.cna.ublkit.render.modelo.FormatoImpresion;
 import com.cna.ublkit.render.modelo.ResultadoRender;
+import com.cna.ublkit.qr.GeneradorQrSunat;
+import com.cna.ublkit.ubl.modelo.DocumentoBase;
+
 import com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
 
 import java.io.ByteArrayOutputStream;
@@ -28,6 +31,14 @@ public class RenderizadorPdfNota implements RenderizadorDocumento<Object> {
 
     @Override
     public ResultadoRender renderizar(ContextoRender<Object> contexto) {
+        if (contexto.documento() instanceof DocumentoBase doc) {
+            if (contexto.qrBase64() == null || contexto.qrBase64().isEmpty()) {
+                GeneradorQrSunat generadorQr = new GeneradorQrSunat();
+                String qrBase64 = generadorQr.generarQrBase64(doc, contexto.hashDocumento());
+                contexto = ContextoRender.of(contexto.documento(), contexto.hashDocumento(), qrBase64, contexto.atributosPlantilla());
+            }
+        }
+
         ResultadoRender resultadoHtml = renderizadorHtml.renderizar(contexto);
         String html = resultadoHtml.contenidoHtml();
 
