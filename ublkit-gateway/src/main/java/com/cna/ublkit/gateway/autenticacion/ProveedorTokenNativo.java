@@ -42,13 +42,19 @@ public class ProveedorTokenNativo implements ProveedorToken {
 
     private final HttpClient httpClient;
     private final Map<String, TokenCacheado> cacheTokens;
+    private final Duration readTimeout;
 
     public ProveedorTokenNativo() {
+        this(Duration.ofSeconds(10), Duration.ofSeconds(60));
+    }
+
+    public ProveedorTokenNativo(Duration connectTimeout, Duration readTimeout) {
         this.httpClient = HttpClient.newBuilder()
                 .version(HttpClient.Version.HTTP_1_1)
-                .connectTimeout(Duration.ofSeconds(10))
+                .connectTimeout(connectTimeout)
                 .build();
         this.cacheTokens = new ConcurrentHashMap<>();
+        this.readTimeout = readTimeout;
     }
 
     @Override
@@ -93,7 +99,7 @@ public class ProveedorTokenNativo implements ProveedorToken {
         try {
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(url))
-                    .timeout(Duration.ofSeconds(30))
+                    .timeout(readTimeout)
                     .header("Content-Type", CONTENT_TYPE_FORM_URLENCODED)
                     .header("Accept", "application/json")
                     .header("User-Agent", USER_AGENT)
@@ -104,6 +110,10 @@ public class ProveedorTokenNativo implements ProveedorToken {
             if (log.isLoggable(Level.INFO)) {
                 log.info(String.format("[UBLKIT][TOKEN] respuestaToken status=%s, body=%s", response.statusCode(),
                         mostrarSensiblesEnLog ? response.body() : sanitizeBody(response.body())));
+            }
+
+            if (response.statusCode() >= 500) {
+                throw new com.cna.ublkit.core.error.ExcepcionTransporte("HTTP_" + response.statusCode() + " - " + response.body());
             }
 
             if (response.statusCode() != 200) {
@@ -127,9 +137,11 @@ public class ProveedorTokenNativo implements ProveedorToken {
 
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new ExcepcionUblKit("Solicitud de token interrumpida", e);
+            throw new com.cna.ublkit.core.error.ExcepcionTransporte("Solicitud de token interrumpida", e);
         } catch (ExcepcionUblKit e) {
             throw e;
+        } catch (java.io.IOException e) {
+            throw new com.cna.ublkit.core.error.ExcepcionTransporte("Error de I/O al solicitar token", e);
         } catch (Exception e) {
             throw new ExcepcionUblKit("Error de red solicitando token a SUNAT: " + e.getMessage(), e);
         }

@@ -11,6 +11,9 @@ import com.cna.ublkit.gateway.transporte.ClienteRest;
 import com.cna.ublkit.gateway.transporte.ClienteSoap;
 import com.cna.ublkit.gateway.transporte.HttpClienteNativoRest;
 import com.cna.ublkit.gateway.transporte.HttpClienteNativoSoap;
+import com.cna.ublkit.gateway.config.ConfiguracionGateway;
+import java.util.function.Predicate;
+import com.cna.ublkit.gateway.respuesta.EstadoEnvio;
 
 import java.util.logging.Logger;
 import java.util.logging.Level;
@@ -23,7 +26,7 @@ import java.util.function.Supplier;
  * @since 0.1.0
  */
 public class PasarelaSunatDefecto implements PasarelaSunat {
-    private static final int MAX_INTENTOS = 3;
+    private final int maxIntentos;
     private static final Logger log = Logger.getLogger(PasarelaSunatDefecto.class.getName());
 
     private final ClienteSoap clienteSoap;
@@ -31,15 +34,28 @@ public class PasarelaSunatDefecto implements PasarelaSunat {
     private final ProveedorToken proveedorToken;
 
     public PasarelaSunatDefecto() {
-        this.clienteSoap = new HttpClienteNativoSoap();
-        this.clienteRest = new HttpClienteNativoRest();
-        this.proveedorToken = new ProveedorTokenNativo();
+        this(ConfiguracionGateway.porDefecto());
+    }
+
+    public PasarelaSunatDefecto(ConfiguracionGateway config) {
+        this.clienteSoap = new HttpClienteNativoSoap(config.connectTimeout(), config.readTimeout());
+        this.clienteRest = new HttpClienteNativoRest(config.connectTimeout(), config.readTimeout());
+        this.proveedorToken = new ProveedorTokenNativo(config.connectTimeout(), config.readTimeout());
+        this.maxIntentos = config.maxIntentos();
     }
 
     public PasarelaSunatDefecto(ClienteSoap clienteSoap, ClienteRest clienteRest, ProveedorToken proveedorToken) {
         this.clienteSoap = clienteSoap;
         this.clienteRest = clienteRest;
         this.proveedorToken = proveedorToken;
+        this.maxIntentos = 3;
+    }
+
+    public PasarelaSunatDefecto(ClienteSoap clienteSoap, ClienteRest clienteRest, ProveedorToken proveedorToken, ConfiguracionGateway config) {
+        this.clienteSoap = clienteSoap;
+        this.clienteRest = clienteRest;
+        this.proveedorToken = proveedorToken;
+        this.maxIntentos = config.maxIntentos();
     }
 
     @Override
@@ -117,17 +133,43 @@ public class PasarelaSunatDefecto implements PasarelaSunat {
     }
 
     private <T> T conRetry(Supplier<T> accion) {
+        T ultimoResultado = null;
         RuntimeException ultima = null;
-        for (int intento = 1; intento <= MAX_INTENTOS; intento++) {
+        for (int intento = 1; intento <= maxIntentos; intento++) {
             try {
-                return accion.get();
-            } catch (RuntimeException e) {
+                T resultado = accion.get();
+                if (resultado instanceof ResultadoEnvio r) {
+                    if (r.estado() == EstadoEnvio.EXCEPCION && esErrorTemporal(r.codigoError())) {
+                        ultimoResultado = resultado;
+                        if (intento == maxIntentos) break;
+                        dormirBackoff(intento);
+                        continue;
+                    }
+                } else if (resultado instanceof ResultadoConsulta r) {
+                    if (r.estado() == EstadoEnvio.EXCEPCION && esErrorTemporal(r.codigoError())) {
+                        ultimoResultado = resultado;
+                        if (intento == maxIntentos) break;
+                        dormirBackoff(intento);
+                        continue;
+                    }
+                }
+                return resultado;
+            } catch (com.cna.ublkit.core.error.ExcepcionTransporte e) {
                 ultima = e;
-                if (intento == MAX_INTENTOS) break;
+                if (intento == maxIntentos) break;
                 dormirBackoff(intento);
+            } catch (RuntimeException e) {
+                throw e;
             }
         }
+        if (ultimoResultado != null) {
+            return ultimoResultado;
+        }
         throw ultima != null ? ultima : new RuntimeException("No se pudo completar la operación");
+    }
+
+    private boolean esErrorTemporal(String codigoError) {
+        return "IO_ERROR".equals(codigoError) || "HTTP_5XX".equals(codigoError);
     }
 
     private void dormirBackoff(int intento) {

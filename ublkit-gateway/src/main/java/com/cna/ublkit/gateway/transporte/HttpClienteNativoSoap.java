@@ -26,12 +26,18 @@ import java.util.regex.Pattern;
 public class HttpClienteNativoSoap implements ClienteSoap {
 
     private final HttpClient httpClient;
+    private final Duration readTimeout;
 
     public HttpClienteNativoSoap() {
+        this(Duration.ofSeconds(10), Duration.ofSeconds(60));
+    }
+
+    public HttpClienteNativoSoap(Duration connectTimeout, Duration readTimeout) {
         this.httpClient = HttpClient.newBuilder()
                 .version(HttpClient.Version.HTTP_1_1)
-                .connectTimeout(Duration.ofSeconds(10))
+                .connectTimeout(connectTimeout)
                 .build();
+        this.readTimeout = readTimeout;
     }
 
     @Override
@@ -56,6 +62,8 @@ public class HttpClienteNativoSoap implements ClienteSoap {
 
             return ResultadoEnvio.sincronoProcesado(estado, cdr);
 
+        } catch (com.cna.ublkit.core.error.ExcepcionTransporte e) {
+            return ResultadoEnvio.error("HTTP_5XX", e.getMessage());
         } catch (Exception e) {
             return ResultadoEnvio.error("IO_ERROR", e.getMessage());
         }
@@ -79,6 +87,8 @@ public class HttpClienteNativoSoap implements ClienteSoap {
 
             return ResultadoEnvio.asincrono(ticket);
 
+        } catch (com.cna.ublkit.core.error.ExcepcionTransporte e) {
+            return ResultadoEnvio.error("HTTP_5XX", e.getMessage());
         } catch (Exception e) {
             return ResultadoEnvio.error("IO_ERROR", e.getMessage());
         }
@@ -111,6 +121,8 @@ public class HttpClienteNativoSoap implements ClienteSoap {
 
             return ResultadoConsulta.completado(estado, cdr);
 
+        } catch (com.cna.ublkit.core.error.ExcepcionTransporte e) {
+            return ResultadoConsulta.error("HTTP_5XX", e.getMessage());
         } catch (Exception e) {
             return ResultadoConsulta.error("IO_ERROR", e.getMessage());
         }
@@ -119,12 +131,20 @@ public class HttpClienteNativoSoap implements ClienteSoap {
     private String executePost(String endpointUrl, String body) throws Exception {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(endpointUrl))
-                .timeout(Duration.ofMinutes(1))
+                .timeout(readTimeout)
                 .header("Content-Type", "text/xml;charset=UTF-8")
                 .POST(HttpRequest.BodyPublishers.ofString(body))
                 .build();
 
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() >= 500) {
+            String fault = extractValue(response.body(), "faultstring");
+            if (fault == null || fault.isBlank()) {
+                throw new com.cna.ublkit.core.error.ExcepcionTransporte("HTTP_" + response.statusCode() + " - " + response.body());
+            }
+        }
+
         return response.body();
     }
 

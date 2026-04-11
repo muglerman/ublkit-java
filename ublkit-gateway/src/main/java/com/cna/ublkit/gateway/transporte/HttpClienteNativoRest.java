@@ -50,12 +50,18 @@ public class HttpClienteNativoRest implements ClienteRest {
             Map.entry("3434", "Destinatario no coincide con la GRE remitente relacionada"));
 
     private final HttpClient httpClient;
+    private final Duration readTimeout;
 
     public HttpClienteNativoRest() {
+        this(Duration.ofSeconds(10), Duration.ofSeconds(60));
+    }
+
+    public HttpClienteNativoRest(Duration connectTimeout, Duration readTimeout) {
         this.httpClient = HttpClient.newBuilder()
                 .version(HttpClient.Version.HTTP_1_1)
-                .connectTimeout(Duration.ofSeconds(10))
+                .connectTimeout(connectTimeout)
                 .build();
+        this.readTimeout = readTimeout;
     }
 
     @Override
@@ -89,7 +95,7 @@ public class HttpClienteNativoRest implements ClienteRest {
             // 3. Ejecutar POST
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(endpointUrl))
-                    .timeout(Duration.ofMinutes(1))
+                    .timeout(readTimeout)
                     .header("Content-Type", "application/json")
                     .header("User-Agent", USER_AGENT)
                     .header("Authorization", "Bearer " + tokenBearer)
@@ -100,6 +106,13 @@ public class HttpClienteNativoRest implements ClienteRest {
             if (log.isLoggable(Level.INFO)) {
                 log.info(String.format("[UBLKIT][REST] enviarGuia status=%s, body=%s",
                         response.statusCode(), sanitizeBody(response.body())));
+            }
+
+            if (response.statusCode() >= 500) {
+                String codError = extraerCampoJson(response.body(), "codError");
+                if (codError == null || codError.isBlank()) {
+                    throw new com.cna.ublkit.core.error.ExcepcionTransporte("HTTP_" + response.statusCode() + " - " + response.body());
+                }
             }
 
             if (response.statusCode() == 200) {
@@ -118,6 +131,8 @@ public class HttpClienteNativoRest implements ClienteRest {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             return ResultadoEnvio.error("IO_ERROR", e.getMessage());
+        } catch (com.cna.ublkit.core.error.ExcepcionTransporte e) {
+            return ResultadoEnvio.error("HTTP_5XX", e.getMessage());
         } catch (Exception e) {
             return ResultadoEnvio.error("IO_ERROR", e.getMessage());
         }
@@ -132,7 +147,7 @@ public class HttpClienteNativoRest implements ClienteRest {
             }
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(endpointUrl + numeroTicket))
-                    .timeout(Duration.ofSeconds(30))
+                    .timeout(readTimeout)
                     .header("Content-Type", "application/json")
                     .header("User-Agent", USER_AGENT)
                     .header("Authorization", "Bearer " + tokenBearer)
@@ -143,6 +158,13 @@ public class HttpClienteNativoRest implements ClienteRest {
             if (log.isLoggable(Level.INFO)) {
                 log.info(String.format("[UBLKIT][REST] consultarTicket status=%s, body=%s",
                         response.statusCode(), sanitizeBody(response.body())));
+            }
+
+            if (response.statusCode() >= 500) {
+                String codRespuesta = extraerCampoJson(response.body(), "codRespuesta");
+                if (codRespuesta == null || codRespuesta.isBlank()) {
+                    throw new com.cna.ublkit.core.error.ExcepcionTransporte("HTTP_" + response.statusCode() + " - " + response.body());
+                }
             }
 
             if (response.statusCode() == 200) {
@@ -175,6 +197,8 @@ public class HttpClienteNativoRest implements ClienteRest {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             return ResultadoConsulta.error("IO_ERROR", e.getMessage());
+        } catch (com.cna.ublkit.core.error.ExcepcionTransporte e) {
+            return ResultadoConsulta.error("HTTP_5XX", e.getMessage());
         } catch (Exception e) {
             return ResultadoConsulta.error("IO_ERROR", e.getMessage());
         }
