@@ -45,7 +45,7 @@ public class RenderizadorHtmlGuiaRemision implements RenderizadorDocumento<Borra
     }
 
     public RenderizadorHtmlGuiaRemision(FormatoImpresion formato) {
-         this.engine = new PebbleEngine.Builder().build();
+         this.engine = new PebbleEngine.Builder().loader(new io.pebbletemplates.pebble.loader.ClasspathLoader()).build();
          this.formato = formato;
     }
 
@@ -383,21 +383,32 @@ public class RenderizadorHtmlGuiaRemision implements RenderizadorDocumento<Borra
         receipt.put("header", texto(attrs.get("header")));
         receipt.put("footer", texto(attrs.get("footer")));
 
+        if (attrs.containsKey("colorPrimario")) {
+            receipt.put("colorPrimario", texto(attrs.get("colorPrimario")));
+        }
         if (attrs.containsKey("color")) {
             receipt.put("color", texto(attrs.get("color")));
+            if (!attrs.containsKey("colorPrimario")) {
+                receipt.put("colorPrimario", texto(attrs.get("color")));
+            }
         }
 
         if (attrs.containsKey("logo")) {
             Object logoObj = attrs.get("logo");
             if (logoObj instanceof String s) {
-                receipt.put("logo", s);
+                if (s.startsWith("data:image")) {
+                    receipt.put("logo", s);
+                } else {
+                    // Fallback for paths? Keep it as is or try to read? We'll just pass it
+                    receipt.put("logo", s);
+                }
             } else if (logoObj instanceof java.io.InputStream is) {
                 try (is) {
                     byte[] bytes = is.readAllBytes();
                     String b64 = java.util.Base64.getEncoder().encodeToString(bytes);
                     receipt.put("logo", "data:image/png;base64," + b64);
                 } catch (java.io.IOException e) {
-                    // Fallback to default
+                    // Fallback
                 }
             } else if (logoObj instanceof byte[] bytes) {
                 String b64 = java.util.Base64.getEncoder().encodeToString(bytes);

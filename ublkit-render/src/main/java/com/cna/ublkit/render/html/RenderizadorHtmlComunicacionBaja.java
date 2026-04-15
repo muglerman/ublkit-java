@@ -22,7 +22,7 @@ import java.util.Map;
  */
 public class RenderizadorHtmlComunicacionBaja implements RenderizadorDocumento<ComunicacionBaja> {
 
-    private final PebbleEngine engine = new PebbleEngine.Builder().build();
+    private final PebbleEngine engine = new PebbleEngine.Builder().loader(new io.pebbletemplates.pebble.loader.ClasspathLoader()).build();
 
     @Override
     public ResultadoRender renderizar(ContextoRender<ComunicacionBaja> contexto) {

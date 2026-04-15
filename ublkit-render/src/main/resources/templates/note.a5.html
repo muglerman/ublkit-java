@@ -63,7 +63,7 @@
       <div class="col">
         <p><strong>Emision:</strong> {{ invoice.issueDate }} {{ invoice.issueTime }}</p>
         <p><strong>Moneda:</strong> {{ invoice.currency }}</p>
-        {% if invoice.exchangeRate %}<p><strong>T/C:</strong> {{ invoice.exchangeRate.value }}</p>{% endif %}
+        {% if invoice.exchangeRate is not empty %}<p><strong>T/C:</strong> {{ invoice.exchangeRate.value }}</p>{% endif %}
         <p><strong>Tipo:</strong> {{ invoice.noteTypeCode }} {{ invoice.noteTypeName }}</p>
       </div>
     </div>
@@ -119,7 +119,7 @@
   <div class="qr">
     <div><img src="data:image/png;base64,{{ invoice.qr }}" alt="QR" /></div>
     <div style="padding-left:8px;">
-      {% if invoice.signer %}<p class="small">Firmante: {{ invoice.signer.identity }}</p>{% endif %}
+      {% if invoice.signer is not empty %}<p class="small">Firmante: {{ invoice.signer.identity }}</p>{% endif %}
       <p class="small">Hash: {{ invoice.hash }}</p>
     </div>
   </div>

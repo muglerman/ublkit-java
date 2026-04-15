@@ -34,7 +34,7 @@
         <p><strong>Emisor:</strong> {{ voided.issuer.name }}</p>
         <p><strong>RUC:</strong> {{ voided.issuer.ruc }}</p>
         {% if voided.issuer.tradeName %}<p><strong>Comercial:</strong> {{ voided.issuer.tradeName }}</p>{% endif %}
-        {% if voided.signer %}<p><strong>Firmante:</strong> {{ voided.signer.ruc }} {{ voided.signer.name }}</p>{% endif %}
+        {% if voided.signer is not empty %}<p><strong>Firmante:</strong> {{ voided.signer.ruc }} {{ voided.signer.name }}</p>{% endif %}
       </div>
     </div>
   </div>

@@ -163,7 +163,7 @@
     <div class="card" style="padding:8px 10px;">
       {% if receipt.port.code %}<p><strong>Puerto:</strong> {{ receipt.port.code }} {{ receipt.port.description }}</p>{% endif %}
       {% if receipt.airport.code %}<p><strong>Aeropuerto:</strong> {{ receipt.airport.code }} {{ receipt.airport.description }}</p>{% endif %}
-      {% if receipt.indicators %}<p><strong>Indicadores:</strong> {% for i in receipt.indicators %}{{ i }}{% if not loop.last %}, {% endif %}{% endfor %}</p>{% endif %}
+      {% if receipt.indicators is not empty %}<p><strong>Indicadores:</strong> {% for i in receipt.indicators %}{{ i }}{% if not loop.last %}, {% endif %}{% endfor %}</p>{% endif %}
       {% if receipt.containers is not empty %}<p><strong>Contenedores:</strong></p>{% for c in receipt.containers %}<p class="small">{{ c.number }}{% if c.seal %} | Precinto: {{ c.seal }}{% endif %}</p>{% endfor %}{% endif %}
       {% if receipt.customsDeclarations is not empty %}<p><strong>Declaraciones aduaneras:</strong></p>{% for c in receipt.customsDeclarations %}<p class="small">{{ c.type }} {{ c.number }} {{ c.customsOffice }}</p>{% endfor %}{% endif %}
     </div>

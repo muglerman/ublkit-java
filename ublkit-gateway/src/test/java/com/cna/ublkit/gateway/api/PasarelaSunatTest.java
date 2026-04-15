@@ -129,6 +129,11 @@ class PasarelaSunatTest {
                     TipoAmbiente ambiente) {
                 return ResultadoConsulta.pendiente();
             }
+
+            @Override
+            public java.util.concurrent.CompletableFuture<ResultadoConsulta> consultarTicketAsincrono(String ticket, CredencialesEmpresa credenciales, TipoAmbiente ambiente, boolean esRest) {
+                return java.util.concurrent.CompletableFuture.completedFuture(ResultadoConsulta.pendiente());
+            }
         };
 
         assertThat(testImpl).isNotNull();
