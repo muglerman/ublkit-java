@@ -8,13 +8,8 @@ Height: 170mm
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 		<style>
-			@page {
-				margin: 0;
-				size: 58mm auto;
-			}
-
 			html {
-				font-family: ui-monospace, SFMono-Regular, Menlo, Courier, monospace;
+				font-family:'Roboto', sans-serif;
 				font-size:8px;
 				-webkit-tap-highlight-color:transparent
 			}
@@ -79,7 +74,7 @@ Height: 170mm
 			#invoice-id-area h4 {
 				border-top: solid 1pt #1d4c39;
 				border-bottom: solid 1pt black;
-				background-color:{% if invoice.color %}{{invoice.color}}{% else %}#dfdfdf{% endif %};
+				background-color:#dfdfdf;
 			}
 			.tabla_borde{
 				border:1px solid #1d4c39;
@@ -139,12 +134,12 @@ Height: 170mm
 				<p><strong>Fecha de Vencimiento:</strong> {{ invoice.dueDate }}</p>
 			{% endif %}
 			<p><strong>Dirección:</strong> {{ invoice.customer.address }}</p>
-			{% if invoice.relatedDocument is not empty %}
+			{% if invoice.relatedDocument %}
 				<p><strong>Tipo Doc. Ref.:</strong> {{ invoice.relatedDocument.type }}</p>
 				<p><strong>Documento Ref.:</strong> {{ invoice.relatedDocument.document }}</p>
 			{% endif %}
 				<p><strong>Tipo de Moneda:</strong> {{ invoice.currency }}</p>
-			{% if invoice.reference is not empty %}
+			{% if invoice.reference %}
 				<!-- generado tal vez por software contable -->
 				<p><strong>N° de Operación:</strong> {{ invoice.reference.order }} - {{ invoice.reference.note }}</p>
 			{% endif %}
@@ -260,7 +255,7 @@ Height: 170mm
 
 		<!-- qr -->
 		<div class="text-center my-10">
-			<img src="data:image/svg+xml;base64,{{ invoice.qr }}" alt="hash QR" />
+			<img src="{{ invoice.qr }}" alt="hash QR" />
 		</div>
 
 		<!-- resumen de cpe -->

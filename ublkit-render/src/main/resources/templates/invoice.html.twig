@@ -5,7 +5,7 @@
         {% include 'assets/style.css' %}
     </style>
 </head>
-<body class="white-bg {% if doc.estado == 'BORRADOR' %}watermark-borrador{% elseif doc.estado == 'ANULADO' %}watermark-anulado{% endif %}">
+<body class="white-bg">
 {% set cp = doc.company %}
 {% set isInvoice = doc.tipoDoc in ['01', '03'] %}
 {% set isNota = doc.tipoDoc in ['07', '08'] %}
@@ -25,9 +25,9 @@
                             <table width="100%" border="0" height="200" cellpadding="6" cellspacing="0">
                                 <tbody><tr>
                                     <td align="center">
-                                        <span style="font-family:Tahoma, Geneva, sans-serif; font-size:29px" text-align="center">{{ name }}</span>
+                                        <span style="font-family:'Roboto', sans-serif; font-size:29px" text-align="center">{{ name }}</span>
                                         <br>
-                                        <span style="font-family:Tahoma, Geneva, sans-serif; font-size:19px" text-align="center">E L E C T R Ó N I C A</span>
+                                        <span style="font-family:'Roboto', sans-serif; font-size:19px" text-align="center">E L E C T R Ó N I C A</span>
                                     </td>
                                 </tr>
                                 <tr>
@@ -150,7 +150,7 @@
                                 <td colspan="4">
                                     <br>
                                     <br>
-                                    <span style="font-family:Tahoma, Geneva, sans-serif; font-size:12px" text-align="center"><strong>{{ legend(doc.legends, '1000')  }}</strong></span>
+                                    <span style="font-family:'Roboto', sans-serif; font-size:12px" text-align="center"><strong>{{ legend(doc.legends, '1000')  }}</strong></span>
                                     <br>
                                     <br>
                                     <strong>Información Adicional</strong>
@@ -420,7 +420,7 @@
                             </blockquote>
                         </td>
                         <td width="15%" align="right">
-                            <img src="data:image/svg+xml;base64,{{ invoice.qr | default(doc.qr) }}" alt="Qr Image">
+                            <img src="{{ qrCode(doc)|image_b64('svg+xml') }}" alt="Qr Image">
                         </td>
                     </tr>
                     </tbody>

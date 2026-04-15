@@ -9,7 +9,7 @@ import com.cna.ublkit.qr.GeneradorQrSunat;
 import com.cna.ublkit.ubl.modelo.DocumentoBase;
 
 import com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
-import com.openhtmltopdf.svgsupport.BatikSVGDrawer;
+import com.cna.ublkit.render.pdf.helper.FontResolver;
 
 import java.io.ByteArrayOutputStream;
 
@@ -46,7 +46,7 @@ public class RenderizadorPdfNota implements RenderizadorDocumento<Object> {
         try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
             PdfRendererBuilder builder = new PdfRendererBuilder();
             builder.useFastMode();
-            builder.useSVGDrawer(new BatikSVGDrawer());
+            FontResolver.configurePdfA(builder);
             builder.withHtmlContent(html, null);
             builder.toStream(os);
             builder.run();

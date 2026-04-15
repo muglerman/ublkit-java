@@ -118,43 +118,6 @@ public class PasarelaSunatDefecto implements PasarelaSunat {
         return conRetry(() -> clienteRest.consultarTicket(ticket, finalEndpoint, token));
     }
 
-    private static final java.util.concurrent.ScheduledExecutorService scheduler = java.util.concurrent.Executors.newScheduledThreadPool(1, r -> {
-        Thread t = new Thread(r, "pasarela-sunat-polling");
-        t.setDaemon(true);
-        return t;
-    });
-
-    @Override
-    public java.util.concurrent.CompletableFuture<ResultadoConsulta> consultarTicketAsincrono(String ticket, CredencialesEmpresa credenciales, TipoAmbiente ambiente, boolean esRest) {
-        java.util.concurrent.CompletableFuture<ResultadoConsulta> future = new java.util.concurrent.CompletableFuture<>();
-        schedulePolling(ticket, credenciales, ambiente, esRest, 1, 10, future);
-        return future;
-    }
-
-    private void schedulePolling(String ticket, CredencialesEmpresa credenciales, TipoAmbiente ambiente, boolean esRest, int intento, int maxIntentos, java.util.concurrent.CompletableFuture<ResultadoConsulta> future) {
-        java.util.concurrent.CompletableFuture.supplyAsync(() -> {
-            return esRest ? consultarTicketRest(ticket, credenciales, ambiente) : consultarTicketSoap(ticket, credenciales, ambiente);
-        }).whenComplete((res, ex) -> {
-            if (ex != null) {
-                if (intento < maxIntentos) {
-                    long esperaMs = (long) Math.pow(2D, intento) * 1000L;
-                    scheduler.schedule(() -> schedulePolling(ticket, credenciales, ambiente, esRest, intento + 1, maxIntentos, future), esperaMs, java.util.concurrent.TimeUnit.MILLISECONDS);
-                } else {
-                    future.completeExceptionally(new RuntimeException("Se excedió el número máximo de intentos consultando el ticket: " + ticket, ex));
-                }
-            } else {
-                if (res.estado() != EstadoEnvio.EN_PROCESAMIENTO) {
-                    future.complete(res);
-                } else if (intento < maxIntentos) {
-                    long esperaMs = (long) Math.pow(2D, intento) * 1000L;
-                    scheduler.schedule(() -> schedulePolling(ticket, credenciales, ambiente, esRest, intento + 1, maxIntentos, future), esperaMs, java.util.concurrent.TimeUnit.MILLISECONDS);
-                } else {
-                    future.completeExceptionally(new RuntimeException("Se excedió el número máximo de intentos consultando el ticket: " + ticket));
-                }
-            }
-        });
-    }
-
     private String detectarRaizXml(String xml) {
         if (xml == null) return "";
         String limpio = xml.replaceFirst("^\\s*<\\?xml[^>]*\\?>\\s*", "").trim();

@@ -6,27 +6,27 @@
   <title>{{ receipt.identity }}</title>
   <style>
     * { box-sizing:border-box; }
-    body { margin:0; padding:18px; font-family:"Helvetica Neue",Helvetica,Arial,sans-serif; font-size:12px; line-height:1.35; color:#0f172a; }
-    .card { border:1px solid {% if receipt.color %}{{receipt.color}}{% else %}#cbd5e1{% endif %}; border-radius:8px; background:#fff; }
+    body { margin:0; padding:18px; font-family:'Roboto', sans-serif; font-size:12px; line-height:1.35; color:#0f172a; }
+    .card { border:1px solid #cbd5e1; border-radius:8px; background:#fff; }
     .header { display:table; width:100%; border-collapse:separate; border-spacing:10px 0; }
     .cell { display:table-cell; vertical-align:top; padding-left: 10px; padding-right: 10px; }
     .logo { width:90px; }
     .logo img { max-width:78px; height:auto; }
     .issuer { padding:10px; }
     .issuer h1 { margin:0 0 4px; font-size:16px; }
-    .doc { width:230px; border:2px solid {% if receipt.color %}{{receipt.color}}{% else %}#0f172a{% endif %}; border-radius:10px; overflow:hidden; }
+    .doc { width:230px; border:2px solid #0f172a; border-radius:10px; overflow:hidden; }
     .doc p { margin:0; padding:8px 10px; text-align:center; font-weight:700; }
-    .doc .type { background:{% if receipt.color %}{{receipt.color}}{% else %}#dbeafe{% endif %}; color:{% if receipt.color %}#ffffff{% else %}#1e3a8a{% endif %}; }
+    .doc .type { background:#dbeafe; color:#1e3a8a; }
     .section { margin-top:10px; }
-    .title { margin:0 0 5px; font-size:11px; text-transform:uppercase; letter-spacing:.3px; color:{% if receipt.color %}{{receipt.color}}{% else %}#334155{% endif %}; font-weight:700; }
+    .title { margin:0 0 5px; font-size:11px; text-transform:uppercase; letter-spacing:.3px; color:#334155; font-weight:700; }
     .grid { display:table; width:100%; }
     .col { display:table-cell; width:50%; vertical-align:top; padding:8px 10px; }
     .col + .col { border-left:1px solid #e2e8f0; }
     p { margin:0 0 4px; }
     .small { color:#475569; font-size:11px; }
     table { width:100%; border-collapse:collapse; }
-    th, td { border:1px solid {% if receipt.color %}{{receipt.color}}{% else %}#cbd5e1{% endif %}; padding:6px 7px; vertical-align:top; }
-    th { background:{% if receipt.color %}{{receipt.color}}{% else %}#eff6ff{% endif %}; color:{% if receipt.color %}#ffffff{% else %}#000000{% endif %}; font-size:11px; text-align:left; }
+    th, td { border:1px solid #cbd5e1; padding:6px 7px; vertical-align:top; }
+    th { background:#eff6ff; font-size:11px; text-align:left; }
     .right { text-align:right; }
     .center { text-align:center; }
     .qr { margin-top:12px; display:table; width:100%; }
@@ -163,7 +163,7 @@
     <div class="card" style="padding:8px 10px;">
       {% if receipt.port.code %}<p><strong>Puerto:</strong> {{ receipt.port.code }} {{ receipt.port.description }}</p>{% endif %}
       {% if receipt.airport.code %}<p><strong>Aeropuerto:</strong> {{ receipt.airport.code }} {{ receipt.airport.description }}</p>{% endif %}
-      {% if receipt.indicators is not empty %}<p><strong>Indicadores:</strong> {% for i in receipt.indicators %}{{ i }}{% if not loop.last %}, {% endif %}{% endfor %}</p>{% endif %}
+      {% if receipt.indicators %}<p><strong>Indicadores:</strong> {% for i in receipt.indicators %}{{ i }}{% if not loop.last %}, {% endif %}{% endfor %}</p>{% endif %}
       {% if receipt.containers is not empty %}<p><strong>Contenedores:</strong></p>{% for c in receipt.containers %}<p class="small">{{ c.number }}{% if c.seal %} | Precinto: {{ c.seal }}{% endif %}</p>{% endfor %}{% endif %}
       {% if receipt.customsDeclarations is not empty %}<p><strong>Declaraciones aduaneras:</strong></p>{% for c in receipt.customsDeclarations %}<p class="small">{{ c.type }} {{ c.number }} {{ c.customsOffice }}</p>{% endfor %}{% endif %}
     </div>

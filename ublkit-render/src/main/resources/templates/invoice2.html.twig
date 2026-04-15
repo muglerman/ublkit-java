@@ -16,7 +16,7 @@
             margin: 0;
             color: #555555;
             background: #FFFFFF;
-            font-family: Arial, sans-serif;
+            font-family:'Roboto', sans-serif;
             font-size: 12px;
         }
         header {
@@ -285,7 +285,7 @@
             </div>
         </div>
         <div id="qrcode">
-            <img src="data:image/svg+xml;base64,{{ invoice.qr | default(doc.qr) }}">
+            <img src="{{ qrCode(doc)|image_b64('svg+xml') }}">
         </div>
     </div>
 </main>

@@ -52,7 +52,7 @@ public class RenderizadorHtmlFactura implements RenderizadorDocumento<BorradorFa
     }
 
     public RenderizadorHtmlFactura(FormatoImpresion formato) {
-        this.engine = new PebbleEngine.Builder().loader(new io.pebbletemplates.pebble.loader.ClasspathLoader()).build();
+        this.engine = new PebbleEngine.Builder().build();
         this.formato = formato;
     }
 
@@ -265,12 +265,9 @@ public class RenderizadorHtmlFactura implements RenderizadorDocumento<BorradorFa
         invoice.put("summary", summary);
         invoice.put("legends", legends(doc.getLeyendas()));
         applyTemplateAttributes(invoice, contexto.atributosPlantilla());
-        invoice.put("estado", contexto.estado());
-        invoice.put("cuentasBancarias", contexto.cuentasBancarias());
 
         Map<String, Object> scope = new HashMap<>();
         scope.put("invoice", invoice);
-        scope.put("doc", invoice); // Alias para las plantillas twig
 
         try {
             PebbleTemplate compiledTemplate = engine.getTemplate(obtenerRutaPlantilla());
@@ -365,40 +362,6 @@ public class RenderizadorHtmlFactura implements RenderizadorDocumento<BorradorFa
         if (attrs == null || attrs.isEmpty()) return;
         invoice.put("header", txt(attrs.get("header")));
         invoice.put("footer", txt(attrs.get("footer")));
-
-        if (attrs.containsKey("colorPrimario")) {
-            invoice.put("colorPrimario", txt(attrs.get("colorPrimario")));
-        }
-        if (attrs.containsKey("color")) {
-            invoice.put("color", txt(attrs.get("color")));
-            if (!attrs.containsKey("colorPrimario")) {
-                invoice.put("colorPrimario", txt(attrs.get("color")));
-            }
-        }
-
-        if (attrs.containsKey("logo")) {
-            Object logoObj = attrs.get("logo");
-            if (logoObj instanceof String s) {
-                if (s.startsWith("data:image")) {
-                    invoice.put("logo", s);
-                } else {
-                    // Fallback for paths? Keep it as is or try to read? We'll just pass it
-                    invoice.put("logo", s);
-                }
-            } else if (logoObj instanceof java.io.InputStream is) {
-                try (is) {
-                    byte[] bytes = is.readAllBytes();
-                    String b64 = java.util.Base64.getEncoder().encodeToString(bytes);
-                    invoice.put("logo", "data:image/png;base64," + b64);
-                } catch (java.io.IOException e) {
-                    // Fallback
-                }
-            } else if (logoObj instanceof byte[] bytes) {
-                String b64 = java.util.Base64.getEncoder().encodeToString(bytes);
-                invoice.put("logo", "data:image/png;base64," + b64);
-            }
-        }
-
         Object extras = attrs.get(KEY_EXTRAS);
         if (extras instanceof List<?> list) {
             invoice.put(KEY_EXTRAS, list);
