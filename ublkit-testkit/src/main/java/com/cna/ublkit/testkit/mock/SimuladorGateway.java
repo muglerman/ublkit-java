@@ -7,6 +7,7 @@ import com.cna.ublkit.gateway.respuesta.EstadoEnvio;
 import com.cna.ublkit.gateway.respuesta.ResultadoConsulta;
 import com.cna.ublkit.gateway.respuesta.ResultadoEnvio;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -71,5 +72,16 @@ public class SimuladorGateway implements PasarelaSunat {
     @Override
     public ResultadoConsulta consultarTicketRest(String ticket, CredencialesEmpresa credenciales, TipoAmbiente ambiente) {
         return respuestasTickets.getOrDefault(ticket, ResultadoConsulta.pendiente());
+    }
+
+    @Override
+    public CompletableFuture<ResultadoConsulta> consultarTicketAsincrono(String ticket,
+                                                                         CredencialesEmpresa credenciales,
+                                                                         TipoAmbiente ambiente,
+                                                                         boolean esRest) {
+        ResultadoConsulta resultado = esRest
+                ? consultarTicketRest(ticket, credenciales, ambiente)
+                : consultarTicketSoap(ticket, credenciales, ambiente);
+        return CompletableFuture.completedFuture(resultado);
     }
 }
