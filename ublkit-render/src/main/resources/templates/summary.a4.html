@@ -36,7 +36,7 @@
         <p><strong>Emisor:</strong> {{ summary.issuer.name }}</p>
         <p><strong>RUC:</strong> {{ summary.issuer.ruc }}</p>
         {% if summary.issuer.tradeName %}<p><strong>Comercial:</strong> {{ summary.issuer.tradeName }}</p>{% endif %}
-        {% if summary.signer %}<p><strong>Firmante:</strong> {{ summary.signer.ruc }} {{ summary.signer.name }}</p>{% endif %}
+        {% if summary.signer is not empty %}<p><strong>Firmante:</strong> {{ summary.signer.ruc }} {{ summary.signer.name }}</p>{% endif %}
       </div>
     </div>
   </div>

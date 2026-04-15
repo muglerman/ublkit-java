@@ -70,7 +70,7 @@
         <p><strong>Emision:</strong> {{ invoice.issueDate }} {{ invoice.issueTime }}</p>
         {% if invoice.dueDate %}<p><strong>Vencimiento:</strong> {{ invoice.dueDate }}</p>{% endif %}
         <p><strong>Moneda:</strong> {{ invoice.currency }}</p>
-        {% if invoice.exchangeRate %}<p><strong>T/C:</strong> {{ invoice.exchangeRate.value }}</p>{% endif %}
+        {% if invoice.exchangeRate is not empty %}<p><strong>T/C:</strong> {{ invoice.exchangeRate.value }}</p>{% endif %}
         {% if invoice.operationTypeCode %}<p><strong>Operacion:</strong> {{ invoice.operationTypeCode }}</p>{% endif %}
       </div>
     </div>
@@ -100,9 +100,9 @@
 
   <div class="section grid">
     <div class="col card" style="padding:7px 8px;">
-      {% if invoice.payment %}<p><strong>Pago:</strong> {{ invoice.payment.type }} {{ invoice.payment.total }}</p>{% endif %}
-      {% if invoice.detraction %}<p><strong>Detraccion:</strong> {{ invoice.detraction.amount }}</p>{% endif %}
-      {% if invoice.perception %}<p><strong>Percepcion:</strong> {{ invoice.perception.amount }}</p>{% endif %}
+      {% if invoice.payment is not empty %}<p><strong>Pago:</strong> {{ invoice.payment.type }} {{ invoice.payment.total }}</p>{% endif %}
+      {% if invoice.detraction is not empty %}<p><strong>Detraccion:</strong> {{ invoice.detraction.amount }}</p>{% endif %}
+      {% if invoice.perception is not empty %}<p><strong>Percepcion:</strong> {{ invoice.perception.amount }}</p>{% endif %}
       {% if invoice.reference.guides is not empty %}<p><strong>Guias:</strong></p>{% for g in invoice.reference.guides %}<p class="small">{{ g.type }} {{ g.document }}</p>{% endfor %}{% endif %}
       {% if invoice.deliveryAddress %}<p><strong>Entrega:</strong> {{ invoice.deliveryAddress }}</p>{% endif %}
       {% if invoice.note %}<p><strong>Obs:</strong> {{ invoice.note }}</p>{% endif %}
@@ -129,7 +129,7 @@
     <div><img src="data:image/svg+xml;base64,{{ invoice.qr }}" alt="QR" /></div>
     <div style="padding-left:8px;">
       <span class="pill">Representacion impresa</span>
-      {% if invoice.signer %}<p class="small" style="margin-top:4px;">Firmante: {{ invoice.signer.identity }}</p>{% endif %}
+      {% if invoice.signer is not empty %}<p class="small" style="margin-top:4px;">Firmante: {{ invoice.signer.identity }}</p>{% endif %}
       <p class="small" style="margin-top:4px;">Hash: {{ invoice.hash }}</p>
     </div>
   </div>

@@ -67,7 +67,7 @@
       <div class="col">
         <p><strong>Emision:</strong> {{ invoice.issueDate }} {{ invoice.issueTime }}</p>
         <p><strong>Moneda:</strong> {{ invoice.currency }}</p>
-        {% if invoice.exchangeRate %}<p><strong>Tipo cambio:</strong> {{ invoice.exchangeRate.date }} {{ invoice.exchangeRate.value }}</p>{% endif %}
+        {% if invoice.exchangeRate is not empty %}<p><strong>Tipo cambio:</strong> {{ invoice.exchangeRate.date }} {{ invoice.exchangeRate.value }}</p>{% endif %}
         <p><strong>Tipo de nota:</strong> {{ invoice.noteTypeCode }} {{ invoice.noteTypeName }}</p>
         {% if invoice.relatedDocument.document %}<p><strong>Doc. afectado:</strong> {{ invoice.relatedDocument.type }} {{ invoice.relatedDocument.document }}</p>{% endif %}
         {% if invoice.orderReference %}<p><strong>Orden:</strong> {{ invoice.orderReference }}</p>{% endif %}
@@ -141,7 +141,7 @@
     <div><img src="data:image/svg+xml;base64,{{ invoice.qr }}" alt="QR" /></div>
     <div style="padding-left:10px;">
       <p class="small">Representacion impresa de nota electronica.</p>
-      {% if invoice.signer %}<p class="small">Firmante: {{ invoice.signer.identity }} {{ invoice.signer.name }}</p>{% endif %}
+      {% if invoice.signer is not empty %}<p class="small">Firmante: {{ invoice.signer.identity }} {{ invoice.signer.name }}</p>{% endif %}
       <p class="small">Hash: {{ invoice.hash }}</p>
     </div>
   </div>

@@ -84,7 +84,7 @@
     </div>
   </div>
 
-  {% if receipt.carrier %}
+  {% if receipt.carrier is not empty %}
   <div class="section card" style="padding:7px 8px;">
     <p><strong>Transportista:</strong> {{ receipt.carrier.name }}</p>
     <p>{{ receipt.carrier.documentType }} {{ receipt.carrier.identity }} | MTC {{ receipt.carrier.mtc }}</p>
@@ -127,7 +127,7 @@
 
   <div class="qr">
     <div><img src="{{ receipt.qr }}" alt="QR" /></div>
-    <div style="padding-left:8px;"><p class="small">Version: {{ receipt.version }}</p>{% if receipt.signer %}<p class="small">Firmante: {{ receipt.signer.identity }}</p>{% endif %}<p class="small">Hash: {{ receipt.hash }}</p></div>
+    <div style="padding-left:8px;"><p class="small">Version: {{ receipt.version }}</p>{% if receipt.signer is not empty %}<p class="small">Firmante: {{ receipt.signer.identity }}</p>{% endif %}<p class="small">Hash: {{ receipt.hash }}</p></div>
   </div>
   {% if receipt.footer %}<div class="card small" style="padding:6px 8px; margin-top:6px;">{{ receipt.footer }}</div>{% endif %}
 </body>
