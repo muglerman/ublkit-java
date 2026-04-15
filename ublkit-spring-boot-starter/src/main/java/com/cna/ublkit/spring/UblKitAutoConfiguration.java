@@ -3,7 +3,9 @@ package com.cna.ublkit.spring;
 import org.springframework.context.annotation.Bean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 
+import com.cna.ublkit.gateway.config.ConfiguracionGateway;
 import com.cna.ublkit.render.pdf.*;
 import com.cna.ublkit.render.html.*;
 import com.cna.ublkit.ubl.xml.*;
@@ -11,10 +13,18 @@ import com.cna.ublkit.validation.validador.*;
 import com.cna.ublkit.gateway.api.*;
 import com.cna.ublkit.gateway.transporte.*;
 import com.cna.ublkit.gateway.autenticacion.*;
-import com.cna.ublkit.sign.api.ServicioFirma;
 
 @AutoConfiguration
+@EnableConfigurationProperties(UblKitProperties.class)
 public class UblKitAutoConfiguration {
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ConfiguracionGateway configuracionGateway(UblKitProperties properties) {
+        UblKitProperties.Gateway gateway = properties.getGateway();
+        int maxIntentos = Math.max(1, gateway.getMaxIntentos());
+        return new ConfiguracionGateway(gateway.getConnectTimeout(), gateway.getReadTimeout(), maxIntentos);
+    }
 
     // --- Renderizadores PDF ---
     @Bean
@@ -185,25 +195,28 @@ public class UblKitAutoConfiguration {
     // --- Gateway ---
     @Bean
     @ConditionalOnMissingBean
-    public ClienteSoap clienteSoap() {
-        return new HttpClienteNativoSoap();
+    public ClienteSoap clienteSoap(ConfiguracionGateway configuracionGateway) {
+        return new HttpClienteNativoSoap(configuracionGateway.connectTimeout(), configuracionGateway.readTimeout());
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public ClienteRest clienteRest() {
-        return new HttpClienteNativoRest();
+    public ClienteRest clienteRest(ConfiguracionGateway configuracionGateway) {
+        return new HttpClienteNativoRest(configuracionGateway.connectTimeout(), configuracionGateway.readTimeout());
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public ProveedorToken proveedorToken() {
-        return new ProveedorTokenNativo();
+    public ProveedorToken proveedorToken(ConfiguracionGateway configuracionGateway) {
+        return new ProveedorTokenNativo(configuracionGateway.connectTimeout(), configuracionGateway.readTimeout());
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public PasarelaSunat pasarelaSunat(ClienteSoap clienteSoap, ClienteRest clienteRest, ProveedorToken proveedorToken) {
-        return new PasarelaSunatDefecto(clienteSoap, clienteRest, proveedorToken);
+    public PasarelaSunat pasarelaSunat(ClienteSoap clienteSoap,
+                                       ClienteRest clienteRest,
+                                       ProveedorToken proveedorToken,
+                                       ConfiguracionGateway configuracionGateway) {
+        return new PasarelaSunatDefecto(clienteSoap, clienteRest, proveedorToken, configuracionGateway);
     }
 }

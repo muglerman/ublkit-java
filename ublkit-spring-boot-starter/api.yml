@@ -1,0 +1,585 @@
+openapi: 3.0.3
+info:
+  title: UBLKit Spring Boot Starter - API de Referencia
+  version: 1.0.0
+  description: |
+    Contrato OpenAPI de referencia para implementar una API HTTP sobre ublkit-spring-boot-starter.
+
+    Importante:
+    - Este archivo no implica que el starter exponga endpoints automaticamente.
+    - Sirve como blueprint para tu capa web (controllers/services).
+servers:
+  - url: http://localhost:8080
+    description: Entorno local
+
+tags:
+  - name: Salud
+  - name: Factura
+  - name: NotaCredito
+  - name: NotaDebito
+  - name: GuiaRemision
+  - name: ResumenBaja
+  - name: PercepcionRetencion
+  - name: SUNAT
+
+paths:
+  /api/v1/health/ublkit:
+    get:
+      tags: [Salud]
+      summary: Verifica disponibilidad de servicios UBLKit
+      operationId: healthUblkit
+      responses:
+        '200':
+          description: Estado general de dependencias UBLKit
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+  /api/v1/facturas/validar:
+    post:
+      tags: [Factura]
+      summary: Valida una factura/boleta en memoria
+      operationId: validarFactura
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DocumentoInput'
+      responses:
+        '200':
+          description: Resultado de validacion
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidacionResponse'
+
+  /api/v1/facturas/xml:
+    post:
+      tags: [Factura]
+      summary: Serializa una factura/boleta a XML UBL
+      operationId: serializarFacturaXml
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DocumentoInput'
+      responses:
+        '200':
+          description: XML generado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/XmlResponse'
+
+  /api/v1/facturas/firmar:
+    post:
+      tags: [Factura]
+      summary: Firma XML de factura/boleta
+      operationId: firmarFacturaXml
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FirmaRequest'
+      responses:
+        '200':
+          description: XML firmado y digest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FirmaResponse'
+
+  /api/v1/facturas/enviar:
+    post:
+      tags: [Factura, SUNAT]
+      summary: Envia factura/boleta/nota por SOAP sincrono
+      operationId: enviarFactura
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EnvioRequest'
+      responses:
+        '200':
+          description: Estado de envio
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnvioResponse'
+
+  /api/v1/facturas/render/html:
+    post:
+      tags: [Factura]
+      summary: Renderiza HTML de factura/boleta
+      operationId: renderFacturaHtml
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RenderRequest'
+      responses:
+        '200':
+          description: HTML renderizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RenderHtmlResponse'
+
+  /api/v1/facturas/render/pdf:
+    post:
+      tags: [Factura]
+      summary: Renderiza PDF de factura/boleta
+      operationId: renderFacturaPdf
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RenderRequest'
+      responses:
+        '200':
+          description: PDF renderizado en Base64
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RenderPdfResponse'
+
+  /api/v1/notas-credito/validar:
+    post:
+      tags: [NotaCredito]
+      summary: Valida nota de credito
+      operationId: validarNotaCredito
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DocumentoInput'
+      responses:
+        '200':
+          description: Resultado de validacion
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidacionResponse'
+
+  /api/v1/notas-debito/validar:
+    post:
+      tags: [NotaDebito]
+      summary: Valida nota de debito
+      operationId: validarNotaDebito
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DocumentoInput'
+      responses:
+        '200':
+          description: Resultado de validacion
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidacionResponse'
+
+  /api/v1/guias/validar:
+    post:
+      tags: [GuiaRemision]
+      summary: Valida guia de remision
+      operationId: validarGuia
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DocumentoInput'
+      responses:
+        '200':
+          description: Resultado de validacion
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidacionResponse'
+
+  /api/v1/guias/enviar:
+    post:
+      tags: [GuiaRemision, SUNAT]
+      summary: Envia guia de remision por REST
+      operationId: enviarGuia
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EnvioRequest'
+      responses:
+        '200':
+          description: Resultado de envio (ticket)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnvioResponse'
+
+  /api/v1/sunat/tickets/soap/{ticket}:
+    get:
+      tags: [SUNAT]
+      summary: Consulta ticket SOAP (resumen/baja)
+      operationId: consultarTicketSoap
+      parameters:
+        - in: path
+          name: ticket
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: ambiente
+          required: true
+          schema:
+            $ref: '#/components/schemas/Ambiente'
+      responses:
+        '200':
+          description: Estado de consulta de ticket
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConsultaResponse'
+
+  /api/v1/sunat/tickets/rest/{ticket}:
+    get:
+      tags: [SUNAT]
+      summary: Consulta ticket REST (GRE)
+      operationId: consultarTicketRest
+      parameters:
+        - in: path
+          name: ticket
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: ambiente
+          required: true
+          schema:
+            $ref: '#/components/schemas/Ambiente'
+      responses:
+        '200':
+          description: Estado de consulta de ticket
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConsultaResponse'
+
+  /api/v1/resumenes-bajas/enviar:
+    post:
+      tags: [ResumenBaja, SUNAT]
+      summary: Envia resumen diario o comunicacion de baja
+      operationId: enviarResumenBaja
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EnvioRequest'
+      responses:
+        '200':
+          description: Resultado de envio asincrono
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnvioResponse'
+
+  /api/v1/percepcion-retencion/validar:
+    post:
+      tags: [PercepcionRetencion]
+      summary: Valida percepcion o retencion
+      operationId: validarPercepcionRetencion
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DocumentoInput'
+      responses:
+        '200':
+          description: Resultado de validacion
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidacionResponse'
+
+  /api/v1/percepcion-retencion/enviar:
+    post:
+      tags: [PercepcionRetencion, SUNAT]
+      summary: Envia comprobante de percepcion/retencion
+      operationId: enviarPercepcionRetencion
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EnvioRequest'
+      responses:
+        '200':
+          description: Resultado de envio
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnvioResponse'
+
+components:
+  schemas:
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: UP
+        beans:
+          type: array
+          items:
+            type: string
+          example:
+            - ValidadorFactura
+            - SerializadorXmlFactura
+            - PasarelaSunat
+
+    DocumentoInput:
+      type: object
+      description: |
+        Payload generico para transportar el documento de negocio.
+        Puede ser mapeado a BorradorFactura, BorradorGuiaRemision, etc.
+      required:
+        - tipoDocumento
+        - payload
+      properties:
+        tipoDocumento:
+          type: string
+          enum:
+            - FACTURA
+            - BOLETA
+            - NOTA_CREDITO
+            - NOTA_DEBITO
+            - GUIA_REMISION
+            - RESUMEN_DIARIO
+            - COMUNICACION_BAJA
+            - PERCEPCION
+            - RETENCION
+        payload:
+          type: object
+          additionalProperties: true
+
+    ValidacionResponse:
+      type: object
+      required:
+        - valido
+        - incidencias
+      properties:
+        valido:
+          type: boolean
+        incidencias:
+          type: array
+          items:
+            $ref: '#/components/schemas/Incidencia'
+
+    Incidencia:
+      type: object
+      properties:
+        severidad:
+          type: string
+          enum: [ERROR, WARNING]
+        codigo:
+          type: string
+          example: SUNAT-2050
+        mensaje:
+          type: string
+          example: Serie invalida para el tipo de documento.
+
+    XmlResponse:
+      type: object
+      required: [xml]
+      properties:
+        xml:
+          type: string
+          description: XML UBL generado
+
+    FirmaRequest:
+      type: object
+      required: [xml, certificado]
+      properties:
+        xml:
+          type: string
+        idReferenciaFirma:
+          type: string
+          default: SignSUNAT
+        certificado:
+          $ref: '#/components/schemas/CertificadoInput'
+
+    CertificadoInput:
+      type: object
+      required: [base64Pfx, password]
+      properties:
+        base64Pfx:
+          type: string
+          format: byte
+        password:
+          type: string
+        tipo:
+          type: string
+          default: PKCS12
+
+    FirmaResponse:
+      type: object
+      required: [exitoso]
+      properties:
+        exitoso:
+          type: boolean
+        digestValue:
+          type: string
+          nullable: true
+        xmlFirmado:
+          type: string
+          nullable: true
+        mensajeError:
+          type: string
+          nullable: true
+
+    EnvioRequest:
+      type: object
+      required:
+        - xmlFirmado
+        - nombreArchivo
+        - credenciales
+        - ambiente
+      properties:
+        xmlFirmado:
+          type: string
+        nombreArchivo:
+          type: string
+          example: 20123456789-01-F001-1.xml
+        credenciales:
+          $ref: '#/components/schemas/CredencialesEmpresa'
+        ambiente:
+          $ref: '#/components/schemas/Ambiente'
+
+    CredencialesEmpresa:
+      type: object
+      required: [ruc, usuarioSol, claveSol]
+      properties:
+        ruc:
+          type: string
+          minLength: 11
+          maxLength: 11
+          example: '20123456789'
+        usuarioSol:
+          type: string
+          example: MODDATOS
+        claveSol:
+          type: string
+          example: moddatos
+        clientId:
+          type: string
+          nullable: true
+          description: Requerido para operaciones REST (GRE)
+        clientSecret:
+          type: string
+          nullable: true
+          description: Requerido para operaciones REST (GRE)
+
+    Ambiente:
+      type: string
+      enum: [BETA, PRODUCCION]
+
+    EnvioResponse:
+      type: object
+      required: [estado]
+      properties:
+        estado:
+          $ref: '#/components/schemas/EstadoEnvio'
+        numeroTicket:
+          type: string
+          nullable: true
+        cdr:
+          $ref: '#/components/schemas/Cdr'
+        codigoError:
+          type: string
+          nullable: true
+        mensajeError:
+          type: string
+          nullable: true
+
+    ConsultaResponse:
+      type: object
+      required: [estado]
+      properties:
+        estado:
+          $ref: '#/components/schemas/EstadoEnvio'
+        cdr:
+          $ref: '#/components/schemas/Cdr'
+        codigoError:
+          type: string
+          nullable: true
+        mensajeError:
+          type: string
+          nullable: true
+
+    Cdr:
+      type: object
+      nullable: true
+      properties:
+        codigo:
+          type: string
+          nullable: true
+        descripcion:
+          type: string
+          nullable: true
+        observaciones:
+          type: array
+          items:
+            type: string
+
+    EstadoEnvio:
+      type: string
+      enum:
+        - ACEPTADO
+        - ACEPTADO_CON_OBSERVACIONES
+        - RECHAZADO
+        - EXCEPCION
+        - TICKET_PENDIENTE
+        - EN_PROCESAMIENTO
+
+    RenderRequest:
+      type: object
+      required: [documento]
+      properties:
+        documento:
+          type: object
+          additionalProperties: true
+        hashDocumento:
+          type: string
+          nullable: true
+        qrBase64:
+          type: string
+          nullable: true
+        atributosPlantilla:
+          type: object
+          additionalProperties: true
+
+    RenderHtmlResponse:
+      type: object
+      required: [contenidoHtml]
+      properties:
+        contenidoHtml:
+          type: string
+
+    RenderPdfResponse:
+      type: object
+      required: [contenidoPdfBase64]
+      properties:
+        contenidoPdfBase64:
+          type: string
+          format: byte
