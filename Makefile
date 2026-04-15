@@ -33,12 +33,15 @@ help:
 
 build:
 	@echo "📦 Building..."; \
+	set -o pipefail; \
 	if [ "$(ENABLE_SONAR)" = "true" ]; then \
 		mvn -q clean verify -Dskip.sonar=false 2>&1 | tee /tmp/build.log | grep -E "BUILD|ERROR" || true; \
+		status=$${PIPESTATUS[0]}; \
 	else \
 		mvn -q clean verify 2>&1 | tee /tmp/build.log | grep -E "BUILD|ERROR" || true; \
+		status=$${PIPESTATUS[0]}; \
 	fi; \
-	if grep -q "ERROR" /tmp/build.log; then echo "❌ Build FAILED"; exit 1; else echo "✅ Build successful"; fi
+	if [ $$status -ne 0 ]; then echo "❌ Build FAILED"; exit $$status; else echo "✅ Build successful"; fi
 
 test:
 	@echo "🧪 Testing $(PROJECT_NAME) (10 modules)..."

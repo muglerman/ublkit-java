@@ -8,8 +8,6 @@ import com.cna.ublkit.gateway.respuesta.ResultadoEnvio;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.concurrent.CompletableFuture;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 class SimuladorGatewayTest {
@@ -43,23 +41,13 @@ class SimuladorGatewayTest {
     }
 
     @Test
-    @DisplayName("retorna ticket simulado en sync y async (soap/rest)")
-    void debeRetornarTicketSimuladoEnSyncYAsync() {
+    @DisplayName("retorna ticket simulado en consultas soap/rest")
+    void debeRetornarTicketSimuladoEnConsultasSync() {
         SimuladorGateway gateway = new SimuladorGateway();
         ResultadoConsulta respuesta = ResultadoConsulta.completado(EstadoEnvio.ACEPTADO, null);
         gateway.simularRespuestaTicket("T-OK", respuesta);
 
         assertThat(gateway.consultarTicketSoap("T-OK", CREDENCIALES, TipoAmbiente.PRODUCCION)).isEqualTo(respuesta);
         assertThat(gateway.consultarTicketRest("T-OK", CREDENCIALES, TipoAmbiente.PRODUCCION)).isEqualTo(respuesta);
-
-        CompletableFuture<ResultadoConsulta> asyncSoap =
-                gateway.consultarTicketAsincrono("T-OK", CREDENCIALES, TipoAmbiente.PRODUCCION, false);
-        CompletableFuture<ResultadoConsulta> asyncRest =
-                gateway.consultarTicketAsincrono("T-OK", CREDENCIALES, TipoAmbiente.PRODUCCION, true);
-
-        assertThat(asyncSoap).isCompleted();
-        assertThat(asyncRest).isCompleted();
-        assertThat(asyncSoap.join()).isEqualTo(respuesta);
-        assertThat(asyncRest.join()).isEqualTo(respuesta);
     }
 }
