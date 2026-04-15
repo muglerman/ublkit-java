@@ -278,18 +278,24 @@ public class TicketService {
 El starter define `@ConfigurationProperties` con prefijo `ublkit`.
 
 Propiedades soportadas:
-- `ublkit.gateway.connect-timeout` (default: `10s`)
-- `ublkit.gateway.read-timeout` (default: `60s`)
+- `ublkit.gateway.connect-timeout-ms` (default: `10000`)
+- `ublkit.gateway.read-timeout-ms` (default: `60000`)
 - `ublkit.gateway.max-intentos` (default: `3`, minimo efectivo: `1`)
+- `ublkit.gateway.max-connections` (default: `100`, minimo efectivo: `1`)
+
+Compatibilidad:
+- Si usas `ublkit.gateway.connect-timeout` y `ublkit.gateway.read-timeout` (formato `Duration`), se siguen soportando para no romper versiones anteriores.
+- Cuando se define `*-timeout-ms`, ese valor tiene prioridad sobre `Duration`.
 
 Ejemplo:
 
 ```yaml
 ublkit:
     gateway:
-        connect-timeout: 5s
-        read-timeout: 45s
+        connect-timeout-ms: 3000
+        read-timeout-ms: 10000
         max-intentos: 5
+        max-connections: 100
 ```
 
 Estas propiedades alimentan:
@@ -297,6 +303,11 @@ Estas propiedades alimentan:
 - `ClienteRest` (`HttpClienteNativoRest`)
 - `ProveedorToken` (`ProveedorTokenNativo`)
 - `PasarelaSunatDefecto` (estrategia de retry)
+
+Nota tecnica de `max-connections`:
+- En Java `HttpClient` nativo, el tamaño de pool se controla con la propiedad JVM `jdk.httpclient.connectionPoolSize`.
+- Es una configuracion global del proceso, por lo que el primer valor aplicado en la JVM es el que prevalece.
+- Si otro componente ya definio un valor diferente, UBLKit registra advertencia y mantiene el valor existente para evitar cambios inesperados.
 
 La personalizacion avanzada sigue disponible reemplazando beans (`@Bean`) por tipo.
 
@@ -313,7 +324,8 @@ public class UblKitCustomConfiguration {
         ConfiguracionGateway cfg = new ConfiguracionGateway(
                 Duration.ofSeconds(5),
                 Duration.ofSeconds(30),
-                5
+            5,
+            100
         );
         return new PasarelaSunatDefecto(clienteSoap, clienteRest, proveedorToken, cfg);
     }

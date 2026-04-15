@@ -48,6 +48,11 @@ if (resultado.esValido()) {
 - Ejecutar validacion antes de serializar/firmar para reducir rechazos en SUNAT.
 - Tratar advertencias y errores de forma diferenciada en la capa de aplicacion.
 
+## Rendimiento XSLT SUNAT
+- `ValidadorSunatXsl` precompila las hojas XSL con `Templates` al iniciar la clase.
+- En cada validacion se usa `templates.newTransformer()`, evitando recompilar XSL por documento.
+- Este enfoque reduce latencia y evita el cuello de botella tipico de `newTransformer(new StreamSource(...))` por cada XML.
+
 ## Errores frecuentes
 - Tratar advertencias como errores bloqueantes sin criterio de negocio.
 - Ejecutar envio SUNAT sin validar primero.

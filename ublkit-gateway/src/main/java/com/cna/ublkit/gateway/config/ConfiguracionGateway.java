@@ -12,15 +12,17 @@ import java.time.Duration;
 public record ConfiguracionGateway(
         Duration connectTimeout,
         Duration readTimeout,
-        int maxIntentos
+    int maxIntentos,
+    int maxConnections
 ) {
     /**
      * Configuración por defecto recomendada:
      * - Timeout de conexión: 10 segundos
      * - Timeout de lectura: 60 segundos
      * - Máximo de intentos: 3
+     * - Tamaño máximo de pool HTTP: 100
      */
     public static ConfiguracionGateway porDefecto() {
-        return new ConfiguracionGateway(Duration.ofSeconds(10), Duration.ofSeconds(60), 3);
+        return new ConfiguracionGateway(Duration.ofSeconds(10), Duration.ofSeconds(60), 3, 100);
     }
 }

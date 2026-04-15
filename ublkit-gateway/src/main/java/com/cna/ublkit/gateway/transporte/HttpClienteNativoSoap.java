@@ -29,14 +29,15 @@ public class HttpClienteNativoSoap implements ClienteSoap {
     private final Duration readTimeout;
 
     public HttpClienteNativoSoap() {
-        this(Duration.ofSeconds(10), Duration.ofSeconds(60));
+        this(Duration.ofSeconds(10), Duration.ofSeconds(60), 100);
     }
 
     public HttpClienteNativoSoap(Duration connectTimeout, Duration readTimeout) {
-        this.httpClient = HttpClient.newBuilder()
-                .version(HttpClient.Version.HTTP_1_1)
-                .connectTimeout(connectTimeout)
-                .build();
+        this(connectTimeout, readTimeout, 100);
+    }
+
+    public HttpClienteNativoSoap(Duration connectTimeout, Duration readTimeout, int maxConnections) {
+        this.httpClient = HttpClientNativoFactory.crear(connectTimeout, maxConnections);
         this.readTimeout = readTimeout;
     }
 

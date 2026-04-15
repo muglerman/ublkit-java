@@ -17,7 +17,12 @@ import com.cna.ublkit.gateway.respuesta.EstadoEnvio;
 
 import java.util.logging.Logger;
 import java.util.logging.Level;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
+import com.cna.ublkit.gateway.respuesta.ArchivoCdr;
 
 /**
  * Implementación por defecto de {@link PasarelaSunat}.
@@ -28,6 +33,18 @@ import java.util.function.Supplier;
 public class PasarelaSunatDefecto implements PasarelaSunat {
     private final int maxIntentos;
     private static final Logger log = Logger.getLogger(PasarelaSunatDefecto.class.getName());
+    private static final long POLLING_ESPERA_INICIAL_MS_DEFAULT = 2000L;
+    private static final long POLLING_ESPERA_MAX_MS_DEFAULT = 30000L;
+    private static final int POLLING_MAX_INTENTOS_DEFAULT = 8;
+    private static final ExecutorService POLLING_EXECUTOR = Executors.newCachedThreadPool(r -> {
+        Thread t = new Thread(r, "ublkit-gre-polling");
+        t.setDaemon(true);
+        return t;
+    });
+
+    private final long pollingEsperaInicialMs;
+    private final long pollingEsperaMaxMs;
+    private final int pollingMaxIntentos;
 
     private final ClienteSoap clienteSoap;
     private final ClienteRest clienteRest;
@@ -38,10 +55,13 @@ public class PasarelaSunatDefecto implements PasarelaSunat {
     }
 
     public PasarelaSunatDefecto(ConfiguracionGateway config) {
-        this.clienteSoap = new HttpClienteNativoSoap(config.connectTimeout(), config.readTimeout());
-        this.clienteRest = new HttpClienteNativoRest(config.connectTimeout(), config.readTimeout());
-        this.proveedorToken = new ProveedorTokenNativo(config.connectTimeout(), config.readTimeout());
+        this.clienteSoap = new HttpClienteNativoSoap(config.connectTimeout(), config.readTimeout(), config.maxConnections());
+        this.clienteRest = new HttpClienteNativoRest(config.connectTimeout(), config.readTimeout(), config.maxConnections());
+        this.proveedorToken = new ProveedorTokenNativo(config.connectTimeout(), config.readTimeout(), config.maxConnections());
         this.maxIntentos = config.maxIntentos();
+        this.pollingEsperaInicialMs = POLLING_ESPERA_INICIAL_MS_DEFAULT;
+        this.pollingEsperaMaxMs = POLLING_ESPERA_MAX_MS_DEFAULT;
+        this.pollingMaxIntentos = POLLING_MAX_INTENTOS_DEFAULT;
     }
 
     public PasarelaSunatDefecto(ClienteSoap clienteSoap, ClienteRest clienteRest, ProveedorToken proveedorToken) {
@@ -49,6 +69,9 @@ public class PasarelaSunatDefecto implements PasarelaSunat {
         this.clienteRest = clienteRest;
         this.proveedorToken = proveedorToken;
         this.maxIntentos = 3;
+        this.pollingEsperaInicialMs = POLLING_ESPERA_INICIAL_MS_DEFAULT;
+        this.pollingEsperaMaxMs = POLLING_ESPERA_MAX_MS_DEFAULT;
+        this.pollingMaxIntentos = POLLING_MAX_INTENTOS_DEFAULT;
     }
 
     public PasarelaSunatDefecto(ClienteSoap clienteSoap, ClienteRest clienteRest, ProveedorToken proveedorToken, ConfiguracionGateway config) {
@@ -56,6 +79,27 @@ public class PasarelaSunatDefecto implements PasarelaSunat {
         this.clienteRest = clienteRest;
         this.proveedorToken = proveedorToken;
         this.maxIntentos = config.maxIntentos();
+        this.pollingEsperaInicialMs = POLLING_ESPERA_INICIAL_MS_DEFAULT;
+        this.pollingEsperaMaxMs = POLLING_ESPERA_MAX_MS_DEFAULT;
+        this.pollingMaxIntentos = POLLING_MAX_INTENTOS_DEFAULT;
+    }
+
+    PasarelaSunatDefecto(
+            ClienteSoap clienteSoap,
+            ClienteRest clienteRest,
+            ProveedorToken proveedorToken,
+            ConfiguracionGateway config,
+            long pollingEsperaInicialMs,
+            long pollingEsperaMaxMs,
+            int pollingMaxIntentos
+    ) {
+        this.clienteSoap = clienteSoap;
+        this.clienteRest = clienteRest;
+        this.proveedorToken = proveedorToken;
+        this.maxIntentos = config.maxIntentos();
+        this.pollingEsperaInicialMs = pollingEsperaInicialMs;
+        this.pollingEsperaMaxMs = pollingEsperaMaxMs;
+        this.pollingMaxIntentos = pollingMaxIntentos;
     }
 
     @Override
@@ -116,6 +160,91 @@ public class PasarelaSunatDefecto implements PasarelaSunat {
                     ambiente, ticket, urlBase, finalEndpoint + ticket, mask(credenciales.getUsernameConcatenado()), mask(token)));
         }
         return conRetry(() -> clienteRest.consultarTicket(ticket, finalEndpoint, token));
+    }
+
+    @Override
+    public CompletableFuture<ArchivoCdr> enviarGuiaRemisionYEsperar(
+            String xmlFirmado,
+            String nombreArchivo,
+            CredencialesEmpresa credenciales,
+            TipoAmbiente ambiente
+    ) {
+        return CompletableFuture.supplyAsync(
+                () -> enviarGuiaRemision(xmlFirmado, nombreArchivo, credenciales, ambiente),
+                POLLING_EXECUTOR
+        ).thenCompose(resultadoEnvio -> {
+            if (resultadoEnvio == null) {
+                return CompletableFuture.failedFuture(new IllegalStateException("No se obtuvo resultado de envío GRE"));
+            }
+            if (resultadoEnvio.estado() == EstadoEnvio.EXCEPCION) {
+                return CompletableFuture.failedFuture(new IllegalStateException(
+                        "Error al enviar GRE: " + resultadoEnvio.codigoError() + " - " + resultadoEnvio.mensajeError()
+                ));
+            }
+            if (resultadoEnvio.numeroTicket() == null || resultadoEnvio.numeroTicket().isBlank()) {
+                return CompletableFuture.failedFuture(new IllegalStateException("SUNAT no retornó ticket para GRE"));
+            }
+
+            return pollGreHastaFinal(
+                    resultadoEnvio.numeroTicket(),
+                    credenciales,
+                    ambiente,
+                    1,
+                    pollingEsperaInicialMs
+            );
+        });
+    }
+
+    private CompletableFuture<ArchivoCdr> pollGreHastaFinal(
+            String ticket,
+            CredencialesEmpresa credenciales,
+            TipoAmbiente ambiente,
+            int intento,
+            long esperaMs
+    ) {
+        return CompletableFuture.supplyAsync(
+                () -> consultarTicketRest(ticket, credenciales, ambiente),
+                CompletableFuture.delayedExecutor(esperaMs, TimeUnit.MILLISECONDS, POLLING_EXECUTOR)
+        ).thenCompose(resultado -> {
+            if (resultado == null) {
+                return CompletableFuture.failedFuture(new IllegalStateException("Consulta de ticket GRE retornó null"));
+            }
+
+            EstadoEnvio estado = resultado.estado();
+            if (estado == EstadoEnvio.ACEPTADO || estado == EstadoEnvio.ACEPTADO_CON_OBSERVACIONES || estado == EstadoEnvio.RECHAZADO) {
+                if (resultado.cdr() == null) {
+                    return CompletableFuture.failedFuture(new IllegalStateException(
+                            "Ticket GRE finalizado sin CDR. Estado: " + estado
+                    ));
+                }
+                return CompletableFuture.completedFuture(resultado.cdr());
+            }
+
+            if (estado == EstadoEnvio.EXCEPCION) {
+                return CompletableFuture.failedFuture(new IllegalStateException(
+                        "Error al consultar ticket GRE: " + resultado.codigoError() + " - " + resultado.mensajeError()
+                ));
+            }
+
+            if (estado == EstadoEnvio.EN_PROCESAMIENTO || estado == EstadoEnvio.TICKET_PENDIENTE) {
+                if (intento >= pollingMaxIntentos) {
+                    return CompletableFuture.failedFuture(new IllegalStateException(
+                            "Tiempo de espera agotado consultando ticket GRE " + ticket
+                    ));
+                }
+                long siguienteEspera = siguienteBackoff(esperaMs);
+                return pollGreHastaFinal(ticket, credenciales, ambiente, intento + 1, siguienteEspera);
+            }
+
+            return CompletableFuture.failedFuture(new IllegalStateException("Estado de ticket GRE no manejado: " + estado));
+        });
+    }
+
+    private long siguienteBackoff(long esperaActualMs) {
+        if (esperaActualMs < 5000L) {
+            return 5000L;
+        }
+        return Math.min(esperaActualMs * 2L, pollingEsperaMaxMs);
     }
 
     private String detectarRaizXml(String xml) {

@@ -75,19 +75,38 @@ class UblKitAutoConfigurationTest {
     void autoConfiguration_ShouldBindGatewayProperties() {
         contextRunner
                 .withPropertyValues(
+                        "ublkit.gateway.connect-timeout-ms=3000",
+                        "ublkit.gateway.read-timeout-ms=10000",
+                        "ublkit.gateway.max-intentos=7",
+                        "ublkit.gateway.max-connections=120"
+                )
+                .run(context -> {
+                    ConfiguracionGateway config = context.getBean(ConfiguracionGateway.class);
+                    assertThat(config.connectTimeout()).hasSeconds(3);
+                    assertThat(config.readTimeout()).hasSeconds(10);
+                    assertThat(config.maxIntentos()).isEqualTo(7);
+                    assertThat(config.maxConnections()).isEqualTo(120);
+
+                    PasarelaSunatDefecto pasarela = (PasarelaSunatDefecto) context.getBean(PasarelaSunat.class);
+                    Object maxIntentos = ReflectionTestUtils.getField(pasarela, "maxIntentos");
+                    assertThat(maxIntentos).isEqualTo(7);
+                });
+    }
+
+    @Test
+    void autoConfiguration_ShouldKeepCompatibilityWithDurationProperties() {
+        contextRunner
+                .withPropertyValues(
                         "ublkit.gateway.connect-timeout=3s",
                         "ublkit.gateway.read-timeout=25s",
-                        "ublkit.gateway.max-intentos=7"
+                        "ublkit.gateway.max-intentos=5"
                 )
                 .run(context -> {
                     ConfiguracionGateway config = context.getBean(ConfiguracionGateway.class);
                     assertThat(config.connectTimeout()).hasSeconds(3);
                     assertThat(config.readTimeout()).hasSeconds(25);
-                    assertThat(config.maxIntentos()).isEqualTo(7);
-
-                    PasarelaSunatDefecto pasarela = (PasarelaSunatDefecto) context.getBean(PasarelaSunat.class);
-                    Object maxIntentos = ReflectionTestUtils.getField(pasarela, "maxIntentos");
-                    assertThat(maxIntentos).isEqualTo(7);
+                    assertThat(config.maxIntentos()).isEqualTo(5);
+                    assertThat(config.maxConnections()).isEqualTo(100);
                 });
     }
 

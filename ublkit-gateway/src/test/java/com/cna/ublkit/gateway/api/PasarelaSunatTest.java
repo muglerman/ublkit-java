@@ -2,9 +2,12 @@ package com.cna.ublkit.gateway.api;
 
 import com.cna.ublkit.core.enumerado.TipoAmbiente;
 import com.cna.ublkit.gateway.autenticacion.CredencialesEmpresa;
+import com.cna.ublkit.gateway.respuesta.ArchivoCdr;
 import com.cna.ublkit.gateway.respuesta.ResultadoConsulta;
 import com.cna.ublkit.gateway.respuesta.ResultadoEnvio;
 import org.junit.jupiter.api.Test;
+
+import java.util.concurrent.CompletableFuture;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -69,6 +72,12 @@ class PasarelaSunatTest {
                 .anyMatch(m -> m.getName().equals("consultarTicketRest") && m.getParameterCount() == 3);
     }
 
+    @Test
+    void interfaceDefinesEnviarGuiaRemisionYEsperarMethod() {
+        assertThat(PasarelaSunat.class.getDeclaredMethods())
+                .anyMatch(m -> m.getName().equals("enviarGuiaRemisionYEsperar") && m.getParameterCount() == 4);
+    }
+
     /**
      * Test that all methods return expected types.
      */
@@ -128,6 +137,12 @@ class PasarelaSunatTest {
             public ResultadoConsulta consultarTicketRest(String ticket, CredencialesEmpresa credenciales,
                     TipoAmbiente ambiente) {
                 return ResultadoConsulta.pendiente();
+            }
+
+            @Override
+            public CompletableFuture<ArchivoCdr> enviarGuiaRemisionYEsperar(String xmlFirmado, String nombreArchivo,
+                    CredencialesEmpresa credenciales, TipoAmbiente ambiente) {
+                return CompletableFuture.completedFuture(new ArchivoCdr(new byte[] {}, "0", "OK", java.util.List.of()));
             }
         };
 

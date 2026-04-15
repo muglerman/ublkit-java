@@ -63,10 +63,9 @@ public final class ServicioFirma {
             throw new NullPointerException("Certificado no puede ser null");
         }
         try {
-            Document documentoFirmado = FirmadorXml.firmar(xml, idReferencia, certificado);
-
-            byte[] bytes = XmlHelper.documentoABytes(documentoFirmado);
+            byte[] bytes = FirmadorXml.firmarComoBytes(xml, idReferencia, certificado);
             String xmlStr = new String(bytes, StandardCharsets.ISO_8859_1);
+            Document documentoFirmado = XmlHelper.convertirStringADocumento(xmlStr);
             String digestValue = extraerDigestValue(documentoFirmado);
 
             return ResultadoFirma.exitoso(bytes, xmlStr, digestValue);

@@ -22,6 +22,7 @@ import javax.xml.crypto.dsig.keyinfo.KeyInfoFactory;
 import javax.xml.crypto.dsig.keyinfo.X509Data;
 import javax.xml.crypto.dsig.spec.C14NMethodParameterSpec;
 import javax.xml.crypto.dsig.spec.TransformParameterSpec;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 
 /**
@@ -39,6 +40,7 @@ public final class FirmadorXml {
     private static final String TAG_UBL_EXTENSIONS = "ext:UBLExtensions";
     private static final String TAG_UBL_EXTENSION = "ext:UBLExtension";
     private static final String TAG_EXTENSION_CONTENT = "ext:ExtensionContent";
+    private static final String C14N_INCLUSIVA = CanonicalizationMethod.INCLUSIVE;
 
     private FirmadorXml() {
         throw new UnsupportedOperationException("Clase utilitaria, no instanciable");
@@ -76,6 +78,7 @@ public final class FirmadorXml {
     public static Document firmar(Document documento, String idReferencia, DetallesCertificado certificado) {
         try {
             Document docFirma = (Document) documento.cloneNode(true);
+            XmlHelper.compactarEstructura(docFirma);
 
             asegurarUBLExtensions(docFirma);
             asegurarUBLExtension(docFirma);
@@ -93,8 +96,9 @@ public final class FirmadorXml {
             Reference referencia = fabrica.newReference(
                     "",
                     fabrica.newDigestMethod(DigestMethod.SHA1, null),
-                    Collections.singletonList(
-                            fabrica.newTransform(Transform.ENVELOPED, (TransformParameterSpec) null)
+                    java.util.List.of(
+                        fabrica.newTransform(Transform.ENVELOPED, (TransformParameterSpec) null),
+                        fabrica.newTransform(C14N_INCLUSIVA, (TransformParameterSpec) null)
                     ),
                     null,
                     null
@@ -102,7 +106,7 @@ public final class FirmadorXml {
 
             SignedInfo infoFirmada = fabrica.newSignedInfo(
                     fabrica.newCanonicalizationMethod(
-                            CanonicalizationMethod.INCLUSIVE,
+                        C14N_INCLUSIVA,
                             (C14NMethodParameterSpec) null
                     ),
                     fabrica.newSignatureMethod(SignatureMethod.RSA_SHA1, null),
@@ -125,6 +129,28 @@ public final class FirmadorXml {
         } catch (Exception e) {
             throw new ExcepcionUblKit("Error al firmar XML: " + e.getMessage(), e);
         }
+    }
+
+    /**
+     * Firma un XML y retorna bytes compactos/minificados.
+     * Esta es la salida recomendada para transporte hacia SUNAT.
+     */
+    public static byte[] firmarComoBytes(String xml, String idReferencia, DetallesCertificado certificado) {
+        Document documentoFirmado = firmar(xml, idReferencia, certificado);
+        try {
+            return XmlHelper.documentoABytesMinificado(documentoFirmado);
+        } catch (Exception e) {
+            throw new ExcepcionUblKit("Error serializando XML firmado: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Firma un XML y retorna String compacto/minificado.
+     * Evita exposición de DOM mutable en el flujo de integración.
+     */
+    public static String firmarComoString(String xml, String idReferencia, DetallesCertificado certificado) {
+        byte[] bytes = firmarComoBytes(xml, idReferencia, certificado);
+        return new String(bytes, StandardCharsets.ISO_8859_1);
     }
 
     // ── Estructura UBL Extensions ────────────────────────────────

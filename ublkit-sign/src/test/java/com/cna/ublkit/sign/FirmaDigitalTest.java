@@ -111,6 +111,17 @@ class FirmaDigitalTest {
     }
 
     @Test
+    void testFirmadorXml_firmarComoBytes_yString_compactos() {
+        byte[] bytesFirmados = FirmadorXml.firmarComoBytes(XML_FACTURA_MINIMA, "SignSUNAT", certificado);
+        String xmlFirmado = FirmadorXml.firmarComoString(XML_FACTURA_MINIMA, "SignSUNAT", certificado);
+
+        assertThat(bytesFirmados).isNotEmpty();
+        assertThat(xmlFirmado).isNotBlank();
+        assertThat(xmlFirmado).contains("ds:Signature");
+        assertThat(xmlFirmado).doesNotContain("\n    ");
+    }
+
+    @Test
     void testServicioFirma_flujoCompleto() {
         ResultadoFirma resultado = ServicioFirma.firmarXml(XML_FACTURA_MINIMA, certificado);
 

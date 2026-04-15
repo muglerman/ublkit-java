@@ -2,8 +2,11 @@ package com.cna.ublkit.gateway.api;
 
 import com.cna.ublkit.core.enumerado.TipoAmbiente;
 import com.cna.ublkit.gateway.autenticacion.CredencialesEmpresa;
+import com.cna.ublkit.gateway.respuesta.ArchivoCdr;
 import com.cna.ublkit.gateway.respuesta.ResultadoConsulta;
 import com.cna.ublkit.gateway.respuesta.ResultadoEnvio;
+
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Fachada principal del módulo Gateway para enviar y consultar comprobantes.
@@ -71,5 +74,22 @@ public interface PasarelaSunat {
      * Consulta el estado de un ticket REST (Guías de Remisión).
      */
     ResultadoConsulta consultarTicketRest(String ticket, CredencialesEmpresa credenciales, TipoAmbiente ambiente);
+
+    /**
+     * Envía una GRE por REST y realiza polling asíncrono del ticket con backoff exponencial
+     * hasta obtener CDR final o agotar intentos.
+     *
+     * @param xmlFirmado XML firmado de la GRE.
+     * @param nombreArchivo Nombre de archivo XML.
+     * @param credenciales Credenciales de empresa.
+     * @param ambiente Ambiente de envío.
+     * @return futuro que completa con el CDR definitivo.
+     */
+    CompletableFuture<ArchivoCdr> enviarGuiaRemisionYEsperar(
+            String xmlFirmado,
+            String nombreArchivo,
+            CredencialesEmpresa credenciales,
+            TipoAmbiente ambiente
+    );
 
 }

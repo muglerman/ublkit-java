@@ -13,6 +13,8 @@ Modulo de firma digital XML para documentos UBL.
 - `ServicioFirma.firmarXml(xml, certificado)`
 - `ServicioFirma.firmarXml(xml, idReferencia, certificado)`
 - `RepositorioCertificados.obtenerOCargar(clave, cargador)`
+- `FirmadorXml.firmarComoBytes(xml, idReferencia, certificado)`
+- `FirmadorXml.firmarComoString(xml, idReferencia, certificado)`
 
 ## Objetos clave
 - `OrigenCertificado`
@@ -50,6 +52,11 @@ ResultadoFirma resultado2 = ServicioFirma.firmarXml(xml, "SignSUNAT", certReutil
 ## Notas operativas
 - Si ocurre un fallo de firma, `ResultadoFirma` retorna `exitoso=false` y `mensajeError`.
 - La API expone XML firmado como `byte[]` y `String` para facilitar integracion con gateway/render.
+
+## Canonicalizacion y salida segura
+- La firma XMLDSig se genera con canonicalizacion inclusiva (C14N) para compatibilidad SUNAT.
+- El flujo recomendado retorna salida compacta/minificada (`byte[]`/`String`) y evita exponer DOM mutable en integracion.
+- No aplicar pretty print despues de firmar: cambiar espacios/indentacion invalida el hash de firma.
 
 ## Concurrencia y rendimiento
 - `ServicioFirma` es stateless y puede invocarse concurrentemente.

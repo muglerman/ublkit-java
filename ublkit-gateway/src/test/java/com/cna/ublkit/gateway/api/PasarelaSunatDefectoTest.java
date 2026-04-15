@@ -3,6 +3,7 @@ package com.cna.ublkit.gateway.api;
 import com.cna.ublkit.core.enumerado.TipoAmbiente;
 import com.cna.ublkit.gateway.autenticacion.CredencialesEmpresa;
 import com.cna.ublkit.gateway.autenticacion.ProveedorToken;
+import com.cna.ublkit.gateway.config.ConfiguracionGateway;
 import com.cna.ublkit.gateway.respuesta.ArchivoCdr;
 import com.cna.ublkit.gateway.respuesta.EstadoEnvio;
 import com.cna.ublkit.gateway.respuesta.ResultadoConsulta;
@@ -14,7 +15,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.util.ArrayDeque;
+import java.util.Queue;
 import java.util.List;
+import java.util.concurrent.CompletionException;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -256,6 +260,106 @@ class PasarelaSunatDefectoTest {
         ResultadoEnvio resultado = gateway.enviarGuiaRemision(xmlFirmado, nombreArchivo, credenciales, ambiente);
 
         assertThat(resultado).isNotNull();
+    }
+
+    @Test
+    void enviarGuiaRemisionYEsperar_whenTicketCompletes_returnsCdr() {
+        Queue<ResultadoConsulta> respuestas = new ArrayDeque<>();
+        respuestas.add(ResultadoConsulta.completado(
+                EstadoEnvio.ACEPTADO,
+                new ArchivoCdr(new byte[] {}, "0", "Aceptado", List.of())
+        ));
+
+        ClienteRest restConSecuencia = new ClienteRest() {
+            @Override
+            public ResultadoEnvio enviarGuia(String xmlFirmado, String nombreArchivo, String endpointUrl, String tokenBearer) {
+                return ResultadoEnvio.asincrono("TK-123");
+            }
+
+            @Override
+            public ResultadoConsulta consultarTicket(String numeroTicket, String endpointUrl, String tokenBearer) {
+                return respuestas.isEmpty() ? ResultadoConsulta.pendiente() : respuestas.poll();
+            }
+        };
+
+        PasarelaSunatDefecto gatewayAsync = new PasarelaSunatDefecto(
+            mockClienteSoap,
+            restConSecuencia,
+            mockProveedorToken,
+            ConfiguracionGateway.porDefecto(),
+            1,
+            10,
+            3
+        );
+        CredencialesEmpresa cred = new CredencialesEmpresa("20000000000", "USER", "PASS", "client", "secret");
+
+        ArchivoCdr cdr = gatewayAsync.enviarGuiaRemisionYEsperar("<DespatchAdvice/>", "20000000000-09-T001-1.xml", cred, TipoAmbiente.BETA)
+                .join();
+
+        assertThat(cdr).isNotNull();
+        assertThat(cdr.codigoRegreso()).isEqualTo("0");
+    }
+
+    @Test
+    void enviarGuiaRemisionYEsperar_whenSendFails_completesExceptionally() {
+        ClienteRest restError = new ClienteRest() {
+            @Override
+            public ResultadoEnvio enviarGuia(String xmlFirmado, String nombreArchivo, String endpointUrl, String tokenBearer) {
+                return ResultadoEnvio.error("HTTP_5XX", "fallo temporal");
+            }
+
+            @Override
+            public ResultadoConsulta consultarTicket(String numeroTicket, String endpointUrl, String tokenBearer) {
+                return ResultadoConsulta.pendiente();
+            }
+        };
+
+        PasarelaSunatDefecto gatewayAsync = new PasarelaSunatDefecto(mockClienteSoap, restError, mockProveedorToken);
+        CredencialesEmpresa cred = new CredencialesEmpresa("20000000000", "USER", "PASS", "client", "secret");
+
+        assertThatThrownBy(() -> gatewayAsync.enviarGuiaRemisionYEsperar(
+                "<DespatchAdvice/>",
+                "20000000000-09-T001-1.xml",
+                cred,
+                TipoAmbiente.BETA
+        ).join())
+                .isInstanceOf(CompletionException.class)
+                .hasMessageContaining("Error al enviar GRE");
+    }
+
+    @Test
+    void enviarGuiaRemisionYEsperar_whenTicketNeverCompletes_timesOut() {
+        ClienteRest restSiemprePendiente = new ClienteRest() {
+            @Override
+            public ResultadoEnvio enviarGuia(String xmlFirmado, String nombreArchivo, String endpointUrl, String tokenBearer) {
+                return ResultadoEnvio.asincrono("TK-999");
+            }
+
+            @Override
+            public ResultadoConsulta consultarTicket(String numeroTicket, String endpointUrl, String tokenBearer) {
+                return ResultadoConsulta.pendiente();
+            }
+        };
+
+        PasarelaSunatDefecto gatewayAsync = new PasarelaSunatDefecto(
+                mockClienteSoap,
+                restSiemprePendiente,
+                mockProveedorToken,
+                ConfiguracionGateway.porDefecto(),
+                1,
+                2,
+                1
+        );
+        CredencialesEmpresa cred = new CredencialesEmpresa("20000000000", "USER", "PASS", "client", "secret");
+
+        assertThatThrownBy(() -> gatewayAsync.enviarGuiaRemisionYEsperar(
+                "<DespatchAdvice/>",
+                "20000000000-09-T001-1.xml",
+                cred,
+                TipoAmbiente.BETA
+        ).join())
+                .isInstanceOf(CompletionException.class)
+                .hasMessageContaining("Tiempo de espera agotado");
     }
 
     /**

@@ -53,14 +53,15 @@ public class HttpClienteNativoRest implements ClienteRest {
     private final Duration readTimeout;
 
     public HttpClienteNativoRest() {
-        this(Duration.ofSeconds(10), Duration.ofSeconds(60));
+        this(Duration.ofSeconds(10), Duration.ofSeconds(60), 100);
     }
 
     public HttpClienteNativoRest(Duration connectTimeout, Duration readTimeout) {
-        this.httpClient = HttpClient.newBuilder()
-                .version(HttpClient.Version.HTTP_1_1)
-                .connectTimeout(connectTimeout)
-                .build();
+        this(connectTimeout, readTimeout, 100);
+    }
+
+    public HttpClienteNativoRest(Duration connectTimeout, Duration readTimeout, int maxConnections) {
+        this.httpClient = HttpClientNativoFactory.crear(connectTimeout, maxConnections);
         this.readTimeout = readTimeout;
     }
 

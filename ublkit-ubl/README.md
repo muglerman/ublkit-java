@@ -28,6 +28,11 @@ Modulo de modelado documental y serializacion XML UBL 2.1.
 - `SerializadorXmlPercepcion`
 - `SerializadorXmlRetencion`
 
+## Modo streaming (StAX) para facturas masivas
+- `SerializadorXmlFactura` ahora expone `serializarStreaming(...)` para escenarios con miles de líneas.
+- Este modo escribe `InvoiceLine` con StAX (`XMLStreamWriter`) hacia `OutputStream`, reduciendo el pico de memoria frente a DOM puro.
+- Recomendado para lotes de alto volumen o alta concurrencia.
+
 ## Dependencias
 - `ublkit-core`
 - `ublkit-catalogs`
@@ -45,6 +50,9 @@ factura.setNumero(1);
 
 SerializadorXmlFactura serializador = new SerializadorXmlFactura();
 String xml = serializador.serializar(factura);
+
+// Opcion para alto volumen: salida streaming
+String xmlStreaming = serializador.serializarStreaming(factura);
 ```
 
 ## Recomendacion de flujo

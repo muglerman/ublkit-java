@@ -81,6 +81,15 @@ class ServicioFirmaTest {
     }
 
     @Test
+    void firmarXml_salidaCompacta_paraEvitarRupturaPorPrettyPrint() {
+        ResultadoFirma resultado = ServicioFirma.firmarXml(XML_FACTURA_MINIMA, certificado);
+
+        assertThat(resultado.exitoso()).isTrue();
+        assertThat(resultado.xmlFirmadoStr()).doesNotContain("\n    ");
+        assertThat(resultado.xmlFirmadoStr()).contains("<ds:Signature");
+    }
+
+    @Test
     void firmarXml_xmlInvalido_fallido() {
         String xmlInvalido = "<xml incompleto>";
         ResultadoFirma resultado = ServicioFirma.firmarXml(xmlInvalido, certificado);

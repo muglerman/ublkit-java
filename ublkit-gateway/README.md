@@ -15,6 +15,7 @@ Modulo de integracion con servicios SUNAT/OSE para envio y consulta de comproban
   - `enviarRetencionPercepcion`
   - `enviarResumen`
   - `enviarGuiaRemision`
+	- `enviarGuiaRemisionYEsperar`
   - `consultarTicketSoap`
   - `consultarTicketRest`
 
@@ -77,6 +78,7 @@ ResultadoEnvio envio = pasarela.enviarComprobante(
 - SOAP sincrono: devuelve CDR en la misma respuesta cuando SUNAT procesa de inmediato.
 - SOAP asincrono: devuelve ticket, requiere consulta posterior.
 - REST GRE: requiere `clientId` y `clientSecret` en credenciales para obtener token.
+- REST GRE con polling integrado: `enviarGuiaRemisionYEsperar` ejecuta consultas asíncronas con `CompletableFuture` y backoff exponencial (2s, 5s, 10s...).
 
 ## Errores frecuentes
 - Enviar GRE sin `clientId/clientSecret`.

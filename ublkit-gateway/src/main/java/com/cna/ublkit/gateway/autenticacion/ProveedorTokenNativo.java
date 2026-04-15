@@ -19,6 +19,7 @@ import java.util.regex.Pattern;
 import com.cna.ublkit.core.enumerado.TipoAmbiente;
 import com.cna.ublkit.core.error.ExcepcionUblKit;
 import com.cna.ublkit.gateway.endpoint.ResolvedorEndpoints;
+import com.cna.ublkit.gateway.transporte.HttpClientNativoFactory;
 
 /**
  * Proveedor de Token por defecto que utiliza {@link HttpClient} nativo. Consume el endpoint OAuth2 resuelto por
@@ -45,14 +46,15 @@ public class ProveedorTokenNativo implements ProveedorToken {
     private final Duration readTimeout;
 
     public ProveedorTokenNativo() {
-        this(Duration.ofSeconds(10), Duration.ofSeconds(60));
+        this(Duration.ofSeconds(10), Duration.ofSeconds(60), 100);
     }
 
     public ProveedorTokenNativo(Duration connectTimeout, Duration readTimeout) {
-        this.httpClient = HttpClient.newBuilder()
-                .version(HttpClient.Version.HTTP_1_1)
-                .connectTimeout(connectTimeout)
-                .build();
+        this(connectTimeout, readTimeout, 100);
+    }
+
+    public ProveedorTokenNativo(Duration connectTimeout, Duration readTimeout, int maxConnections) {
+        this.httpClient = HttpClientNativoFactory.crear(connectTimeout, maxConnections);
         this.cacheTokens = new ConcurrentHashMap<>();
         this.readTimeout = readTimeout;
     }

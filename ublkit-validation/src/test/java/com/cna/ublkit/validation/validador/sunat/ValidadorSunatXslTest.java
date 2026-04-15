@@ -13,6 +13,36 @@ class ValidadorSunatXslTest {
     private final ValidadorSunatXsl validador = new ValidadorSunatXsl();
 
     @Test
+    @DisplayName("Should precompile XSL templates once at startup")
+    void templates_precompilados_alInicializar() {
+        assertTrue(ValidadorSunatXsl.cantidadTemplatesPrecompilados() > 0);
+    }
+
+    @Test
+    @DisplayName("Should reuse compiled templates across repeated validations")
+    void validarXml_reutilizaTemplatesSinRecompilar() {
+        int antes = ValidadorSunatXsl.cantidadTemplatesPrecompilados();
+
+        String oldValue = System.getProperty("ublkit.validation.sunat.enabled");
+        try {
+            System.setProperty("ublkit.validation.sunat.enabled", "true");
+            for (int i = 0; i < 20; i++) {
+                ResultadoValidacion resultado = validador.validarXml("<Invoice/>", "factura.xml", ReglaSunatXsl.FACTURA);
+                assertNotNull(resultado);
+            }
+        } finally {
+            if (oldValue != null) {
+                System.setProperty("ublkit.validation.sunat.enabled", oldValue);
+            } else {
+                System.clearProperty("ublkit.validation.sunat.enabled");
+            }
+        }
+
+        int despues = ValidadorSunatXsl.cantidadTemplatesPrecompilados();
+        assertEquals(antes, despues);
+    }
+
+    @Test
     @DisplayName("Should return valid result when SUNAT validation is disabled")
     void validarXml_validacionDeshabilitada_retornaVacio() {
         // SUNAT validation is disabled by default

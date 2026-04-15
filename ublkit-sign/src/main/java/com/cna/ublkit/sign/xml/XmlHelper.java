@@ -2,6 +2,7 @@ package com.cna.ublkit.sign.xml;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.w3c.dom.bootstrap.DOMImplementationRegistry;
 import org.w3c.dom.ls.DOMImplementationLS;
 import org.w3c.dom.ls.LSOutput;
@@ -13,6 +14,11 @@ import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.StringReader;
@@ -65,6 +71,33 @@ public final class XmlHelper {
      * Serializa un {@link Document} DOM a bytes con codificación ISO-8859-1.
      */
     public static byte[] documentoABytes(Document documento) throws Exception {
+        return documentoABytesMinificado(documento);
+    }
+
+    /**
+     * Serializa un {@link Document} DOM a bytes compactos/minificados (sin indentación).
+     */
+    public static byte[] documentoABytesMinificado(Document documento) throws Exception {
+        ByteArrayOutputStream salida = new ByteArrayOutputStream();
+        TransformerFactory factory = TransformerFactory.newInstance();
+        factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+        factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+        factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
+
+        Transformer transformer = factory.newTransformer();
+        transformer.setOutputProperty(OutputKeys.ENCODING, ENCODING);
+        transformer.setOutputProperty(OutputKeys.INDENT, "no");
+        transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
+
+        transformer.transform(new DOMSource(documento), new StreamResult(salida));
+        return salida.toByteArray();
+    }
+
+    /**
+     * @deprecated usar {@link #documentoABytesMinificado(Document)} para flujo de firma/transporte.
+     */
+    @Deprecated
+    public static byte[] documentoABytesLegacy(Document documento) throws Exception {
         ByteArrayOutputStream salida = new ByteArrayOutputStream();
         serializarNodo(documento, salida);
         return salida.toByteArray();
@@ -82,5 +115,22 @@ public final class XmlHelper {
         LSSerializer serializer = implementacion.createLSSerializer();
         serializer.getDomConfig().setParameter("xml-declaration", true);
         serializer.write(nodo, lsOutput);
+    }
+
+    /**
+     * Elimina nodos de texto que solo contienen espacios en blanco.
+     * Se usa para evitar variaciones por pretty print antes de firmar.
+     */
+    public static void compactarEstructura(Node nodo) {
+        NodeList hijos = nodo.getChildNodes();
+        for (int i = hijos.getLength() - 1; i >= 0; i--) {
+            Node hijo = hijos.item(i);
+            if (hijo.getNodeType() == Node.TEXT_NODE && hijo.getTextContent() != null
+                    && hijo.getTextContent().trim().isEmpty()) {
+                nodo.removeChild(hijo);
+            } else {
+                compactarEstructura(hijo);
+            }
+        }
     }
 }

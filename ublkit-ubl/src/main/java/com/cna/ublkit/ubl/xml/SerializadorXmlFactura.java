@@ -1,11 +1,18 @@
 package com.cna.ublkit.ubl.xml;
 
+import com.cna.ublkit.core.error.ExcepcionSerializacionXml;
 import com.cna.ublkit.ubl.modelo.BorradorFactura;
 import com.cna.ublkit.ubl.modelo.complemento.*;
 import com.cna.ublkit.ubl.modelo.linea.LineaDetalle;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import javax.xml.stream.XMLOutputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
+import java.io.ByteArrayOutputStream;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +37,7 @@ public final class SerializadorXmlFactura implements SerializadorXml<BorradorFac
     private static final String VALUE_PE_SUNAT = "PE:SUNAT";
     private static final String TAG_PAYMENT_TERMS = "PaymentTerms";
     private static final String TAG_PAYMENT_MEANS_ID = "PaymentMeansID";
+    private static final String TAG_INVOICE_CIERRE = "</Invoice>";
 
     @Override
     public String serializar(BorradorFactura factura) {
@@ -376,5 +384,290 @@ public final class SerializadorXmlFactura implements SerializadorXml<BorradorFac
 
     private String moneda(BorradorFactura factura) {
         return factura.getMoneda() != null ? factura.getMoneda() : "PEN";
+    }
+
+    /**
+     * Serializa una factura usando escritura streaming (StAX) para las líneas de detalle.
+     * <p>
+     * Esta variante reduce el uso de memoria en documentos con miles de líneas,
+     * evitando construir en DOM todas las {@code cac:InvoiceLine} al mismo tiempo.
+     * </p>
+     */
+    public void serializarStreaming(BorradorFactura factura, OutputStream outputStream) {
+        if (factura == null) {
+            throw new ExcepcionSerializacionXml("Factura no puede ser null");
+        }
+        if (outputStream == null) {
+            throw new ExcepcionSerializacionXml("OutputStream no puede ser null");
+        }
+
+        try {
+            String cabeceraSinLineas = extraerCabeceraSinLineas(factura);
+            outputStream.write(cabeceraSinLineas.getBytes(StandardCharsets.ISO_8859_1));
+
+            XMLOutputFactory factory = XMLOutputFactory.newFactory();
+            factory.setProperty(XMLOutputFactory.IS_REPAIRING_NAMESPACES, Boolean.TRUE);
+            XMLStreamWriter writer = factory.createXMLStreamWriter(outputStream, StandardCharsets.ISO_8859_1.name());
+
+            escribirLineasStreaming(writer, factura);
+            writer.flush();
+
+            outputStream.write(TAG_INVOICE_CIERRE.getBytes(StandardCharsets.ISO_8859_1));
+            outputStream.flush();
+        } catch (Exception e) {
+            throw new ExcepcionSerializacionXml("Error serializando factura en modo streaming", e);
+        }
+    }
+
+    /**
+     * Serializa una factura en modo streaming y retorna el XML como String.
+     */
+    public String serializarStreaming(BorradorFactura factura) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        serializarStreaming(factura, baos);
+        return baos.toString(StandardCharsets.ISO_8859_1);
+    }
+
+    private String extraerCabeceraSinLineas(BorradorFactura factura) {
+        BorradorFactura clon = clonarSinLineas(factura);
+        String xmlSinLineas = serializar(clon);
+        int idxCierre = xmlSinLineas.lastIndexOf(TAG_INVOICE_CIERRE);
+        if (idxCierre < 0) {
+            throw new ExcepcionSerializacionXml("No se pudo ubicar cierre de Invoice al preparar modo streaming");
+        }
+        return xmlSinLineas.substring(0, idxCierre);
+    }
+
+    private BorradorFactura clonarSinLineas(BorradorFactura factura) {
+        BorradorFactura clon = new BorradorFactura();
+
+        clon.setSerie(factura.getSerie());
+        clon.setNumero(factura.getNumero());
+        clon.setMoneda(factura.getMoneda());
+        clon.setFechaEmision(factura.getFechaEmision());
+        clon.setHoraEmision(factura.getHoraEmision());
+        clon.setEmisor(factura.getEmisor());
+        clon.setReceptor(factura.getReceptor());
+        clon.setFirmante(factura.getFirmante());
+        clon.setTasaIgv(factura.getTasaIgv());
+        clon.setTasaIvap(factura.getTasaIvap());
+        clon.setTasaIcb(factura.getTasaIcb());
+        clon.setLeyendas(factura.getLeyendas());
+        clon.setTipoCambio(factura.getTipoCambio());
+        clon.setOrdenDeCompra(factura.getOrdenDeCompra());
+        clon.setGuias(factura.getGuias());
+        clon.setDocumentosRelacionados(factura.getDocumentosRelacionados());
+        clon.setCargos(factura.getCargos());
+        clon.setTotalImpuestos(factura.getTotalImpuestos());
+
+        clon.setTipoComprobante(factura.getTipoComprobante());
+        clon.setTipoOperacion(factura.getTipoOperacion());
+        clon.setFechaVencimiento(factura.getFechaVencimiento());
+        clon.setObservaciones(factura.getObservaciones());
+        clon.setFormaDePago(factura.getFormaDePago());
+        clon.setTotalImporte(factura.getTotalImporte());
+        clon.setDireccionEntrega(factura.getDireccionEntrega());
+        clon.setDetraccion(factura.getDetraccion());
+        clon.setPercepcion(factura.getPercepcion());
+        clon.setAnticipos(factura.getAnticipos());
+        clon.setDescuentos(factura.getDescuentos());
+        clon.setGuiaEmbebida(factura.getGuiaEmbebida());
+
+        clon.setDetalles(null);
+        return clon;
+    }
+
+    private void escribirLineasStreaming(XMLStreamWriter writer, BorradorFactura factura) throws XMLStreamException {
+        List<LineaDetalle> detalles = factura.getDetalles();
+        if (detalles == null) {
+            return;
+        }
+
+        String moneda = moneda(factura);
+        int idx = 1;
+        for (LineaDetalle linea : detalles) {
+            writer.writeStartElement("cac", "InvoiceLine", NS_CAC);
+
+            escribirCbc(writer, "ID", String.valueOf(idx));
+            escribirCbcCantidad(writer, "InvoicedQuantity",
+                    linea.getCantidad() != null ? linea.getCantidad() : BigDecimal.ONE,
+                    linea.getUnidadMedida() != null ? linea.getUnidadMedida() : "NIU");
+
+            BigDecimal extension = linea.getIscBaseImponible() != null
+                    ? linea.getIscBaseImponible()
+                    : (linea.getIgvBaseImponible() != null ? linea.getIgvBaseImponible() : BigDecimal.ZERO);
+            escribirCbcMonto(writer, "LineExtensionAmount", extension, moneda);
+
+            escribirPricingReferenceStreaming(writer, linea, moneda);
+            escribirImpuestosLineaStreaming(writer, linea, moneda);
+            escribirItemYPrecioStreaming(writer, linea, moneda);
+
+            writer.writeEndElement();
+            idx++;
+        }
+    }
+
+    private void escribirPricingReferenceStreaming(XMLStreamWriter writer, LineaDetalle linea, String moneda) throws XMLStreamException {
+        if (linea.getPrecioReferencia() == null) {
+            return;
+        }
+
+        writer.writeStartElement("cac", "PricingReference", NS_CAC);
+        writer.writeStartElement("cac", "AlternativeConditionPrice", NS_CAC);
+        escribirCbcMonto(writer, "PriceAmount", linea.getPrecioReferencia(), moneda);
+        escribirCbcConAtributos(writer, "PriceTypeCode",
+                linea.getPrecioReferenciaTipo() != null ? linea.getPrecioReferenciaTipo() : "01",
+                "listAgencyName", "PE:SUNAT",
+                "listName", "Tipo de Precio",
+                "listURI", "urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo16");
+        writer.writeEndElement();
+        writer.writeEndElement();
+    }
+
+    private void escribirImpuestosLineaStreaming(XMLStreamWriter writer, LineaDetalle linea, String moneda) throws XMLStreamException {
+        writer.writeStartElement("cac", "TaxTotal", NS_CAC);
+        escribirCbcMonto(writer, "TaxAmount", orZero(linea.getTotalImpuestos()), moneda);
+
+        if (linea.getIsc() != null) {
+            writer.writeStartElement("cac", "TaxSubtotal", NS_CAC);
+            escribirCbcMonto(writer, "TaxableAmount", orZero(linea.getIscBaseImponible()), moneda);
+            escribirCbcMonto(writer, "TaxAmount", linea.getIsc(), moneda);
+
+            writer.writeStartElement("cac", "TaxCategory", NS_CAC);
+            escribirCbcConAtributos(writer, "Percent",
+                    escalar(linea.getTasaIsc() != null ? linea.getTasaIsc().multiply(new BigDecimal("100")) : BigDecimal.ZERO));
+            if (linea.getIscTipo() != null) {
+                escribirCbc(writer, "TierRange", linea.getIscTipo());
+            }
+            writer.writeStartElement("cac", "TaxScheme", NS_CAC);
+            escribirCbc(writer, "ID", "2000");
+            escribirCbc(writer, "Name", "ISC");
+            escribirCbc(writer, "TaxTypeCode", "EXC");
+            writer.writeEndElement();
+            writer.writeEndElement();
+            writer.writeEndElement();
+        }
+
+        writer.writeStartElement("cac", "TaxSubtotal", NS_CAC);
+        escribirCbcMonto(writer, "TaxableAmount", orZero(linea.getIgvBaseImponible()), moneda);
+        escribirCbcMonto(writer, "TaxAmount", orZero(linea.getIgv()), moneda);
+
+        writer.writeStartElement("cac", "TaxCategory", NS_CAC);
+        CategoriaIgv cat = CategoriaIgv.obtener(linea.getIgvTipo());
+        escribirCbcConAtributos(writer, "ID", cat.categoriaId(),
+                "schemeAgencyName", "United Nations Economic Commission for Europe",
+                "schemeID", "UN/ECE 5305",
+                "schemeName", "Tax Category Identifier");
+        escribirCbcConAtributos(writer, "Percent",
+                escalar(linea.getTasaIgv() != null ? linea.getTasaIgv().multiply(new BigDecimal("100")) : BigDecimal.ZERO));
+        escribirCbcConAtributos(writer, "TaxExemptionReasonCode",
+                linea.getIgvTipo() != null ? linea.getIgvTipo() : "10",
+                "listAgencyName", "PE:SUNAT",
+                "listName", "Afectacion del IGV",
+                "listURI", "urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo07");
+
+        writer.writeStartElement("cac", "TaxScheme", NS_CAC);
+        escribirCbcConAtributos(writer, "ID", cat.tribCode(),
+                "schemeAgencyName", "PE:SUNAT",
+                "schemeID", "UN/ECE 5153",
+                "schemeName", "Codigo de tributos");
+        escribirCbc(writer, "Name", cat.tribName());
+        escribirCbc(writer, "TaxTypeCode", cat.tribTypeCode());
+        writer.writeEndElement();
+        writer.writeEndElement();
+        writer.writeEndElement();
+
+        if (linea.getIcb() != null) {
+            writer.writeStartElement("cac", "TaxSubtotal", NS_CAC);
+            escribirCbcMonto(writer, "TaxAmount", linea.getIcb(), moneda);
+            escribirCbcCantidad(writer, "BaseUnitMeasure",
+                    linea.getCantidad() != null ? linea.getCantidad() : BigDecimal.ONE,
+                    linea.getUnidadMedida() != null ? linea.getUnidadMedida() : "NIU");
+
+            writer.writeStartElement("cac", "TaxCategory", NS_CAC);
+            escribirCbcMonto(writer, "PerUnitAmount", orZero(linea.getTasaIcb()), moneda);
+
+            writer.writeStartElement("cac", "TaxScheme", NS_CAC);
+            escribirCbcConAtributos(writer, "ID", "7152",
+                    "schemeAgencyName", "PE:SUNAT",
+                    "schemeID", "UN/ECE 5153",
+                    "schemeName", "Codigo de tributos");
+            escribirCbc(writer, "Name", "ICBPER");
+            escribirCbc(writer, "TaxTypeCode", "OTH");
+            writer.writeEndElement();
+            writer.writeEndElement();
+            writer.writeEndElement();
+        }
+
+        writer.writeEndElement();
+    }
+
+    private void escribirItemYPrecioStreaming(XMLStreamWriter writer, LineaDetalle linea, String moneda) throws XMLStreamException {
+        writer.writeStartElement("cac", "Item", NS_CAC);
+        writer.writeStartElement("cbc", "Description", NS_CBC);
+        writer.writeCData(linea.getDescripcion() != null ? linea.getDescripcion() : "");
+        writer.writeEndElement();
+
+        if (linea.getCodigoProducto() != null) {
+            writer.writeStartElement("cac", "SellersItemIdentification", NS_CAC);
+            escribirCbc(writer, "ID", linea.getCodigoProducto());
+            writer.writeEndElement();
+        }
+        if (linea.getCodigoProductoGS1() != null) {
+            writer.writeStartElement("cac", "StandardItemIdentification", NS_CAC);
+            escribirCbcConAtributos(writer, "ID", linea.getCodigoProductoGS1(), "schemeID", "GTIN");
+            writer.writeEndElement();
+        }
+        if (linea.getCodigoProductoSunat() != null) {
+            writer.writeStartElement("cac", "CommodityClassification", NS_CAC);
+            escribirCbcConAtributos(writer, "ItemClassificationCode", linea.getCodigoProductoSunat(),
+                    "listID", "UNSPSC",
+                    "listAgencyName", "GS1 US",
+                    "listName", "Item Classification");
+            writer.writeEndElement();
+        }
+        writer.writeEndElement();
+
+        writer.writeStartElement("cac", "Price", NS_CAC);
+        escribirCbcMonto(writer, "PriceAmount", orZero(linea.getPrecio()), moneda);
+        writer.writeEndElement();
+    }
+
+    private void escribirCbc(XMLStreamWriter writer, String nombre, String valor) throws XMLStreamException {
+        writer.writeStartElement("cbc", nombre, NS_CBC);
+        writer.writeCharacters(valor != null ? valor : "");
+        writer.writeEndElement();
+    }
+
+    private void escribirCbcConAtributos(XMLStreamWriter writer, String nombre, String valor, String... atributos)
+            throws XMLStreamException {
+        writer.writeStartElement("cbc", nombre, NS_CBC);
+        for (int i = 0; i < atributos.length - 1; i += 2) {
+            writer.writeAttribute(atributos[i], atributos[i + 1]);
+        }
+        writer.writeCharacters(valor != null ? valor : "");
+        writer.writeEndElement();
+    }
+
+    private void escribirCbcMonto(XMLStreamWriter writer, String nombre, BigDecimal monto, String moneda)
+            throws XMLStreamException {
+        writer.writeStartElement("cbc", nombre, NS_CBC);
+        writer.writeAttribute("currencyID", moneda);
+        writer.writeCharacters(escalar(monto));
+        writer.writeEndElement();
+    }
+
+    private void escribirCbcCantidad(XMLStreamWriter writer, String nombre, BigDecimal cantidad, String unidad)
+            throws XMLStreamException {
+        writer.writeStartElement("cbc", nombre, NS_CBC);
+        writer.writeAttribute("unitCode", unidad);
+        writer.writeAttribute("unitCodeListAgencyName", "United Nations Economic Commission for Europe");
+        writer.writeAttribute("unitCodeListID", "UN/ECE rec 20");
+        writer.writeCharacters(cantidad.toPlainString());
+        writer.writeEndElement();
+    }
+
+    private BigDecimal orZero(BigDecimal valor) {
+        return valor != null ? valor : BigDecimal.ZERO;
     }
 }

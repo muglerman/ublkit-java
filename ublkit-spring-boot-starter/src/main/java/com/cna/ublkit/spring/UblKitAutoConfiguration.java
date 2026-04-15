@@ -36,7 +36,13 @@ public class UblKitAutoConfiguration {
     public ConfiguracionGateway configuracionGateway(UblKitProperties properties) {
         UblKitProperties.Gateway gateway = properties.getGateway();
         int maxIntentos = Math.max(1, gateway.getMaxIntentos());
-        return new ConfiguracionGateway(gateway.getConnectTimeout(), gateway.getReadTimeout(), maxIntentos);
+        int maxConnections = Math.max(1, gateway.getMaxConnections());
+        return new ConfiguracionGateway(
+            gateway.resolveConnectTimeout(),
+            gateway.resolveReadTimeout(),
+            maxIntentos,
+            maxConnections
+        );
     }
 
     // --- Storage ---
@@ -54,7 +60,7 @@ public class UblKitAutoConfiguration {
         UblKitStorageProperties.S3 s3 = properties.getS3();
         validateS3Properties(s3);
 
-        S3Client.Builder builder = S3Client.builder()
+        var builder = S3Client.builder()
                 .region(Region.of(resolveRegion(s3.getRegion())))
                 .credentialsProvider(StaticCredentialsProvider.create(
                         AwsBasicCredentials.create(s3.getAccessKey(), s3.getSecretKey())))
@@ -248,19 +254,31 @@ public class UblKitAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public ClienteSoap clienteSoap(ConfiguracionGateway configuracionGateway) {
-        return new HttpClienteNativoSoap(configuracionGateway.connectTimeout(), configuracionGateway.readTimeout());
+        return new HttpClienteNativoSoap(
+                configuracionGateway.connectTimeout(),
+                configuracionGateway.readTimeout(),
+                configuracionGateway.maxConnections()
+        );
     }
 
     @Bean
     @ConditionalOnMissingBean
     public ClienteRest clienteRest(ConfiguracionGateway configuracionGateway) {
-        return new HttpClienteNativoRest(configuracionGateway.connectTimeout(), configuracionGateway.readTimeout());
+        return new HttpClienteNativoRest(
+                configuracionGateway.connectTimeout(),
+                configuracionGateway.readTimeout(),
+                configuracionGateway.maxConnections()
+        );
     }
 
     @Bean
     @ConditionalOnMissingBean
     public ProveedorToken proveedorToken(ConfiguracionGateway configuracionGateway) {
-        return new ProveedorTokenNativo(configuracionGateway.connectTimeout(), configuracionGateway.readTimeout());
+        return new ProveedorTokenNativo(
+                configuracionGateway.connectTimeout(),
+                configuracionGateway.readTimeout(),
+                configuracionGateway.maxConnections()
+        );
     }
 
     @Bean

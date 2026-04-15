@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -31,38 +33,14 @@ import java.util.regex.Pattern;
  */
 public final class ValidadorSunatXsl {
 
+    private static final Logger LOG = Logger.getLogger(ValidadorSunatXsl.class.getName());
+
     private static final String FACTORY_SAXON = "net.sf.saxon.TransformerFactoryImpl";
     private static final Pattern CODIGO_PATTERN = Pattern.compile("(?:errorCode\\s+)?(\\d{3,5})");
     private static final String PARAM_NOMBRE_ARCHIVO = "nombreArchivoEnviado";
     private static final String PROP_VALIDACION_SUNAT = "ublkit.validation.sunat.enabled";
 
-    private static final Map<ReglaSunatXsl, Templates> templatesCache = new ConcurrentHashMap<>();
-
-    static {
-        try {
-            TransformerFactory factory = crearFactorySaxon();
-            factory.setURIResolver(new ResolverSunatClasspath());
-
-            for (ReglaSunatXsl regla : ReglaSunatXsl.values()) {
-                InputStream xslStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(regla.recursoClasspath());
-                if (xslStream != null) {
-                    try (InputStream in = xslStream) {
-                        String xslContenido = new String(in.readAllBytes(), StandardCharsets.UTF_8)
-                                .replace("current-date()", "date:date()");
-                        StreamSource xslSource = new StreamSource(new StringReader(xslContenido));
-                        xslSource.setSystemId(regla.recursoClasspath());
-                        Templates templates = factory.newTemplates(xslSource);
-                        templatesCache.put(regla, templates);
-                    }
-                } else {
-                    System.err.println("Advertencia: No se encontró recurso XSL de validación para precompilar: " + regla.recursoClasspath());
-                }
-            }
-        } catch (Exception e) {
-            System.err.println("Error al precompilar templates XSL de SUNAT: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
+    private static final Map<ReglaSunatXsl, Templates> templatesCache = precompilarTemplates();
 
     public ResultadoValidacion validarXml(String xml, String nombreArchivo, ReglaSunatXsl regla) {
         ResultadoValidacion resultado = new ResultadoValidacion();
@@ -109,6 +87,50 @@ public final class ValidadorSunatXsl {
             resultado.agregar(new IncidenciaValidacion(codigo, mensajeLimpio(msg.mensaje()), msg.severidad()));
         }
         return resultado;
+    }
+
+    static int cantidadTemplatesPrecompilados() {
+        return templatesCache.size();
+    }
+
+    private static Map<ReglaSunatXsl, Templates> precompilarTemplates() {
+        Map<ReglaSunatXsl, Templates> cache = new ConcurrentHashMap<>();
+        try {
+            TransformerFactory factory = crearFactorySaxon();
+            factory.setURIResolver(new ResolverSunatClasspath());
+
+            for (ReglaSunatXsl regla : ReglaSunatXsl.values()) {
+                try {
+                    Templates template = compilarTemplate(factory, regla);
+                    if (template != null) {
+                        cache.put(regla, template);
+                    } else {
+                        LOG.warning("No se encontró recurso XSL de validación para precompilar: " + regla.recursoClasspath());
+                    }
+                } catch (Exception ex) {
+                    LOG.log(Level.WARNING,
+                            "No se pudo precompilar regla SUNAT " + regla.name() + " desde " + regla.recursoClasspath(),
+                            ex);
+                }
+            }
+        } catch (Exception e) {
+            LOG.log(Level.SEVERE, "Error al inicializar la precompilación XSL SUNAT", e);
+        }
+        return Map.copyOf(cache);
+    }
+
+    private static Templates compilarTemplate(TransformerFactory factory, ReglaSunatXsl regla) throws Exception {
+        InputStream xslStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(regla.recursoClasspath());
+        if (xslStream == null) {
+            return null;
+        }
+        try (InputStream in = xslStream) {
+            String xslContenido = new String(in.readAllBytes(), StandardCharsets.UTF_8)
+                    .replace("current-date()", "date:date()");
+            StreamSource xslSource = new StreamSource(new StringReader(xslContenido));
+            xslSource.setSystemId(regla.recursoClasspath());
+            return factory.newTemplates(xslSource);
+        }
     }
 
     private static boolean isValidacionSunatHabilitada() {
