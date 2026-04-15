@@ -8,6 +8,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.io.IOException;
 import java.security.cert.X509Certificate;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -187,5 +188,18 @@ class CargadorCertificadoTest {
 
         assertThat(detalles1.certificado().getSerialNumber())
                 .isEqualTo(detalles2.certificado().getSerialNumber());
+    }
+
+    @Test
+    void cargar_desdeBytes_exitoso() throws IOException {
+        byte[] bytes = CargadorCertificadoTest.class.getClassLoader()
+                .getResourceAsStream("test-keystore.p12")
+                .readAllBytes();
+
+        DetallesCertificado detalles = CargadorCertificado.cargar(bytes, "changeit");
+
+        assertThat(detalles).isNotNull();
+        assertThat(detalles.clavePrivada()).isNotNull();
+        assertThat(detalles.certificado()).isNotNull();
     }
 }

@@ -38,6 +38,15 @@ class FirmaDigitalTest {
             </Invoice>
             """;
 
+    private static final String XML_MALICIOSO_XXE = """
+            <?xml version="1.0" encoding="ISO-8859-1"?>
+            <!DOCTYPE foo [ <!ENTITY xxe SYSTEM "file:///etc/passwd"> ]>
+            <Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
+                     xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
+                <cbc:ID>&xxe;</cbc:ID>
+            </Invoice>
+            """;
+
     @BeforeAll
     static void cargarCertificado() {
         InputStream is = FirmaDigitalTest.class.getClassLoader().getResourceAsStream("test-keystore.p12");
@@ -78,6 +87,12 @@ class FirmaDigitalTest {
         assertThat(bytes).isNotEmpty();
         String resultado = new String(bytes, "ISO-8859-1");
         assertThat(resultado).contains("F001-1");
+    }
+
+    @Test
+    void testXmlHelper_rechazaDoctypeParaEvitarXXE() {
+        assertThatThrownBy(() -> XmlHelper.convertirStringADocumento(XML_MALICIOSO_XXE))
+                .hasMessageContaining("DOCTYPE");
     }
 
     @Test

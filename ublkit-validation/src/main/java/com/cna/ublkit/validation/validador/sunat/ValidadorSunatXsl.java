@@ -13,6 +13,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.URIResolver;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
+import javax.xml.XMLConstants;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.io.StringReader;
@@ -119,7 +120,11 @@ public final class ValidadorSunatXsl {
         System.setProperty("jdk.xml.xpathExprOpLimit", "0");
         System.setProperty("jdk.xml.xpathTotalOpLimit", "0");
         System.setProperty("jdk.xml.xpathExprGrpLimit", "0");
-        return (TransformerFactory) Class.forName(FACTORY_SAXON).getDeclaredConstructor().newInstance();
+        TransformerFactory factory = (TransformerFactory) Class.forName(FACTORY_SAXON).getDeclaredConstructor().newInstance();
+        factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+        factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+        factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
+        return factory;
     }
 
     private static String extraerCodigo(String mensaje) {

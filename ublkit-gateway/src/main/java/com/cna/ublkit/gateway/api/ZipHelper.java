@@ -3,11 +3,18 @@ package com.cna.ublkit.gateway.api;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 /**
  * Utilitario simple para generar archivos ZIP requeridos por los envíos de SUNAT.
+ *
+ * <p>
+ * La compresión se realiza de forma estrictamente in-memory usando
+ * {@link ByteArrayOutputStream} y {@link ZipOutputStream}; no escribe archivos
+ * temporales en disco.
+ * </p>
  *
  * @since 0.1.0
  */
@@ -37,5 +44,16 @@ public final class ZipHelper {
         } catch (IOException e) {
             throw new RuntimeException("Error al comprimir el archivo XML a ZIP", e);
         }
+    }
+
+    /**
+     * Comprime un XML en ZIP y devuelve el resultado codificado en Base64.
+     *
+     * @param contenidoXml El contenido del documento XML.
+     * @param nombreArchivo El nombre del archivo dentro del ZIP (incluyendo extensión .xml).
+     * @return ZIP codificado en Base64.
+     */
+    public static String comprimirBase64(String contenidoXml, String nombreArchivo) {
+        return Base64.getEncoder().encodeToString(comprimir(contenidoXml, nombreArchivo));
     }
 }

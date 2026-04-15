@@ -68,6 +68,11 @@ ResultadoEnvio envio = pasarela.enviarComprobante(
 - `PasarelaSunatDefecto` acepta `ConfiguracionGateway` para timeout y reintentos.
 - Los errores temporales (`IO_ERROR`, `HTTP_5XX`) aplican reintento con backoff exponencial.
 
+## Compresion ZIP para SUNAT
+- La generacion de ZIP (`ZipHelper`) se realiza 100% en memoria RAM.
+- No se crean archivos temporales en disco para convertir XML -> ZIP -> Base64.
+- Este enfoque evita cuellos de botella de I/O en entornos Cloud/Kubernetes.
+
 ## Consideraciones por flujo
 - SOAP sincrono: devuelve CDR en la misma respuesta cuando SUNAT procesa de inmediato.
 - SOAP asincrono: devuelve ticket, requiere consulta posterior.

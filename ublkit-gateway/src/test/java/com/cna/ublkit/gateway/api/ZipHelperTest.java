@@ -3,6 +3,8 @@ package com.cna.ublkit.gateway.api;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -25,7 +27,26 @@ class ZipHelperTest {
             assertThat(entry.getName()).isEqualTo(nombre);
 
             byte[] contenido = zis.readAllBytes();
-            assertThat(new String(contenido, "ISO-8859-1")).isEqualTo(xml);
+            assertThat(new String(contenido, StandardCharsets.ISO_8859_1)).isEqualTo(xml);
+        }
+    }
+
+    @Test
+    void testComprimirBase64() throws Exception {
+        String xml = "<test>Hola</test>";
+        String nombre = "test.xml";
+
+        String zipBase64 = ZipHelper.comprimirBase64(xml, nombre);
+        assertThat(zipBase64).isNotBlank();
+
+        byte[] zipBytes = Base64.getDecoder().decode(zipBase64);
+        try (ZipInputStream zis = new ZipInputStream(new ByteArrayInputStream(zipBytes))) {
+            ZipEntry entry = zis.getNextEntry();
+            assertThat(entry).isNotNull();
+            assertThat(entry.getName()).isEqualTo(nombre);
+
+            byte[] contenido = zis.readAllBytes();
+            assertThat(new String(contenido, StandardCharsets.ISO_8859_1)).isEqualTo(xml);
         }
     }
 }

@@ -30,6 +30,10 @@ import java.nio.charset.StandardCharsets;
  * }
  * }</pre>
  *
+ * <p><strong>Concurrencia:</strong> esta clase es stateless y thread-safe.
+ * Para alto throughput, se recomienda cargar {@code DetallesCertificado} una sola vez
+ * al inicio de la aplicación y reutilizarlo entre hilos.</p>
+ *
  * @since 0.1.0
  */
 public final class ServicioFirma {

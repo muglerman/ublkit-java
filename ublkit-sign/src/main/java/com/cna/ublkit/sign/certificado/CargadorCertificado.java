@@ -2,6 +2,7 @@ package com.cna.ublkit.sign.certificado;
 
 import com.cna.ublkit.core.error.ExcepcionUblKit;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -59,6 +60,28 @@ public final class CargadorCertificado {
                  | IOException | UnrecoverableEntryException e) {
             throw new ExcepcionUblKit("Error al cargar el certificado: " + e.getMessage(), e);
         }
+    }
+
+    /**
+     * Carga un certificado desde bytes de keystore en formato PKCS12.
+     * Útil cuando el contenido del keystore ya fue leído en memoria.
+     */
+    public static DetallesCertificado cargar(byte[] keystoreBytes, String password) {
+        return cargar(keystoreBytes, password, "PKCS12");
+    }
+
+    /**
+     * Carga un certificado desde bytes de keystore para el tipo indicado.
+     *
+     * @param keystoreBytes contenido completo del keystore.
+     * @param password contraseña del keystore.
+     * @param tipo tipo de keystore (PKCS12, JKS, etc).
+     */
+    public static DetallesCertificado cargar(byte[] keystoreBytes, String password, String tipo) {
+        if (keystoreBytes == null) {
+            throw new ExcepcionUblKit("keystoreBytes no puede ser null");
+        }
+        return cargar(new OrigenCertificado(new ByteArrayInputStream(keystoreBytes), password, tipo));
     }
 
     private static String buscarAliasConClavePrivada(KeyStore keyStore) throws KeyStoreException {

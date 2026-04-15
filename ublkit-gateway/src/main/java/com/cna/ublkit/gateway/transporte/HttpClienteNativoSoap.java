@@ -43,8 +43,7 @@ public class HttpClienteNativoSoap implements ClienteSoap {
     @Override
     public ResultadoEnvio enviarSincrono(String xmlFirmado, String nombreArchivo, String endpointUrl, CredencialesEmpresa credenciales) {
         try {
-            byte[] zipBytes = ZipHelper.comprimir(xmlFirmado, nombreArchivo);
-            String base64Zip = Base64.getEncoder().encodeToString(zipBytes);
+            String base64Zip = ZipHelper.comprimirBase64(xmlFirmado, nombreArchivo);
             String nombreZip = nombreArchivo.replace(".xml", ".zip");
 
             String payload = buildSendBillPayload(credenciales, nombreZip, base64Zip);
@@ -72,8 +71,7 @@ public class HttpClienteNativoSoap implements ClienteSoap {
     @Override
     public ResultadoEnvio enviarAsincrono(String xmlFirmado, String nombreArchivo, String endpointUrl, CredencialesEmpresa credenciales) {
         try {
-            byte[] zipBytes = ZipHelper.comprimir(xmlFirmado, nombreArchivo);
-            String base64Zip = Base64.getEncoder().encodeToString(zipBytes);
+            String base64Zip = ZipHelper.comprimirBase64(xmlFirmado, nombreArchivo);
             String nombreZip = nombreArchivo.replace(".xml", ".zip");
 
             String payload = buildSendSummaryPayload(credenciales, nombreZip, base64Zip);
