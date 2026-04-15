@@ -1,27 +1,63 @@
 # ublkit-quarkus
 
-Adaptador oficial para integrar UBLKit de forma nativa en aplicaciones Quarkus.
+Integracion CDI para usar UBLKit en aplicaciones Quarkus.
 
-## Responsabilidad
-- Proveer productores CDI para los componentes de la librería.
-- Soporte para inyección de dependencias de firmadores y renderizadores.
-- Permitir el arranque rápido y eficiente en entornos serverless o contenedores.
+## Alcance
+- Provee productores CDI singleton para renderizadores, serializadores y validadores.
+- Evita wiring manual repetitivo en servicios Quarkus.
 
-## Componentes Clave
-- `UblKitProducers`: Provee beans CDI como @Singleton.
-- `io.quarkus:quarkus-arc`: Inyección de dependencias centralizada.
+## Componente principal
+- `UblKitProducers`
+
+## Que beans produce hoy
+
+### Render
+- Factura, Nota, Guia, Resumen, Comunicacion de baja (HTML/PDF)
+
+### Serializacion XML
+- Factura, Nota credito/debito, Guia, Resumen, Baja, Percepcion, Retencion
+
+### Validacion
+- Factura, Nota credito/debito, Guia, Resumen, Baja, Percepcion, Retencion
+
+## Importante
+Este modulo no produce actualmente beans de gateway ni de firma.
+Si los necesitas en CDI, debes registrarlos en tus propios productores.
 
 ## Dependencias
-- `ublkit-*` (Módulos nucleares)
-- `jakarta.enterprise:jakarta.enterprise.cdi-api`
+- `quarkus-arc`
+- `ublkit-core`
+- `ublkit-ubl`
+- `ublkit-sign`
+- `ublkit-gateway`
+- `ublkit-render`
+- `ublkit-validation`
 
-## Ejemplo de Uso
-En tu recurso o servicio Quarkus:
+## Ejemplo rapido
+
 ```java
-@Inject
-RenderizadorPdfFactura renderizador;
+import com.cna.ublkit.render.modelo.ContextoRender;
+import com.cna.ublkit.render.pdf.RenderizadorPdfFactura;
+import jakarta.inject.Inject;
 
-public byte[] emitirPdf(BorradorFactura factura) {
-    return renderizador.renderizar(ContextoRender.of(factura)).contenidoPdf();
+public class EmisionService {
+
+    @Inject
+    RenderizadorPdfFactura renderizador;
+
+    public byte[] emitirPdf(BorradorFactura factura) {
+        return renderizador.renderizar(ContextoRender.of(factura)).contenidoPdf();
+    }
+}
+```
+
+## Extension recomendada
+Para inyectar `PasarelaSunat` o servicios de firma, crea un productor CDI en tu aplicacion:
+
+```java
+@Produces
+@Singleton
+PasarelaSunat pasarela() {
+    return new PasarelaSunatDefecto();
 }
 ```

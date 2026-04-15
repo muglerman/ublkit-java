@@ -1,23 +1,59 @@
 # ublkit-core
 
-Módulo base que contiene los conceptos fundamentales del dominio y objetos de valor compartidos por todo el proyecto UBLKit.
+Modulo base del ecosistema UBLKit.
+Define contratos, enums, value objects y errores transversales reutilizados por los demas modulos.
 
-## Responsabilidad
-- Definir tipos base del dominio sin dependencias externas.
-- Centralizar excepciones y resultados comunes.
-- Mantener la integridad de los datos mediante objetos de valor (Value Objects).
+## Alcance
+- Modelo comun agnostico a framework.
+- Contratos de resultado sin excepciones de flujo para operaciones de infraestructura.
+- Tipos canonicos para ambiente, documento, transporte y datos monetarios.
 
-## Componentes Clave
-- `TipoDocumento`: Enum con los tipos soportados (Factura, Boleta, etc.).
-- `TipoAmbiente`: Beta y Producción.
-- `Dinero`: Representación inmutable de montos y monedas.
-- `ExcepcionUblKit`: Excepción base del sistema.
+## Componentes principales
+
+### Enums de dominio
+- `TipoDocumento`
+- `TipoAmbiente`
+- `ProtocoloTransporte`
+
+### Value objects y modelo comun
+- `Dinero`
+- `Moneda`
+- `NumeroSerie`
+- `IdentificadorDocumento`
+- `Direccion`
+- `Contacto`
+- `TipoCambio`
+
+### Resultado de operaciones
+- `ResultadoOperacion<T>`
+
+### Jerarquia de errores
+- `ExcepcionUblKit`
+- `ExcepcionValidacion`
+- `ExcepcionSerializacionXml`
+- `ExcepcionFirmaDigital`
+- `ExcepcionAutenticacionSunat`
+- `ExcepcionTransporte`
+- `ExcepcionEnsamblaje`
 
 ## Dependencias
-- Ninguna (Java 21 Puro).
+- Sin dependencias de terceros en este modulo.
+- Version de Java del proyecto: 21 (definida en el parent).
 
-## Ejemplo de Uso
+## Ejemplo rapido
+
 ```java
+import com.cna.ublkit.core.enumerado.TipoAmbiente;
+import com.cna.ublkit.core.enumerado.TipoDocumento;
+import com.cna.ublkit.core.modelo.ResultadoOperacion;
+
 TipoDocumento tipo = TipoDocumento.FACTURA;
 TipoAmbiente ambiente = TipoAmbiente.PRODUCCION;
+
+ResultadoOperacion<String> ok = ResultadoOperacion.ok("XML generado");
+ResultadoOperacion<String> error = ResultadoOperacion.error("VALIDATION_ERROR", "Documento invalido");
 ```
+
+## Buenas practicas
+- Reutilizar `ResultadoOperacion` en adaptadores IO para no mezclar errores tecnicos con validacion de negocio.
+- Mantener enums y value objects de `ublkit-core` como unica fuente de verdad compartida.

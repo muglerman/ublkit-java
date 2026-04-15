@@ -1,29 +1,49 @@
 # ublkit-validation
 
-Módulo responsable de la validación sintáctica, semántica y de negocio de los documentos antes de su procesamiento.
+Modulo de validacion funcional y estructural para documentos UBL antes de firma y envio.
 
-## Responsabilidad
-- Validar documentos y datos (BorradorFactura, etc.).
-- Informar sobre errores y advertencias mediante un resultado estructurado.
-- No depender de excepciones de control para el flujo normal de validación.
+## Alcance
+- API generica de validacion por tipo de documento.
+- Acumulacion de incidencias con severidad y codigo.
+- Validaciones especificas por comprobante y documentos SUNAT.
 
-## Componentes Clave
-- `Validador<T>`: Interfaz base para validadores.
-- `ResultadoValidacion`: Acumula las incidencias detectadas.
-- `IncidenciaValidacion`: Detalle de un error o advertencia con código y severidad.
-- `ValidadorFactura`: Implementación específica para Facturas y Boletas.
+## API principal
+- `Validador<T>`
+- `ResultadoValidacion`
+- `IncidenciaValidacion`
+- `SeveridadValidacion`
+
+## Validadores disponibles
+- `ValidadorFactura`
+- `ValidadorNotaCredito`
+- `ValidadorNotaDebito`
+- `ValidadorGuiaRemision`
+- `ValidadorComunicacionBaja`
+- `ValidadorResumenDiario`
+- `ValidadorPercepcion`
+- `ValidadorRetencion`
 
 ## Dependencias
 - `ublkit-core`
-- `ublkit-ubl` (para modelos de documento)
+- `ublkit-ubl`
 
-## Ejemplo de Uso
+## Ejemplo rapido
+
 ```java
+import com.cna.ublkit.validation.modelo.ResultadoValidacion;
+import com.cna.ublkit.validation.validador.ValidadorFactura;
+
 ValidadorFactura validador = new ValidadorFactura();
 ResultadoValidacion resultado = validador.validar(factura);
 
-if (!resultado.esValido()) {
-    resultado.getIncidencias().forEach(error -> 
-        System.err.println(error.mensaje()));
+if (resultado.esValido()) {
+    System.out.println("Documento valido");
+} else {
+    resultado.getIncidencias().forEach(i ->
+            System.err.println(i.severidad() + " " + i.codigo() + " " + i.mensaje()));
 }
 ```
+
+## Recomendacion
+- Ejecutar validacion antes de serializar/firmar para reducir rechazos en SUNAT.
+- Tratar advertencias y errores de forma diferenciada en la capa de aplicacion.

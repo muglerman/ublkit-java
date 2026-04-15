@@ -1,21 +1,34 @@
 package com.cna.ublkit.spring;
 
-import org.springframework.context.annotation.Bean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-
+import com.cna.ublkit.gateway.api.*;
+import com.cna.ublkit.gateway.autenticacion.*;
 import com.cna.ublkit.gateway.config.ConfiguracionGateway;
-import com.cna.ublkit.render.pdf.*;
+import com.cna.ublkit.gateway.transporte.*;
 import com.cna.ublkit.render.html.*;
+import com.cna.ublkit.render.pdf.*;
+import com.cna.ublkit.storage.AlmacenDocumentos;
+import com.cna.ublkit.storage.AlmacenLocalStorage;
+import com.cna.ublkit.storage.AlmacenS3;
 import com.cna.ublkit.ubl.xml.*;
 import com.cna.ublkit.validation.validador.*;
-import com.cna.ublkit.gateway.api.*;
-import com.cna.ublkit.gateway.transporte.*;
-import com.cna.ublkit.gateway.autenticacion.*;
+import java.net.URI;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Bean;
+import org.springframework.util.StringUtils;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.S3Configuration;
+import software.amazon.awssdk.services.s3.model.CreateBucketRequest;
+import software.amazon.awssdk.services.s3.model.HeadBucketRequest;
+import software.amazon.awssdk.services.s3.model.S3Exception;
 
 @AutoConfiguration
-@EnableConfigurationProperties(UblKitProperties.class)
+@EnableConfigurationProperties({UblKitProperties.class, UblKitStorageProperties.class})
 public class UblKitAutoConfiguration {
 
     @Bean
@@ -24,6 +37,45 @@ public class UblKitAutoConfiguration {
         UblKitProperties.Gateway gateway = properties.getGateway();
         int maxIntentos = Math.max(1, gateway.getMaxIntentos());
         return new ConfiguracionGateway(gateway.getConnectTimeout(), gateway.getReadTimeout(), maxIntentos);
+    }
+
+    // --- Storage ---
+    @Bean
+    @ConditionalOnMissingBean
+    @ConditionalOnProperty(prefix = "ublkit.storage", name = "type", havingValue = "local", matchIfMissing = true)
+    public AlmacenDocumentos almacenLocalStorage(UblKitStorageProperties properties) {
+        return new AlmacenLocalStorage(properties.getLocal().getBaseDirectory());
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(S3Client.class)
+    @ConditionalOnProperty(prefix = "ublkit.storage", name = "type", havingValue = "s3")
+    public S3Client s3Client(UblKitStorageProperties properties) {
+        UblKitStorageProperties.S3 s3 = properties.getS3();
+        validateS3Properties(s3);
+
+        S3Client.Builder builder = S3Client.builder()
+                .region(Region.of(resolveRegion(s3.getRegion())))
+                .credentialsProvider(StaticCredentialsProvider.create(
+                        AwsBasicCredentials.create(s3.getAccessKey(), s3.getSecretKey())))
+                .serviceConfiguration(S3Configuration.builder()
+                        .pathStyleAccessEnabled(s3.isPathStyleAccess())
+                        .build());
+
+        if (StringUtils.hasText(s3.getEndpoint())) {
+            builder.endpointOverride(URI.create(s3.getEndpoint()));
+        }
+
+        S3Client client = builder.build();
+        ensureBucketExists(client, s3);
+        return client;
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    @ConditionalOnProperty(prefix = "ublkit.storage", name = "type", havingValue = "s3")
+    public AlmacenDocumentos almacenS3Storage(S3Client s3Client, UblKitStorageProperties properties) {
+        return new AlmacenS3(s3Client, properties.getS3().getBucket());
     }
 
     // --- Renderizadores PDF ---
@@ -218,5 +270,33 @@ public class UblKitAutoConfiguration {
                                        ProveedorToken proveedorToken,
                                        ConfiguracionGateway configuracionGateway) {
         return new PasarelaSunatDefecto(clienteSoap, clienteRest, proveedorToken, configuracionGateway);
+    }
+
+    private void validateS3Properties(UblKitStorageProperties.S3 s3) {
+        if (!StringUtils.hasText(s3.getAccessKey())) {
+            throw new IllegalStateException("ublkit.storage.s3.access-key es obligatorio cuando ublkit.storage.type=s3");
+        }
+        if (!StringUtils.hasText(s3.getSecretKey())) {
+            throw new IllegalStateException("ublkit.storage.s3.secret-key es obligatorio cuando ublkit.storage.type=s3");
+        }
+        if (!StringUtils.hasText(s3.getBucket())) {
+            throw new IllegalStateException("ublkit.storage.s3.bucket es obligatorio cuando ublkit.storage.type=s3");
+        }
+    }
+
+    private String resolveRegion(String region) {
+        return StringUtils.hasText(region) ? region : "us-east-1";
+    }
+
+    private void ensureBucketExists(S3Client s3Client, UblKitStorageProperties.S3 s3) {
+        if (!s3.isCreateBucketOnStartup()) {
+            return;
+        }
+
+        try {
+            s3Client.headBucket(HeadBucketRequest.builder().bucket(s3.getBucket()).build());
+        } catch (S3Exception e) {
+            s3Client.createBucket(CreateBucketRequest.builder().bucket(s3.getBucket()).build());
+        }
     }
 }

@@ -1,26 +1,55 @@
 # ublkit-ubl
 
-Módulo encargado del modelamiento documental amigable y su transformación al estándar XML UBL 2.1.
+Modulo de modelado documental y serializacion XML UBL 2.1.
 
-## Responsabilidad
-- Proveer un modelo documental racional para el desarrollador.
-- Automatizar la serialización XML siguiendo los esquemas de la SUNAT.
-- Normalizar los campos documentales necesarios para la emisión.
+## Alcance
+- Modelos de dominio para comprobantes y documentos SUNAT.
+- Ensambladores para normalizacion y armado de contenido documental.
+- Serializadores XML especializados por tipo de documento.
 
-## Componentes Clave
-- `BorradorFactura`: El modelo central para Facturas y Boletas.
-- `BorradorGuiaRemision`: Modelo para Guías de Remisión Remitente y Transportista.
-- `DocumentoBase`: Raíz común para actoría (emisor, receptor) e identificación.
-- `SerializadorXmlUbl`: Clase encargada de la transformación XML.
+## Modelos principales
+- `DocumentoBase`
+- `BorradorFactura`
+- `BorradorNotaCredito`
+- `BorradorNotaDebito`
+- `BorradorGuiaRemision`
+- `ComunicacionBaja`
+- `ResumenDiario`
+- `ComprobantePercepcion`
+- `ComprobanteRetencion`
+
+## Serializadores XML disponibles
+- `SerializadorXmlFactura`
+- `SerializadorXmlNotaCredito`
+- `SerializadorXmlNotaDebito`
+- `SerializadorXmlGuiaRemision`
+- `SerializadorXmlComunicacionBaja`
+- `SerializadorXmlResumenDiario`
+- `SerializadorXmlPercepcion`
+- `SerializadorXmlRetencion`
 
 ## Dependencias
 - `ublkit-core`
 - `ublkit-catalogs`
 
-## Ejemplo de Uso
+## Ejemplo rapido
+
 ```java
+import com.cna.ublkit.ubl.modelo.BorradorFactura;
+import com.cna.ublkit.ubl.xml.SerializadorXmlFactura;
+
 BorradorFactura factura = new BorradorFactura();
+factura.setTipoComprobante("01");
 factura.setSerie("F001");
 factura.setNumero(1);
-// ...
+
+SerializadorXmlFactura serializador = new SerializadorXmlFactura();
+String xml = serializador.serializar(factura);
 ```
+
+## Recomendacion de flujo
+1. Construir modelo (`Borrador*` o documento SUNAT).
+2. Validar en `ublkit-validation`.
+3. Serializar con el `SerializadorXml*` correspondiente.
+4. Firmar en `ublkit-sign`.
+5. Enviar en `ublkit-gateway`.

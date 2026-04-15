@@ -1,26 +1,50 @@
 # ublkit-testkit
 
-Módulo de herramientas y utilidades para facilitar el testing en aplicaciones que usan UBLKit.
+Modulo de utilidades para pruebas unitarias e integracion sobre flujos UBLKit.
 
-## Responsabilidad
-- Proveer fixtures y modelos de ejemplo (FacturasEjemplo, etc.).
-- Proporcionar utilidades de aserción para XML UBL.
-- Facilitar la emulación de pasarelas de envío para pruebas de integración.
+## Alcance
+- Fixtures listos para construir documentos de prueba.
+- Aserciones de XML y CDR para tests de regresion.
+- Simulador de pasarela SUNAT para desacoplar pruebas de red.
 
-## Componentes Clave
-- `FacturasEjemplo`: Retorna borradores listos para pruebas.
-- `AssertsXml`: Métodos estáticos para validar valores en XML mediante XPath.
-- `SimuladorGateway`: Mock configurable de una pasarela SUNAT.
+## Fixtures disponibles
+- `FacturasEjemplo`
+- `NotasCreditoEjemplo`
+- `NotasDebitoEjemplo`
+- `GuiasRemisionEjemplo`
+- `ResumenesDiarioEjemplo`
+- `ComunicacionesBajaEjemplo`
+- `RespuestasSunatSimuladas`
+
+## Aserciones disponibles
+- `AssertsXml`
+- `AssertsCdr`
+- `GoldenXml`
+
+## Simulador
+- `SimuladorGateway` implementa `PasarelaSunat` para tests de capa aplicacion.
 
 ## Dependencias
 - `ublkit-core`
 - `ublkit-ubl`
 - `ublkit-gateway`
-- `org.junit.jupiter:junit-jupiter`
+- `junit-jupiter`
 
-## Ejemplo de Uso
+## Ejemplo rapido
+
 ```java
+import com.cna.ublkit.testkit.assertion.AssertsXml;
+import com.cna.ublkit.testkit.fixture.FacturasEjemplo;
+import com.cna.ublkit.ubl.modelo.BorradorFactura;
+import com.cna.ublkit.ubl.xml.SerializadorXmlFactura;
+
 BorradorFactura factura = FacturasEjemplo.facturaMinima();
-String xml = serializador.serializar(factura);
+String xml = new SerializadorXmlFactura().serializar(factura);
+
+AssertsXml.assertElementExists(xml, "//Invoice");
 AssertsXml.assertXPath(xml, "//ID", "F001-1");
 ```
+
+## Nota sobre XPath
+`AssertsXml` parsea en modo sin namespaces para simplificar pruebas rapidas.
+Si necesitas validaciones estrictas con namespace, conviene agregar assertions especificas en tu suite.

@@ -1,21 +1,28 @@
 package com.cna.ublkit.spring;
 
-import com.cna.ublkit.render.pdf.RenderizadorPdfFactura;
-import com.cna.ublkit.render.html.RenderizadorHtmlFactura;
-import com.cna.ublkit.ubl.xml.SerializadorXmlFactura;
-import com.cna.ublkit.validation.validador.ValidadorFactura;
 import com.cna.ublkit.gateway.api.PasarelaSunat;
 import com.cna.ublkit.gateway.api.PasarelaSunatDefecto;
 import com.cna.ublkit.gateway.config.ConfiguracionGateway;
 import com.cna.ublkit.gateway.transporte.ClienteSoap;
 import com.cna.ublkit.gateway.transporte.HttpClienteNativoSoap;
+import com.cna.ublkit.render.html.RenderizadorHtmlFactura;
+import com.cna.ublkit.render.pdf.RenderizadorPdfFactura;
+import com.cna.ublkit.storage.AlmacenDocumentos;
+import com.cna.ublkit.storage.AlmacenLocalStorage;
+import com.cna.ublkit.storage.AlmacenS3;
+import com.cna.ublkit.ubl.xml.SerializadorXmlFactura;
+import com.cna.ublkit.validation.validador.ValidadorFactura;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
 class UblKitAutoConfigurationTest {
 
@@ -32,6 +39,36 @@ class UblKitAutoConfigurationTest {
             assertThat(context).hasSingleBean(PasarelaSunat.class);
             assertThat(context).hasSingleBean(ConfiguracionGateway.class);
         });
+    }
+
+    @Test
+    void autoConfiguration_ShouldRegisterLocalStorageBeanByDefault() throws Exception {
+        Path tempDir = Files.createTempDirectory("ublkit-storage-test");
+
+        contextRunner
+                .withPropertyValues("ublkit.storage.local.base-directory=" + tempDir)
+                .run(context -> {
+                    assertThat(context).hasSingleBean(AlmacenDocumentos.class);
+                    assertThat(context.getBean(AlmacenDocumentos.class)).isInstanceOf(AlmacenLocalStorage.class);
+                });
+    }
+
+    @Test
+    void autoConfiguration_ShouldRegisterS3StorageBeanWhenConfigured() {
+        contextRunner
+                .withPropertyValues(
+                        "ublkit.storage.type=s3",
+                        "ublkit.storage.s3.endpoint=http://localhost:9100",
+                        "ublkit.storage.s3.access-key=test-access",
+                        "ublkit.storage.s3.secret-key=test-secret",
+                        "ublkit.storage.s3.bucket=test-bucket",
+                        "ublkit.storage.s3.region=us-east-1",
+                        "ublkit.storage.s3.create-bucket-on-startup=false"
+                )
+                .run(context -> {
+                    assertThat(context).hasSingleBean(AlmacenDocumentos.class);
+                    assertThat(context.getBean(AlmacenDocumentos.class)).isInstanceOf(AlmacenS3.class);
+                });
     }
 
     @Test
@@ -61,5 +98,14 @@ class UblKitAutoConfigurationTest {
         contextRunner
                 .withBean(ClienteSoap.class, () -> custom)
                 .run(context -> assertThat(context.getBean(ClienteSoap.class)).isSameAs(custom));
+    }
+
+    @Test
+    void autoConfiguration_ShouldRespectUserProvidedStorageBean() {
+        AlmacenDocumentos custom = mock(AlmacenDocumentos.class);
+
+        contextRunner
+                .withBean(AlmacenDocumentos.class, () -> custom)
+                .run(context -> assertThat(context.getBean(AlmacenDocumentos.class)).isSameAs(custom));
     }
 }

@@ -1,35 +1,70 @@
 # ublkit-render
 
-Módulo encargado de generar representaciones gráficas amigables para los documentos UBL.
+Modulo de renderizacion visual (HTML/PDF/ticket) para documentos UBL.
 
-## Responsabilidad
-- Transformar modelos de dominio o XML a formatos visuales.
-- Generar archivos PDF para impresión y envío por correo.
-- Soporte para formatos de Ticket Térmico de 58mm y 80mm.
+## Alcance
+- Render HTML para visualizacion web.
+- Render PDF para distribucion e impresion.
+- Render ticket termico para escenarios POS.
 
-## Componentes Clave
-- `RenderizadorPdfFactura`: Genera PDF para Facturas y Boletas en formato A4/A5.
-- `RenderizadorTicketFactura`: Versión optimizada para impresoras térmicas.
-- `RenderizadorHtmlGuiaRemision`: Proporciona la base HTML para Guías.
-- `FormatoImpresion`: Enum con las opciones de tamaño (A4, A5, TICKET_58MM, TICKET_80MM).
+## Contratos centrales
+- `ContextoRender<T>`: contiene documento, hash, qr y atributos de plantilla.
+- `ResultadoRender`: salida HTML o PDF segun renderizador.
+- `RenderizadorDocumento<T>`: contrato comun de render.
+
+## Renderizadores disponibles
+
+### Factura y boleta
+- `RenderizadorHtmlFactura`
+- `RenderizadorPdfFactura`
+- `RenderizadorTicketFactura`
+
+### Notas
+- `RenderizadorHtmlNota`
+- `RenderizadorPdfNota`
+
+### Guia de remision
+- `RenderizadorHtmlGuiaRemision`
+- `RenderizadorPdfGuiaRemision`
+
+### Resumen y baja
+- `RenderizadorHtmlResumenDiario`
+- `RenderizadorPdfResumenDiario`
+- `RenderizadorHtmlComunicacionBaja`
+- `RenderizadorPdfComunicacionBaja`
+
+### Formatos de impresion
+- `FormatoImpresion`: A4, A5, TICKET_58MM, TICKET_80MM
 
 ## Dependencias
 - `ublkit-core`
 - `ublkit-ubl`
-- `io.pebbletemplates:pebble` (Motor de plantillas)
-- `io.github.openhtmltopdf:openhtmltopdf-pdfbox` (Convertidor HTML a PDF)
+- `io.pebbletemplates:pebble`
+- `io.github.openhtmltopdf:openhtmltopdf-pdfbox`
 
-## Ejemplo de Uso
+## Ejemplo rapido
+
 ```java
+import com.cna.ublkit.render.modelo.ContextoRender;
+import com.cna.ublkit.render.modelo.ResultadoRender;
+import com.cna.ublkit.render.pdf.RenderizadorPdfFactura;
+
 RenderizadorPdfFactura render = new RenderizadorPdfFactura();
-ResultadoRender pdf = render.renderizar(ContextoRender.of(factura));
-byte[] bytes = pdf.contenidoPdf();
+ResultadoRender resultado = render.renderizar(ContextoRender.of(factura, hash, qrBase64));
+byte[] pdf = resultado.contenidoPdf();
 ```
 
-## Personalización de plantillas HTML
-Puedes pasar atributos adicionales por contexto para ser usados por tus plantillas:
+## Atributos de plantilla
+
 ```java
 ContextoRender<BorradorFactura> ctx = ContextoRender.of(
-    factura, "hash", "qrBase64", Map.of("CAMPO_EXTRA", "Valor")
+        factura,
+        hash,
+        qrBase64,
+        Map.of("CAMPO_EXTRA", "Valor")
 );
 ```
+
+## Recomendaciones
+- Proveer logo y recursos estaticos con ruta resoluble en tu runtime para evitar warnings de recursos no encontrados.
+- Usar `hashDocumento` y `qrBase64` cuando el documento ya fue firmado para consistencia visual legal.

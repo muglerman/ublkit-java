@@ -61,6 +61,16 @@
             <artifactId>ublkit-catalogs</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.cna</groupId>
+            <artifactId>ublkit-storage</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>s3</artifactId>
+            <version>2.20.162</version>
+        </dependency>
 	</dependencies>
 
 </project>

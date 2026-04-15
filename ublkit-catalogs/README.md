@@ -1,21 +1,53 @@
 # ublkit-catalogs
 
-Módulo para la gestión y validación de catálogos normativos, principalmente los definidos por la SUNAT en el Anexo 08.
+Modulo de acceso a catalogos normativos (principalmente SUNAT) mediante una API comun.
 
-## Responsabilidad
-- Proveer acceso a las tablas de referencia (Catálogo 01, 06, 07, etc.).
-- Validar códigos de tipos de documentos, monedas, impuestos y otros.
+## Alcance
+- Cargar catalogos desde archivos CSV en classpath.
+- Exponer busqueda por id de catalogo y codigo.
+- Entregar metadatos dinamicos por columna para catalogos con estructura extendida.
 
-## Componentes Clave
-- `ProveedorCatalogos`: Interfaz para consultar entradas.
-- `CatalogoTiposDocumento`: Acceso a códigos como "01", "03", "07".
-- `CatalogoMonedas`: Validación de códigos ISO 4217 (PEN, USD).
+## API publica real
+- `ProveedorCatalogos`:
+	- `obtenerCatalogo(String idCatalogo)`
+	- `buscar(String idCatalogo, String codigo)`
+- `EntradaCatalogo`:
+	- `getCodigo()`
+	- `getDescripcion()`
+	- `getAtributoAdicional(String clave)`
+	- `getTodosAtributos()`
+
+## Implementacion incluida
+- `LectorCsvCatalogos` implementa `ProveedorCatalogos`.
+- Ruta de carga esperada por defecto:
+
+```text
+/sunat/catalogos/{idCatalogo}.csv
+```
+
+Ejemplo: para id `01`, intenta leer `/sunat/catalogos/01.csv`.
 
 ## Dependencias
 - `ublkit-core`
 
-## Ejemplo de Uso
+## Ejemplo rapido
+
 ```java
-// Próximamente: implementación de búsqueda por código
-// CatalogoTiposDocumento.getInstance().buscar("01");
+import com.cna.ublkit.catalogs.api.ProveedorCatalogos;
+import com.cna.ublkit.catalogs.sunat.LectorCsvCatalogos;
+
+ProveedorCatalogos proveedor = new LectorCsvCatalogos();
+
+proveedor.buscar("01", "01").ifPresent(entrada -> {
+		System.out.println("Codigo: " + entrada.getCodigo());
+		System.out.println("Descripcion: " + entrada.getDescripcion());
+});
+
+int totalMonedas = proveedor.obtenerCatalogo("02").size();
+System.out.println("Entradas catalogo 02: " + totalMonedas);
 ```
+
+## Comportamientos importantes
+- Si el CSV no existe, retorna catalogo vacio (no lanza error).
+- Si hay error de parseo, lanza `ExcepcionUblKit`.
+- Las entradas retornadas son inmutables desde la API publica.
