@@ -8,11 +8,6 @@ Height: 170mm
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 		<style>
-			@page {
-				margin: 0;
-				size: 58mm auto;
-			}
-
 			html {
 				font-family:'Roboto', sans-serif;
 				font-size:8px;
@@ -79,7 +74,7 @@ Height: 170mm
 			#invoice-id-area h4 {
 				border-top: solid 1pt #1d4c39;
 				border-bottom: solid 1pt black;
-				background-color:{% if invoice.color %}{{invoice.color}}{% else %}#dfdfdf{% endif %};
+				background-color:#dfdfdf;
 			}
 			.tabla_borde{
 				border:1px solid #1d4c39;
@@ -260,7 +255,7 @@ Height: 170mm
 
 		<!-- qr -->
 		<div class="text-center my-10">
-			<img src="data:image/png;base64,{{ invoice.qr }}" alt="hash QR" />
+			<img src="{{ invoice.qr }}" alt="hash QR" />
 		</div>
 
 		<!-- resumen de cpe -->

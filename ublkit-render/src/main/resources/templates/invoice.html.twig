@@ -5,7 +5,7 @@
         {% include 'assets/style.css' %}
     </style>
 </head>
-<body class="white-bg {% if doc.estado == 'BORRADOR' %}watermark-borrador{% elseif doc.estado == 'ANULADO' %}watermark-anulado{% endif %}">
+<body class="white-bg">
 {% set cp = doc.company %}
 {% set isInvoice = doc.tipoDoc in ['01', '03'] %}
 {% set isNota = doc.tipoDoc in ['07', '08'] %}
@@ -420,7 +420,7 @@
                             </blockquote>
                         </td>
                         <td width="15%" align="right">
-                            <img src="data:image/svg+xml;base64,{{ invoice.qr | default(doc.qr) }}" alt="Qr Image">
+                            <img src="{{ qrCode(doc)|image_b64('svg+xml') }}" alt="Qr Image">
                         </td>
                     </tr>
                     </tbody>

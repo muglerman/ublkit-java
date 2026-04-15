@@ -8,19 +8,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.logging.Logger;
 
 /**
  * Implementación de {@link AlmacenDocumentos} que guarda los archivos en el sistema de archivos local.
  */
 public class AlmacenLocalStorage implements AlmacenDocumentos {
 
-    private static final Logger log = Logger.getLogger(AlmacenLocalStorage.class.getName());
-
     private final Path directorioBase;
 
     public AlmacenLocalStorage(String rutaDirectorioBase) {
-        log.warning("[UBLKIT-STORAGE] ADVERTENCIA: Usando AlmacenLocalStorage. Si la aplicación se ejecuta en Docker, asegúrese de mapear los volúmenes correctamente (ej. -v /ruta/host:/ruta/contenedor) para evitar pérdida de datos o inconsistencias.");
         this.directorioBase = Paths.get(rutaDirectorioBase).toAbsolutePath().normalize();
         try {
             Files.createDirectories(this.directorioBase);

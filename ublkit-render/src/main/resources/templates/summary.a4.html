@@ -7,7 +7,7 @@
   <style>
     * { box-sizing:border-box; }
     body { margin:0; padding:18px; font-family:'Roboto', sans-serif; color:#0f172a; font-size:12px; line-height:1.35; }
-    .card { border:1px solid {% if summary.color %}{{summary.color}}{% else %}#cbd5e1{% endif %}; border-radius:8px; background:#fff; }
+    .card { border:1px solid #cbd5e1; border-radius:8px; background:#fff; }
     .header { padding:12px; }
     h1 { margin:0 0 6px; font-size:18px; }
     p { margin:0 0 4px; }
@@ -15,8 +15,8 @@
     .meta { display:table; width:100%; margin-top:8px; }
     .meta > div { display:table-cell; width:50%; vertical-align:top; }
     table { width:100%; border-collapse:collapse; margin-top:10px; }
-    th, td { border:1px solid {% if summary.color %}{{summary.color}}{% else %}#cbd5e1{% endif %}; padding:6px 7px; vertical-align:top; }
-    th { background:{% if summary.color %}{{summary.color}}{% else %}#e6f4f1{% endif %}; color:{% if summary.color %}#ffffff{% else %}#0b1324{% endif %}; font-size:11px; text-align:left; }
+    th, td { border:1px solid #cbd5e1; padding:6px 7px; vertical-align:top; }
+    th { background:#e6f4f1; font-size:11px; text-align:left; }
     .center { text-align:center; }
     .right { text-align:right; }
   </style>
@@ -36,7 +36,7 @@
         <p><strong>Emisor:</strong> {{ summary.issuer.name }}</p>
         <p><strong>RUC:</strong> {{ summary.issuer.ruc }}</p>
         {% if summary.issuer.tradeName %}<p><strong>Comercial:</strong> {{ summary.issuer.tradeName }}</p>{% endif %}
-        {% if summary.signer is not empty %}<p><strong>Firmante:</strong> {{ summary.signer.ruc }} {{ summary.signer.name }}</p>{% endif %}
+        {% if summary.signer %}<p><strong>Firmante:</strong> {{ summary.signer.ruc }} {{ summary.signer.name }}</p>{% endif %}
       </div>
     </div>
   </div>

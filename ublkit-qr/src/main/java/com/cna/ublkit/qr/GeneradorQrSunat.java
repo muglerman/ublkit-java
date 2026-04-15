@@ -5,18 +5,14 @@ import com.cna.ublkit.ubl.modelo.BorradorNotaCredito;
 import com.cna.ublkit.ubl.modelo.BorradorNotaDebito;
 import com.cna.ublkit.ubl.modelo.DocumentoBase;
 import com.google.zxing.BarcodeFormat;
-
-import com.google.zxing.common.BitMatrix;
 import com.google.zxing.client.j2se.MatrixToImageWriter;
+import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
 
-
-import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
 import java.time.format.DateTimeFormatter;
 import java.util.Base64;
-import javax.imageio.ImageIO;
 
 public class GeneradorQrSunat {
 
@@ -89,13 +85,10 @@ public class GeneradorQrSunat {
             QRCodeWriter qrCodeWriter = new QRCodeWriter();
             BitMatrix bitMatrix = qrCodeWriter.encode(texto, BarcodeFormat.QR_CODE, 200, 200);
 
-            BufferedImage qrImage = MatrixToImageWriter.toBufferedImage(bitMatrix);
-            try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
-                if (!ImageIO.write(qrImage, "png", outputStream)) {
-                    throw new IllegalStateException("No PNG writer available for QR generation");
-                }
-                return Base64.getEncoder().encodeToString(outputStream.toByteArray());
-            }
+            ByteArrayOutputStream pngOutputStream = new ByteArrayOutputStream();
+            MatrixToImageWriter.writeToStream(bitMatrix, "PNG", pngOutputStream);
+            byte[] pngData = pngOutputStream.toByteArray();
+            return Base64.getEncoder().encodeToString(pngData);
         } catch (Exception e) {
             throw new RuntimeException("Error al generar QR", e);
         }
