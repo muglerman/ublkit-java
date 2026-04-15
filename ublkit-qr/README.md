@@ -49,3 +49,11 @@ String qrBase64 = generador.generarQrBase64(documento, hashDocumento);
 ## Consideraciones
 - Si faltan datos en el documento, se completan como cadena vacia en la trama.
 - El modulo lanza `RuntimeException` si falla la generacion del QR.
+
+## Errores frecuentes
+- Generar QR sin hash de firma cuando el flujo exige trazabilidad completa.
+- Asumir soporte de todos los tipos documentales sin validar trama esperada.
+
+## Checklist de produccion
+- Verificar con SUNAT/OSE la trama final esperada por tipo de comprobante.
+- Agregar pruebas de regresion visual del QR generado.

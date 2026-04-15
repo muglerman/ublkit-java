@@ -72,3 +72,11 @@ ResultadoEnvio envio = pasarela.enviarComprobante(
 - SOAP sincrono: devuelve CDR en la misma respuesta cuando SUNAT procesa de inmediato.
 - SOAP asincrono: devuelve ticket, requiere consulta posterior.
 - REST GRE: requiere `clientId` y `clientSecret` en credenciales para obtener token.
+
+## Errores frecuentes
+- Enviar GRE sin `clientId/clientSecret`.
+- Consultar ticket con ambiente distinto al usado en el envio.
+
+## Checklist de produccion
+- Configurar timeouts y reintentos segun tu SLA.
+- Registrar y persistir ticket, estado y CDR para trazabilidad.

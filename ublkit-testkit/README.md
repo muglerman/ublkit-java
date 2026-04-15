@@ -48,3 +48,11 @@ AssertsXml.assertXPath(xml, "//ID", "F001-1");
 ## Nota sobre XPath
 `AssertsXml` parsea en modo sin namespaces para simplificar pruebas rapidas.
 Si necesitas validaciones estrictas con namespace, conviene agregar assertions especificas en tu suite.
+
+## Errores frecuentes
+- Asumir que `AssertsXml` valida namespaces XML estrictamente.
+- Usar fixtures sin ajustar datos para escenarios limite.
+
+## Checklist de produccion
+- Mantener pruebas golden de XML por tipo documental critico.
+- Simular respuestas de gateway para escenarios de retry, rechazo y pendiente.

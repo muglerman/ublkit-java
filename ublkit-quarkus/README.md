@@ -61,3 +61,11 @@ PasarelaSunat pasarela() {
     return new PasarelaSunatDefecto();
 }
 ```
+
+## Errores frecuentes
+- Esperar inyeccion de gateway/firma sin productores CDI propios.
+- Mezclar scopes CDI sin definir claramente ciclo de vida de componentes.
+
+## Checklist de produccion
+- Declarar productores CDI adicionales para gateway/firma cuando el flujo lo requiera.
+- Validar arranque nativo/jvm de Quarkus con los beans necesarios en cada perfil.

@@ -53,3 +53,11 @@ String xml = serializador.serializar(factura);
 3. Serializar con el `SerializadorXml*` correspondiente.
 4. Firmar en `ublkit-sign`.
 5. Enviar en `ublkit-gateway`.
+
+## Errores frecuentes
+- Usar serializador incorrecto para el tipo de documento.
+- Omitir datos obligatorios del modelo y esperar XML valido sin pasar por validacion.
+
+## Checklist de produccion
+- Ejecutar validacion previa a serializacion.
+- Versionar muestras XML por tipo documental para regresion.

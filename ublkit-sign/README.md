@@ -42,3 +42,11 @@ if (resultado.exitoso()) {
 ## Notas operativas
 - Si ocurre un fallo de firma, `ResultadoFirma` retorna `exitoso=false` y `mensajeError`.
 - La API expone XML firmado como `byte[]` y `String` para facilitar integracion con gateway/render.
+
+## Errores frecuentes
+- Cargar un certificado sin clave privada utilizable.
+- Firmar con `idReferencia` incompatible con la expectativa del flujo receptor.
+
+## Checklist de produccion
+- Proteger password de keystore en secreto externo.
+- Rotar certificados y monitorear vigencia/expiracion.

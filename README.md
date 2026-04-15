@@ -74,6 +74,38 @@ if (resultado.esValido()) {
 
 Ver detalles en [MODULES.md](MODULES.md) y [ARCHITECTURE.md](ARCHITECTURE.md).
 
+## Matriz comparativa de módulos
+
+| Modulo | Rol principal | API/Contrato clave | Flujo tipico |
+|---|---|---|---|
+| `ublkit-core` | Tipos y resultados comunes | `ResultadoOperacion`, enums, value objects | Base transversal para todos los modulos |
+| `ublkit-catalogs` | Catalogos normativos | `ProveedorCatalogos` | Lookup de codigos SUNAT/atributos |
+| `ublkit-ubl` | Modelado + serializacion XML | `SerializadorXml*` | Documento de dominio -> XML UBL |
+| `ublkit-validation` | Validacion documental | `Validador*`, `ResultadoValidacion` | Documento -> incidencias/validez |
+| `ublkit-sign` | Firma digital XML | `ServicioFirma` | XML -> XML firmado + digest |
+| `ublkit-gateway` | Envio/consulta SUNAT | `PasarelaSunat` | XML firmado -> envio/ticket/CDR |
+| `ublkit-render` | Salida visual | `Renderizador*`, `ContextoRender` | Documento + hash/qr -> HTML/PDF |
+| `ublkit-qr` | Generacion QR SUNAT | `GeneradorQrSunat` | Documento + hash -> QR Base64 |
+| `ublkit-storage` | Persistencia de artefactos | `AlmacenDocumentos` | Guardar/descargar XML, CDR, PDF |
+| `ublkit-testkit` | Soporte de testing | Fixtures + Asserts + simulador gateway | Pruebas unitarias/integracion |
+| `ublkit-spring-boot-starter` | Autoconfiguracion Spring | `UblKitAutoConfiguration`, `ublkit.gateway.*` | Inyeccion de beans UBLKit |
+| `ublkit-quarkus` | Productores CDI Quarkus | `UblKitProducers` | Inyeccion CDI de render/serializacion/validacion |
+
+## Quick Start por modulo
+
+- Core: [ublkit-core/README.md](ublkit-core/README.md)
+- Catalogos: [ublkit-catalogs/README.md](ublkit-catalogs/README.md)
+- UBL: [ublkit-ubl/README.md](ublkit-ubl/README.md)
+- Validation: [ublkit-validation/README.md](ublkit-validation/README.md)
+- Sign: [ublkit-sign/README.md](ublkit-sign/README.md)
+- Gateway: [ublkit-gateway/README.md](ublkit-gateway/README.md)
+- Render: [ublkit-render/README.md](ublkit-render/README.md)
+- QR: [ublkit-qr/README.md](ublkit-qr/README.md)
+- Storage: [ublkit-storage/README.md](ublkit-storage/README.md)
+- Testkit: [ublkit-testkit/README.md](ublkit-testkit/README.md)
+- Spring Boot Starter: [ublkit-spring-boot-starter/README.md](ublkit-spring-boot-starter/README.md)
+- Quarkus: [ublkit-quarkus/README.md](ublkit-quarkus/README.md)
+
 ## Homologación SUNAT (Reglas de Referencia)
 
 ### Migración desde SFS (`*.ftl` y `*.properties`)

@@ -68,3 +68,11 @@ ContextoRender<BorradorFactura> ctx = ContextoRender.of(
 ## Recomendaciones
 - Proveer logo y recursos estaticos con ruta resoluble en tu runtime para evitar warnings de recursos no encontrados.
 - Usar `hashDocumento` y `qrBase64` cuando el documento ya fue firmado para consistencia visual legal.
+
+## Errores frecuentes
+- Renderizar sin `qrBase64`/`hashDocumento` en flujos que lo requieren legalmente.
+- No resolver rutas de recursos estaticos (logo, fuentes) en runtime.
+
+## Checklist de produccion
+- Validar render por tipo documental y formato de impresion antes de liberar.
+- Versionar plantillas y recursos graficos junto con el despliegue.

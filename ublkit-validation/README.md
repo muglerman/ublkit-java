@@ -47,3 +47,11 @@ if (resultado.esValido()) {
 ## Recomendacion
 - Ejecutar validacion antes de serializar/firmar para reducir rechazos en SUNAT.
 - Tratar advertencias y errores de forma diferenciada en la capa de aplicacion.
+
+## Errores frecuentes
+- Tratar advertencias como errores bloqueantes sin criterio de negocio.
+- Ejecutar envio SUNAT sin validar primero.
+
+## Checklist de produccion
+- Definir politica explicita de bloqueo para `ERROR` y `WARNING`.
+- Persistir incidencias relevantes para auditoria y soporte.

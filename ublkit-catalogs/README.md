@@ -51,3 +51,11 @@ System.out.println("Entradas catalogo 02: " + totalMonedas);
 - Si el CSV no existe, retorna catalogo vacio (no lanza error).
 - Si hay error de parseo, lanza `ExcepcionUblKit`.
 - Las entradas retornadas son inmutables desde la API publica.
+
+## Errores frecuentes
+- Consultar un catalogo que no existe esperando excepcion; la API retorna lista vacia.
+- Buscar columnas adicionales sin respetar exactamente el nombre del header CSV.
+
+## Checklist de produccion
+- Versionar y validar los CSV normativos antes de desplegar.
+- Agregar monitoreo de catalogos vacios para detectar recursos faltantes en classpath.

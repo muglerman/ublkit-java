@@ -57,3 +57,11 @@ ResultadoOperacion<String> error = ResultadoOperacion.error("VALIDATION_ERROR", 
 ## Buenas practicas
 - Reutilizar `ResultadoOperacion` en adaptadores IO para no mezclar errores tecnicos con validacion de negocio.
 - Mantener enums y value objects de `ublkit-core` como unica fuente de verdad compartida.
+
+## Errores frecuentes
+- Duplicar enums de negocio en otros modulos en vez de reutilizar `ublkit-core`.
+- Usar excepciones para control normal de flujo en lugar de `ResultadoOperacion`.
+
+## Checklist de produccion
+- Centralizar mapeos de errores de dominio a errores HTTP/aplicacion.
+- Revisar consistencia de `TipoDocumento` y `TipoAmbiente` en todos los puntos de integracion.

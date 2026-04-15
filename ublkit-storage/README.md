@@ -63,3 +63,11 @@ AlmacenDocumentos almacen = new AlmacenGCS(storage, "mi-bucket-gcs");
 - `AlmacenLocalStorage` protege contra path traversal validando que la ruta final permanezca dentro del directorio base.
 - Adaptadores cloud retornan URI logica (`s3://...`, `gs://...`) como dato de exito al guardar.
 - Dependencias cloud son opcionales para no forzar peso en escenarios locales.
+
+## Errores frecuentes
+- No configurar credenciales cloud y asumir que el adaptador maneja autenticacion automaticamente.
+- Guardar InputStream grandes sin estrategia de streaming/control de memoria.
+
+## Checklist de produccion
+- Definir estrategia de nombres y versionado de objetos (`ruc/anio/mes/tipo/archivo`).
+- Configurar politicas de retencion, cifrado y backup del proveedor de almacenamiento.

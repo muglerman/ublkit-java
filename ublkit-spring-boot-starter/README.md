@@ -390,3 +390,15 @@ Puedes adaptarlo a tu arquitectura (sync, async, colas, eventos).
 - `PasarelaSunat`
 
 Esto confirma el wiring basico de autoconfiguracion.
+
+## 14. Errores frecuentes
+
+- Esperar endpoints REST automaticos del starter (el starter solo registra beans).
+- Configurar `ublkit.gateway.*` y luego sobreescribir manualmente los mismos beans sin querer.
+- No incluir `clientId/clientSecret` para operaciones GRE via REST.
+
+## 15. Checklist de produccion
+
+- Validar propiedades `ublkit.gateway.*` por ambiente (`BETA`/`PRODUCCION`).
+- Definir estrategia de override solo para beans que realmente quieras customizar.
+- Añadir pruebas de contexto (`ApplicationContextRunner`) para tus personalizaciones.
