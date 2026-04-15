@@ -76,7 +76,7 @@
         <p><strong>Emision:</strong> {{ invoice.issueDate }} {{ invoice.issueTime }}</p>
         {% if invoice.dueDate %}<p><strong>Vencimiento:</strong> {{ invoice.dueDate }}</p>{% endif %}
         <p><strong>Moneda:</strong> {{ invoice.currency }}</p>
-        {% if invoice.exchangeRate %}<p><strong>Tipo cambio:</strong> {{ invoice.exchangeRate.date }} {{ invoice.exchangeRate.value }}</p>{% endif %}
+        {% if invoice.exchangeRate is not null %}<p><strong>Tipo cambio:</strong> {{ invoice.exchangeRate.date }} {{ invoice.exchangeRate.value }}</p>{% endif %}
         {% if invoice.operationTypeCode %}<p><strong>Operacion:</strong> {{ invoice.operationTypeCode }} {{ invoice.operationTypeName }}</p>{% endif %}
         {% if invoice.orderReference %}<p><strong>Orden de compra:</strong> {{ invoice.orderReference }}</p>{% endif %}
         {% if invoice.deliveryAddress %}<p><strong>Direccion entrega:</strong> {{ invoice.deliveryAddress }}</p>{% endif %}
@@ -84,7 +84,7 @@
     </div>
   </div>
 
-  {% if invoice.payment %}
+  {% if invoice.payment is not null %}
   <div class="section">
     <p class="title">Condicion de Pago</p>
     <div class="card" style="padding:8px 10px;">
@@ -152,7 +152,7 @@
       <p style="margin-top:6px;"><strong>Cargos:</strong></p>
       {% for c in invoice.charges %}<p class="small">{{ c.type }}: {{ c.amount }}</p>{% endfor %}
       {% endif %}
-      {% if invoice.embeddedGuide %}
+      {% if invoice.embeddedGuide is not null %}
       <p style="margin-top:6px;"><strong>Factura-Guia:</strong></p>
       {% if invoice.embeddedGuide.departure %}<p class="small">Partida: {{ invoice.embeddedGuide.departure }}</p>{% endif %}
       {% if invoice.embeddedGuide.arrival %}<p class="small">Llegada: {{ invoice.embeddedGuide.arrival }}</p>{% endif %}
@@ -162,11 +162,11 @@
       <p style="margin-top:6px;"><strong>Anticipos:</strong></p>
       {% for a in invoice.advances %}<p class="small">{{ a.documentType }} {{ a.document }}: {{ a.amount }}</p>{% endfor %}
       {% endif %}
-      {% if invoice.detraction %}
+      {% if invoice.detraction is not null %}
       <p style="margin-top:6px;"><strong>Detraccion:</strong> {{ invoice.detraction.amount }}</p>
       <p class="small">Bien/Servicio: {{ invoice.detraction.serviceCode }} | Medio pago: {{ invoice.detraction.method }} | Cuenta BN: {{ invoice.detraction.financialAccount }}</p>
       {% endif %}
-      {% if invoice.perception %}
+      {% if invoice.perception is not null %}
       <p style="margin-top:6px;"><strong>Percepcion:</strong> {{ invoice.perception.amount }} ({{ invoice.perception.percent }})</p>
       {% endif %}
       {% if invoice.note %}<p style="margin-top:6px;"><strong>Observacion:</strong> {{ invoice.note }}</p>{% endif %}
@@ -200,7 +200,7 @@
     <div style="padding-left:10px;">
       <span class="pill">Representacion impresa</span>
       <p class="small" style="margin-top:6px;">Valide este documento en SUNAT.</p>
-      {% if invoice.signer %}<p class="small">Firmante: {{ invoice.signer.identity }} {{ invoice.signer.name }}</p>{% endif %}
+      {% if invoice.signer is not null %}<p class="small">Firmante: {{ invoice.signer.identity }} {{ invoice.signer.name }}</p>{% endif %}
       <p class="small">Hash: {{ invoice.hash }}</p>
     </div>
   </div>
