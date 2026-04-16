@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="UBLKit Java: modela, valida, firma y envia documentos UBL 2.1 para SUNAT.">
+  <meta name="theme-color" content="#0c2947">
+  <title>UBLKit Java | Documentos UBL 2.1 para SUNAT</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="app.js"></script>
+</head>
+<body>
+  <div class="bg-orb orb-a" aria-hidden="true"></div>
+  <div class="bg-orb orb-b" aria-hidden="true"></div>
+
+  <header class="site-header">
+    <a class="brand" href="#top">UBLKit Java</a>
+    <nav class="main-nav" aria-label="Navegacion principal">
+      <a href="#flujo">Flujo</a>
+      <a href="#modulos">Modulos</a>
+      <a href="#arranque">Arranque</a>
+    </nav>
+    <a class="btn btn-ghost" href="https://github.com/muglerman/ublkit-java" target="_blank" rel="noreferrer">GitHub</a>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <p class="eyebrow reveal">Libreria comunitaria para UBL 2.1 en Java</p>
+      <h1 class="reveal">Modela, valida, firma y envia documentos electronicos con una arquitectura modular.</h1>
+      <p class="lead reveal">UBLKit te ayuda a construir un flujo completo para Factura, Boleta, Notas, Guia, Resumen, Baja, Percepcion y Retencion, con enfoque de dominio y homologacion SUNAT.</p>
+
+      <div class="hero-actions reveal">
+        <a class="btn btn-primary" href="https://github.com/muglerman/ublkit-java" target="_blank" rel="noreferrer">Ver repositorio</a>
+        <a class="btn btn-light" href="#modulos">Explorar modulos</a>
+      </div>
+
+      <ul class="stats reveal" aria-label="Metricas del proyecto">
+        <li>
+          <strong>12</strong>
+          <span>Modulos principales</span>
+        </li>
+        <li>
+          <strong>72+</strong>
+          <span>Tests reportados</span>
+        </li>
+        <li>
+          <strong>Java 21</strong>
+          <span>Stack base</span>
+        </li>
+      </ul>
+    </section>
+
+    <section id="flujo" class="panel">
+      <h2 class="reveal">Flujo tipico con UBLKit</h2>
+      <ol class="flow-track" aria-label="Pipeline UBLKit">
+        <li data-reveal>
+          <h3>1. Modelar</h3>
+          <p>Construye el borrador de documento desde el dominio de negocio.</p>
+        </li>
+        <li data-reveal>
+          <h3>2. Ensamblar</h3>
+          <p>Auto-calcula impuestos, totales y reglas documentales.</p>
+        </li>
+        <li data-reveal>
+          <h3>3. Validar</h3>
+          <p>Aplica validacion funcional y opcionalmente XSL de referencia SUNAT.</p>
+        </li>
+        <li data-reveal>
+          <h3>4. Firmar</h3>
+          <p>Firma XML con certificado X509 para envio formal.</p>
+        </li>
+        <li data-reveal>
+          <h3>5. Enviar y Renderizar</h3>
+          <p>Publica hacia SUNAT/OSE y genera HTML, PDF o ticket.</p>
+        </li>
+      </ol>
+    </section>
+
+    <section id="modulos" class="modules">
+      <div class="section-head reveal">
+        <h2>Arquitectura modular</h2>
+        <p>Cada modulo cumple una responsabilidad puntual para evitar acoplamiento y simplificar evolucion.</p>
+      </div>
+
+      <div class="module-grid">
+        <a class="card" data-reveal href="https://github.com/muglerman/ublkit-java/tree/main/ublkit-core" target="_blank" rel="noreferrer">
+          <h3>ublkit-core</h3>
+          <p>Tipos, value objects, resultados y errores base.</p>
+        </a>
+        <a class="card" data-reveal href="https://github.com/muglerman/ublkit-java/tree/main/ublkit-catalogs" target="_blank" rel="noreferrer">
+          <h3>ublkit-catalogs</h3>
+          <p>Catalogos normativos SUNAT y consultas por codigo.</p>
+        </a>
+        <a class="card" data-reveal href="https://github.com/muglerman/ublkit-java/tree/main/ublkit-validation" target="_blank" rel="noreferrer">
+          <h3>ublkit-validation</h3>
+          <p>Validadores funcionales y homologacion XSL.</p>
+        </a>
+        <a class="card" data-reveal href="https://github.com/muglerman/ublkit-java/tree/main/ublkit-ubl" target="_blank" rel="noreferrer">
+          <h3>ublkit-ubl</h3>
+          <p>Modelado documental y serializacion XML UBL 2.1.</p>
+        </a>
+        <a class="card" data-reveal href="https://github.com/muglerman/ublkit-java/tree/main/ublkit-sign" target="_blank" rel="noreferrer">
+          <h3>ublkit-sign</h3>
+          <p>Firma digital XML con RSA y certificados PKCS12.</p>
+        </a>
+        <a class="card" data-reveal href="https://github.com/muglerman/ublkit-java/tree/main/ublkit-gateway" target="_blank" rel="noreferrer">
+          <h3>ublkit-gateway</h3>
+          <p>Envio y consulta SOAP/REST para SUNAT y GRE.</p>
+        </a>
+        <a class="card" data-reveal href="https://github.com/muglerman/ublkit-java/tree/main/ublkit-render" target="_blank" rel="noreferrer">
+          <h3>ublkit-render</h3>
+          <p>Plantillas HTML, PDF y tickets 58mm/80mm.</p>
+        </a>
+        <a class="card" data-reveal href="https://github.com/muglerman/ublkit-java/tree/main/ublkit-qr" target="_blank" rel="noreferrer">
+          <h3>ublkit-qr</h3>
+          <p>Generacion de QR SUNAT para representacion impresa.</p>
+        </a>
+        <a class="card" data-reveal href="https://github.com/muglerman/ublkit-java/tree/main/ublkit-storage" target="_blank" rel="noreferrer">
+          <h3>ublkit-storage</h3>
+          <p>Persistencia de XML, CDR y documentos derivados.</p>
+        </a>
+        <a class="card" data-reveal href="https://github.com/muglerman/ublkit-java/tree/main/ublkit-testkit" target="_blank" rel="noreferrer">
+          <h3>ublkit-testkit</h3>
+          <p>Fixtures, simuladores y aserciones para pruebas.</p>
+        </a>
+        <a class="card" data-reveal href="https://github.com/muglerman/ublkit-java/tree/main/ublkit-spring-boot-starter" target="_blank" rel="noreferrer">
+          <h3>ublkit-spring-boot-starter</h3>
+          <p>Autoconfiguracion para proyectos Spring Boot.</p>
+        </a>
+        <a class="card" data-reveal href="https://github.com/muglerman/ublkit-java/tree/main/ublkit-quarkus" target="_blank" rel="noreferrer">
+          <h3>ublkit-quarkus</h3>
+          <p>Productores CDI y arranque rapido con Quarkus.</p>
+        </a>
+      </div>
+    </section>
+
+    <section id="arranque" class="panel quickstart">
+      <div class="quickstart-copy">
+        <h2 class="reveal">Arranque rapido</h2>
+        <p class="reveal">Si trabajas con Spring Boot, puedes iniciar con el starter oficial y escalar luego por modulo.</p>
+        <ul class="checklist">
+          <li data-reveal>Define emisor y receptor desde el dominio.</li>
+          <li data-reveal>Ensamblar para impuestos y totales.</li>
+          <li data-reveal>Validar, serializar, firmar y enviar.</li>
+        </ul>
+      </div>
+      <pre class="code reveal"><code>&lt;dependency&gt;
+  &lt;groupId&gt;com.cna&lt;/groupId&gt;
+  &lt;artifactId&gt;ublkit-spring-boot-starter&lt;/artifactId&gt;
+  &lt;version&gt;0.1.0-SNAPSHOT&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
+    </section>
+
+    <section class="panel docs">
+      <h2 class="reveal">Documentacion recomendada</h2>
+      <div class="docs-links">
+        <a data-reveal href="https://github.com/muglerman/ublkit-java/blob/main/README.md" target="_blank" rel="noreferrer">README general</a>
+        <a data-reveal href="https://github.com/muglerman/ublkit-java/blob/main/MODULES.md" target="_blank" rel="noreferrer">Mapa de modulos</a>
+        <a data-reveal href="https://github.com/muglerman/ublkit-java/blob/main/ARCHITECTURE.md" target="_blank" rel="noreferrer">Arquitectura hexagonal</a>
+        <a data-reveal href="https://github.com/muglerman/ublkit-java/tree/main/docs" target="_blank" rel="noreferrer">Guias y referencias SUNAT</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>UBLKit Java - Comunidad CNA | <span id="year"></span></p>
+  </footer>
+</body>
+</html>
