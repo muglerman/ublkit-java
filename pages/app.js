@@ -1,10 +1,35 @@
 (() => {
+  // Set year in footer
   const yearEl = document.getElementById("year");
   if (yearEl) {
     yearEl.textContent = String(new Date().getFullYear());
   }
 
-  const revealTargets = Array.from(document.querySelectorAll(".reveal, [data-reveal]"));
+  // Initialize tabs
+  const tabBtns = document.querySelectorAll(".tab-btn");
+  const tabContents = document.querySelectorAll(".tab-content");
+
+  tabBtns.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const tabId = btn.getAttribute("data-tab");
+
+      // Remove active from all
+      tabBtns.forEach((b) => b.classList.remove("active"));
+      tabContents.forEach((c) => c.classList.remove("active"));
+
+      // Add active to clicked
+      btn.classList.add("active");
+      const content = document.getElementById(tabId + "-tab");
+      if (content) {
+        content.classList.add("active");
+      }
+    });
+  });
+
+  // Setup reveal animations
+  const revealTargets = Array.from(
+    document.querySelectorAll(".reveal, [data-reveal]")
+  );
   if (revealTargets.length === 0) {
     return;
   }

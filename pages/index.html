@@ -21,6 +21,7 @@
     <nav class="main-nav" aria-label="Navegacion principal">
       <a href="#flujo">Flujo</a>
       <a href="#modulos">Modulos</a>
+      <a href="#workflows">Casos</a>
       <a href="#arranque">Arranque</a>
     </nav>
     <a class="btn btn-ghost" href="https://github.com/muglerman/ublkit-java" target="_blank" rel="noreferrer">GitHub</a>
@@ -81,59 +82,444 @@
 
     <section id="modulos" class="modules">
       <div class="section-head reveal">
-        <h2>Arquitectura modular</h2>
-        <p>Cada modulo cumple una responsabilidad puntual para evitar acoplamiento y simplificar evolucion.</p>
+        <h2>Modulos desglosados</h2>
+        <p>Cada modulo cumple una responsabilidad puntual. Explora en detalle que trae cada uno y como integrarlo.</p>
       </div>
 
-      <div class="module-grid">
-        <a class="card" data-reveal href="https://github.com/muglerman/ublkit-java/tree/main/ublkit-core" target="_blank" rel="noreferrer">
+      <div class="tabs reveal">
+        <div class="tabs-nav">
+          <button class="tab-btn active" data-tab="ublkit-core">ublkit-core</button>
+          <button class="tab-btn" data-tab="ublkit-catalogs">ublkit-catalogs</button>
+          <button class="tab-btn" data-tab="ublkit-ubl">ublkit-ubl</button>
+          <button class="tab-btn" data-tab="ublkit-validation">ublkit-validation</button>
+          <button class="tab-btn" data-tab="ublkit-sign">ublkit-sign</button>
+          <button class="tab-btn" data-tab="ublkit-gateway">ublkit-gateway</button>
+          <button class="tab-btn" data-tab="ublkit-render">ublkit-render</button>
+          <button class="tab-btn" data-tab="ublkit-qr">ublkit-qr</button>
+          <button class="tab-btn" data-tab="ublkit-storage">ublkit-storage</button>
+          <button class="tab-btn" data-tab="ublkit-testkit">ublkit-testkit</button>
+          <button class="tab-btn" data-tab="ublkit-spring">Spring Boot</button>
+          <button class="tab-btn" data-tab="ublkit-quarkus">Quarkus</button>
+        </div>
+
+        <div class="tab-content active" id="ublkit-core-tab">
           <h3>ublkit-core</h3>
-          <p>Tipos, value objects, resultados y errores base.</p>
-        </a>
-        <a class="card" data-reveal href="https://github.com/muglerman/ublkit-java/tree/main/ublkit-catalogs" target="_blank" rel="noreferrer">
+          <p class="tab-desc">Base transversal de todo UBLKit. Define tipos de dato, enums, value objects y excepciones del framework.</p>
+          <div class="tab-features">
+            <div class="feature">
+              <h4>Beneficios</h4>
+              <ul>
+                <li>Tipado fuerte sin dependencias externas</li>
+                <li>Enums para tipos de documento, ambiente, protocolo</li>
+                <li>Value Objects para Dinero, Moneda, NumeroSerie</li>
+                <li>Resultado generico para operaciones consistentes</li>
+              </ul>
+            </div>
+            <div class="feature">
+              <h4>Casos de uso</h4>
+              <p>Define el contrato entre capas. Si creas un adaptador personalizado (p.ej. para otra OSE), extiendes desde aqui.</p>
+            </div>
+          </div>
+          <pre class="code"><code>// Value Object tipado
+Dinero impuesto = new Dinero(
+  new BigDecimal("18.00"),
+  Moneda.PEN
+);
+
+// Enum de tipos
+TipoDocumento tipo = TipoDocumento.FACTURA;
+TipoAmbiente ambiente = TipoAmbiente.BETA;</code></pre>
+        </div>
+
+        <div class="tab-content" id="ublkit-catalogs-tab">
           <h3>ublkit-catalogs</h3>
-          <p>Catalogos normativos SUNAT y consultas por codigo.</p>
-        </a>
-        <a class="card" data-reveal href="https://github.com/muglerman/ublkit-java/tree/main/ublkit-validation" target="_blank" rel="noreferrer">
-          <h3>ublkit-validation</h3>
-          <p>Validadores funcionales y homologacion XSL.</p>
-        </a>
-        <a class="card" data-reveal href="https://github.com/muglerman/ublkit-java/tree/main/ublkit-ubl" target="_blank" rel="noreferrer">
+          <p class="tab-desc">Gestiona los 60+ catalogos normativos SUNAT (codigos de pais, impuestos, monedas, etc.) con busqueda rapida y cache.</p>
+          <div class="tab-features">
+            <div class="feature">
+              <h4>Beneficios</h4>
+              <ul>
+                <li>Busqueda O(1) por codigo en 35+ catalogos CSV embebidos</li>
+                <li>Cache concurrente para rendimiento en tiempo real</li>
+                <li>Validacion de existencia de codigos SUNAT</li>
+                <li>Soporte multidireccional (codigo → descripcion y viceversa)</li>
+              </ul>
+            </div>
+            <div class="feature">
+              <h4>Casos de uso</h4>
+              <p>Antes de emitir, valida que el codigo de tributacion, moneda o departamento exista en los catalogos oficiales.</p>
+            </div>
+          </div>
+          <pre class="code"><code>ProveedorCatalogos catalogos = new ProveedorCatalogos();
+
+// Validar codigo de impuesto
+String descImpuesto = catalogos
+  .buscarPorCatalogo("05", "1000");
+// Retorna: "IGV - Impuesto General a las Ventas"
+
+// Validar pais
+boolean esPeruValido = catalogos
+  .existeEnCatalogo("03", "PE");</code></pre>
+        </div>
+
+        <div class="tab-content" id="ublkit-ubl-tab">
           <h3>ublkit-ubl</h3>
-          <p>Modelado documental y serializacion XML UBL 2.1.</p>
-        </a>
-        <a class="card" data-reveal href="https://github.com/muglerman/ublkit-java/tree/main/ublkit-sign" target="_blank" rel="noreferrer">
+          <p class="tab-desc">Mapeo integral del modelo de dominio al standard XML UBL 2.1. Incluye serializadores y ensambladores con auto-calculo de impuestos.</p>
+          <div class="tab-features">
+            <div class="feature">
+              <h4>Beneficios</h4>
+              <ul>
+                <li>Modelos de dominio amigables (BorradorFactura, BorradorNota)</li>
+                <li>Auto-calculo de IGV, ISC, ICBPER y totales</li>
+                <li>Ensambladores que aplican reglas de negocio SUNAT</li>
+                <li>Serializacion XML nativa (javax.xml DOM) sin JAXB</li>
+              </ul>
+            </div>
+            <div class="feature">
+              <h4>Casos de uso</h4>
+              <p>Punto central para transformar datos de negocio a XML oficial. Si necesitas customizar el template XML, aqui es el lugar.</p>
+            </div>
+          </div>
+          <pre class="code"><code>// Crear borrador
+BorradorFactura factura = new BorradorFactura();
+factura.setSerie("F001");
+factura.setNumero(1);
+
+LineaDetalle linea = new LineaDetalle();
+linea.setDescripcion("Servicio");
+linea.setCantidad(new BigDecimal("1"));
+linea.setPrecio(new BigDecimal("100.00"));
+
+factura.setDetalles(List.of(linea));
+
+// Ensamblar (auto-calcula IGV, totales, etc)
+EnsambladorFactura.ensamblar(factura);
+
+// Serializar a XML UBL 2.1
+String xmlUbl = new SerializadorXmlFactura()
+  .serializar(factura);</code></pre>
+        </div>
+
+        <div class="tab-content" id="ublkit-validation-tab">
+          <h3>ublkit-validation</h3>
+          <p class="tab-desc">Validacion integral funcional + homologacion XSL oficial SUNAT. No rompe en el primer error; acumula incidencias.</p>
+          <div class="tab-features">
+            <div class="feature">
+              <h4>Beneficios</h4>
+              <ul>
+                <li>8 validadores (Factura, Boleta, Notas, Guia, Resumen, Baja, Percepcion, Retencion)</li>
+                <li>Validacion funcional local sin latencia SUNAT</li>
+                <li>Opcionalmente ejecuta XSL embebido de referencia SUNAT</li>
+                <li>Reporta todos los errores y advertencias, no solo el primero</li>
+              </ul>
+            </div>
+            <div class="feature">
+              <h4>Casos de uso</h4>
+              <p>Valida antes de firmar y enviar. Usa homologacion XSL para garantizar cumplimiento SUNAT.</p>
+            </div>
+          </div>
+          <pre class="code"><code>ValidadorFactura validador = new ValidadorFactura();
+ResultadoValidacion resultado = validador.validar(factura);
+
+if (!resultado.esValido()) {
+  for (IncidenciaValidacion inc : resultado.getIncidencias()) {
+    System.out.println(
+      inc.getRegla() + ": " + inc.getMensaje()
+    );
+  }
+}</code></pre>
+        </div>
+
+        <div class="tab-content" id="ublkit-sign-tab">
           <h3>ublkit-sign</h3>
-          <p>Firma digital XML con RSA y certificados PKCS12.</p>
-        </a>
-        <a class="card" data-reveal href="https://github.com/muglerman/ublkit-java/tree/main/ublkit-gateway" target="_blank" rel="noreferrer">
+          <p class="tab-desc">Firma digital de XML con certificados X509 (PKCS12). Implementa RSA-SHA1 enveloped signature.</p>
+          <div class="tab-features">
+            <div class="feature">
+              <h4>Beneficios</h4>
+              <ul>
+                <li>Firma enveloped (XML firmado incluye la firma)</li>
+                <li>Soporte PKCS12 (.pfx, .p12) nativo</li>
+                <li>Validacion y sanitizacion segura del DOM</li>
+                <li>Compatible con certificados SUNAT</li>
+              </ul>
+            </div>
+            <div class="feature">
+              <h4>Casos de uso</h4>
+              <p>Obligatorio antes de enviar a SUNAT. Requiere certificado digital valido (RUC + contraseña).</p>
+            </div>
+          </div>
+          <pre class="code"><code>// Cargar certificado
+DetallesCertificado cert = CargadorCertificado.cargar(
+  new OrigenCertificado(
+    inputStream,
+    "contraseña_cert",
+    "PKCS12"
+  )
+);
+
+// Firmar XML
+String xmlSinFirma = "...XML UBL...";
+ResultadoFirma firma = ServicioFirma.firmarXml(
+  xmlSinFirma,
+  "#UBLKIT-SIGN",
+  cert
+);
+
+String xmlFirmado = firma.xmlFirmadoStr();</code></pre>
+        </div>
+
+        <div class="tab-content" id="ublkit-gateway-tab">
           <h3>ublkit-gateway</h3>
-          <p>Envio y consulta SOAP/REST para SUNAT y GRE.</p>
-        </a>
-        <a class="card" data-reveal href="https://github.com/muglerman/ublkit-java/tree/main/ublkit-render" target="_blank" rel="noreferrer">
+          <p class="tab-desc">Envio y consulta a SUNAT/OSE via SOAP y REST. Manejo de tokens OAuth2, retry con backoff y caché.</p>
+          <div class="tab-features">
+            <div class="feature">
+              <h4>Beneficios</h4>
+              <ul>
+                <li>Protocolo SOAP para factura/notas/guia clasica</li>
+                <li>REST para GRE (Guias de Remision Electronica)</li>
+                <li>OAuth2 automático con refresh de token</li>
+                <li>Retry exponencial y manejo de timeout</li>
+              </ul>
+            </div>
+            <div class="feature">
+              <h4>Casos de uso</h4>
+              <p>Envia el XML firmado a SUNAT y consulta el CDR (Comprobante de Recepcion) para confirmar aceptacion.</p>
+            </div>
+          </div>
+          <pre class="code"><code>PasarelaSunat pasarela = new PasarelaSunatDefecto(
+  credenciales,  // usuario + password SUNAT
+  TipoAmbiente.BETA
+);
+
+ResultadoEnvio envio = pasarela.enviarComprobante(
+  xmlFirmado,
+  TipoDocumento.FACTURA
+);
+
+if (envio.esExitoso()) {
+  String ticket = envio.getNumeroTicket();
+  
+  // Consultar CDR
+  ResultadoConsulta consulta = pasarela
+    .consultarTicket(ticket);
+}</code></pre>
+        </div>
+
+        <div class="tab-content" id="ublkit-render-tab">
           <h3>ublkit-render</h3>
-          <p>Plantillas HTML, PDF y tickets 58mm/80mm.</p>
-        </a>
-        <a class="card" data-reveal href="https://github.com/muglerman/ublkit-java/tree/main/ublkit-qr" target="_blank" rel="noreferrer">
+          <p class="tab-desc">Genera representaciones visuales: HTML, PDF y tickets termicos (58mm/80mm). Plantillas Pebble + OpenHTMLtoPDF.</p>
+          <div class="tab-features">
+            <div class="feature">
+              <h4>Beneficios</h4>
+              <ul>
+                <li>Plantillas HTML (Pebble) reutilizables y personalizables</li>
+                <li>PDF de alta calidad con OpenHTMLtoPDF</li>
+                <li>Soporte ticket termal (58mm y 80mm)</li>
+                <li>Contexto de render unificado para todos los tipos</li>
+              </ul>
+            </div>
+            <div class="feature">
+              <h4>Casos de uso</h4>
+              <p>Genera documentos de usuario final: PDF para email, HTML para web, ticket para impresora termal de punto venta.</p>
+            </div>
+          </div>
+          <pre class="code"><code>ContextoRender contexto = new ContextoRender()
+  .setFactura(factura)
+  .setQrBase64(qrCodeB64)
+  .setHashCdr(hashCdr);
+
+// Renderizar a HTML
+RenderizadorFacturaHtml htmlRender = 
+  new RenderizadorFacturaHtml();
+String html = htmlRender.renderizar(contexto);
+
+// Renderizar a PDF
+RenderizadorFacturaPdf pdfRender = 
+  new RenderizadorFacturaPdf();
+byte[] pdf = pdfRender.renderizar(contexto);</code></pre>
+        </div>
+
+        <div class="tab-content" id="ublkit-qr-tab">
           <h3>ublkit-qr</h3>
-          <p>Generacion de QR SUNAT para representacion impresa.</p>
-        </a>
-        <a class="card" data-reveal href="https://github.com/muglerman/ublkit-java/tree/main/ublkit-storage" target="_blank" rel="noreferrer">
+          <p class="tab-desc">Genera codigos QR segun standard SUNAT. Vincula clave de acceso, montos, hash CDR y datos fiscales.</p>
+          <div class="tab-features">
+            <div class="feature">
+              <h4>Beneficios</h4>
+              <ul>
+                <li>QR SUNAT oficial: clave acceso + montos + hash</li>
+                <li>Generacion base64 lista para embeber en PDF/HTML</li>
+                <li>Validacion de componentes antes de generar</li>
+                <li>Soporta todos los tipos de documento</li>
+              </ul>
+            </div>
+            <div class="feature">
+              <h4>Casos de uso</h4>
+              <p>Embebe el QR en el PDF/ticket para que clientes validen el comprobante escaneando en portal SUNAT.</p>
+            </div>
+          </div>
+          <pre class="code"><code>GeneradorQrSunat generador = new GeneradorQrSunat();
+
+String qrBase64 = generador.generarQr(
+  factura.getClaveAcceso(),
+  factura.getSumaIgv(),
+  factura.getTotal(),
+  factura.getFechaEmision(),
+  hashCdr
+);
+
+// Usar en contexto render
+contexto.setQrBase64(qrBase64);
+// &lt;img src="data:image/png;base64,..."&gt;</code></pre>
+        </div>
+
+        <div class="tab-content" id="ublkit-storage-tab">
           <h3>ublkit-storage</h3>
-          <p>Persistencia de XML, CDR y documentos derivados.</p>
-        </a>
-        <a class="card" data-reveal href="https://github.com/muglerman/ublkit-java/tree/main/ublkit-testkit" target="_blank" rel="noreferrer">
+          <p class="tab-desc">Persiste artefactos: XML, CDR, PDF, tickets. Adaptadores para S3, GCS y almacenamiento local.</p>
+          <div class="tab-features">
+            <div class="feature">
+              <h4>Beneficios</h4>
+              <ul>
+                <li>Interfaz unificada AlmacenDocumentos</li>
+                <li>Adaptadores S3, Google Cloud Storage, Local FS</li>
+                <li>Metadatos y busqueda por fecha, tipo, RUC</li>
+                <li>Versionado y historial de cambios</li>
+              </ul>
+            </div>
+            <div class="feature">
+              <h4>Casos de uso</h4>
+              <p>Archiva XML firmado, CDR del SFS, PDF y ticket para auditoría y consultas posteriores.</p>
+            </div>
+          </div>
+          <pre class="code"><code>AlmacenDocumentos almacen = new AlmacenS3(
+  bucketNombre,
+  credencialesAws
+);
+
+// Guardar XML
+almacen.guardarXml(
+  "F001-00000001",
+  xmlFirmado,
+  metadatos
+);
+
+// Recuperar PDF
+byte[] pdf = almacen.descargarPdf(
+  "F001-00000001"
+);</code></pre>
+        </div>
+
+        <div class="tab-content" id="ublkit-testkit-tab">
           <h3>ublkit-testkit</h3>
-          <p>Fixtures, simuladores y aserciones para pruebas.</p>
-        </a>
-        <a class="card" data-reveal href="https://github.com/muglerman/ublkit-java/tree/main/ublkit-spring-boot-starter" target="_blank" rel="noreferrer">
+          <p class="tab-desc">Herramientas para testing: fixtures de documentos, simulador de gateway, aserciones XML y CDR mocks.</p>
+          <div class="tab-features">
+            <div class="feature">
+              <h4>Beneficios</h4>
+              <ul>
+                <li>Fixtures pre-construidas (FacturasEjemplo, NotasEjemplo, etc.)</li>
+                <li>SimuladorGateway para pruebas sin conectar SUNAT</li>
+                <li>Aserciones tipadas (AssertsCdr, AssertXml)</li>
+                <li>Respuestas SUNAT simuladas para todos los escenarios</li>
+              </ul>
+            </div>
+            <div class="feature">
+              <h4>Casos de uso</h4>
+              <p>Pruebas unitarias y de integracion sin conectar SUNAT real. Tests reproducibles y rapidos.</p>
+            </div>
+          </div>
+          <pre class="code"><code>// Usar fixture
+BorradorFactura factura = FacturasEjemplo
+  .facturaEstandarValida();
+
+// Simular respuesta SUNAT
+SimuladorGateway simulador = new SimuladorGateway()
+  .conRespuestaExitosa();
+
+PasarelaSunat pasarela = simulador.crearPasarela();
+ResultadoEnvio resultado = pasarela
+  .enviarComprobante(xml);
+
+// Aserciones
+AssertsCdr.queCdrEsValido(resultado.getCdr());
+AssertXml.queExisteElemento(xml, "/Invoice/ID");</code></pre>
+        </div>
+
+        <div class="tab-content" id="ublkit-spring-tab">
           <h3>ublkit-spring-boot-starter</h3>
-          <p>Autoconfiguracion para proyectos Spring Boot.</p>
-        </a>
-        <a class="card" data-reveal href="https://github.com/muglerman/ublkit-java/tree/main/ublkit-quarkus" target="_blank" rel="noreferrer">
+          <p class="tab-desc">Integracion oficial para Spring Boot. Auto-configura beans, propiedades y esterotipos personalizados.</p>
+          <div class="tab-features">
+            <div class="feature">
+              <h4>Beneficios</h4>
+              <ul>
+                <li>Autoconfiguracion zero-setup (@SpringBootApplication)</li>
+                <li>Propiedades YAML centralizadas (ublkit.gateway.*)</li>
+                <li>Inyeccion de serializadores, validadores y renderizadores</li>
+                <li>Health checks para conexion SUNAT</li>
+              </ul>
+            </div>
+            <div class="feature">
+              <h4>Casos de uso</h4>
+              <p>Proyectos Spring Boot que necesitan emitir documentos electronicos. Es la forma mas simple de integrar.</p>
+            </div>
+          </div>
+          <pre class="code"><code>// application.yml
+ublkit:
+  gateway:
+    ambiente: BETA
+    credenciales:
+      usuario: ${SUNAT_USER}
+      password: ${SUNAT_PASS}
+
+// En un @Controller o @Service
+@Autowired
+private SerializadorXmlFactura serializador;
+
+@Autowired
+private PasarelaSunat pasarela;
+
+public void emitirFactura() {
+  String xml = serializador.serializar(factura);
+  pasarela.enviarComprobante(xml);
+}</code></pre>
+        </div>
+
+        <div class="tab-content" id="ublkit-quarkus-tab">
           <h3>ublkit-quarkus</h3>
-          <p>Productores CDI y arranque rapido con Quarkus.</p>
-        </a>
+          <p class="tab-desc">Integracion oficial para Quarkus. Productores CDI, optimizacion de arranque rapido y compilacion nativa.</p>
+          <div class="tab-features">
+            <div class="feature">
+              <h4>Beneficios</h4>
+              <ul>
+                <li>Productores CDI para inyeccion declarativa</li>
+                <li>Tiempo de arranque &lt; 1s (vs 5-10s Spring)</li>
+                <li>Soporte compilacion nativa GraalVM</li>
+                <li>Menor consumo de RAM y CPU</li>
+              </ul>
+            </div>
+            <div class="feature">
+              <h4>Casos de uso</h4>
+              <p>Servicios serverless (AWS Lambda, Google Cloud Run) o contenedores ligeros que necesiten UBLKit.</p>
+            </div>
+          </div>
+          <pre class="code"><code>// Quarkus injected sin configuracion extra
+@QuarkusMain
+public static void main(String[] args) {
+  Quarkus.run(args);
+}
+
+@Path("/factura")
+public class FacturaResource {
+  @Inject
+  SerializadorXmlFactura serializador;
+  
+  @Inject
+  PasarelaSunat pasarela;
+  
+  @POST
+  public Response emitir(BorradorFactura factura) {
+    // Uso directo
+    return Response.ok().build();
+  }
+}</code></pre>
+        </div>
       </div>
     </section>
 
@@ -152,6 +538,407 @@
   &lt;artifactId&gt;ublkit-spring-boot-starter&lt;/artifactId&gt;
   &lt;version&gt;0.1.0-SNAPSHOT&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
+    </section>
+
+    <section class="panel comparison">
+      <div class="section-head reveal">
+        <h2>Tabla comparativa de modulos</h2>
+        <p>Selecciona los modulos que necesitas segun tu caso de uso y arquitectura.</p>
+      </div>
+      <div class="table-scroll reveal">
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Modulo</th>
+              <th>Dependencias</th>
+              <th>Casos de uso</th>
+              <th>Alternativa</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>ublkit-core</strong></td>
+              <td>Ninguna</td>
+              <td>Base obligatoria</td>
+              <td>—</td>
+            </tr>
+            <tr>
+              <td><strong>ublkit-catalogs</strong></td>
+              <td>core</td>
+              <td>Validar codigos SUNAT</td>
+              <td>Tabla propia en BD</td>
+            </tr>
+            <tr>
+              <td><strong>ublkit-ubl</strong></td>
+              <td>core, catalogs</td>
+              <td>Modelado y XML</td>
+              <td>JAXB manual</td>
+            </tr>
+            <tr>
+              <td><strong>ublkit-validation</strong></td>
+              <td>core, ubl</td>
+              <td>Validar documentos</td>
+              <td>XSD/Schematron manual</td>
+            </tr>
+            <tr>
+              <td><strong>ublkit-sign</strong></td>
+              <td>core</td>
+              <td>Firmar XML</td>
+              <td>OpenSSL CLI</td>
+            </tr>
+            <tr>
+              <td><strong>ublkit-gateway</strong></td>
+              <td>core</td>
+              <td>Envio SUNAT/OSE</td>
+              <td>SOAP manual (java.net.http)</td>
+            </tr>
+            <tr>
+              <td><strong>ublkit-render</strong></td>
+              <td>core, ubl</td>
+              <td>HTML/PDF/Ticket</td>
+              <td>Thymeleaf + Apache FOP</td>
+            </tr>
+            <tr>
+              <td><strong>ublkit-qr</strong></td>
+              <td>core</td>
+              <td>Codigo QR SUNAT</td>
+              <td>ZXing/QRGen</td>
+            </tr>
+            <tr>
+              <td><strong>ublkit-storage</strong></td>
+              <td>core</td>
+              <td>Persistir artefactos</td>
+              <td>S3 SDK directo</td>
+            </tr>
+            <tr>
+              <td><strong>ublkit-testkit</strong></td>
+              <td>core, ubl</td>
+              <td>Testing</td>
+              <td>Fixtures propios</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="workflows" class="panel workflows">
+      <div class="section-head reveal">
+        <h2>Flujos avanzados de integracion</h2>
+        <p>Ejemplos de como combinar modulos para casos reales.</p>
+      </div>
+
+      <div class="workflows-grid">
+        <div class="workflow-card reveal">
+          <h3>🏪 Punto de Venta (POS)</h3>
+          <p class="workflow-desc">Emitir facturas/boletas en tiempo real con venta y generar ticket.</p>
+          <div class="workflow-stack">
+            <span>ublkit-core</span>
+            <span>ublkit-ubl</span>
+            <span>ublkit-validation</span>
+            <span>ublkit-sign</span>
+            <span>ublkit-gateway</span>
+            <span>ublkit-render (ticket)</span>
+            <span>ublkit-qr</span>
+          </div>
+          <pre class="code code-sm"><code>// 1. Crear boleta
+BorradorBoleta boleta = new BorradorBoleta();
+boleta.setDetalles(carrito.getItems());
+
+// 2. Ensamblar + Validar
+EnsambladorBoleta.ensamblar(boleta);
+if (!validador.validar(boleta).esValido()) return;
+
+// 3. Serializar + Firmar
+String xml = serializador.serializar(boleta);
+String xmlFirmado = servicioFirma.firmarXml(xml, cert);
+
+// 4. Enviar async
+completableFuture(() -> 
+  pasarela.enviarComprobante(xmlFirmado)
+);
+
+// 5. Renderizar ticket local
+byte[] ticket = renderizadorTicket.renderizar(boleta);
+impresora.imprimir(ticket);</code></pre>
+        </div>
+
+        <div class="workflow-card reveal">
+          <h3>📦 E-commerce</h3>
+          <p class="workflow-desc">Emitir factura post-compra, generar PDF y archivar en S3.</p>
+          <div class="workflow-stack">
+            <span>ublkit-core</span>
+            <span>ublkit-catalogs</span>
+            <span>ublkit-ubl</span>
+            <span>ublkit-validation</span>
+            <span>ublkit-sign</span>
+            <span>ublkit-gateway</span>
+            <span>ublkit-render (PDF)</span>
+            <span>ublkit-storage (S3)</span>
+          </div>
+          <pre class="code code-sm"><code>// 1. Crear factura desde pedido
+BorradorFactura factura = new BorradorFactura();
+factura.setReceptor(pedido.getCliente());
+factura.setDetalles(pedido.getLineas());
+
+// 2. Ensamblar + Validar
+EnsambladorFactura.ensamblar(factura);
+validador.validar(factura);
+
+// 3. Firma + Envio
+String xmlFirmado = servicioFirma.firmarXml(
+  serializador.serializar(factura), cert);
+pasarela.enviarComprobante(xmlFirmado);
+
+// 4. Renderizar PDF + Archivar
+byte[] pdf = renderizadorPdf.renderizar(factura);
+almacenS3.guardarPdf(factura.getId(), pdf);
+
+// 5. Email a cliente
+enviador.enviarPdfAlCliente(
+  pedido.getCliente().getEmail(), pdf);</code></pre>
+        </div>
+
+        <div class="workflow-card reveal">
+          <h3>📊 Sistema Nomina</h3>
+          <p class="workflow-desc">Generar reportes de Percepcion/Retencion con validacion SUNAT.</p>
+          <div class="workflow-stack">
+            <span>ublkit-core</span>
+            <span>ublkit-catalogs</span>
+            <span>ublkit-ubl</span>
+            <span>ublkit-validation</span>
+            <span>ublkit-gateway</span>
+            <span>ublkit-render (HTML)</span>
+          </div>
+          <pre class="code code-sm"><code>// 1. Generar Percepcion
+Percepcion percepcion = new Percepcion();
+percepcion.setPeriodo("2026-04");
+percepcion.setTrabajadores(empleados);
+
+// 2. Validar reglas SUNAT
+ValidadorPercepcion validador = new ValidadorPercepcion();
+Resultado resultado = validador.validar(percepcion);
+
+if (resultado.esValido()) {
+  // 3. Render HTML para envio
+  String html = renderizador.renderizar(percepcion);
+  
+  // 4. Enviar reporte a SUNAT
+  pasarela.enviarPercepcion(html);
+}</code></pre>
+        </div>
+
+        <div class="workflow-card reveal">
+          <h3>🚚 Logistica (GRE)</h3>
+          <p class="workflow-desc">Emitir Guia de Remision Electronica con validacion de transporte.</p>
+          <div class="workflow-stack">
+            <span>ublkit-core</span>
+            <span>ublkit-catalogs</span>
+            <span>ublkit-ubl</span>
+            <span>ublkit-validation</span>
+            <span>ublkit-sign</span>
+            <span>ublkit-gateway (REST)</span>
+            <span>ublkit-qr</span>
+          </div>
+          <pre class="code code-sm"><code>// 1. Crear GRE desde remision
+BorradorGuiaRemision guia = new BorradorGuiaRemision();
+guia.setTransportista(empresa.getDatosTransporte());
+guia.setDetalles(articulos);
+
+// 2. Validar reglas de transportista
+ValidadorGuia validador = new ValidadorGuia();
+validador.validar(guia);
+
+// 3. Serializar + Firmar
+String xml = serializador.serializar(guia);
+String xmlFirmado = servicioFirma.firmarXml(xml, cert);
+
+// 4. Enviar via REST (GRE)
+Resultado envio = pasarelaSunat
+  .enviarGuiaRemision(xmlFirmado);
+
+// 5. Generar QR + Etiqueta
+String qr = generadorQr.generarQr(guia);</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel compatibility">
+      <div class="section-head reveal">
+        <h2>Matriz de compatibilidad</h2>
+        <p>Versiones soportadas y dependencias externas clave.</p>
+      </div>
+      
+      <div class="compat-grid reveal">
+        <div class="compat-card">
+          <h4>Java</h4>
+          <p><strong>21+</strong></p>
+          <small>Records, sealed classes, virtual threads</small>
+        </div>
+        <div class="compat-card">
+          <h4>Spring Boot</h4>
+          <p><strong>4.0+</strong></p>
+          <small>Auto-config, ConfigurationProperties</small>
+        </div>
+        <div class="compat-card">
+          <h4>Quarkus</h4>
+          <p><strong>3.8+</strong></p>
+          <small>CDI native, GraalVM</small>
+        </div>
+        <div class="compat-card">
+          <h4>Maven</h4>
+          <p><strong>3.9+</strong></p>
+          <small>BOM import, multi-module</small>
+        </div>
+        <div class="compat-card">
+          <h4>XML/UBL</h4>
+          <p><strong>2.1</strong></p>
+          <small>SUNAT PE oficial</small>
+        </div>
+        <div class="compat-card">
+          <h4>Firma</h4>
+          <p><strong>X509 RSA-SHA1</strong></p>
+          <small>PKCS12, SUNAT certs</small>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel faq">
+      <div class="section-head reveal">
+        <h2>Preguntas frecuentes</h2>
+        <p>Respuestas a dudas comunes de implementacion.</p>
+      </div>
+
+      <div class="faq-list">
+        <details class="faq-item reveal">
+          <summary>
+            <span class="faq-q">¿Puedo usar UBLKit sin Spring Boot?</span>
+            <span class="faq-icon">+</span>
+          </summary>
+          <div class="faq-a">
+            <p>Si, absolutamente. UBLKit es agnóstico del framework. Los módulos core, ubl, validation, sign, gateway y render funcionan con cualquier stack Java. Spring Boot starter es solo para conveniencia en proyectos Spring.</p>
+          </div>
+        </details>
+
+        <details class="faq-item reveal">
+          <summary>
+            <span class="faq-q">¿Cual es el overhead de dependencias?</span>
+            <span class="faq-icon">+</span>
+          </summary>
+          <div class="faq-a">
+            <p>Minimo. ublkit-core no tiene dependencias. Los demás módulos usan librería estándar (javax.xml, java.net.http, Jackson para JSON). Opcionalemente OpenHTMLtoPDF para PDF. Sin JAXB, sin frameworks pesados.</p>
+          </div>
+        </details>
+
+        <details class="faq-item reveal">
+          <summary>
+            <span class="faq-q">¿Puede validar homologación SUNAT oficial?</span>
+            <span class="faq-icon">+</span>
+          </summary>
+          <div class="faq-a">
+            <p>Si. El módulo ublkit-validation incluye XSL embebido (ValidaExprRegFactura, ValidaExprRegBoleta, etc) de referencia SUNAT. Actívalo con -Dublkit.validation.sunat.enabled=true en propiedades.</p>
+          </div>
+        </details>
+
+        <details class="faq-item reveal">
+          <summary>
+            <span class="faq-q">¿Soporta compilación GraalVM nativa?</span>
+            <span class="faq-icon">+</span>
+          </summary>
+          <div class="faq-a">
+            <p>Parcialmente. Los módulos core, ubl, catalogs y validation funcionan en GraalVM. El módulo gateway requiere runtime reflection para SOAP, por eso Quarkus usa productores CDI para inyectar sin reflexión.</p>
+          </div>
+        </details>
+
+        <details class="faq-item reveal">
+          <summary>
+            <span class="faq-q">¿Como manejo reintentos y timeouts?</span>
+            <span class="faq-icon">+</span>
+          </summary>
+          <div class="faq-a">
+            <p>ublkit-gateway ya implementa retry exponencial y caché de token OAuth2. Puedes customizar timeouts en propiedades YAML (ublkit.gateway.timeout-ms, ublkit.gateway.max-retries).</p>
+          </div>
+        </details>
+
+        <details class="faq-item reveal">
+          <summary>
+            <span class="faq-q">¿Puedo almacenar en GCS o Azure Blob?</span>
+            <span class="faq-icon">+</span>
+          </summary>
+          <div class="faq-a">
+            <p>Si. ublkit-storage define interfaz AlmacenDocumentos. Ya hay adaptadores para S3 y GCS. Para Azure, extiendes la interfaz con tu implementacion (5-10 lineas de código).</p>
+          </div>
+        </details>
+
+        <details class="faq-item reveal">
+          <summary>
+            <span class="faq-q">¿Cual es el cost/rendimiento en producción?</span>
+            <span class="faq-icon">+</span>
+          </summary>
+          <div class="faq-a">
+            <p>Bajo. Serialización XML: ~5ms por documento. Validación: ~2ms. Firma: ~50ms (depende CPU). Envio SUNAT: ~200-500ms (latencia red). Total estimado: 300-600ms por flujo completo en hardware moderno. RAM: ~50MB startup.</p>
+          </div>
+        </details>
+
+        <details class="faq-item reveal">
+          <summary>
+            <span class="faq-q">¿Como hago testing sin conectar SUNAT real?</span>
+            <span class="faq-icon">+</span>
+          </summary>
+          <div class="faq-a">
+            <p>Usa ublkit-testkit. Proporciona SimuladorGateway que devuelve respuestas SUNAT simuladas sin conexión real. Perfecto para CI/CD y pruebas unitarias rápidas. Incluye fixtures de documentos válidos.</p>
+          </div>
+        </details>
+
+        <details class="faq-item reveal">
+          <summary>
+            <span class="faq-q">¿Hay soporte para Resumen Diario (RC) y Comunicación de Baja (RA)?</span>
+            <span class="faq-icon">+</span>
+          </summary>
+          <div class="faq-a">
+            <p>Si. Modelos completos para ResumenDiario y ComunicacionBaja. Validadores, serializadores y ensambladores listos. Incluyen reglas SUNAT para acumulaciones y reversiones.</p>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <section class="panel roadmap">
+      <div class="section-head reveal">
+        <h2>Roadmap y futuro</h2>
+        <p>Planes de desarrollo y evolución del proyecto.</p>
+      </div>
+
+      <div class="roadmap-timeline reveal">
+        <div class="roadmap-phase">
+          <h4>Version 0.1.0 (Actual)</h4>
+          <ul>
+            <li>✅ 12 módulos principales</li>
+            <li>✅ Todos los tipos de documento (Invoice, CreditNote, DebitNote, DespatchAdvice)</li>
+            <li>✅ Validación funcional + XSL SUNAT</li>
+            <li>✅ Spring Boot + Quarkus starters</li>
+            <li>✅ 72+ tests</li>
+          </ul>
+        </div>
+
+        <div class="roadmap-phase">
+          <h4>Proximo: v0.2.0</h4>
+          <ul>
+            <li>📋 Soporte GraalVM nativa para todos los módulos</li>
+            <li>📋 Adaptador oficial para Azure Storage</li>
+            <li>📋 Dashboard de monitoreo (health, métricas)</li>
+            <li>📋 Documentación REST API (swagger/openapi)</li>
+          </ul>
+        </div>
+
+        <div class="roadmap-phase">
+          <h4>Futuro: v1.0.0</h4>
+          <ul>
+            <li>🔮 Soporte offline (cache de catalogos, XML firmado previo)</li>
+            <li>🔮 Modulo de auditoría (logging, trazabilidad)</li>
+            <li>🔮 Webflux reactive para alto volumen</li>
+            <li>🔮 Certificación SFS v3.0 (si SUNAT la libera)</li>
+          </ul>
+        </div>
+      </div>
     </section>
 
     <section class="panel docs">
