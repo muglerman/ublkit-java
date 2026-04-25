@@ -1,0 +1,7 @@
+/* Shared tokens across all template styles */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+/* A4 page dimensions at 96dpi: 794 × 1123 */
+/* A5: 559 × 794 */
+/* Ticket 80mm: ~302px wide */
+/* Ticket 58mm: ~220px wide */

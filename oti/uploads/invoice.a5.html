@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ invoice.identity }}</title>
+  <style>
+    * { box-sizing:border-box; }
+    body { margin:0; padding:12px; font-family:'Roboto', sans-serif; color:#0f172a; font-size:10.5px; line-height:1.32; }
+    .card { border:1px solid #cbd5e1; border-radius:7px; background:#fff; }
+    .header { display:table; width:100%; border-collapse:separate; border-spacing:8px 0; }
+    .cell { display:table-cell; vertical-align:top; }
+    .logo { width:68px; }
+    .logo img { max-width:58px; max-height:58px; }
+    .issuer { padding:8px; }
+    .issuer h1 { margin:0 0 3px; font-size:13px; }
+    .doc { width:190px; border:2px solid #0f172a; border-radius:9px; overflow:hidden; }
+    .doc p { margin:0; padding:6px 8px; text-align:center; font-weight:700; }
+    .doc .type { background:#e6f4f1; }
+    .section { margin-top:8px; }
+    .title { margin:0 0 4px; font-size:10px; text-transform:uppercase; letter-spacing:.3px; color:#334155; font-weight:700; }
+    .grid { display:table; width:100%; }
+    .col { display:table-cell; width:50%; vertical-align:top; padding:7px 8px; }
+    .col + .col { border-left:1px solid #e2e8f0; }
+    p { margin:0 0 3px; }
+    .small { color:#475569; font-size:10px; }
+    .mono { font-family:'Roboto', monospace; }
+    table { width:100%; border-collapse:collapse; }
+    th, td { border:1px solid #cbd5e1; padding:5px; vertical-align:top; }
+    th { background:#e6f4f1; font-size:9.8px; text-align:left; }
+    .center { text-align:center; }
+    .right { text-align:right; }
+    .totals td { border:0; padding:2px 0; }
+    .totals td:first-child { color:#475569; }
+    .legend { margin-top:4px; color:#334155; font-weight:600; }
+    .qr { margin-top:10px; display:table; width:100%; }
+    .qr div { display:table-cell; vertical-align:top; }
+    .qr img { width:82px; height:82px; }
+    .pill { display:inline-block; border:1px solid #99f6e4; background:#f0fdfa; color:#0f766e; border-radius:999px; padding:1px 7px; font-size:9.6px; }
+  </style>
+</head>
+<body>
+  {% if invoice.header %}<div class="card small" style="padding:6px 8px; margin-bottom:6px;">{{ invoice.header }}</div>{% endif %}
+  <div class="header">
+    <div class="cell logo"><img src="{{ invoice.logo }}" alt="Logo" /></div>
+    <div class="cell card issuer">
+      <h1>{{ invoice.taxpayer.name }}</h1>
+      {% if invoice.taxpayer.tradeName %}<p><strong>{{ invoice.taxpayer.tradeName }}</strong></p>{% endif %}
+      <p>{{ invoice.taxpayer.address }}</p>
+      {% if invoice.taxpayer.location %}<p class="small">{{ invoice.taxpayer.location }}</p>{% endif %}
+    </div>
+    <div class="cell">
+      <div class="doc">
+        <p>RUC: {{ invoice.taxpayer.identity }}</p>
+        <p class="type">{{ invoice.name }}</p>
+        <p class="mono">{{ invoice.identity }}</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <p class="title">Cliente</p>
+    <div class="card grid">
+      <div class="col">
+        <p><strong>{{ invoice.customer.name }}</strong></p>
+        <p>{{ invoice.customer.documentType }} {{ invoice.customer.identity }}</p>
+        {% if invoice.customer.address %}<p>{{ invoice.customer.address }}</p>{% endif %}
+      </div>
+      <div class="col">
+        <p><strong>Emision:</strong> {{ invoice.issueDate }} {{ invoice.issueTime }}</p>
+        {% if invoice.dueDate %}<p><strong>Vencimiento:</strong> {{ invoice.dueDate }}</p>{% endif %}
+        <p><strong>Moneda:</strong> {{ invoice.currency }}</p>
+        {% if invoice.exchangeRate %}<p><strong>T/C:</strong> {{ invoice.exchangeRate.value }}</p>{% endif %}
+        {% if invoice.operationTypeCode %}<p><strong>Operacion:</strong> {{ invoice.operationTypeCode }}</p>{% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <p class="title">Detalle</p>
+    <table>
+      <tr>
+        <th style="width:28px;" class="center">#</th>
+        <th>Descripcion</th>
+        <th style="width:56px;" class="center">Und</th>
+        <th style="width:66px;" class="right">Cant</th>
+        <th style="width:78px;" class="right">Precio</th>
+      </tr>
+      {% for item in invoice.items %}
+      <tr>
+        <td class="center">{{ item.index }}</td>
+        <td>{{ item.description }}{% if item.code %}<div class="small">{{ item.code }}</div>{% endif %}</td>
+        <td class="center">{{ item.unitCode }}</td>
+        <td class="right">{{ item.quantity }}</td>
+        <td class="right">{{ item.price }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+
+  <div class="section grid">
+    <div class="col card" style="padding:7px 8px;">
+      {% if invoice.payment %}<p><strong>Pago:</strong> {{ invoice.payment.type }} {{ invoice.payment.total }}</p>{% endif %}
+      {% if invoice.detraction %}<p><strong>Detraccion:</strong> {{ invoice.detraction.amount }}</p>{% endif %}
+      {% if invoice.perception %}<p><strong>Percepcion:</strong> {{ invoice.perception.amount }}</p>{% endif %}
+      {% if invoice.reference.guides is not empty %}<p><strong>Guias:</strong></p>{% for g in invoice.reference.guides %}<p class="small">{{ g.type }} {{ g.document }}</p>{% endfor %}{% endif %}
+      {% if invoice.deliveryAddress %}<p><strong>Entrega:</strong> {{ invoice.deliveryAddress }}</p>{% endif %}
+      {% if invoice.note %}<p><strong>Obs:</strong> {{ invoice.note }}</p>{% endif %}
+      {% if invoice.legends is not empty %}{% for l in invoice.legends %}<p class="small">{{ l.code }}: {{ l.value }}</p>{% endfor %}{% endif %}
+    </div>
+    <div class="col">
+      <table class="totals" style="width:100%;">
+        <tr><td>Subtotal</td><td class="right">{{ invoice.summary.subtotal }}</td></tr>
+        <tr><td>Gravado</td><td class="right">{{ invoice.summary.taxable }}</td></tr>
+        <tr><td>Exonerado</td><td class="right">{{ invoice.summary.exonerated }}</td></tr>
+        <tr><td>Inafecto</td><td class="right">{{ invoice.summary.unaffected }}</td></tr>
+        <tr><td>IGV</td><td class="right">{{ invoice.summary.igv }}</td></tr>
+        <tr><td>ISC</td><td class="right">{{ invoice.summary.isc }}</td></tr>
+        <tr><td>ICBPER</td><td class="right">{{ invoice.summary.icb }}</td></tr>
+        <tr><td>Tasa IGV</td><td class="right">{{ invoice.taxRates.igv }}</td></tr>
+        <tr><td>Tasa IVAP</td><td class="right">{{ invoice.taxRates.ivap }}</td></tr>
+        <tr><td><strong>Total</strong></td><td class="right"><strong>{{ invoice.summary.total }}</strong></td></tr>
+      </table>
+      {% if invoice.summary.totalText %}<div class="legend">{{ invoice.summary.totalText }}</div>{% endif %}
+    </div>
+  </div>
+
+  <div class="qr">
+    <div><img src="{{ invoice.qr }}" alt="QR" /></div>
+    <div style="padding-left:8px;">
+      <span class="pill">Representacion impresa</span>
+      {% if invoice.signer %}<p class="small" style="margin-top:4px;">Firmante: {{ invoice.signer.identity }}</p>{% endif %}
+      <p class="small" style="margin-top:4px;">Hash: {{ invoice.hash }}</p>
+    </div>
+  </div>
+  {% if invoice.footer %}<div class="card small" style="padding:6px 8px; margin-top:6px;">{{ invoice.footer }}</div>{% endif %}
+</body>
+</html>

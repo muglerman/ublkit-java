@@ -1,0 +1,266 @@
+{#
+Template Name: Ticket
+Width: 58mm
+Height: 170mm
+#}
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<style>
+			html {
+				font-family:'Roboto', sans-serif;
+				font-size:8px;
+				-webkit-tap-highlight-color:transparent
+			}
+			body {
+				margin: 0;
+				padding: 8px;
+			}
+			.bold,b,strong{
+				font-weight:700
+			}
+			td{
+				padding:3px;
+			}
+			.first-width-auto tr td:first-child {
+				width: 1%;
+				white-space: nowrap;
+			}
+			.inner-separator tr {
+				border-bottom:1px solid #1d4c39;
+			}
+			.inner-separator tr:last-child{
+				border:0
+			}
+			.text-center {
+				text-align: center;
+			}
+			.w-30 {
+				width:30%;
+			}
+			.w-70 {
+				width:70%;
+			}
+			.my-10 {
+				margin-top:10px;
+				margin-bottom:10px;
+			}
+			.mhy-4 p {
+				margin:4px;
+			}
+			.separador {
+				 display: block;
+				 height: 1px;
+				 border: 0;
+				 border-top: 1px dashed #666;
+				 margin: 10px 0;
+				 padding: 0;
+			 }
+
+			#invoice-id-area {
+				width:100%;
+				border:1px solid;
+				border-radius:7px;
+				text-align:center;
+				font-size:9pt;
+				font-weight:700;
+				line-height:1.5;
+			}
+			#invoice-id-area p, #invoice-id-area h4 {
+				margin:0;
+				padding:4pt;
+			}
+			#invoice-id-area h4 {
+				border-top: solid 1pt #1d4c39;
+				border-bottom: solid 1pt black;
+				background-color:#dfdfdf;
+			}
+			.tabla_borde{
+				border:1px solid #1d4c39;
+				border-radius:7px;
+			}
+			.border_top td{
+				border-top:1px solid #1d4c39;
+			}
+			.border_bottom td:nth-child(2) {
+				width: 15%;
+			}
+		</style>
+	</head>
+	<body>
+		{% set isInvoice = (invoice.type == 1) or (invoice.type == 3) %}
+		{% set isNote = (invoice.type == 7) or (invoice.type == 8) %}
+
+		<!-- logotipo -->
+		<div class="text-center my-10">
+			<img src="{{ invoice.logo }}" border="0" alt="Logotipo" class="w-30" />
+		</div>
+
+		<!-- presentación -->
+		<div class="text-center">
+			<strong>{{ invoice.taxpayer.name }}</strong><br />
+			<span>{{ invoice.taxpayer.address }}</span><br />
+			<span>
+			{% if invoice.taxpayer.contact.web %}
+				{{ invoice.taxpayer.contact.web }}
+			{% endif %}
+			{% if invoice.taxpayer.contact.email %}
+				- {{ invoice.taxpayer.contact.email }}
+			{% endif %}
+			{% if invoice.taxpayer.contact.telephone %}
+			 - {{ invoice.taxpayer.contact.telephone }}
+			{% endif %}
+			</span>
+		</div>
+
+		<!-- etiqueta de cpe -->
+		<div id="invoice-id-area" class="my-10">
+			<p>RUC: {{ invoice.taxpayer.identity }}</p>
+			<h4>{{ invoice.name }}</h4>
+			<p>{{ invoice.identity }}</p>
+		</div>
+
+		<hr class="separador" />
+
+		<!-- adquiriente -->
+		<div class="my-10 mhy-4">
+			<p><strong>Nombre:</strong> {{invoice.customer.name}}</p>
+
+			<p><strong>Documento:</strong> {{ invoice.customer.identity }}</p>
+			<p><strong>Fecha de Emisión:</strong> {{ invoice.issueDate }}</p>
+
+			{% if invoice.dueDate %}
+				<p><strong>Fecha de Vencimiento:</strong> {{ invoice.dueDate }}</p>
+			{% endif %}
+			<p><strong>Dirección:</strong> {{ invoice.customer.address }}</p>
+			{% if invoice.relatedDocument %}
+				<p><strong>Tipo Doc. Ref.:</strong> {{ invoice.relatedDocument.type }}</p>
+				<p><strong>Documento Ref.:</strong> {{ invoice.relatedDocument.document }}</p>
+			{% endif %}
+				<p><strong>Tipo de Moneda:</strong> {{ invoice.currency }}</p>
+			{% if invoice.reference %}
+				<!-- generado tal vez por software contable -->
+				<p><strong>N° de Operación:</strong> {{ invoice.reference.order }} - {{ invoice.reference.note }}</p>
+			{% endif %}
+		</div>
+
+		<!-- productos -->
+		<div class="tabla_borde">
+			<table width="100%" border="0" cellpadding="1" cellspacing="0">
+				<tbody>
+					<tr>
+						<td align="left" class="bold">Cantidad</td>
+						<td align="center" class="bold">Descripción</td>
+						<td align="right" class="bold">Valor</td>
+					</tr>
+					{% for item in invoice.items %}
+					<tr class="border_top">
+						<td align="left">
+							{{ item.quantity }}
+							{{ item.unitCode }}
+						</td>
+						<td align="center">
+							{% if item.code %}
+								<i>(  {{ item.code }}  )</i><br />
+							{% endif %}
+							{{ item.description }}
+						</td>
+						<td align="right">
+							{{ item.price }}
+						</td>
+					</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+		</div>
+
+		<!-- importes -->
+		<div>
+			<table width="100%" border="0" cellpadding="0" cellspacing="0" class="table table-valores-totales">
+				<tbody>
+				{% if invoice.summary.discount %}
+					<tr class="border_bottom">
+						<td align="right"><strong>Descuento:</strong></td>
+						<td align="right"><span>{{ invoice.summary.discount }}</span></td>
+					</tr>
+				{% endif %}
+				{% if invoice.summary.taxable %}
+					<tr class="border_bottom">
+						<td align="right"><strong>Op. Gravadas:</strong></td>
+						<td align="right"><span>{{ invoice.summary.taxable }}</span></td>
+					</tr>
+				{% endif %}
+				{% if invoice.summary.taxableFre %}
+					<tr class="border_bottom">
+						<td align="right"><strong>Op. Inafectas:</strong></td>
+						<td align="right"><span>{{ invoice.summary.taxableFre }}</span></td>
+					</tr>
+				{% endif %}
+				{% if invoice.summary.taxableVat %}
+					<tr class="border_bottom">
+						<td align="right"><strong>Op. Exoneradas:</strong></td>
+						<td align="right"><span>{{ invoice.summary.taxableVat }}</span></td>
+					</tr>
+				{% endif %}
+				{% if invoice.summary.isc %}
+					<tr>
+						<td align="right"><strong>ISC:</strong></td>
+						<td align="right"><span>{{ invoice.summary.isc }}</span></td>
+					</tr>
+				{% endif %}
+				{% if invoice.summary.igv %}
+					<tr>
+						<td align="right"><strong>IGV:</strong></td>
+						<td align="right"><span>{{ invoice.summary.igv }}</span></td>
+					</tr>
+				{% endif %}
+					<tr>
+						<td align="right"><strong>Precio Venta:</strong></td>
+						<td align="right"><span id="ride-importeTotal" class="ride-importeTotal">{{ invoice.summary.total }}</span></td>
+					</tr>
+					<tr>
+						<td colspan="2" align="right">
+							<strong>{{ invoice.summary.totalText }}</strong>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+
+		<!-- información adicional -->
+		<div>
+			<strong>Información Adicional</strong>
+			<table width="100%" border="0" cellpadding="5" cellspacing="0" class="first-width-auto inner-separator">
+				<tbody>
+				{% if isNota %}
+					<tr>
+						<td>Motivo de emisión:</td>
+						<td>{{ doc.desMotivo }}</td>
+					</tr>
+				{% endif %}
+				{% if params.user.extras is defined %}
+					{% for item in params.user.extras %}
+						<tr>
+							<td>{{ item.name }}:</td>
+							<td>{{ item.value }}</td>
+						</tr>
+					{% endfor %}
+				{% endif %}
+				</tbody>
+			</table>
+		</div>
+
+		<hr class="separador" />
+
+		<!-- qr -->
+		<div class="text-center my-10">
+			<img src="{{ invoice.qr }}" alt="hash QR" />
+		</div>
+
+		<!-- resumen de cpe -->
+		<div>
+			<strong>Resumen:</strong> {{ invoice.hash }}<br />
+		</div>
+	</body>
+</html>

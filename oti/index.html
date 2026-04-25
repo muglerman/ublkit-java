@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>PDF Templates · Facturación Electrónica</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: #f5f5f2; font-family: 'Inter', sans-serif; color: #111; }
+  body { padding: 40px 32px 80px; }
+  .mono { font-family: 'IBM Plex Mono', monospace; }
+
+  .hero { max-width: 1280px; margin: 0 auto 36px; }
+  .hero .kicker { font-size: 11px; text-transform: uppercase; letter-spacing: 0.18em; color: #737373; font-weight: 600; }
+  .hero h1 { margin: 6px 0 6px; font-size: 32px; font-weight: 700; letter-spacing: -0.02em; }
+  .hero p { color: #525252; font-size: 14px; max-width: 720px; line-height: 1.55; }
+  .hero .legend { margin-top: 18px; display: flex; gap: 12px; flex-wrap: wrap; font-size: 11px; color: #525252; }
+  .hero .legend span { padding: 4px 10px; background: #fff; border: 1px solid #e5e5e5; border-radius: 999px; }
+
+  .grid { max-width: 1280px; margin: 0 auto; display: grid; grid-template-columns: repeat(2, 1fr); gap: 28px; }
+  .card { background: #fff; border-radius: 14px; overflow: hidden; border: 1px solid #e5e5e5; box-shadow: 0 1px 2px rgba(0,0,0,0.03); }
+  .card .head { padding: 20px 22px 14px; display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; border-bottom: 1px solid #eee; }
+  .card .head .title-block h2 { margin: 0; font-size: 18px; font-weight: 700; letter-spacing: -0.01em; }
+  .card .head .title-block .desc { font-size: 12px; color: #737373; margin-top: 4px; max-width: 380px; line-height: 1.5; }
+  .card .head .swatches { display: flex; gap: 6px; }
+  .card .head .swatches i { width: 18px; height: 18px; border-radius: 5px; display: block; border: 1px solid rgba(0,0,0,0.08); }
+  .card .preview { background: #fafaf8; padding: 18px; display: flex; justify-content: center; align-items: flex-start; position: relative; }
+  .card .preview .frame { width: 100%; aspect-ratio: 794/560; background: #fff; border-radius: 6px; overflow: hidden; position: relative; border: 1px solid #e0e0dc; }
+  .card .preview iframe { position: absolute; top: 0; left: 0; width: 1588px; height: 1120px; border: 0; transform: scale(0.45); transform-origin: top left; }
+  .card .preview .overlay { position: absolute; inset: 0; background: transparent; cursor: zoom-in; }
+  .card .preview .fade { position: absolute; left: 0; right: 0; bottom: 0; height: 40px; background: linear-gradient(to bottom, rgba(250,250,248,0), #fafaf8); pointer-events: none; }
+  .card .docs { padding: 14px 22px 20px; display: flex; flex-wrap: wrap; gap: 8px; }
+  .card .docs a { font-size: 11.5px; padding: 6px 12px; border-radius: 999px; background: #f1f1ee; color: #111; text-decoration: none; font-weight: 500; transition: background 0.15s; }
+  .card .docs a:hover { background: #111; color: #fff; }
+  .card .docs a.disabled { color: #a3a3a3; background: transparent; border: 1px dashed #d4d4d4; pointer-events: none; }
+  .card .docs .group-label { width: 100%; font-size: 10px; text-transform: uppercase; letter-spacing: 0.14em; color: #a3a3a3; margin-top: 6px; font-weight: 600; }
+
+  .foot { max-width: 1280px; margin: 40px auto 0; padding-top: 24px; border-top: 1px solid #e5e5e5; display: grid; grid-template-columns: 1fr 1fr; gap: 32px; font-size: 12px; color: #525252; }
+  .foot h3 { font-size: 11px; text-transform: uppercase; letter-spacing: 0.14em; color: #111; margin: 0 0 10px; }
+  .foot ul { padding: 0; margin: 0; list-style: none; }
+  .foot li { padding: 3px 0; }
+  .foot code { font-family: 'IBM Plex Mono', monospace; font-size: 11px; background: #fff; padding: 1px 6px; border-radius: 4px; border: 1px solid #e5e5e5; }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="kicker">PDF Templates · Facturación Electrónica SUNAT</div>
+  <h1>5 estilos para tus comprobantes electrónicos</h1>
+  <p>Cinco direcciones visuales listas para producción: factura, boleta, nota de crédito/débito, guía de remisión y resumen. Cada estilo mantiene los mismos campos SUNAT (RUC, leyendas, detracción, QR, hash) pero con una personalidad gráfica distinta. Haz clic en cualquier vista previa para abrirla a tamaño real.</p>
+  <div class="legend">
+    <span>A4 · 794 × 1123 px</span>
+    <span>A5 · en progreso</span>
+    <span>Ticket 80 / 58 mm</span>
+    <span>Datos de ejemplo reales</span>
+    <span>Compatible Twig → plug &amp; play</span>
+  </div>
+</div>
+
+<div class="grid">
+
+  <div class="card">
+    <div class="head">
+      <div class="title-block">
+        <h2>01 · Classic Mono</h2>
+        <div class="desc">Editorial blanco y negro, tipografía monoespaciada para cifras. Máxima legibilidad, estética de documento fiscal clásico.</div>
+      </div>
+      <div class="swatches">
+        <i style="background:#0a0a0a"></i>
+        <i style="background:#525252"></i>
+        <i style="background:#fafafa"></i>
+      </div>
+    </div>
+    <div class="preview">
+      <div class="frame">
+        <iframe src="templates/01-classic-mono/invoice.a4.html" scrolling="no"></iframe>
+        <a class="overlay" href="templates/01-classic-mono/invoice.a4.html" target="_blank"></a>
+        <div class="fade"></div>
+      </div>
+    </div>
+    <div class="docs">
+      <span class="group-label">Documentos</span>
+      <a href="templates/01-classic-mono/invoice.a4.html" target="_blank">Factura A4</a>
+      <a href="templates/01-classic-mono/invoice.ticket80mm.html" target="_blank">Ticket 80mm</a>
+      <a class="disabled">Boleta A4</a>
+      <a class="disabled">Nota crédito</a>
+      <a class="disabled">Guía remisión</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="head">
+      <div class="title-block">
+        <h2>02 · Corporate Blue</h2>
+        <div class="desc">Band azul corporativo con docbox blanco. El estándar B2B: claro, confiable, escaneable. Rojo reservado para notas de crédito.</div>
+      </div>
+      <div class="swatches">
+        <i style="background:#1e4694"></i>
+        <i style="background:#0b1f3a"></i>
+        <i style="background:#eef3fb"></i>
+      </div>
+    </div>
+    <div class="preview">
+      <div class="frame">
+        <iframe src="templates/02-corporate-blue/invoice.a4.html" scrolling="no"></iframe>
+        <a class="overlay" href="templates/02-corporate-blue/invoice.a4.html" target="_blank"></a>
+        <div class="fade"></div>
+      </div>
+    </div>
+    <div class="docs">
+      <span class="group-label">Documentos</span>
+      <a href="templates/02-corporate-blue/invoice.a4.html" target="_blank">Factura A4</a>
+      <a href="templates/02-corporate-blue/note.a4.html" target="_blank">Nota de crédito</a>
+      <a class="disabled">Boleta A4</a>
+      <a class="disabled">Ticket 80mm</a>
+      <a class="disabled">Guía remisión</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="head">
+      <div class="title-block">
+        <h2>03 · Forest Modern</h2>
+        <div class="desc">Verde bosque, Space Grotesk, cards redondeadas y banda de viaje destacada en la guía. Estilo fintech/SaaS moderno.</div>
+      </div>
+      <div class="swatches">
+        <i style="background:#1d6b4f"></i>
+        <i style="background:#d1e7dc"></i>
+        <i style="background:#fdfdfb"></i>
+      </div>
+    </div>
+    <div class="preview">
+      <div class="frame">
+        <iframe src="templates/03-forest-modern/invoice.a4.html" scrolling="no"></iframe>
+        <a class="overlay" href="templates/03-forest-modern/invoice.a4.html" target="_blank"></a>
+        <div class="fade"></div>
+      </div>
+    </div>
+    <div class="docs">
+      <span class="group-label">Documentos</span>
+      <a href="templates/03-forest-modern/invoice.a4.html" target="_blank">Factura A4</a>
+      <a href="templates/03-forest-modern/despatch.a4.html" target="_blank">Guía remisión A4</a>
+      <a class="disabled">Boleta A4</a>
+      <a class="disabled">Nota crédito</a>
+      <a class="disabled">Ticket 80mm</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="head">
+      <div class="title-block">
+        <h2>04 · Minimal Serif</h2>
+        <div class="desc">Newsreader serif con cabecera centrada y mucho aire. Comunica marca cuidada y producto premium. Ideal para estudios y boutiques.</div>
+      </div>
+      <div class="swatches">
+        <i style="background:#161411"></i>
+        <i style="background:#a8412f"></i>
+        <i style="background:#fbfaf6"></i>
+      </div>
+    </div>
+    <div class="preview">
+      <div class="frame">
+        <iframe src="templates/04-minimal-serif/invoice.a4.html" scrolling="no"></iframe>
+        <a class="overlay" href="templates/04-minimal-serif/invoice.a4.html" target="_blank"></a>
+        <div class="fade"></div>
+      </div>
+    </div>
+    <div class="docs">
+      <span class="group-label">Documentos</span>
+      <a href="templates/04-minimal-serif/invoice.a4.html" target="_blank">Factura A4</a>
+      <a class="disabled">Boleta A4</a>
+      <a class="disabled">Nota crédito</a>
+      <a class="disabled">Guía remisión</a>
+      <a class="disabled">Ticket 80mm</a>
+    </div>
+  </div>
+
+  <div class="card" style="grid-column: 1 / -1;">
+    <div class="head">
+      <div class="title-block">
+        <h2>05 · Bold Accent</h2>
+        <div class="desc">Negro profundo + naranja señal. Archivo y tipografía condensada. Identidad fuerte, perfecta para retail y marcas de consumo con personalidad.</div>
+      </div>
+      <div class="swatches">
+        <i style="background:#0f0f10"></i>
+        <i style="background:#ff5a1f"></i>
+        <i style="background:#fbfaf4"></i>
+      </div>
+    </div>
+    <div class="preview" style="padding: 22px;">
+      <div class="frame" style="max-width: 900px; aspect-ratio: 794/520;">
+        <iframe src="templates/05-bold-accent/invoice.a4.html" scrolling="no"></iframe>
+        <a class="overlay" href="templates/05-bold-accent/invoice.a4.html" target="_blank"></a>
+        <div class="fade"></div>
+      </div>
+    </div>
+    <div class="docs">
+      <span class="group-label">Documentos</span>
+      <a href="templates/05-bold-accent/invoice.a4.html" target="_blank">Factura A4</a>
+      <a class="disabled">Boleta A4</a>
+      <a class="disabled">Nota crédito</a>
+      <a class="disabled">Guía remisión</a>
+      <a class="disabled">Ticket 80mm</a>
+    </div>
+  </div>
+
+</div>
+
+<div class="foot">
+  <div>
+    <h3>Siguientes pasos</h3>
+    <ul>
+      <li>· Elegir el estilo ganador (1 ó 2 candidatos).</li>
+      <li>· Extender el estilo elegido a todos los formatos: <code>A4</code>, <code>A5</code>, <code>ticket 58mm</code>, <code>ticket 80mm</code>.</li>
+      <li>· Completar la matriz de documentos: factura, boleta, nota crédito/débito, guía, perc./ret., resumen, voided.</li>
+      <li>· Convertir a plantillas Twig reemplazando los datos de ejemplo por variables <code>{{ invoice.documentId }}</code>, etc.</li>
+    </ul>
+  </div>
+  <div>
+    <h3>Qué está completo</h3>
+    <ul>
+      <li>· 5 estilos completos con Factura A4 en datos reales.</li>
+      <li>· 01 · Classic Mono: ticket 80mm.</li>
+      <li>· 02 · Corporate Blue: nota de crédito A4.</li>
+      <li>· 03 · Forest Modern: guía de remisión A4.</li>
+      <li>· Sistema coherente: QR, leyendas, detracción, hash SHA1, firmante digital.</li>
+    </ul>
+  </div>
+</div>
+
+</body>
+</html>
