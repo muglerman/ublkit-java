@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>B001-0001287 · Boleta De Venta Electrónica</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  :root {
+    --ink: #161411;
+    --ink-2: #57524b;
+    --ink-3: #8c857c;
+    --paper: #fbfaf6;
+    --rule: #161411;
+    --line: #e6e2d9;
+    --accent: #a8412f;
+  }
+  body {
+    font-family: 'Inter', sans-serif;
+    font-size: 9.5px;
+    line-height: 1.5;
+    color: var(--ink);
+    background: var(--paper);
+    width: 302px;
+    min-height: auto;
+    padding: 16px;
+    min-height: 1123px;
+    padding: 48px 56px;
+  }
+  .mono { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
+  .serif { font-family: 'Newsreader', serif; }
+  p { margin: 0; }
+
+  .hero { text-align: center; padding-bottom: 22px; border-bottom: 1px solid var(--rule); }
+  .hero .co-name { font-family: 'Newsreader', serif; font-size: 22px; font-weight: 500; letter-spacing: 0.02em; }
+  .hero .co-sub { font-size: 10px; color: var(--ink-2); margin-top: 3px; letter-spacing: 0.04em; }
+  .hero .doc-kind { margin-top: 18px; font-family: 'Newsreader', serif; font-style: italic; font-size: 14px; color: var(--ink-2); }
+  .hero .doc-num { margin-top: 4px; font-family: 'JetBrains Mono', monospace; font-size: 22px; font-weight: 500; letter-spacing: 0.03em; }
+
+  .meta-grid { display: grid; grid-template-columns: repeat(4, 1fr); padding: 18px 0; border-bottom: 1px solid var(--line); }
+  .meta-grid > div { padding: 0 14px; }
+  .meta-grid > div + div { border-left: 1px solid var(--line); }
+  .meta-grid .k { font-size: 9px; text-transform: uppercase; letter-spacing: 0.16em; color: var(--ink-3); margin-bottom: 3px; }
+  .meta-grid .v { font-size: 11px; font-weight: 500; }
+
+  .parties { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; padding: 22px 0; border-bottom: 1px solid var(--line); }
+  .party .label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.16em; color: var(--ink-3); margin-bottom: 6px; }
+  .party .name { font-family: 'Newsreader', serif; font-size: 15px; font-weight: 500; margin-bottom: 6px; }
+  .party .row { display: grid; grid-template-columns: 72px 1fr; font-size: 10px; padding: 1px 0; }
+  .party .row .k { color: var(--ink-3); }
+
+  .section { padding-top: 20px; }
+  .section-title { font-family: 'Newsreader', serif; font-style: italic; font-size: 13px; color: var(--ink-2); margin-bottom: 10px; }
+
+  .items { width: 100%; border-collapse: collapse; }
+  .items thead th { font-size: 9px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--ink-3); font-weight: 500; text-align: left; padding: 8px 10px 8px 0; border-bottom: 1px solid var(--rule); }
+  .items tbody td { padding: 12px 10px 12px 0; border-bottom: 1px solid var(--line); vertical-align: top; font-size: 9.5px; }
+  .items .c-idx { width: 28px; color: var(--ink-3); }
+  .items .c-code { width: 86px; }
+  .items .c-qty, .items .c-price, .items .c-tax, .items .c-unit { text-align: right; }
+  .items .c-qty { width: 60px; }
+  .items .c-unit { width: 48px; text-align: center; color: var(--ink-3); }
+  .items .c-price { width: 82px; }
+  .items .c-tax { width: 84px; padding-right: 0; }
+  .items .desc .main { font-weight: 500; }
+  .items .desc .sub { font-size: 9.5px; color: var(--ink-3); margin-top: 2px; }
+
+  .bottom { display: grid; grid-template-columns: 1fr 300px; gap: 40px; margin-top: 22px; }
+  .notes .block { margin-bottom: 14px; }
+  .notes .block .head { font-size: 9px; text-transform: uppercase; letter-spacing: 0.16em; color: var(--ink-3); margin-bottom: 3px; }
+  .notes .block .body { font-size: 10px; }
+  .notes .small { font-size: 9.5px; color: var(--ink-2); }
+  .notes .block .body p + p { margin-top: 2px; }
+
+  .totals .line { display: flex; justify-content: space-between; padding: 4px 0; font-size: 9.5px; }
+  .totals .line .k { color: var(--ink-2); }
+  .totals .line .v { font-family: 'JetBrains Mono', monospace; white-space: nowrap; }
+  .totals .rule { border-top: 1px solid var(--line); margin: 6px 0; }
+  .totals .grand { display: flex; justify-content: space-between; align-items: baseline; padding: 12px 0 6px; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); margin-top: 6px; }
+  .totals .grand .k { font-family: 'Newsreader', serif; font-style: italic; font-size: 14px; color: var(--ink-2); }
+  .totals .grand .v { font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 600; white-space: nowrap; }
+  .totals .in-words { margin-top: 10px; font-size: 9.5px; color: var(--ink-2); font-style: italic; text-align: right; }
+
+  .foot { display: grid; grid-template-columns: 90px 1fr auto; gap: 22px; align-items: start; margin-top: 30px; padding-top: 18px; border-top: 1px solid var(--line); }
+  .foot .qr { width: 90px; height: 90px; background: #fff; padding: 4px; border: 1px solid var(--line); }
+  .foot .qr svg { width: 100%; height: 100%; display: block; }
+  .foot .meta { font-size: 9.5px; color: var(--ink-2); }
+  .foot .meta strong { color: var(--ink); }
+  .foot .meta .hash { font-family: 'JetBrains Mono', monospace; word-break: break-all; font-size: 8.5px; margin-top: 2px; color: var(--ink-3); }
+  .foot .stamp { text-align: right; min-width: 180px; }
+  .foot .stamp .badge { display: inline-block; color: var(--accent); padding: 4px 0; font-family: 'Newsreader', serif; font-style: italic; font-size: 13px; border-bottom: 1px solid var(--accent); }
+  .foot .stamp .line { font-size: 9.5px; color: var(--ink-2); margin-top: 8px; max-width: 180px; }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="co-name">Manufacturas Andina Textil</div>
+  <div class="co-sub">Av. Argentina 2740 Int. 301 · Lima · RUC 20512345678 · ventas@andinatextil.pe</div>
+  <div class="doc-kind">Boleta De Venta Electrónica</div>
+  <div class="doc-num">B001 · 0001287</div>
+</div>
+
+<div class="meta-grid">
+  <div><div class="k">Emitido</div><div class="v">24/04/2026</div></div>
+  <div><div class="k">Vencimiento</div><div class="v">24/05/2026</div></div>
+  <div><div class="k">Moneda</div><div class="v">Soles · T/C 3.742</div></div>
+  <div><div class="k">Condición</div><div class="v">Crédito · 2 cuotas</div></div>
+</div>
+
+<div class="parties">
+  <div class="party">
+    <div class="label">Facturado a</div>
+    <div class="name">Comercial Los Portales S.A.</div>
+    <div class="row"><span class="k">RUC</span><span class="mono">20498123456</span></div>
+    <div class="row"><span class="k">Dirección</span><span>Av. Jorge Chavez 455 — Miraflores</span></div>
+    <div class="row"><span class="k">Ubicación</span><span>Lima · Miraflores</span></div>
+    <div class="row"><span class="k">O/C</span><span class="mono">OC-2026-00487</span></div>
+  </div>
+  <div class="party">
+    <div class="label">Operación</div>
+    <div class="name serif">0101 — Venta interna</div>
+    <div class="row"><span class="k">Entrega</span><span>Almacén Los Portales · Callao</span></div>
+    <div class="row"><span class="k">Guía</span><span class="mono">GRE T001-00452</span></div>
+    <div class="row"><span class="k">Vendedor</span><span>Diego Paredes</span></div>
+    <div class="row"><span class="k">Ruta</span><span>Lima–Callao</span></div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">Detalle</div>
+  <table class="items">
+    <thead>
+      <tr><th class="c-idx">#</th><th class="c-code">Código</th><th>Descripción</th><th class="c-unit">Und</th><th class="c-qty">Cant.</th><th class="c-price">P. Unit.</th><th class="c-tax">Importe</th></tr>
+    </thead>
+    <tbody>
+      <tr><td class="c-idx mono">01</td><td class="c-code mono">TX-0014</td><td class="desc"><div class="main">Polo algodón pima Premium — Talla M / Azul marino</div><div class="sub">SUNAT 53102400 · GS1 7750112000142</div></td><td class="c-unit">NIU</td><td class="c-qty mono">48.00</td><td class="c-price mono">65.00</td><td class="c-tax mono">3,120.00</td></tr>
+      <tr><td class="c-idx mono">02</td><td class="c-code mono">TX-0022</td><td class="desc"><div class="main">Polo algodón pima Premium — Talla L / Blanco</div><div class="sub">SUNAT 53102400</div></td><td class="c-unit">NIU</td><td class="c-qty mono">36.00</td><td class="c-price mono">65.00</td><td class="c-tax mono">2,340.00</td></tr>
+      <tr><td class="c-idx mono">03</td><td class="c-code mono">TX-0031</td><td class="desc"><div class="main">Camisa lino básica — Talla M / Beige arena</div><div class="sub">IGV 10 Gravado</div></td><td class="c-unit">NIU</td><td class="c-qty mono">24.00</td><td class="c-price mono">89.00</td><td class="c-tax mono">2,136.00</td></tr>
+      <tr><td class="c-idx mono">04</td><td class="c-code mono">TX-0045</td><td class="desc"><div class="main">Pantalón chino casual — Talla 32 / Caqui</div><div class="sub">IGV 10 Gravado</div></td><td class="c-unit">NIU</td><td class="c-qty mono">18.00</td><td class="c-price mono">149.00</td><td class="c-tax mono">2,682.00</td></tr>
+      <tr><td class="c-idx mono">05</td><td class="c-code mono">SV-001</td><td class="desc"><div class="main">Servicio de bordado personalizado — logo en pecho</div><div class="sub">IGV 10 Gravado</div></td><td class="c-unit">ZZ</td><td class="c-qty mono">126.00</td><td class="c-price mono">4.50</td><td class="c-tax mono">567.00</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="bottom">
+  <div class="notes">
+    <div class="block"><div class="head">Cuotas</div><div class="body">
+      <p class="small">Cuota 1 · 24/05/2026 · S/ 5,946.20</p>
+      <p class="small">Cuota 2 · 24/06/2026 · S/ 5,946.20</p>
+    </div></div>
+    <div class="block"><div class="head">Detracción</div><div class="body">
+      <p>S/ 1,427.09 · 020 Bienes gravados con IGV</p>
+      <p class="small">Transferencia en cuenta · BN 00-032-019287</p>
+    </div></div>
+    <div class="block"><div class="head">Observaciones</div><div class="body">
+      <p>Pedido fraccionado — entrega en 2 camiones.</p>
+    </div></div>
+    <div class="block"><div class="head">Leyendas SUNAT</div><div class="body">
+      <p class="small">· SON ONCE MIL OCHOCIENTOS NOVENTA Y DOS CON 40/100 SOLES</p>
+      <p class="small">· Operación sujeta a detracción</p>
+    </div></div>
+  </div>
+
+  <div class="totals">
+    <div class="line"><span class="k">Op. gravadas</span><span class="v">S/ 10,078.31</span></div>
+    <div class="line"><span class="k">Op. exoneradas</span><span class="v">S/ 0.00</span></div>
+    <div class="line"><span class="k">Op. inafectas</span><span class="v">S/ 0.00</span></div>
+    <div class="line"><span class="k">Op. gratuitas</span><span class="v">S/ 0.00</span></div>
+    <div class="rule"></div>
+    <div class="line"><span class="k">IGV (18%)</span><span class="v">S/ 1,814.10</span></div>
+    <div class="line"><span class="k">ICBPER / ISC</span><span class="v">S/ 0.00</span></div>
+    <div class="grand"><span class="k">Total</span><span class="v">S/ 11,892.40</span></div>
+    <div class="in-words">Son: once mil ochocientos noventa y dos con 40/100 soles.</div>
+  </div>
+</div>
+
+<div class="foot">
+  <div class="qr">
+    <svg viewBox="0 0 21 21" shape-rendering="crispEdges"><rect width="21" height="21" fill="#fff"/>
+    <g fill="#161411">
+      <rect x="0" y="0" width="7" height="7"/><rect x="1" y="1" width="5" height="5" fill="#fff"/><rect x="2" y="2" width="3" height="3"/>
+      <rect x="14" y="0" width="7" height="7"/><rect x="15" y="1" width="5" height="5" fill="#fff"/><rect x="16" y="2" width="3" height="3"/>
+      <rect x="0" y="14" width="7" height="7"/><rect x="1" y="15" width="5" height="5" fill="#fff"/><rect x="2" y="16" width="3" height="3"/>
+      <rect x="8" y="0" width="1" height="1"/><rect x="10" y="0" width="2" height="1"/><rect x="8" y="2" width="2" height="1"/>
+      <rect x="5" y="8" width="2" height="2"/><rect x="8" y="8" width="2" height="1"/><rect x="11" y="8" width="1" height="2"/><rect x="13" y="8" width="3" height="1"/><rect x="17" y="8" width="1" height="2"/>
+      <rect x="1" y="10" width="2" height="1"/><rect x="4" y="10" width="1" height="2"/><rect x="6" y="10" width="2" height="1"/><rect x="9" y="10" width="1" height="2"/><rect x="12" y="10" width="2" height="1"/><rect x="15" y="10" width="1" height="2"/>
+      <rect x="0" y="12" width="1" height="2"/><rect x="3" y="12" width="2" height="1"/><rect x="6" y="12" width="1" height="2"/><rect x="8" y="12" width="2" height="1"/><rect x="11" y="12" width="2" height="2"/><rect x="17" y="12" width="2" height="2"/>
+      <rect x="10" y="14" width="2" height="1"/><rect x="13" y="14" width="1" height="2"/><rect x="15" y="14" width="2" height="1"/><rect x="18" y="14" width="1" height="2"/>
+      <rect x="8" y="16" width="2" height="1"/><rect x="11" y="16" width="1" height="2"/><rect x="14" y="16" width="2" height="1"/>
+      <rect x="9" y="18" width="1" height="2"/><rect x="12" y="18" width="2" height="1"/><rect x="15" y="18" width="1" height="2"/>
+      <rect x="8" y="20" width="1" height="1"/><rect x="11" y="20" width="3" height="1"/>
+    </g></svg>
+  </div>
+  <div class="meta">
+    <p><strong>Representación impresa</strong> de la Boleta De Venta Electrónica.</p>
+    <p>Verifique este documento en <strong>sunat.gob.pe</strong> con el RUC del emisor y el número del comprobante.</p>
+    <p style="margin-top:6px;">Firmante: 20512345678 · Manufacturas Andina Textil S.A.C.</p>
+    <p class="hash">Hash: 3f8a21bc9d7e04a6c2f1b8e0d4a7c9f2e5b6d8a1</p>
+  </div>
+  <div class="stamp">
+    <span class="badge">Documento válido</span>
+    <div class="line">Emitido conforme al RCP SUNAT. Consultable en el portal oficial.</div>
+  </div>
+</div>
+
+</body>
+</html>

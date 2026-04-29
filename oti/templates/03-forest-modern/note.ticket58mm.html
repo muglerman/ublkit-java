@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>FC01-0001287 · Nota De Crédito Electrónica</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  :root {
+    --ink: #1a2720;
+    --ink-2: #48554e;
+    --ink-3: #7b8882;
+    --accent: #1d6b4f;
+    --accent-2: #d1e7dc;
+    --accent-soft: #f2f8f5;
+    --line: #d9e0dc;
+    --paper: #fdfdfb;
+  }
+  body {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 8px;
+    line-height: 1.5;
+    color: var(--ink);
+    background: var(--paper);
+    width: 219px;
+    min-height: auto;
+    padding: 10px;
+    min-height: 1123px;
+    padding: 40px 44px;
+  }
+  .mono { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
+  p, h1, h2, h3, h4 { margin: 0; }
+
+  .hero { display: grid; grid-template-columns: 1fr auto; align-items: start; gap: 32px; margin-bottom: 20px; }
+  .brand .mark { display: flex; align-items: center; gap: 14px; }
+  .brand .logo { width: 50px; height: 50px; background: var(--accent); color: #fff; border-radius: 14px; display: flex; align-items: center; justify-content: center; }
+  .brand .logo svg { width: 32px; height: 32px; }
+  .brand .co-name { font-size: 16px; font-weight: 700; letter-spacing: -0.01em; }
+  .brand .co-tagline { font-size: 8px; color: var(--ink-3); margin-top: 1px; }
+  .brand .meta { margin-top: 14px; font-size: 8px; color: var(--ink-2); }
+  .brand .meta p { padding: 1px 0; }
+
+  .doc-id { text-align: right; border-left: 3px solid var(--accent); padding-left: 18px; min-width: 240px; }
+  .doc-id .tag { font-size: 9.5px; color: var(--accent); font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; }
+  .doc-id .kind { font-size: 22px; font-weight: 700; letter-spacing: -0.01em; line-height: 1.1; margin-top: 4px; }
+  .doc-id .num { font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 500; color: var(--accent); margin-top: 2px; }
+  .doc-id .ruc { margin-top: 10px; font-size: 10px; color: var(--ink-2); }
+  .doc-id .ruc b { color: var(--ink); font-family: 'JetBrains Mono', monospace; }
+  .doc-id .issued { font-size: 10px; color: var(--ink-2); }
+
+  .meta-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 18px; }
+  .meta-row .chip { background: var(--accent-soft); border-radius: 10px; padding: 10px 12px; }
+  .meta-row .chip .k { font-size: 9px; color: var(--accent); letter-spacing: 0.14em; text-transform: uppercase; font-weight: 600; display: block; margin-bottom: 4px; }
+  .meta-row .chip .v { font-size: 11px; font-weight: 500; }
+
+  .parties { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+  .party { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; }
+  .party .label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--ink-3); margin-bottom: 6px; }
+  .party .name { font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+  .party .row { display: grid; grid-template-columns: 78px 1fr; font-size: 10px; padding: 2px 0; }
+  .party .row .k { color: var(--ink-3); }
+
+  .section-title { font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--ink-3); font-weight: 600; margin: 0 0 10px; }
+
+  .items-wrap { background: #fff; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+  .items { width: 100%; border-collapse: collapse; }
+  .items thead th { font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-2); font-weight: 600; text-align: left; padding: 12px 12px; background: var(--accent-soft); border-bottom: 1px solid var(--line); }
+  .items tbody td { padding: 11px 12px; border-top: 1px solid var(--line); vertical-align: top; font-size: 8px; }
+  .items .c-idx { width: 26px; color: var(--ink-3); text-align: center; }
+  .items .c-code { width: 90px; }
+  .items .c-qty, .items .c-price, .items .c-tax { text-align: right; }
+  .items .c-qty { width: 60px; }
+  .items .c-unit { width: 48px; text-align: center; color: var(--ink-3); }
+  .items .c-price { width: 84px; }
+  .items .c-tax { width: 86px; }
+  .items .desc .main { font-weight: 500; }
+  .items .desc .sub { font-size: 9.5px; color: var(--ink-3); margin-top: 2px; }
+
+  .bottom { display: grid; grid-template-columns: 1fr 320px; gap: 20px; margin-top: 18px; }
+  .notes .block { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; margin-bottom: 10px; }
+  .notes .block .head { font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--accent); font-weight: 600; margin-bottom: 4px; }
+  .notes .block .body { font-size: 10px; color: var(--ink); }
+  .notes .block .body p + p { margin-top: 2px; }
+  .notes .small { font-size: 9.5px; color: var(--ink-2); }
+
+  .totals { background: #fff; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+  .totals .inner { padding: 14px 18px; }
+  .totals .line { display: flex; justify-content: space-between; padding: 4px 0; font-size: 8px; }
+  .totals .line .k { color: var(--ink-2); }
+  .totals .line .v { font-family: 'JetBrains Mono', monospace; white-space: nowrap; }
+  .totals .rule { border-top: 1px dashed var(--line); margin: 6px 0; }
+  .totals .grand-wrap { background: var(--accent); color: #fff; padding: 14px 18px; }
+  .totals .grand { display: flex; justify-content: space-between; align-items: baseline; }
+  .totals .grand .k { font-size: 10px; text-transform: uppercase; letter-spacing: 0.14em; font-weight: 600; opacity: 0.85; }
+  .totals .grand .v { font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 700; white-space: nowrap; }
+  .totals .grand-wrap .words { font-size: 9.5px; margin-top: 6px; opacity: 0.85; }
+
+  .foot { display: grid; grid-template-columns: 110px 1fr auto; gap: 18px; align-items: start; margin-top: 22px; padding-top: 16px; border-top: 1px solid var(--line); }
+  .foot .qr { width: 110px; height: 110px; background: #fff; padding: 6px; border-radius: 10px; border: 1px solid var(--line); }
+  .foot .qr svg { width: 100%; height: 100%; display: block; }
+  .foot .meta { font-size: 9.5px; color: var(--ink-2); }
+  .foot .meta strong { color: var(--ink); }
+  .foot .meta .hash { font-family: 'JetBrains Mono', monospace; word-break: break-all; font-size: 8.5px; margin-top: 4px; color: var(--ink-3); }
+  .foot .stamp { text-align: right; min-width: 180px; }
+  .foot .stamp .badge { display: inline-flex; align-items: center; gap: 5px; background: var(--accent-2); color: var(--accent); padding: 6px 12px; border-radius: 999px; font-size: 9.5px; font-weight: 600; letter-spacing: 0.04em; }
+  .foot .stamp .badge::before { content: ""; width: 6px; height: 6px; background: var(--accent); border-radius: 50%; }
+  .foot .stamp .line { font-size: 9.5px; color: var(--ink-2); margin-top: 8px; max-width: 180px; }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="brand">
+    <div class="mark">
+      <div class="logo">
+        <svg viewBox="0 0 40 40" fill="none" stroke="#fff" stroke-width="2.4">
+          <rect x="6" y="6" width="28" height="28" rx="3"/>
+          <path d="M12 20h16M12 14h10M12 26h14"/>
+        </svg>
+      </div>
+      <div>
+        <div class="co-name">Manufacturas Andina Textil S.A.C.</div>
+        <div class="co-tagline">Hilando lo mejor de los Andes desde 2001</div>
+      </div>
+    </div>
+    <div class="meta">
+      <p>Av. Argentina 2740 Int. 301 — Lima, Perú</p>
+      <p>ventas@andinatextil.pe · (01) 555-0102 · andinatextil.pe</p>
+    </div>
+  </div>
+  <div class="doc-id">
+    <div class="tag">Comprobante</div>
+    <div class="kind">Nota De Crédito Electrónica</div>
+    <div class="num">FC01-0001287</div>
+    <div class="ruc">RUC <b>20512345678</b></div>
+    <div class="issued">Emitido 24/04/2026 · 14:32</div>
+  </div>
+</div>
+
+<div class="meta-row">
+  <div class="chip"><span class="k">Moneda</span><span class="v">Soles (PEN)</span></div>
+  <div class="chip"><span class="k">T/C</span><span class="v mono">3.742</span></div>
+  <div class="chip"><span class="k">Vencimiento</span><span class="v">24/05/2026</span></div>
+  <div class="chip"><span class="k">Condición</span><span class="v">Crédito 2 cuotas</span></div>
+</div>
+
+<div class="parties">
+  <div class="party">
+    <div class="label">Cliente</div>
+    <div class="name">Comercial Los Portales S.A.</div>
+    <div class="row"><span class="k">RUC</span><span class="mono">20498123456</span></div>
+    <div class="row"><span class="k">Dirección</span><span>Av. Jorge Chavez 455 — Miraflores</span></div>
+    <div class="row"><span class="k">Ubicación</span><span>Lima — Lima — Miraflores</span></div>
+    <div class="row"><span class="k">O/C</span><span class="mono">OC-2026-00487</span></div>
+  </div>
+  <div class="party">
+    <div class="label">Operación</div>
+    <div class="name">0101 — Venta interna</div>
+    <div class="row"><span class="k">Entrega</span><span>Almacén Los Portales · Callao</span></div>
+    <div class="row"><span class="k">Guía</span><span class="mono">GRE T001-00452</span></div>
+    <div class="row"><span class="k">Vendedor</span><span>Diego Paredes</span></div>
+    <div class="row"><span class="k">Ruta</span><span>Lima–Callao</span></div>
+  </div>
+</div>
+
+<p class="section-title">Detalle del comprobante</p>
+<div class="items-wrap">
+<table class="items">
+  <thead>
+    <tr>
+      <th class="c-idx">#</th>
+      <th class="c-code">Código</th>
+      <th>Descripción</th>
+      <th class="c-unit">Und</th>
+      <th class="c-qty">Cant.</th>
+      <th class="c-price">P. Unit.</th>
+      <th class="c-tax">Importe</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td class="c-idx mono">01</td><td class="c-code mono">TX-0014</td><td class="desc"><div class="main">Polo algodón pima Premium — Talla M / Azul marino</div><div class="sub">SUNAT 53102400 · GS1 7750112000142</div></td><td class="c-unit">NIU</td><td class="c-qty mono">48.00</td><td class="c-price mono">65.00</td><td class="c-tax mono">3,120.00</td></tr>
+    <tr><td class="c-idx mono">02</td><td class="c-code mono">TX-0022</td><td class="desc"><div class="main">Polo algodón pima Premium — Talla L / Blanco</div><div class="sub">SUNAT 53102400</div></td><td class="c-unit">NIU</td><td class="c-qty mono">36.00</td><td class="c-price mono">65.00</td><td class="c-tax mono">2,340.00</td></tr>
+    <tr><td class="c-idx mono">03</td><td class="c-code mono">TX-0031</td><td class="desc"><div class="main">Camisa lino básica — Talla M / Beige arena</div><div class="sub">IGV 10 Gravado Onerosa</div></td><td class="c-unit">NIU</td><td class="c-qty mono">24.00</td><td class="c-price mono">89.00</td><td class="c-tax mono">2,136.00</td></tr>
+    <tr><td class="c-idx mono">04</td><td class="c-code mono">TX-0045</td><td class="desc"><div class="main">Pantalón chino casual — Talla 32 / Caqui</div><div class="sub">IGV 10 Gravado Onerosa</div></td><td class="c-unit">NIU</td><td class="c-qty mono">18.00</td><td class="c-price mono">149.00</td><td class="c-tax mono">2,682.00</td></tr>
+    <tr><td class="c-idx mono">05</td><td class="c-code mono">SV-001</td><td class="desc"><div class="main">Servicio de bordado personalizado — logo en pecho</div><div class="sub">IGV 10 Gravado Onerosa</div></td><td class="c-unit">ZZ</td><td class="c-qty mono">126.00</td><td class="c-price mono">4.50</td><td class="c-tax mono">567.00</td></tr>
+  </tbody>
+</table>
+</div>
+
+<div class="bottom">
+  <div class="notes">
+    <div class="block"><div class="head">Cuotas</div><div class="body">
+      <p class="small">Cuota 1 · 24/05/2026 · <b>S/ 5,946.20</b></p>
+      <p class="small">Cuota 2 · 24/06/2026 · <b>S/ 5,946.20</b></p>
+    </div></div>
+    <div class="block"><div class="head">Detracción</div><div class="body">
+      <p><b>S/ 1,427.09</b> · 020 Bienes gravados con IGV</p>
+      <p class="small">Transferencia en cuenta · Cta. BN 00-032-019287</p>
+    </div></div>
+    <div class="block"><div class="head">Observaciones</div><div class="body">
+      <p>Pedido fraccionado — entrega en 2 camiones.</p>
+    </div></div>
+    <div class="block"><div class="head">Leyendas SUNAT</div><div class="body">
+      <p class="small">· SON ONCE MIL OCHOCIENTOS NOVENTA Y DOS CON 40/100 SOLES</p>
+      <p class="small">· Operación sujeta a detracción</p>
+    </div></div>
+  </div>
+
+  <div class="totals">
+    <div class="inner">
+      <div class="line"><span class="k">Op. gravadas</span><span class="v">S/ 10,078.31</span></div>
+      <div class="line"><span class="k">Op. exoneradas</span><span class="v">S/ 0.00</span></div>
+      <div class="line"><span class="k">Op. inafectas</span><span class="v">S/ 0.00</span></div>
+      <div class="line"><span class="k">Op. gratuitas</span><span class="v">S/ 0.00</span></div>
+      <div class="rule"></div>
+      <div class="line"><span class="k">IGV (18%)</span><span class="v">S/ 1,814.10</span></div>
+      <div class="line"><span class="k">ICBPER / ISC</span><span class="v">S/ 0.00</span></div>
+    </div>
+    <div class="grand-wrap">
+      <div class="grand"><span class="k">Total a pagar</span><span class="v">S/ 11,892.40</span></div>
+      <div class="words">Son: once mil ochocientos noventa y dos con 40/100 soles.</div>
+    </div>
+  </div>
+</div>
+
+<div class="foot">
+  <div class="qr">
+    <svg viewBox="0 0 21 21" shape-rendering="crispEdges"><rect width="21" height="21" fill="#fff"/>
+    <g fill="#1d6b4f">
+      <rect x="0" y="0" width="7" height="7"/><rect x="1" y="1" width="5" height="5" fill="#fff"/><rect x="2" y="2" width="3" height="3"/>
+      <rect x="14" y="0" width="7" height="7"/><rect x="15" y="1" width="5" height="5" fill="#fff"/><rect x="16" y="2" width="3" height="3"/>
+      <rect x="0" y="14" width="7" height="7"/><rect x="1" y="15" width="5" height="5" fill="#fff"/><rect x="2" y="16" width="3" height="3"/>
+      <rect x="8" y="0" width="1" height="1"/><rect x="10" y="0" width="2" height="1"/><rect x="8" y="2" width="2" height="1"/><rect x="12" y="2" width="1" height="2"/>
+      <rect x="5" y="8" width="2" height="2"/><rect x="8" y="8" width="2" height="1"/><rect x="11" y="8" width="1" height="2"/><rect x="13" y="8" width="3" height="1"/><rect x="17" y="8" width="1" height="2"/><rect x="19" y="8" width="2" height="1"/>
+      <rect x="1" y="10" width="2" height="1"/><rect x="4" y="10" width="1" height="2"/><rect x="6" y="10" width="2" height="1"/><rect x="9" y="10" width="1" height="2"/><rect x="12" y="10" width="2" height="1"/><rect x="15" y="10" width="1" height="2"/><rect x="18" y="10" width="2" height="1"/>
+      <rect x="0" y="12" width="1" height="2"/><rect x="3" y="12" width="2" height="1"/><rect x="6" y="12" width="1" height="2"/><rect x="8" y="12" width="2" height="1"/><rect x="11" y="12" width="2" height="2"/><rect x="17" y="12" width="2" height="2"/>
+      <rect x="8" y="14" width="1" height="1"/><rect x="10" y="14" width="2" height="1"/><rect x="13" y="14" width="1" height="2"/><rect x="15" y="14" width="2" height="1"/><rect x="18" y="14" width="1" height="2"/>
+      <rect x="8" y="16" width="2" height="1"/><rect x="11" y="16" width="1" height="2"/><rect x="14" y="16" width="2" height="1"/><rect x="17" y="16" width="1" height="1"/>
+      <rect x="9" y="18" width="1" height="2"/><rect x="12" y="18" width="2" height="1"/><rect x="15" y="18" width="1" height="2"/><rect x="17" y="18" width="2" height="1"/>
+      <rect x="8" y="20" width="1" height="1"/><rect x="11" y="20" width="3" height="1"/><rect x="15" y="20" width="1" height="1"/><rect x="18" y="20" width="1" height="1"/>
+    </g></svg>
+  </div>
+  <div class="meta">
+    <p><strong>Representación impresa</strong> de la Nota De Crédito Electrónica.</p>
+    <p>Consulte la validez de este documento en <strong>sunat.gob.pe</strong> con el RUC del emisor y el número del comprobante.</p>
+    <p style="margin-top:6px;">Firmante: 20512345678 · Manufacturas Andina Textil S.A.C.</p>
+    <p class="hash">Hash SHA1: 3f8a21bc9d7e04a6c2f1b8e0d4a7c9f2e5b6d8a1</p>
+  </div>
+  <div class="stamp">
+    <span class="badge">CPE autorizado</span>
+    <div class="line">Emitido conforme al Reglamento de Comprobantes de Pago SUNAT.</div>
+  </div>
+</div>
+
+</body>
+</html>
