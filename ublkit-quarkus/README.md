@@ -1,71 +1,64 @@
 # ublkit-quarkus
 
-Integracion CDI para usar UBLKit en aplicaciones Quarkus.
+## Nombre y Descripción del Proyecto
+**ublkit-quarkus** es un módulo que pertenece a la librería comunitaria UBLKit.
+Módulo que proporciona integración nativa de la librería UBLKit con el framework Quarkus a través de Context and Dependency Injection (CDI).
 
-## Alcance
-- Provee productores CDI singleton para renderizadores, serializadores y validadores.
-- Evita wiring manual repetitivo en servicios Quarkus.
+## Stack Tecnológico
+- Java 21+
+- Quarkus (CDI, `jakarta.enterprise.context`, `jakarta.enterprise.inject.Produces`)
+- GraalVM (Compatible para generación de binarios nativos)
 
-## Componente principal
-- `UblKitProducers`
+## Arquitectura del Proyecto
+Módulo de Adaptador de Framework en la Arquitectura Hexagonal. Conecta el mundo de la infraestructura de UBLKit (serializadores, renderizadores, etc.) con el ecosistema de dependencias de una aplicación Quarkus cliente. Facilita la inyección de los puertos de la librería como Beans.
 
-## Que beans produce hoy
+## Empezando
+### Requisitos Previos
+- Java 21+
+- Maven 3.8+
 
-### Render
-- Factura, Nota, Guia, Resumen, Comunicacion de baja (HTML/PDF)
+### Instalación
+Para utilizar este módulo, agrégalo como dependencia en tu archivo `pom.xml`:
 
-### Serializacion XML
-- Factura, Nota credito/debito, Guia, Resumen, Baja, Percepcion, Retencion
-
-### Validacion
-- Factura, Nota credito/debito, Guia, Resumen, Baja, Percepcion, Retencion
-
-## Importante
-Este modulo no produce actualmente beans de gateway ni de firma.
-Si los necesitas en CDI, debes registrarlos en tus propios productores.
-
-## Dependencias
-- `quarkus-arc`
-- `ublkit-core`
-- `ublkit-ubl`
-- `ublkit-sign`
-- `ublkit-gateway`
-- `ublkit-render`
-- `ublkit-validation`
-
-## Ejemplo rapido
-
-```java
-import com.cna.ublkit.render.modelo.ContextoRender;
-import com.cna.ublkit.render.pdf.RenderizadorPdfFactura;
-import jakarta.inject.Inject;
-
-public class EmisionService {
-
-    @Inject
-    RenderizadorPdfFactura renderizador;
-
-    public byte[] emitirPdf(BorradorFactura factura) {
-        return renderizador.renderizar(ContextoRender.of(factura)).contenidoPdf();
-    }
-}
+```xml
+<dependency>
+    <groupId>com.cna</groupId>
+    <artifactId>ublkit-quarkus</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+</dependency>
 ```
 
-## Extension recomendada
-Para inyectar `PasarelaSunat` o servicios de firma, crea un productor CDI en tu aplicacion:
+## Estructura del Proyecto
+La estructura del módulo consiste principalmente en:
+- `src/main/java/com/cna/ublkit/quarkus/`: La clase `UblKitProducers` que expone constructores CDI (`@Produces`) para cada servicio de la librería.
 
-```java
-@Produces
-@Singleton
-PasarelaSunat pasarela() {
-    return new PasarelaSunatDefecto();
-}
-```
+## Características Principales
+- Provisión de **Productores CDI** singleton para:
+  - Validadores de negocio y SUNAT.
+  - Serializadores XML.
+  - Renderizadores HTML y PDF.
+  - Servicio de Firma.
+- Evita el cableado manual (wiring) repetitivo de los objetos inmutables y sin estado de UBLKit dentro de los microservicios Quarkus.
+- Habilitación de la librería en modo de compilación AOT de GraalVM.
 
-## Errores frecuentes
-- Esperar inyeccion de gateway/firma sin productores CDI propios.
-- Mezclar scopes CDI sin definir claramente ciclo de vida de componentes.
+## Flujo de Desarrollo
+- Instalar la dependencia en el proyecto Quarkus final.
+- Inyectar (`@Inject`) directamente interfaces como `SerializadorXml<BorradorFactura>` en los controladores REST o servicios de negocio.
+- Cualquier adición de un nuevo servicio o renderizador en la suite UBLKit requiere agregar un nuevo método `@Produces` en este módulo.
 
-## Checklist de produccion
-- Declarar productores CDI adicionales para gateway/firma cuando el flujo lo requiera.
-- Validar arranque nativo/jvm de Quarkus con los beans necesarios en cada perfil.
+## Estándares de Código
+- Exponer las clases funcionales puras como `@ApplicationScoped` o `@Singleton` pues no mantienen estado entre peticiones.
+- No incluir lógica de negocio aquí, solo instanciación.
+
+## Pruebas
+- Validar que los contextos CDI carguen exitosamente en una aplicación de prueba embebida de Quarkus sin ciclos de dependencia.
+
+## Contribución
+Las contribuciones son bienvenidas. Por favor, lee el archivo `CONTRIBUTING.md` en la raíz del repositorio para obtener detalles sobre nuestro código de conducta y el proceso para enviarnos pull requests.
+1. Haz un fork del repositorio.
+2. Crea una rama para tu feature (`git checkout -b feature/nueva-caracteristica`).
+3. Haz tus cambios siguiendo los estándares de código.
+4. Envía un Pull Request.
+
+## Licencia
+Este proyecto está bajo la Licencia MIT. Consulta el archivo `LICENSE` en la raíz del repositorio para más detalles.

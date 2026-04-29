@@ -1,89 +1,67 @@
 # ublkit-gateway
 
-Modulo de integracion con servicios SUNAT/OSE para envio y consulta de comprobantes.
+## Nombre y Descripción del Proyecto
+**ublkit-gateway** es un módulo que pertenece a la librería comunitaria UBLKit.
+Módulo que maneja las comunicaciones externas enviando los documentos y consultas de estado a los servicios web de la SUNAT (o una OSE).
 
-## Alcance
-- Envio SOAP sincrono para CPE tradicionales.
-- Envio SOAP asincrono para resumenes y bajas.
-- Envio REST para GRE con OAuth2.
-- Consulta de tickets SOAP y REST.
-- Parseo de CDR y mapeo a estados de negocio.
+## Stack Tecnológico
+- Java 21+
+- `java.net.http.HttpClient` nativo (introducido en Java 11) para peticiones sincrónicas y asincrónicas.
+- Sin dependencias de terceros para SOAP (no Apache CXF ni Spring WebServices).
 
-## API principal
-- `PasarelaSunat`
-  - `enviarComprobante`
-  - `enviarRetencionPercepcion`
-  - `enviarResumen`
-  - `enviarGuiaRemision`
-	- `enviarGuiaRemisionYEsperar`
-  - `consultarTicketSoap`
-  - `consultarTicketRest`
+## Arquitectura del Proyecto
+Módulo de Infraestructura que implementa el puerto `PasarelaSunat` del core. Centraliza toda la lógica de transporte de red, compresión, descompresión (ZIP) requerida por el estándar de facturación de SUNAT.
 
-## Implementacion incluida
-- `PasarelaSunatDefecto`
-- `HttpClienteNativoSoap`
-- `HttpClienteNativoRest`
-- `ProveedorTokenNativo`
-- `ResolvedorEndpoints`
-- `LectorCdr`
+## Empezando
+### Requisitos Previos
+- Java 21+
+- Maven 3.8+
 
-## Modelos de entrada/salida
-- `CredencialesEmpresa`
-- `ResultadoEnvio`
-- `ResultadoConsulta`
-- `EstadoEnvio`
-- `ArchivoCdr`
-- `ConfiguracionGateway`
+### Instalación
+Para utilizar este módulo, agrégalo como dependencia en tu archivo `pom.xml`:
 
-## Dependencias
-- `ublkit-core`
-
-## Ejemplo rapido
-
-```java
-import com.cna.ublkit.core.enumerado.TipoAmbiente;
-import com.cna.ublkit.gateway.api.PasarelaSunat;
-import com.cna.ublkit.gateway.api.PasarelaSunatDefecto;
-import com.cna.ublkit.gateway.autenticacion.CredencialesEmpresa;
-import com.cna.ublkit.gateway.respuesta.ResultadoEnvio;
-
-PasarelaSunat pasarela = new PasarelaSunatDefecto();
-
-CredencialesEmpresa cred = new CredencialesEmpresa(
-	"20123456789",
-	"MODDATOS",
-	"moddatos",
-	"clientId",
-	"clientSecret"
-);
-
-ResultadoEnvio envio = pasarela.enviarComprobante(
-	xmlFirmado,
-	"20123456789-01-F001-1.xml",
-	cred,
-	TipoAmbiente.BETA
-);
+```xml
+<dependency>
+    <groupId>com.cna</groupId>
+    <artifactId>ublkit-gateway</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+</dependency>
 ```
 
-## Configuracion
-- `PasarelaSunatDefecto` acepta `ConfiguracionGateway` para timeout y reintentos.
-- Los errores temporales (`IO_ERROR`, `HTTP_5XX`) aplican reintento con backoff exponencial.
+## Estructura del Proyecto
+La estructura del paquete es:
+- `src/main/java/com/cna/ublkit/gateway/`: Contrato `PasarelaSunat` y modelos de respuesta (`ResultadoEnvio`, `ArchivoCdr`).
+- `src/main/java/com/cna/ublkit/gateway/client/`: Clientes subyacentes SOAP (`ClienteSoap`) y REST (`ClienteRest`).
+- `src/main/java/com/cna/ublkit/gateway/auth/`: Proveedores de tokens OAuth2 (`ProveedorToken`) usados en la API REST (GRE).
+- `src/main/java/com/cna/ublkit/gateway/config/`: `ResolvedorEndpoints` y `ConfiguracionGateway`.
 
-## Compresion ZIP para SUNAT
-- La generacion de ZIP (`ZipHelper`) se realiza 100% en memoria RAM.
-- No se crean archivos temporales en disco para convertir XML -> ZIP -> Base64.
-- Este enfoque evita cuellos de botella de I/O en entornos Cloud/Kubernetes.
+## Características Principales
+- Envío SOAP síncrono (tradicional para Facturas y Boletas a SUNAT/OSE).
+- Envío SOAP asíncrono (con ticket) para Resúmenes y Comunicaciones de Baja.
+- Envío REST nativo mediante OAuth2 para Guías de Remisión Electrónicas (GRE).
+- Empaquetado automático del XML firmado en un `.zip` y codificación Base64 en un paso.
+- Parseo automático y desempaquetado del archivo de Constancia de Recepción (CDR) determinando el `EstadoEnvio` (Aceptado, Rechazado, Observado).
+- Configuración explícita de *timeouts* y políticas de reintentos en caso de caídas transitorias del servicio.
 
-## Consideraciones por flujo
-- SOAP sincrono: devuelve CDR en la misma respuesta cuando SUNAT procesa de inmediato.
-- SOAP asincrono: devuelve ticket, requiere consulta posterior.
-- REST GRE: requiere `clientId` y `clientSecret` en credenciales para obtener token.
-- REST GRE con polling integrado: `enviarGuiaRemisionYEsperar` ejecuta consultas asíncronas con `CompletableFuture` y backoff exponencial (2s, 5s, 10s...).
+## Flujo de Desarrollo
+- Cualquier comunicación HTTP debe ser tramitada a través del `HttpClient` pre-configurado para soportar reactividad (ej. con `CompletableFuture`) cuando la consulta es por un ticket asíncrono.
+- Nuevos endpoints o cambios en URLs deben reflejarse en `ConstantesEndpoint`.
 
-## Errores frecuentes
-- Enviar GRE sin `clientId/clientSecret`.
-- Consultar ticket con ambiente distinto al usado en el envio.
+## Estándares de Código
+- **No bloquear hilos eternamente**: Usar `ConfiguracionGateway` para controlar tiempos de lectura/conexión.
+- **Backoff Exponencial**: Recomendado para reintentos de consulta de tickets y evitar baneos de IPs.
+- **Tipado seguro**: Usar `ExcepcionTransporte` para errores de red o HTTP (5xx) delegando la decisión de reintento a las capas superiores.
 
-## Checklist de produccion
-- Configurar timeouts y reintentos segun tu SLA.
-- Registrar y persistir ticket, estado y CDR para trazabilidad.
+## Pruebas
+- Uso de `MockWebServer` (o similar ligero) en test para simular latencia de red y respuestas erróneas (500, 502).
+- Validar el correcto parseo de un ZIP simulando la respuesta en bytes de la SUNAT.
+
+## Contribución
+Las contribuciones son bienvenidas. Por favor, lee el archivo `CONTRIBUTING.md` en la raíz del repositorio para obtener detalles sobre nuestro código de conducta y el proceso para enviarnos pull requests.
+1. Haz un fork del repositorio.
+2. Crea una rama para tu feature (`git checkout -b feature/nueva-caracteristica`).
+3. Haz tus cambios siguiendo los estándares de código.
+4. Envía un Pull Request.
+
+## Licencia
+Este proyecto está bajo la Licencia MIT. Consulta el archivo `LICENSE` en la raíz del repositorio para más detalles.

@@ -1,59 +1,60 @@
 # ublkit-qr
 
-Modulo de generacion de codigo QR SUNAT en Base64 para comprobantes electronicos.
+## Nombre y Descripción del Proyecto
+**ublkit-qr** es un módulo que pertenece a la librería comunitaria UBLKit.
+Módulo enfocado en la generación del código QR oficial requerido por SUNAT para la representación impresa de los comprobantes de pago electrónicos.
 
-## Alcance
-- Construccion de trama QR para documentos UBL.
-- Generacion de imagen QR PNG codificada en Base64.
-- Soporte directo para Factura, Nota de credito y Nota de debito.
+## Stack Tecnológico
+- Java 21+
+- `com.google.zxing:core` (Librería ZXing para generar códigos de barras y QR)
+- Codificación en Base64
 
-## Componente principal
-- `GeneradorQrSunat`
+## Arquitectura del Proyecto
+Módulo de infraestructura específico. Extrae los datos necesarios de un documento ensamblado y su firma XML, construyendo la trama estricta exigida por la norma para los QR, y exporta una imagen Base64 o arreglo de bytes que puede ser consumida por motores de renderización o servicios web.
 
-## API
-- `generarQrBase64(DocumentoBase documento, String hashDocumento)`
+## Empezando
+### Requisitos Previos
+- Java 21+
+- Maven 3.8+
 
-## Formato de trama
-La trama se construye en este orden:
+### Instalación
+Para utilizar este módulo, agrégalo como dependencia en tu archivo `pom.xml`:
 
-```text
-RUC|Tipo|Serie|Numero|IGV|Total|Fecha|Hash
+```xml
+<dependency>
+    <groupId>com.cna</groupId>
+    <artifactId>ublkit-qr</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+</dependency>
 ```
 
-- Fecha en formato `yyyy-MM-dd`.
-- Tipo se infiere segun el documento:
-  - Factura/Boleta: desde `getTipoComprobante()`
-  - Nota credito: `07`
-  - Nota debito: `08`
+## Estructura del Proyecto
+La estructura contiene:
+- `src/main/java/com/cna/ublkit/qr/`: El servicio principal `GeneradorQrSunat`.
 
-## Dependencias
-- `ublkit-ubl`
-- `com.google.zxing:core`
-- `com.google.zxing:javase`
+## Características Principales
+- Construcción automática de la trama de texto SUNAT (RUC emisor | Tipo documento | Serie | Número | IGV | Total | Fecha | Tipo Doc Adquiriente | Nro Doc Adquiriente | Hash firma).
+- Generación de la imagen del código QR en formato PNG.
+- Codificación transparente a `Base64` o arreglos de bytes sin dependencias del sistema operativo.
 
-## Ejemplo rapido
+## Flujo de Desarrollo
+- Los cambios en este módulo suelen ser muy raros a menos que SUNAT modifique la composición de la trama del QR.
+- Utilizado por el módulo de renderización u otras aplicaciones para inyectar la imagen al PDF/HTML.
 
-```java
-import com.cna.ublkit.qr.GeneradorQrSunat;
+## Estándares de Código
+- Las imágenes se devuelven en memoria (`byte[]` o `Base64`) y **no se escriben en disco**.
+- Dependencia aislada (ZxIng no contamina el core ni el ubl base).
 
-GeneradorQrSunat generador = new GeneradorQrSunat();
-String qrBase64 = generador.generarQrBase64(documento, hashDocumento);
-```
+## Pruebas
+- Validar que las tramas generadas contengan exactamente los pipe (`|`) y datos obligatorios.
+- Validar la legibilidad de la imagen generada mediante la decodificación ZXing inversa en tests.
 
-## Uso tipico en flujo de emision
-1. Validar y serializar documento.
-2. Firmar XML y obtener digest/hash.
-3. Generar QR Base64 con `GeneradorQrSunat`.
-4. Enviar QR al render para PDF/HTML.
+## Contribución
+Las contribuciones son bienvenidas. Por favor, lee el archivo `CONTRIBUTING.md` en la raíz del repositorio para obtener detalles sobre nuestro código de conducta y el proceso para enviarnos pull requests.
+1. Haz un fork del repositorio.
+2. Crea una rama para tu feature (`git checkout -b feature/nueva-caracteristica`).
+3. Haz tus cambios siguiendo los estándares de código.
+4. Envía un Pull Request.
 
-## Consideraciones
-- Si faltan datos en el documento, se completan como cadena vacia en la trama.
-- El modulo lanza `RuntimeException` si falla la generacion del QR.
-
-## Errores frecuentes
-- Generar QR sin hash de firma cuando el flujo exige trazabilidad completa.
-- Asumir soporte de todos los tipos documentales sin validar trama esperada.
-
-## Checklist de produccion
-- Verificar con SUNAT/OSE la trama final esperada por tipo de comprobante.
-- Agregar pruebas de regresion visual del QR generado.
+## Licencia
+Este proyecto está bajo la Licencia MIT. Consulta el archivo `LICENSE` en la raíz del repositorio para más detalles.
