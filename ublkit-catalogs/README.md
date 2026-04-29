@@ -1,61 +1,63 @@
 # ublkit-catalogs
 
-Modulo de acceso a catalogos normativos (principalmente SUNAT) mediante una API comun.
+## Nombre y Descripción del Proyecto
+**ublkit-catalogs** es un módulo que pertenece a la librería comunitaria UBLKit.
+Módulo encargado de proporcionar acceso unificado a los catálogos normativos (principalmente de la SUNAT) mediante una API común. Contiene datos en formato CSV para validaciones y consultas estandarizadas.
 
-## Alcance
-- Cargar catalogos desde archivos CSV en classpath.
-- Exponer busqueda por id de catalogo y codigo.
-- Entregar metadatos dinamicos por columna para catalogos con estructura extendida.
+## Stack Tecnológico
+- Java 21+
+- Lectura de archivos CSV (incorporados como recursos)
+- Caché en memoria usando estructuras concurrentes nativas de Java (ej. `ConcurrentHashMap`)
 
-## API publica real
-- `ProveedorCatalogos`:
-	- `obtenerCatalogo(String idCatalogo)`
-	- `buscar(String idCatalogo, String codigo)`
-- `EntradaCatalogo`:
-	- `getCodigo()`
-	- `getDescripcion()`
-	- `getAtributoAdicional(String clave)`
-	- `getTodosAtributos()`
+## Arquitectura del Proyecto
+Parte del dominio y aplicación base. Expone un `ProveedorCatalogos` que sirve como puerto para consultar los códigos de catálogos (como tipos de documento de identidad, monedas, afectaciones del IGV, etc.). Está desacoplado de bases de datos externas para garantizar alta disponibilidad en memoria.
 
-## Implementacion incluida
-- `LectorCsvCatalogos` implementa `ProveedorCatalogos`.
-- Ruta de carga esperada por defecto:
+## Empezando
+### Requisitos Previos
+- Java 21+
+- Maven 3.8+
 
-```text
-/sunat/catalogos/{idCatalogo}.csv
+### Instalación
+Para utilizar este módulo, agrégalo como dependencia en tu archivo `pom.xml`:
+
+```xml
+<dependency>
+    <groupId>com.cna</groupId>
+    <artifactId>ublkit-catalogs</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+</dependency>
 ```
 
-Ejemplo: para id `01`, intenta leer `/sunat/catalogos/01.csv`.
+## Estructura del Proyecto
+La estructura del código fuente se organiza así:
+- `src/main/java/com/cna/ublkit/catalogs/`: Contiene `ProveedorCatalogos`, `EntradaCatalogo` y `LectorCsvCatalogos`.
+- `src/main/resources/catalogs/`: Archivos `.csv` estáticos que representan los Catálogos normativos SUNAT (01 a 60).
 
-## Dependencias
-- `ublkit-core`
+## Características Principales
+- Carga rápida de catálogos desde archivos CSV estáticos en el `classpath`.
+- Búsqueda eficiente por ID de catálogo y código específico.
+- Metadatos dinámicos por columna para catálogos que poseen una estructura extendida.
+- Prevención de acceso a disco recurrente mediante lectura única y cacheo en memoria.
 
-## Ejemplo rapido
+## Flujo de Desarrollo
+- Actualización de archivos CSV cuando SUNAT publica nuevas versiones de catálogos.
+- Verificación de concurrencia y validación de tipos al exponer los datos.
 
-```java
-import com.cna.ublkit.catalogs.api.ProveedorCatalogos;
-import com.cna.ublkit.catalogs.sunat.LectorCsvCatalogos;
+## Estándares de Código
+- Mantenimiento de la inmutabilidad de los datos cargados.
+- Nomenclatura en español para la API de consulta (`ProveedorCatalogos`).
+- Manejo seguro de concurrencia.
 
-ProveedorCatalogos proveedor = new LectorCsvCatalogos();
+## Pruebas
+- Pruebas orientadas a garantizar que todos los CSV requeridos estén presentes y sean correctamente parseados.
+- Verificación del correcto funcionamiento de las búsquedas y el comportamiento concurrente.
 
-proveedor.buscar("01", "01").ifPresent(entrada -> {
-		System.out.println("Codigo: " + entrada.getCodigo());
-		System.out.println("Descripcion: " + entrada.getDescripcion());
-});
+## Contribución
+Las contribuciones son bienvenidas. Por favor, lee el archivo `CONTRIBUTING.md` en la raíz del repositorio para obtener detalles sobre nuestro código de conducta y el proceso para enviarnos pull requests.
+1. Haz un fork del repositorio.
+2. Crea una rama para tu feature (`git checkout -b feature/nueva-caracteristica`).
+3. Haz tus cambios siguiendo los estándares de código.
+4. Envía un Pull Request.
 
-int totalMonedas = proveedor.obtenerCatalogo("02").size();
-System.out.println("Entradas catalogo 02: " + totalMonedas);
-```
-
-## Comportamientos importantes
-- Si el CSV no existe, retorna catalogo vacio (no lanza error).
-- Si hay error de parseo, lanza `ExcepcionUblKit`.
-- Las entradas retornadas son inmutables desde la API publica.
-
-## Errores frecuentes
-- Consultar un catalogo que no existe esperando excepcion; la API retorna lista vacia.
-- Buscar columnas adicionales sin respetar exactamente el nombre del header CSV.
-
-## Checklist de produccion
-- Versionar y validar los CSV normativos antes de desplegar.
-- Agregar monitoreo de catalogos vacios para detectar recursos faltantes en classpath.
+## Licencia
+Este proyecto está bajo la Licencia MIT. Consulta el archivo `LICENSE` en la raíz del repositorio para más detalles.

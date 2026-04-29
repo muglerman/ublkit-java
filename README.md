@@ -1,146 +1,32 @@
 # UBLKit
 
-**UBLKit** es una librería comunitaria diseñada para modelar, validar, firmar, enviar y renderizar comprobantes de pago electrónicos o documentos UBL desde Java.
+## Nombre y Descripción del Proyecto
+**UBLKit** es una librería comunitaria diseñada para modelar, validar, firmar, enviar y renderizar comprobantes de pago electrónicos o documentos UBL desde Java. El propósito principal es ofrecer una solución integral para el manejo de documentos electrónicos orientada al dominio, amigable para el desarrollador, y sin depender de forma exclusiva de APIs XML crudas o frameworks específicos.
 
-## Objetivo del proyecto
-El propósito principal es ofrecer una solución integral, estructurada bajo **arquitectura hexagonal**, para aislar la lógica de los documentos de cualquier infraestructura o framework (como Spring o Quarkus). Se busca que el manejo de documentos electrónicos se oriente al **dominio** de uso amigable y no de forma exclusiva a través de APIs XML crudas o dependientes del medio de distribución.
+## Stack Tecnológico
+- Java 21+
+- Estructura Multi-módulo manejada por Maven
+- `javax.xml` (DOM nativo para serialización) y `javax.xml.crypto` (Firma digital estándar nativa)
+- `java.net.http.HttpClient` para transporte (SOAP/REST)
+- OpenHTMLtoPDF & Pebble (Para renderización de PDFs)
+- Frameworks de prueba: JUnit 5, AssertJ, Mockito
+- Starter integrations: Spring Boot Starter, Quarkus Extension
 
-## Estado del Proyecto
-*   **Version 0.1.0-SNAPSHOT**
-*   ✅ Core agnostic, modelos de dominio y objetos de valor.
-*   ✅ Modelo documental: Factura, Boleta, Notas, Guía, Resumen, Baja, Percepción, Retención.
-*   ✅ Ensambladores con auto-cálculo de impuestos (IGV, ISC, ICBPER), totales, leyendas SUNAT y reglas de boleta.
-*   ✅ Serialización XML UBL 2.1 (javax.xml DOM): Invoice, CreditNote, DebitNote, DespatchAdvice.
-*   ✅ Validación estructurada de documentos (8 validadores).
-*   ✅ Firma digital de XML con estándar X509 RSA-SHA1.
-*   ✅ Integración con Pasarela SUNAT (SOAP nativo + REST GRE + OAuth2).
-*   ✅ Renderizado multiformato (HTML Pebble, PDF OpenHTMLtoPDF, Ticket 58mm/80mm).
-*   ✅ Testkit con fixtures, mocks y aserciones.
-*   ✅ Adaptadores oficiales para **Spring Boot** y **Quarkus**.
-*   ✅ 72+ tests, 0 failures.
+## Arquitectura del Proyecto
+UBLKit está diseñado estrictamente bajo el paradigma de **Arquitectura Hexagonal** (Puertos y Adaptadores). Esta decisión separa las reglas de negocio (el modelo de comprobantes, reglas de validación) de los detalles técnicos (generación de XML, clientes HTTP, renderizadores visuales).
 
-## Ejemplo de uso rápido
+La regla de dependencia exige que las interacciones siempre fluyan hacia el dominio:
+`[Infraestructura] ---depende de---> [Aplicación] ---depende de---> [Dominio]`
 
-```java
-// 1. Crear el borrador del documento
-BorradorFactura factura = new BorradorFactura();
-factura.setSerie("F001");
-factura.setNumero(1);
-factura.setFechaEmision(LocalDate.now());
-factura.setEmisor(new EmisorDocumento("20123456789", "Mi Empresa", "Mi Empresa SAC", null, null));
-factura.setReceptor(new ReceptorDocumento("6", "20999999999", "Cliente SAC", null, null));
+Esto asegura que la lógica crítica no se acople a frameworks como Spring o Quarkus. Estos frameworks actúan como un adaptador final en las capas más externas de la aplicación.
 
-LineaDetalle linea = new LineaDetalle();
-linea.setDescripcion("Producto");
-linea.setCantidad(BigDecimal.TEN);
-linea.setPrecio(new BigDecimal("100.00"));
-factura.setDetalles(List.of(linea));
+## Empezando
+### Requisitos Previos
+- Java 21 o superior instalado.
+- Apache Maven (3.8+) para construir o descargar el proyecto.
 
-// 2. Ensamblar (auto-calcula IGV, totales, leyendas)
-EnsambladorFactura.ensamblar(factura);
-
-// 3. Validar
-ValidadorFactura validador = new ValidadorFactura();
-ResultadoValidacion resultado = validador.validar(factura);
-
-if (resultado.esValido()) {
-    // 4. Serializar a XML UBL 2.1
-    SerializadorXmlFactura serializador = new SerializadorXmlFactura();
-    String xml = serializador.serializar(factura);
-    
-    // 5. Firmar
-    DetallesCertificado cert = CargadorCertificado.cargar(
-        new OrigenCertificado(inputStream, "password", "PKCS12"));
-    ResultadoFirma firma = ServicioFirma.firmarXml(xml, "#UBLKIT-SIGN", cert);
-    
-    // 6. Enviar a SUNAT
-    PasarelaSunat pasarela = new PasarelaSunatDefecto(credenciales, TipoAmbiente.BETA);
-    ResultadoEnvio envio = pasarela.enviarComprobante(firma.xmlFirmadoStr());
-}
-```
-
-## Módulos
-- [ublkit-core](./ublkit-core): Modelos de negocio y excepciones base.
-- [ublkit-validation](./ublkit-validation): Reglas de validación funcional.
-- [ublkit-ubl](./ublkit-ubl): Mapeo a estándar UBL 2.1.
-- [ublkit-sign](./ublkit-sign): Firma digital de archivos XML.
-- [ublkit-gateway](./ublkit-gateway): Envío a SUNAT/OSE (SOAP/REST).
-- [ublkit-render](./ublkit-render): Generación de PDF, HTML y Tickets.
-- [ublkit-catalogs](./ublkit-catalogs): Catálogos normativos SUNAT.
-- [ublkit-testkit](./ublkit-testkit): Herramientas para pruebas unitarias.
-- [ublkit-storage](./ublkit-storage): Almacenamiento de documentos (S3, GCS, Local).
-- [ublkit-spring-boot-starter](./ublkit-spring-boot-starter): Adaptador Spring Boot.
-- [ublkit-quarkus](./ublkit-quarkus): Adaptador Quarkus.
-
-Ver detalles en [MODULES.md](MODULES.md) y [ARCHITECTURE.md](ARCHITECTURE.md).
-
-## Matriz comparativa de módulos
-
-| Modulo | Rol principal | API/Contrato clave | Flujo tipico |
-|---|---|---|---|
-| `ublkit-core` | Tipos y resultados comunes | `ResultadoOperacion`, enums, value objects | Base transversal para todos los modulos |
-| `ublkit-catalogs` | Catalogos normativos | `ProveedorCatalogos` | Lookup de codigos SUNAT/atributos |
-| `ublkit-ubl` | Modelado + serializacion XML | `SerializadorXml*` | Documento de dominio -> XML UBL |
-| `ublkit-validation` | Validacion documental | `Validador*`, `ResultadoValidacion` | Documento -> incidencias/validez |
-| `ublkit-sign` | Firma digital XML | `ServicioFirma` | XML -> XML firmado + digest |
-| `ublkit-gateway` | Envio/consulta SUNAT | `PasarelaSunat` | XML firmado -> envio/ticket/CDR |
-| `ublkit-render` | Salida visual | `Renderizador*`, `ContextoRender` | Documento + hash/qr -> HTML/PDF |
-| `ublkit-qr` | Generacion QR SUNAT | `GeneradorQrSunat` | Documento + hash -> QR Base64 |
-| `ublkit-storage` | Persistencia de artefactos | `AlmacenDocumentos` | Guardar/descargar XML, CDR, PDF |
-| `ublkit-testkit` | Soporte de testing | Fixtures + Asserts + simulador gateway | Pruebas unitarias/integracion |
-| `ublkit-spring-boot-starter` | Autoconfiguracion Spring | `UblKitAutoConfiguration`, `ublkit.gateway.*` | Inyeccion de beans UBLKit |
-| `ublkit-quarkus` | Productores CDI Quarkus | `UblKitProducers` | Inyeccion CDI de render/serializacion/validacion |
-
-## Quick Start por modulo
-
-- Core: [ublkit-core/README.md](ublkit-core/README.md)
-- Catalogos: [ublkit-catalogs/README.md](ublkit-catalogs/README.md)
-- UBL: [ublkit-ubl/README.md](ublkit-ubl/README.md)
-- Validation: [ublkit-validation/README.md](ublkit-validation/README.md)
-- Sign: [ublkit-sign/README.md](ublkit-sign/README.md)
-- Gateway: [ublkit-gateway/README.md](ublkit-gateway/README.md)
-- Render: [ublkit-render/README.md](ublkit-render/README.md)
-- QR: [ublkit-qr/README.md](ublkit-qr/README.md)
-- Storage: [ublkit-storage/README.md](ublkit-storage/README.md)
-- Testkit: [ublkit-testkit/README.md](ublkit-testkit/README.md)
-- Spring Boot Starter: [ublkit-spring-boot-starter/README.md](ublkit-spring-boot-starter/README.md)
-- Quarkus: [ublkit-quarkus/README.md](ublkit-quarkus/README.md)
-
-## Homologación SUNAT (Reglas de Referencia)
-
-### Migración desde SFS (`*.ftl` y `*.properties`)
-Los archivos de `SFS_v-2.1/sunat_archivos/sfs/VALI/*.ftl` y `*.properties` pertenecen al motor interno de conversión/configuración del SFS.
-- En UBLKit no son dependencias de runtime.
-- UBLKit serializa XML con código Java (`ublkit-ubl`) y valida con XSL embebidos (`ublkit-validation`).
-- Por eso no se referencian desde los módulos productivos.
-
-### Envío, reenvío y consulta
-En `ublkit-gateway` ya está contemplado:
-- Envío SOAP síncrono/asíncrono y consulta de ticket.
-- Envío REST de GRE, OAuth2 y consulta de ticket.
-- Retry con backoff y caché de token.
-- Resolución de endpoints configurable por ambiente y overrides.
-
-### Validaciones oficiales (`VALI/*`)
-Los validadores ejecutan validación local de UBLKit y validación XSL de referencia SUNAT.
-- Factura: `ValidaExprRegFactura-2.0.1.xsl`
-- Boleta: `ValidaExprRegBoleta-2.0.1.xsl`
-- Nota de crédito: `ValidaExprRegNC-2.0.1.xsl`
-- Nota de débito: `ValidaExprRegND-2.0.1.xsl`
-- GRE remitente: `ValidaExprRegGreRemitente-2.0.1.xsl`
-- GRE transportista: `ValidaExprRegGreTransportista-2.0.1.xsl`
-- Resumen diario (RC): `ValidaExprRegSummary-1.1.0.xsl`
-- Comunicación de baja (RA): `ValidaExprRegSummaryVoided-1.0.1.xsl`
-
-Ejecución de validación XSL SUNAT:
-- `-Dublkit.validation.sunat.enabled=true` para activar la homologación XSL oficial.
-- Sin esa propiedad, solo aplica validación funcional de UBLKit.
-
-### Render PDF
-Renderizadores PDF usan una sola estrategia: plantillas HTML (Pebble/Twig) + OpenHTMLtoPDF.
-No se utiliza JasperReports/JRXML en esta versión.
-
-## Instalación
+### Instalación
+Si utilizas **Spring Boot**, añade el siguiente starter a tu `pom.xml`:
 
 ```xml
 <dependency>
@@ -150,8 +36,85 @@ No se utiliza JasperReports/JRXML en esta versión.
 </dependency>
 ```
 
-## Contribuir
-Por favor, lee [CONTRIBUTING.md](CONTRIBUTING.md) antes de enviar Pull Requests.
+Si usas Java plano (o necesitas solo módulos puntuales), puedes importar partes específicas como el core o el ubl:
+```xml
+<dependency>
+    <groupId>com.cna</groupId>
+    <artifactId>ublkit-ubl</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+</dependency>
+```
+
+### Uso Rápido
+Ejemplo de creación y envío de una factura:
+```java
+// 1. Crear el borrador
+BorradorFactura factura = new BorradorFactura();
+factura.setSerie("F001");
+factura.setNumero(1);
+// ... Llenar datos, emisor, receptor, lineas de detalle.
+
+// 2. Ensamblar (auto-calcula impuestos)
+EnsambladorFactura.ensamblar(factura);
+
+// 3. Serializar y Firmar
+String xml = new SerializadorXmlFactura().serializar(factura);
+ResultadoFirma firma = ServicioFirma.firmarXml(xml, "#UBLKIT-SIGN", certificado);
+
+// 4. Enviar a SUNAT
+PasarelaSunat pasarela = new PasarelaSunatDefecto(credenciales, TipoAmbiente.BETA);
+ResultadoEnvio envio = pasarela.enviarComprobante(firma.xmlFirmadoStr());
+```
+
+## Estructura del Proyecto
+El proyecto está estructurado como un agregador Maven con 12 módulos principales:
+- `ublkit-core`: Modelos de negocio y puertos base.
+- `ublkit-catalogs`: Datos normativos SUNAT.
+- `ublkit-testkit`: Utilidades de prueba, mocks, assertions.
+- `ublkit-ubl`: DOM serialización de modelos y ensambladores.
+- `ublkit-validation`: Reglas y validadores formales y XSLT.
+- `ublkit-qr`: Generación de trama y códigos.
+- `ublkit-storage`: Abstracciones persistentes (Local, S3, GCS).
+- `ublkit-sign`: Motor de firma digital.
+- `ublkit-gateway`: Clientes API y SOAP (SUNAT, OSE).
+- `ublkit-render`: Plantillas visuales, conversión PDF/Ticket.
+- `ublkit-quarkus` / `ublkit-spring-boot-starter`: Integraciones de frameworks.
+
+Para ver el detalle de un módulo en particular, entra a su respectivo directorio y revisa su `README.md` individual.
+
+## Características Principales
+- **Core Agnóstico**: Dominio puro e independiente de la infraestructura web.
+- **Modelado Robusto**: Cobertura amplia de comprobantes (Facturas, Boletas, Notas Crédito/Débito, Guías de Remisión, Resúmenes, Bajas, Retenciones, Percepciones).
+- **Ensamblado Inteligente**: Cálculo automático de impuestos (IGV, ISC) basados en ítems.
+- **Validación Dual**: Verificación funcional en Java y homologación normativa a través de XSLT pre-compilado de SUNAT.
+- **Multiformato Visual**: Generación PDF/A compatible con A4, A5, y formatos térmicos de tickets POS (58/80mm).
+- **Adaptable**: Listo para ser introducido en entornos tradicionales, Serverless (GCP, AWS) con soporte para S3, y Cloud Native (Quarkus/GraalVM).
+
+## Flujo de Desarrollo
+- La librería prioriza el desarrollo *Test-Driven* y está respaldada por una extensa suite de pruebas automatizadas.
+- Cada cambio en la normativa SUNAT o adición de estructura se modela en `ublkit-ubl`, testeando contra "Golden XMLs".
+- Integración Continua (CI) se encarga de ejecutar todas las compilaciones sin tests (`mvn clean install -DskipTests`) y las validaciones de las pruebas.
+
+## Estándares de Código
+- Código 100% en Java puro donde sea posible.
+- **Lenguaje Transversal**: Todo el código, nombres de clases, métodos, dominios y documentación de UBLKit está en estricto **Español** para alinearse a las normativas de la facturación en Perú.
+- Nomenclaturas descriptivas y orientadas al dominio (`BorradorFactura`, no `InvoiceDraft`).
+- Preferencia abrumadora por la inmutabilidad: Se usa `record` en objetos de valor extensamente.
+- `ResultadoOperacion<T>` como estándar de notificación de respuesta (evitar el uso de excepciones ocultas para control de flujo de negocio).
+
+## Pruebas
+Las pruebas son primordiales y se organizan usando JUnit 5 y AssertJ en todos los módulos de manera independiente.
+- Para probar todo el ecosistema ejecuta: `mvn test`
+- Para probar un solo módulo: `mvn test -pl <module_name>`
+- El módulo `ublkit-testkit` provee aserciones dedicadas y respuestas MOCK para emular conectividad externa.
+
+## Contribución
+¡La comunidad es bienvenida a contribuir!
+Por favor revisa nuestro archivo `CONTRIBUTING.md` para las directrices. Como resumen:
+1. Haz un fork del repositorio.
+2. Crea tu feature branch: `git checkout -b feature/nueva-funcionalidad`
+3. Asegúrate que las reglas de inmutabilidad y separación de dominios se respeten.
+4. Escribe tus pruebas, asegura que pasen y lanza tu **Pull Request**.
 
 ## Licencia
-Este proyecto está bajo la licencia [MIT](LICENSE).
+El ecosistema UBLKit está distribuido bajo la licencia abierta MIT. Consulta el archivo `LICENSE` en la raíz para más información.

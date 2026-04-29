@@ -1,74 +1,61 @@
 # ublkit-sign
 
-Modulo de firma digital XML para documentos UBL.
+## Nombre y Descripción del Proyecto
+**ublkit-sign** es un módulo que pertenece a la librería comunitaria UBLKit.
+Módulo de infraestructura responsable de aplicar la firma digital estándar exigida por SUNAT a los documentos XML UBL (estándar XMLDSig / X.509 RSA-SHA1).
 
-## Alcance
-- Carga de certificados desde keystore (PKCS12/JKS).
-- Firma XML con referencia de firma configurable.
-- Entrega de XML firmado y digest para uso posterior (QR, render, auditoria).
+## Stack Tecnológico
+- Java 21+
+- Java Cryptography Architecture (JCA) nativa de Java (`java.security.*`, `javax.xml.crypto.*`).
+- Proveedores criptográficos estándar (PKCS12, JKS).
 
-## API publica recomendada
-- `CargadorCertificado.cargar(OrigenCertificado)`
-- `CargadorCertificado.cargar(byte[], password)`
-- `ServicioFirma.firmarXml(xml, certificado)`
-- `ServicioFirma.firmarXml(xml, idReferencia, certificado)`
-- `RepositorioCertificados.obtenerOCargar(clave, cargador)`
-- `FirmadorXml.firmarComoBytes(xml, idReferencia, certificado)`
-- `FirmadorXml.firmarComoString(xml, idReferencia, certificado)`
+## Arquitectura del Proyecto
+Módulo de Infraestructura. Transforma un XML no firmado en un documento con un nodo `ds:Signature` envuelto (Enveloped Signature), que posteriormente puede ser enviado a la SUNAT. Está altamente aislado para asegurar la gestión correcta de certificados en memoria.
 
-## Objetos clave
-- `OrigenCertificado`
-- `DetallesCertificado`
-- `ResultadoFirma`
+## Empezando
+### Requisitos Previos
+- Java 21+
+- Maven 3.8+
 
-## Dependencias
-- `ublkit-core`
+### Instalación
+Para utilizar este módulo, agrégalo como dependencia en tu archivo `pom.xml`:
 
-## Ejemplo rapido
-
-```java
-import com.cna.ublkit.sign.api.ResultadoFirma;
-import com.cna.ublkit.sign.api.ServicioFirma;
-import com.cna.ublkit.sign.certificado.CargadorCertificado;
-import com.cna.ublkit.sign.certificado.DetallesCertificado;
-import com.cna.ublkit.sign.certificado.OrigenCertificado;
-import com.cna.ublkit.sign.certificado.RepositorioCertificados;
-
-InputStream pfx = Files.newInputStream(Path.of("certificado.pfx"));
-DetallesCertificado cert = CargadorCertificado.cargar(new OrigenCertificado(pfx, "password"));
-
-ResultadoFirma resultado = ServicioFirma.firmarXml(xml, "SignSUNAT", cert);
-if (resultado.exitoso()) {
-	String digest = resultado.digestValue();
-	byte[] xmlFirmado = resultado.xmlFirmado();
-}
-
-// Recomendado en alto throughput: cachear y reutilizar el certificado por identidad
-RepositorioCertificados repo = new RepositorioCertificados();
-DetallesCertificado certReutilizable = repo.obtenerOCargar("20123456789", () -> cert);
-ResultadoFirma resultado2 = ServicioFirma.firmarXml(xml, "SignSUNAT", certReutilizable);
+```xml
+<dependency>
+    <groupId>com.cna</groupId>
+    <artifactId>ublkit-sign</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+</dependency>
 ```
 
-## Notas operativas
-- Si ocurre un fallo de firma, `ResultadoFirma` retorna `exitoso=false` y `mensajeError`.
-- La API expone XML firmado como `byte[]` y `String` para facilitar integracion con gateway/render.
+## Estructura del Proyecto
+La estructura del módulo es:
+- `src/main/java/com/cna/ublkit/sign/`: El `ServicioFirma` como fachada, modelos de origen y detalles (`DetallesCertificado`, `OrigenCertificado`), lógica de carga (`CargadorCertificado`) y el motor de firma subyacente (`FirmadorXml`).
 
-## Canonicalizacion y salida segura
-- La firma XMLDSig se genera con canonicalizacion inclusiva (C14N) para compatibilidad SUNAT.
-- El flujo recomendado retorna salida compacta/minificada (`byte[]`/`String`) y evita exponer DOM mutable en integracion.
-- No aplicar pretty print despues de firmar: cambiar espacios/indentacion invalida el hash de firma.
+## Características Principales
+- Carga transparente de certificados digitales desde almacenes PKCS12 (.p12) o JKS (Java KeyStore).
+- Firma nativa de XML bajo el estándar Enveloped Signature especificado por UBL, sin usar BouncyCastle o librerías adicionales que sobrecargan el runtime.
+- Extracción del *Digest Value* (Hash) resultante y del XML firmado (`ResultadoFirma`).
+- Preparado para multitenencia (el certificado no se ancla a nivel de configuración global, sino que se suministra por solicitud o a través de un `RepositorioCertificados`).
 
-## Concurrencia y rendimiento
-- `ServicioFirma` es stateless y puede invocarse concurrentemente.
-- `DetallesCertificado` es inmutable: cargalo una vez y reutilizalo entre hilos.
-- Evita abrir/parsing del `.p12` por cada request; carga en startup o usa `RepositorioCertificados`.
-- Para rotacion de certificados, invalida una clave puntual con `RepositorioCertificados.invalidar(clave)` o limpia todo con `limpiar()`.
+## Flujo de Desarrollo
+- El XML generado por `ublkit-ubl` se pasa al `ServicioFirma` junto con el certificado del emisor.
+- El objeto `ResultadoFirma` retornado contiene tanto la cadena XML final como el hash necesario para el código QR.
 
-## Errores frecuentes
-- Cargar un certificado sin clave privada utilizable.
-- Firmar con `idReferencia` incompatible con la expectativa del flujo receptor.
+## Estándares de Código
+- **Cero archivos temporales**: Todo el proceso de firmado debe ocurrir en memoria (DOM to DOM o DOM a String).
+- No cachear estáticamente instancias de `KeyStore` para evitar fugas de memoria en escenarios SaaS multitenant. Se usa caché dinámico si es necesario.
 
-## Checklist de produccion
-- Proteger password de keystore en secreto externo.
-- Rotar certificados y monitorear vigencia/expiracion.
-- Precalentar certificados en el arranque para evitar latencia inicial en primera firma.
+## Pruebas
+- Validar que el XML resultante cumpla con el esquema XMLDSig y tenga referencias válidas.
+- Asegurar que la modificación de un solo bit en el XML firmado rompa la validación del hash en los tests.
+
+## Contribución
+Las contribuciones son bienvenidas. Por favor, lee el archivo `CONTRIBUTING.md` en la raíz del repositorio para obtener detalles sobre nuestro código de conducta y el proceso para enviarnos pull requests.
+1. Haz un fork del repositorio.
+2. Crea una rama para tu feature (`git checkout -b feature/nueva-caracteristica`).
+3. Haz tus cambios siguiendo los estándares de código.
+4. Envía un Pull Request.
+
+## Licencia
+Este proyecto está bajo la Licencia MIT. Consulta el archivo `LICENSE` en la raíz del repositorio para más detalles.
