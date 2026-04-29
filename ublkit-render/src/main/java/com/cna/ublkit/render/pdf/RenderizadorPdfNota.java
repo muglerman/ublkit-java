@@ -36,12 +36,18 @@ public class RenderizadorPdfNota implements RenderizadorDocumento<Object> {
             if (contexto.qrBase64() == null || contexto.qrBase64().isEmpty()) {
                 GeneradorQrSunat generadorQr = new GeneradorQrSunat();
                 String qrBase64 = generadorQr.generarQrBase64(doc, contexto.hashDocumento());
-                contexto = ContextoRender.of(contexto.documento(), contexto.hashDocumento(), qrBase64, contexto.atributosPlantilla());
+                contexto = ContextoRender.of(
+                        contexto.documento(),
+                        contexto.hashDocumento(),
+                        qrBase64,
+                        contexto.atributosPlantilla(),
+                        contexto.estiloPlantilla()
+                );
             }
         }
 
         ResultadoRender resultadoHtml = renderizadorHtml.renderizar(contexto);
-        String html = resultadoHtml.contenidoHtml();
+        String html = HtmlXhtmlSanitizer.sanear(resultadoHtml.contenidoHtml());
 
         try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
             PdfRendererBuilder builder = new PdfRendererBuilder();
@@ -55,4 +61,5 @@ public class RenderizadorPdfNota implements RenderizadorDocumento<Object> {
             throw new RuntimeException("Error convirtiendo Nota Electrónica a PDF: " + e.getMessage(), e);
         }
     }
+
 }

@@ -550,7 +550,7 @@ class RenderizadorHtmlFacturaTest {
         @DisplayName("Should handle null template attributes")
         void shouldHandleNullTemplateAttributes() {
             BorradorFactura factura = crearFacturaBasica();
-            ContextoRender<BorradorFactura> contexto = ContextoRender.of(factura, "hash", null, null);
+            ContextoRender<BorradorFactura> contexto = ContextoRender.of(factura, "hash", null, (Map<String, Object>) null);
             RenderizadorHtmlFactura renderer = new RenderizadorHtmlFactura();
 
             assertDoesNotThrow(() -> renderer.renderizar(contexto));

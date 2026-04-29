@@ -2,6 +2,7 @@ package com.cna.ublkit.render.pdf;
 
 import com.cna.ublkit.core.modelo.Direccion;
 import com.cna.ublkit.render.modelo.ContextoRender;
+import com.cna.ublkit.render.modelo.EstiloPlantilla;
 import com.cna.ublkit.render.modelo.FormatoImpresion;
 import com.cna.ublkit.render.modelo.ResultadoRender;
 import com.cna.ublkit.ubl.modelo.BorradorFactura;
@@ -38,7 +39,8 @@ class RenderizadorPdfFacturaTest {
         ContextoRender<BorradorFactura> contexto = ContextoRender.of(
                 factura,
                 "abc123hashejemplo",
-                null // sin QR en este test
+                null,
+                EstiloPlantilla.CLASSIC_MONO
         );
 
         RenderizadorPdfFactura renderizador = new RenderizadorPdfFactura(FormatoImpresion.A4);

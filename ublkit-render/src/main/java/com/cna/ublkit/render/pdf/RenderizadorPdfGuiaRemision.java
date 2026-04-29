@@ -31,7 +31,7 @@ public class RenderizadorPdfGuiaRemision implements RenderizadorDocumento<Borrad
     @Override
     public ResultadoRender renderizar(ContextoRender<BorradorGuiaRemision> contexto) {
         ResultadoRender resultadoHtml = renderizadorHtml.renderizar(contexto);
-        String html = resultadoHtml.contenidoHtml();
+        String html = HtmlXhtmlSanitizer.sanear(resultadoHtml.contenidoHtml());
 
         try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
             PdfRendererBuilder builder = new PdfRendererBuilder();
@@ -45,4 +45,5 @@ public class RenderizadorPdfGuiaRemision implements RenderizadorDocumento<Borrad
             throw new RuntimeException("Error convirtiendo Guía de Remisión a PDF: " + e.getMessage(), e);
         }
     }
+
 }

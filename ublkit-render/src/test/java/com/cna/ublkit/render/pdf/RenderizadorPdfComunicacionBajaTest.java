@@ -1,6 +1,7 @@
 package com.cna.ublkit.render.pdf;
 
 import com.cna.ublkit.render.modelo.ContextoRender;
+import com.cna.ublkit.render.modelo.EstiloPlantilla;
 import com.cna.ublkit.render.modelo.ResultadoRender;
 import com.cna.ublkit.ubl.modelo.sunat.baja.ComunicacionBaja;
 import com.cna.ublkit.ubl.modelo.sunat.baja.ItemBaja;
@@ -34,7 +35,7 @@ class RenderizadorPdfComunicacionBajaTest {
         @DisplayName("Should generate valid PDF output")
         void shouldGenerateValidPdfOutput() {
             ComunicacionBaja baja = crearComunicacionBasica();
-            ContextoRender<ComunicacionBaja> contexto = ContextoRender.of(baja, "hash", null);
+            ContextoRender<ComunicacionBaja> contexto = ContextoRender.of(baja, "hash", null, EstiloPlantilla.CLASSIC_MONO);
             RenderizadorPdfComunicacionBaja renderer = new RenderizadorPdfComunicacionBaja();
 
             ResultadoRender resultado = renderer.renderizar(contexto);

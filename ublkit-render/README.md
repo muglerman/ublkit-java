@@ -9,6 +9,7 @@ Modulo de renderizacion visual (HTML/PDF/ticket) para documentos UBL.
 
 ## Contratos centrales
 - `ContextoRender<T>`: contiene documento, hash, qr y atributos de plantilla.
+- `EstiloPlantilla`: define la carpeta visual del template. Por defecto usa `01-classic-mono`.
 - `ResultadoRender`: salida HTML o PDF segun renderizador.
 - `RenderizadorDocumento<T>`: contrato comun de render.
 
@@ -46,6 +47,7 @@ Modulo de renderizacion visual (HTML/PDF/ticket) para documentos UBL.
 
 ```java
 import com.cna.ublkit.render.modelo.ContextoRender;
+import com.cna.ublkit.render.modelo.EstiloPlantilla;
 import com.cna.ublkit.render.modelo.ResultadoRender;
 import com.cna.ublkit.render.pdf.RenderizadorPdfFactura;
 
@@ -61,7 +63,8 @@ ContextoRender<BorradorFactura> ctx = ContextoRender.of(
         factura,
         hash,
         qrBase64,
-        Map.of("CAMPO_EXTRA", "Valor")
+        Map.of("CAMPO_EXTRA", "Valor"),
+        EstiloPlantilla.CLASSIC_MONO
 );
 ```
 

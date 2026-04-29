@@ -34,6 +34,7 @@ class ContextoRenderTest {
             assertEquals(documento, contexto.documento());
             assertEquals(hash, contexto.hashDocumento());
             assertEquals(qr, contexto.qrBase64());
+            assertEquals(EstiloPlantilla.DEFAULT, contexto.estiloPlantilla());
         }
 
         @Test
@@ -47,6 +48,7 @@ class ContextoRenderTest {
             assertEquals(documento, contexto.documento());
             assertNull(contexto.hashDocumento());
             assertNull(contexto.qrBase64());
+            assertEquals(EstiloPlantilla.DEFAULT, contexto.estiloPlantilla());
         }
 
         @Test
@@ -64,6 +66,27 @@ class ContextoRenderTest {
             assertEquals(hash, contexto.hashDocumento());
             assertEquals(qr, contexto.qrBase64());
             assertEquals(attrs, contexto.atributosPlantilla());
+            assertEquals(EstiloPlantilla.DEFAULT, contexto.estiloPlantilla());
+        }
+
+        @Test
+        @DisplayName("Should create context with explicit style")
+        void shouldCreateContextWithExplicitStyle() {
+            String documento = "test_doc";
+            ContextoRender<String> contexto = ContextoRender.of(documento, "hash", "qr", EstiloPlantilla.BOLD_ACCENT);
+
+            assertEquals(EstiloPlantilla.BOLD_ACCENT, contexto.estiloPlantilla());
+        }
+
+        @Test
+        @DisplayName("Should create context with explicit style and attributes")
+        void shouldCreateContextWithExplicitStyleAndAttributes() {
+            Map<String, Object> attrs = Map.of("key", "value");
+
+            ContextoRender<String> contexto = ContextoRender.of("doc", "hash", "qr", attrs, EstiloPlantilla.FOREST_MODERN);
+
+            assertEquals(attrs, contexto.atributosPlantilla());
+            assertEquals(EstiloPlantilla.FOREST_MODERN, contexto.estiloPlantilla());
         }
 
         @Test
@@ -167,7 +190,7 @@ class ContextoRenderTest {
         @Test
         @DisplayName("Should handle null attributes")
         void shouldHandleNullAttributes() {
-            ContextoRender<String> contexto = ContextoRender.of("doc", "hash", "qr", null);
+            ContextoRender<String> contexto = ContextoRender.of("doc", "hash", "qr", (Map<String, Object>) null);
 
             assertNotNull(contexto.atributosPlantilla());
             assertTrue(contexto.atributosPlantilla().isEmpty());
@@ -201,6 +224,7 @@ class ContextoRenderTest {
             assertNotNull(contexto.documento());
             assertNotNull(contexto.hashDocumento());
             assertNotNull(contexto.qrBase64());
+            assertEquals(EstiloPlantilla.DEFAULT, contexto.estiloPlantilla());
         }
 
         @Test

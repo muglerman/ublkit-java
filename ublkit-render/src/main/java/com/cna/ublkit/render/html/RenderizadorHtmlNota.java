@@ -5,7 +5,10 @@ import com.cna.ublkit.core.modelo.Direccion;
 import com.cna.ublkit.render.api.RenderizadorDocumento;
 import com.cna.ublkit.render.modelo.ContextoRender;
 import com.cna.ublkit.render.modelo.FormatoImpresion;
+import com.cna.ublkit.render.modelo.EstiloPlantilla;
+import com.cna.ublkit.render.modelo.PlantillaRutas;
 import com.cna.ublkit.render.modelo.ResultadoRender;
+import com.cna.ublkit.render.pebble.PebbleEngines;
 import com.cna.ublkit.ubl.modelo.BorradorNotaCredito;
 import com.cna.ublkit.ubl.modelo.BorradorNotaDebito;
 import com.cna.ublkit.ubl.modelo.DocumentoBase;
@@ -17,12 +20,13 @@ import com.cna.ublkit.ubl.modelo.linea.CargoDescuento;
 import com.cna.ublkit.ubl.modelo.linea.LineaDetalle;
 import com.cna.ublkit.ubl.modelo.total.TotalImporte;
 import com.cna.ublkit.ubl.modelo.total.TotalImpuestos;
-import io.pebbletemplates.pebble.PebbleEngine;
 import io.pebbletemplates.pebble.template.PebbleTemplate;
 
 import java.io.StringWriter;
 import java.io.Writer;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -43,7 +47,7 @@ public class RenderizadorHtmlNota implements RenderizadorDocumento<Object> {
     private static final String KEY_EXTRAS = "extras";
     private static final String LEGEND_TOTAL_TEXT = "1000";
 
-    private final PebbleEngine engine;
+    private final io.pebbletemplates.pebble.PebbleEngine engine;
     private final FormatoImpresion formato;
 
     public RenderizadorHtmlNota() {
@@ -51,17 +55,12 @@ public class RenderizadorHtmlNota implements RenderizadorDocumento<Object> {
     }
 
     public RenderizadorHtmlNota(FormatoImpresion formato) {
-        this.engine = new PebbleEngine.Builder().build();
+        this.engine = PebbleEngines.crear();
         this.formato = formato;
     }
 
-    private String obtenerRutaPlantilla() {
-        return switch (formato) {
-            case A5 -> "templates/note.a5.html";
-            case TICKET_80MM -> "templates/note.ticket80mm.html";
-            case TICKET_58MM -> "templates/note.ticket58mm.html";
-            default -> "templates/note.a4.html";
-        };
+    private String obtenerRutaPlantilla(ContextoRender<Object> contexto) {
+        return PlantillaRutas.ruta("note", formato, PlantillaRutas.resolver(contexto.estiloPlantilla(), EstiloPlantilla.DEFAULT));
     }
 
     @Override
@@ -70,6 +69,7 @@ public class RenderizadorHtmlNota implements RenderizadorDocumento<Object> {
         if (!(doc instanceof BorradorNotaCredito) && !(doc instanceof BorradorNotaDebito)) {
             throw new IllegalArgumentException("El documento debe ser BorradorNotaCredito o BorradorNotaDebito");
         }
+        DocumentoBase documento = (DocumentoBase) doc;
 
         Map<String, Object> invoice = new HashMap<>();
         if (doc instanceof BorradorNotaCredito nc) {
@@ -90,14 +90,22 @@ public class RenderizadorHtmlNota implements RenderizadorDocumento<Object> {
         invoice.put("hash", txt(contexto.hashDocumento()));
         invoice.put("qr", txt(contexto.qrBase64()));
         invoice.put("logo", "logo.jpg");
-        invoice.put("legends", legends(((DocumentoBase) doc).getLeyendas()));
+        invoice.put("legends", legends(documento.getLeyendas()));
+        invoice.put("serie", txt(documento.getSerie()) + "-" + txt(documento.getNumero()));
+        invoice.put("correlativo", txt(documento.getNumero()));
+        invoice.put("fechaEmision", fechaEmision(documento.getFechaEmision(), documento.getHoraEmision()));
+        invoice.put("details", invoice.get("items"));
+        invoice.put("company", invoice.get("taxpayer"));
         applyTemplateAttributes(invoice, contexto.atributosPlantilla());
 
         Map<String, Object> scope = new HashMap<>();
         scope.put("invoice", invoice);
+        scope.put("doc", invoice);
+        scope.put("cl", invoice.get("customer"));
+        scope.put("moneda", txt(documento.getMoneda()));
 
         try {
-            PebbleTemplate compiledTemplate = engine.getTemplate(obtenerRutaPlantilla());
+            PebbleTemplate compiledTemplate = engine.getTemplate(obtenerRutaPlantilla(contexto));
             Writer writer = new StringWriter();
             compiledTemplate.evaluate(writer, scope);
             return ResultadoRender.html(writer.toString());
@@ -107,12 +115,13 @@ public class RenderizadorHtmlNota implements RenderizadorDocumento<Object> {
     }
 
     private void cargarDatosComunes(Map<String, Object> invoice, DocumentoBase doc, String typeCode, String name) {
+        LocalDateTime fechaEmision = fechaEmision(doc.getFechaEmision(), doc.getHoraEmision());
         invoice.put("type", parseInt(typeCode, 7));
         invoice.put("typedIdentity", typeCode);
         invoice.put("identity", txt(doc.getSerie()) + "-" + (doc.getNumero() != null ? doc.getNumero() : ""));
         invoice.put("name", name);
-        invoice.put("issueDate", txt(doc.getFechaEmision()));
-        invoice.put("issueTime", txt(doc.getHoraEmision()));
+        invoice.put("issueDate", fechaEmision);
+        invoice.put("issueTime", doc.getHoraEmision() != null ? doc.getHoraEmision() : LocalTime.MIDNIGHT);
         invoice.put("currency", txt(doc.getMoneda()));
         invoice.put("orderReference", txt(doc.getOrdenDeCompra()));
         invoice.put("taxRates", Map.of(
@@ -150,9 +159,11 @@ public class RenderizadorHtmlNota implements RenderizadorDocumento<Object> {
                 item.put("unitCode", txt(linea.getUnidadMedida()));
                 item.put("description", txt(linea.getDescripcion()));
                 item.put("code", txt(linea.getCodigoProducto()));
+                item.put("codigo", txt(linea.getCodigoProducto()));
                 item.put("sunatCode", txt(linea.getCodigoProductoSunat()));
                 item.put("gs1Code", txt(linea.getCodigoProductoGS1()));
                 item.put("price", txt(linea.getPrecio()));
+                item.put("mtoValorUnitario", txt(linea.getPrecio()));
                 item.put("igvType", txt(linea.getIgvTipo()));
                 item.put("igv", txt(linea.getIgv()));
                 item.put("isc", txt(linea.getIsc()));
@@ -161,7 +172,9 @@ public class RenderizadorHtmlNota implements RenderizadorDocumento<Object> {
                 items.add(item);
             }
             invoice.put("items", items);
+            invoice.put("details", items);
         }
+        invoice.putIfAbsent("details", List.of());
         if (doc.getCargos() != null && !doc.getCargos().isEmpty()) {
             List<Map<String, Object>> charges = doc.getCargos().stream().map(this::mapCharge).toList();
             invoice.put("charges", charges);
@@ -232,8 +245,13 @@ public class RenderizadorHtmlNota implements RenderizadorDocumento<Object> {
         Map<String, Object> m = new HashMap<>();
         m.put(KEY_IDENTITY, txt(emisor.ruc()));
         m.put(KEY_NAME, txt(emisor.razonSocial()));
+        m.put("ruc", txt(emisor.ruc()));
+        m.put("razonSocial", txt(emisor.razonSocial()));
         m.put("tradeName", txt(emisor.nombreComercial()));
-        m.put("address", txt(emisor.direccion() != null ? emisor.direccion().direccion() : ""));
+        Map<String, Object> address = new HashMap<>();
+        address.put("direccion", txt(emisor.direccion() != null ? emisor.direccion().direccion() : ""));
+        m.put("address", address);
+        m.put("addressText", txt(emisor.direccion() != null ? emisor.direccion().direccion() : ""));
         m.put("location", location(emisor.direccion()));
         m.put("contact", contactMap(emisor.contacto()));
         return m;
@@ -244,7 +262,11 @@ public class RenderizadorHtmlNota implements RenderizadorDocumento<Object> {
         m.put(KEY_DOCUMENT_TYPE, txt(receptor.tipoDocIdentidad()));
         m.put(KEY_IDENTITY, txt(receptor.numDocIdentidad()));
         m.put(KEY_NAME, txt(receptor.nombre()));
-        m.put("address", txt(receptor.direccion() != null ? receptor.direccion().direccion() : ""));
+        m.put("rznSocial", txt(receptor.nombre()));
+        m.put("numDoc", txt(receptor.numDocIdentidad()));
+        Map<String, Object> address = new HashMap<>();
+        address.put("direccion", txt(receptor.direccion() != null ? receptor.direccion().direccion() : ""));
+        m.put("address", address);
         m.put("location", location(receptor.direccion()));
         m.put("contact", contactMap(receptor.contacto()));
         return m;
@@ -345,5 +367,10 @@ public class RenderizadorHtmlNota implements RenderizadorDocumento<Object> {
             return b.stripTrailingZeros().toPlainString();
         }
         return value.toString();
+    }
+
+    private LocalDateTime fechaEmision(java.time.LocalDate fecha, java.time.LocalTime hora) {
+        return LocalDateTime.of(fecha != null ? fecha : java.time.LocalDate.now(),
+                hora != null ? hora : LocalTime.MIDNIGHT);
     }
 }

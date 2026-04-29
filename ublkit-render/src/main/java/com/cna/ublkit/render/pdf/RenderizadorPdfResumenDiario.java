@@ -21,7 +21,7 @@ public class RenderizadorPdfResumenDiario implements RenderizadorDocumento<Resum
 
     @Override
     public ResultadoRender renderizar(ContextoRender<ResumenDiario> contexto) {
-        String html = renderizadorHtml.renderizar(contexto).contenidoHtml();
+        String html = HtmlXhtmlSanitizer.sanear(renderizadorHtml.renderizar(contexto).contenidoHtml());
         try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
             PdfRendererBuilder builder = new PdfRendererBuilder();
             builder.useFastMode();
@@ -34,5 +34,5 @@ public class RenderizadorPdfResumenDiario implements RenderizadorDocumento<Resum
             throw new RuntimeException("Error renderizando PDF de resumen diario: " + e.getMessage(), e);
         }
     }
-}
 
+}

@@ -101,15 +101,17 @@
     </div>
     <dl class="meta">
       <dt>Dirección</dt><dd>{{ doc.company.address.direccion }}</dd>
-      <dt>Ubicación</dt><dd>LIMA — LIMA — CERCADO DE LIMA</dd>
-      <dt>Contacto</dt><dd>ventas@andinatextil.pe · (01) 555-0102 · www.andinatextil.pe</dd>
+      {% if doc.company.tradeName is defined and doc.company.tradeName %}
+      <dt>Nombre comercial</dt><dd>{{ doc.company.tradeName }}</dd>
+      {% endif %}
+      <dt>Contacto</dt><dd>{{ doc.company.contact.email }} · {{ doc.company.contact.telephone }}{% if doc.company.contact.web %} · {{ doc.company.contact.web }}{% endif %}</dd>
     </dl>
   </div>
   <div class="doc-id">
     <div class="ruc">RUC <strong>{{ doc.company.ruc }}</strong></div>
     <div class="kind">FACTURA ELECTRÓNICA</div>
     <div class="num">{{ doc.serie }} — {{ doc.correlativo }}</div>
-    <div class="issued">Emitido {{ doc.fechaEmision|date('d/m/Y') }} · {{ doc.fechaEmision|date('H:i:s') }}</div>
+    <div class="issued">Emitido {{ doc.fechaEmision|date('dd/MM/yyyy') }} · {{ doc.fechaEmision|date('HH:mm:ss') }}</div>
   </div>
 </div>
 
@@ -123,18 +125,18 @@
   </div>
   <div class="party">
     <div class="label">Entrega</div>
-    <div class="name">Almacén Los Portales — Callao</div>
-    <div class="row"><span>O/C</span><span class="mono">OC-2026-00487</span></div>
-    <div class="row"><span>Guía</span><span class="mono">GRE T001-00452</span></div>
-    <div class="row"><span>Operación</span><span>0101 · Venta interna</span></div>
+    <div class="name">{{ doc.deliveryAddress }}</div>
+    <div class="row"><span>O/C</span><span class="mono">{{ doc.orderReference }}</span></div>
+    <div class="row"><span>Guía</span><span class="mono">{{ doc.embeddedGuide is defined and doc.embeddedGuide ? doc.embeddedGuide : '' }}</span></div>
+    <div class="row"><span>Operación</span><span>{{ doc.operationTypeCode }} · {{ doc.operationTypeName }}</span></div>
   </div>
 </div>
 
 <div class="strip">
   <div><span class="k">Moneda</span><span class="v">{{ moneda }}</span></div>
-  <div><span class="k">T/C</span><span class="v mono">3.742</span></div>
-  <div><span class="k">Vencimiento</span><span class="v">24/05/2026</span></div>
-  <div><span class="k">Forma de pago</span><span class="v">Crédito · 2 cuotas</span></div>
+  <div><span class="k">T/C</span><span class="v mono">{{ doc.exchangeRate is defined and doc.exchangeRate ? doc.exchangeRate.value : '' }}</span></div>
+  <div><span class="k">Vencimiento</span><span class="v">{% if doc.dueDate is defined and doc.dueDate %}{{ doc.dueDate|date('dd/MM/yyyy') }}{% endif %}</span></div>
+  <div><span class="k">Forma de pago</span><span class="v">{% if doc.payment is defined and doc.payment %}{{ doc.payment.type }}{% if doc.payment.installments is defined and doc.payment.installments|length > 0 %} · {{ doc.payment.installments|length }} cuotas{% endif %}{% endif %}</span></div>
 </div>
 
 <table class="items">
@@ -170,31 +172,33 @@
     <div class="block">
       <div class="head">Condiciones de pago</div>
       <div class="body">
-        <p>Crédito — {{ moneda }} {{ doc.mtoImpVenta|n_format }}</p>
-        <p class="small">Cuota 1 · vence 24/05/2026 · {{ moneda }} 5,946.20</p>
-        <p class="small">Cuota 2 · vence 24/06/2026 · {{ moneda }} 5,946.20</p>
+        <p>{% if doc.payment is defined and doc.payment %}{{ doc.payment.type }}{% endif %} — {{ moneda }} {{ doc.mtoImpVenta|n_format }}</p>
+        {% if doc.payment is defined and doc.payment.installments is defined %}
+          {% for cuota in doc.payment.installments %}
+            <p class="small">Cuota {{ loop.index }} · vence {{ cuota.dueDate|date('dd/MM/yyyy') }} · {{ moneda }} {{ cuota.amount|n_format }}</p>
+          {% endfor %}
+        {% endif %}
       </div>
     </div>
     <div class="block">
       <div class="head">Detracción</div>
       <div class="body">
-        <p>{{ moneda }} 1,427.09 · 020 Bienes gravados con IGV</p>
-        <p class="small">Transferencia en cuenta · Cta. BN 00-032-019287</p>
+        {% if doc.detraction is defined and doc.detraction %}
+          <p>{{ moneda }} {{ doc.detraction.amount|n_format }} · {{ doc.detraction.serviceCode }}</p>
+          <p class="small">{{ doc.detraction.method }} · {{ doc.detraction.financialAccount }}</p>
+        {% endif %}
       </div>
     </div>
     <div class="block">
       <div class="head">Observaciones</div>
       <div class="body">
-        <p>Pedido fraccionado — entrega en 2 camiones.</p>
-        <p class="small">Vendedor: Diego Paredes</p>
-        <p class="small">Ruta: Lima–Callao</p>
+        <p>{{ doc.note }}</p>
       </div>
     </div>
     <div class="block">
       <div class="head">Leyendas SUNAT</div>
       <div class="body">
-        <p class="small">· SON ONCE MIL OCHOCIENTOS NOVENTA Y DOS CON 40/100 {{ moneda }}</p>
-        <p class="small">· Operación sujeta a detracción</p>
+        <p class="small">· {{ doc.legends['1000'] }}</p>
       </div>
     </div>
   </div>

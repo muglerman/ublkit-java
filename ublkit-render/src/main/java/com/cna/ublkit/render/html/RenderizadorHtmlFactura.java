@@ -5,7 +5,10 @@ import com.cna.ublkit.core.modelo.Direccion;
 import com.cna.ublkit.render.api.RenderizadorDocumento;
 import com.cna.ublkit.render.modelo.ContextoRender;
 import com.cna.ublkit.render.modelo.FormatoImpresion;
+import com.cna.ublkit.render.modelo.PlantillaRutas;
 import com.cna.ublkit.render.modelo.ResultadoRender;
+import com.cna.ublkit.render.modelo.EstiloPlantilla;
+import com.cna.ublkit.render.pebble.PebbleEngines;
 import com.cna.ublkit.ubl.modelo.BorradorFactura;
 import com.cna.ublkit.ubl.modelo.complemento.Anticipo;
 import com.cna.ublkit.ubl.modelo.complemento.CuotaDePago;
@@ -16,12 +19,13 @@ import com.cna.ublkit.ubl.modelo.linea.CargoDescuento;
 import com.cna.ublkit.ubl.modelo.linea.LineaDetalle;
 import com.cna.ublkit.ubl.modelo.total.TotalImporte;
 import com.cna.ublkit.ubl.modelo.total.TotalImpuestos;
-import io.pebbletemplates.pebble.PebbleEngine;
 import io.pebbletemplates.pebble.template.PebbleTemplate;
 
 import java.io.StringWriter;
 import java.io.Writer;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -44,7 +48,7 @@ public class RenderizadorHtmlFactura implements RenderizadorDocumento<BorradorFa
     private static final String KEY_EXTRAS = "extras";
     private static final String LEGEND_TOTAL_TEXT = "1000";
 
-    private final PebbleEngine engine;
+    private final io.pebbletemplates.pebble.PebbleEngine engine;
     private final FormatoImpresion formato;
 
     public RenderizadorHtmlFactura() {
@@ -52,31 +56,28 @@ public class RenderizadorHtmlFactura implements RenderizadorDocumento<BorradorFa
     }
 
     public RenderizadorHtmlFactura(FormatoImpresion formato) {
-        this.engine = new PebbleEngine.Builder().build();
+        this.engine = PebbleEngines.crear();
         this.formato = formato;
     }
 
-    private String obtenerRutaPlantilla() {
-        return switch (formato) {
-            case A5 -> "templates/invoice.a5.html";
-            case TICKET_80MM -> "templates/invoice.ticket80mm.html";
-            case TICKET_58MM -> "templates/invoice.ticket58mm.html";
-            default -> "templates/invoice.a4.html";
-        };
+    private String obtenerRutaPlantilla(ContextoRender<BorradorFactura> contexto) {
+        return PlantillaRutas.ruta("invoice", formato, PlantillaRutas.resolver(contexto.estiloPlantilla(), EstiloPlantilla.DEFAULT));
     }
 
     @Override
     public ResultadoRender renderizar(ContextoRender<BorradorFactura> contexto) {
         BorradorFactura doc = contexto.documento();
+        LocalDateTime fechaEmision = fechaEmision(doc.getFechaEmision(), doc.getHoraEmision());
 
         Map<String, Object> invoice = new HashMap<>();
         invoice.put(KEY_TYPE, parseInt(doc.getTipoComprobante(), 1));
         invoice.put("typedIdentity", txt(doc.getTipoComprobante()));
         invoice.put(KEY_IDENTITY, txt(doc.getSerie()) + "-" + (doc.getNumero() != null ? doc.getNumero() : ""));
         invoice.put(KEY_NAME, mapearNombreDocumento(doc.getTipoComprobante()));
-        invoice.put("issueDate", txt(doc.getFechaEmision()));
-        invoice.put("issueTime", txt(doc.getHoraEmision()));
-        invoice.put("dueDate", txt(doc.getFechaVencimiento()));
+        invoice.put("issueDate", fechaEmision);
+        invoice.put("fechaEmision", fechaEmision);
+        invoice.put("issueTime", doc.getHoraEmision() != null ? doc.getHoraEmision() : LocalTime.MIDNIGHT);
+        invoice.put("dueDate", doc.getFechaVencimiento());
         invoice.put("currency", txt(doc.getMoneda()));
         invoice.put("operationTypeCode", txt(doc.getTipoOperacion()));
         invoice.put("operationTypeName", mapearTipoOperacion(doc.getTipoOperacion()));
@@ -86,6 +87,8 @@ public class RenderizadorHtmlFactura implements RenderizadorDocumento<BorradorFa
         invoice.put("qr", txt(contexto.qrBase64()));
         invoice.put("logo", "logo.jpg");
         invoice.put("deliveryAddress", txt(doc.getDireccionEntrega() != null ? doc.getDireccionEntrega().direccion() : ""));
+        invoice.put("serie", txt(doc.getSerie()) + "-" + txt(doc.getNumero()));
+        invoice.put("correlativo", txt(doc.getNumero()));
         invoice.put("taxRates", Map.of(
                 "igv", txt(doc.getTasaIgv()),
                 "ivap", txt(doc.getTasaIvap()),
@@ -101,7 +104,7 @@ public class RenderizadorHtmlFactura implements RenderizadorDocumento<BorradorFa
 
         if (doc.getTipoCambio() != null) {
             Map<String, Object> exchange = new HashMap<>();
-            exchange.put("date", txt(doc.getTipoCambio().fecha()));
+            exchange.put("date", doc.getTipoCambio().fecha());
             exchange.put(KEY_VALUE, txt(doc.getTipoCambio().valor()));
             invoice.put("exchangeRate", exchange);
         }
@@ -110,11 +113,17 @@ public class RenderizadorHtmlFactura implements RenderizadorDocumento<BorradorFa
             Map<String, Object> taxpayer = new HashMap<>();
             taxpayer.put(KEY_IDENTITY, txt(doc.getEmisor().ruc()));
             taxpayer.put(KEY_NAME, txt(doc.getEmisor().razonSocial()));
+            taxpayer.put("ruc", txt(doc.getEmisor().ruc()));
+            taxpayer.put("razonSocial", txt(doc.getEmisor().razonSocial()));
             taxpayer.put("tradeName", txt(doc.getEmisor().nombreComercial()));
-            taxpayer.put("address", txt(doc.getEmisor().direccion() != null ? doc.getEmisor().direccion().direccion() : ""));
+            Map<String, Object> address = new HashMap<>();
+            address.put("direccion", txt(doc.getEmisor().direccion() != null ? doc.getEmisor().direccion().direccion() : ""));
+            taxpayer.put("address", address);
+            taxpayer.put("addressText", txt(doc.getEmisor().direccion() != null ? doc.getEmisor().direccion().direccion() : ""));
             taxpayer.put("location", location(doc.getEmisor().direccion()));
             taxpayer.put("contact", contactMap(doc.getEmisor().contacto()));
             invoice.put("taxpayer", taxpayer);
+            invoice.put("company", taxpayer);
         }
 
         if (doc.getReceptor() != null) {
@@ -122,10 +131,15 @@ public class RenderizadorHtmlFactura implements RenderizadorDocumento<BorradorFa
             customer.put(KEY_DOCUMENT_TYPE, txt(doc.getReceptor().tipoDocIdentidad()));
             customer.put(KEY_IDENTITY, txt(doc.getReceptor().numDocIdentidad()));
             customer.put(KEY_NAME, txt(doc.getReceptor().nombre()));
-            customer.put("address", txt(doc.getReceptor().direccion() != null ? doc.getReceptor().direccion().direccion() : ""));
+            customer.put("rznSocial", txt(doc.getReceptor().nombre()));
+            customer.put("numDoc", txt(doc.getReceptor().numDocIdentidad()));
+            Map<String, Object> address = new HashMap<>();
+            address.put("direccion", txt(doc.getReceptor().direccion() != null ? doc.getReceptor().direccion().direccion() : ""));
+            customer.put("address", address);
             customer.put("location", location(doc.getReceptor().direccion()));
             customer.put("contact", contactMap(doc.getReceptor().contacto()));
             invoice.put("customer", customer);
+            invoice.put("cl", customer);
         }
 
         if (doc.getFormaDePago() != null) {
@@ -245,10 +259,15 @@ public class RenderizadorHtmlFactura implements RenderizadorDocumento<BorradorFa
                 item.put("unitCode", txt(linea.getUnidadMedida()));
                 item.put("description", txt(linea.getDescripcion()));
                 item.put("code", txt(linea.getCodigoProducto()));
+                item.put("codProducto", txt(linea.getCodigoProducto()));
                 item.put("sunatCode", txt(linea.getCodigoProductoSunat()));
+                item.put("codProductoSUNAT", txt(linea.getCodigoProductoSunat()));
                 item.put("gs1Code", txt(linea.getCodigoProductoGS1()));
                 item.put(KEY_VALUE, txt(linea.getPrecio()));
                 item.put("price", txt(linea.getPrecio()));
+                item.put("mtoValorUnitario", txt(linea.getPrecio()));
+                item.put("mtoValorVenta", txt(linea.getCantidad() != null && linea.getPrecio() != null
+                        ? linea.getCantidad().multiply(linea.getPrecio()) : linea.getPrecio()));
                 item.put("referencePrice", txt(linea.getPrecioReferencia()));
                 item.put("referencePriceType", txt(linea.getPrecioReferenciaTipo()));
                 item.put("igvType", txt(linea.getIgvTipo()));
@@ -259,18 +278,26 @@ public class RenderizadorHtmlFactura implements RenderizadorDocumento<BorradorFa
                 items.add(item);
             }
             invoice.put("items", items);
+            invoice.put("details", items);
         }
+        invoice.putIfAbsent("details", List.of());
 
         Map<String, Object> summary = summaryMap(doc.getTotalImporte(), doc.getTotalImpuestos(), doc.getLeyendas());
         invoice.put("summary", summary);
+        invoice.put("mtoImpVenta", summary.getOrDefault("total", ""));
+        invoice.put("mtoIGV", summary.getOrDefault("igv", ""));
+        invoice.put("mtoOperGravadas", summary.getOrDefault("taxable", ""));
         invoice.put("legends", legends(doc.getLeyendas()));
         applyTemplateAttributes(invoice, contexto.atributosPlantilla());
 
         Map<String, Object> scope = new HashMap<>();
         scope.put("invoice", invoice);
+        scope.put("doc", invoice);
+        scope.put("cl", invoice.get("cl"));
+        scope.put("moneda", txt(doc.getMoneda()));
 
         try {
-            PebbleTemplate compiledTemplate = engine.getTemplate(obtenerRutaPlantilla());
+            PebbleTemplate compiledTemplate = engine.getTemplate(obtenerRutaPlantilla(contexto));
             Writer writer = new StringWriter();
             compiledTemplate.evaluate(writer, scope);
             return ResultadoRender.html(writer.toString());
@@ -403,5 +430,10 @@ public class RenderizadorHtmlFactura implements RenderizadorDocumento<BorradorFa
             return b.stripTrailingZeros().toPlainString();
         }
         return value.toString();
+    }
+
+    private LocalDateTime fechaEmision(java.time.LocalDate fecha, java.time.LocalTime hora) {
+        return LocalDateTime.of(fecha != null ? fecha : java.time.LocalDate.now(),
+                hora != null ? hora : LocalTime.MIDNIGHT);
     }
 }

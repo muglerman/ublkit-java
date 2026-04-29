@@ -21,7 +21,7 @@ public class RenderizadorPdfComunicacionBaja implements RenderizadorDocumento<Co
 
     @Override
     public ResultadoRender renderizar(ContextoRender<ComunicacionBaja> contexto) {
-        String html = renderizadorHtml.renderizar(contexto).contenidoHtml();
+        String html = HtmlXhtmlSanitizer.sanear(renderizadorHtml.renderizar(contexto).contenidoHtml());
         try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
             PdfRendererBuilder builder = new PdfRendererBuilder();
             builder.useFastMode();
@@ -34,5 +34,5 @@ public class RenderizadorPdfComunicacionBaja implements RenderizadorDocumento<Co
             throw new RuntimeException("Error renderizando PDF de comunicación de baja: " + e.getMessage(), e);
         }
     }
-}
 
+}

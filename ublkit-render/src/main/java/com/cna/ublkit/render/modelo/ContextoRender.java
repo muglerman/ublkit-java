@@ -1,5 +1,7 @@
 package com.cna.ublkit.render.modelo;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -18,19 +20,40 @@ public record ContextoRender<T>(
         T documento,
         String hashDocumento,
         String qrBase64,
-        Map<String, Object> atributosPlantilla
+        Map<String, Object> atributosPlantilla,
+        EstiloPlantilla estiloPlantilla
 ) {
+    public ContextoRender {
+        atributosPlantilla = atributosPlantilla != null
+                ? Collections.unmodifiableMap(new HashMap<>(atributosPlantilla))
+                : Map.of();
+        estiloPlantilla = estiloPlantilla != null ? estiloPlantilla : EstiloPlantilla.DEFAULT;
+    }
+
     public static <T> ContextoRender<T> of(T documento, String hashDocumento, String qrBase64) {
-        return new ContextoRender<>(documento, hashDocumento, qrBase64, Map.of());
+        return new ContextoRender<>(documento, hashDocumento, qrBase64, Map.of(), EstiloPlantilla.DEFAULT);
     }
 
     public static <T> ContextoRender<T> of(T documento) {
-        return new ContextoRender<>(documento, null, null, Map.of());
+        return new ContextoRender<>(documento, null, null, Map.of(), EstiloPlantilla.DEFAULT);
     }
 
     public static <T> ContextoRender<T> of(T documento, String hashDocumento, String qrBase64,
                                            Map<String, Object> atributosPlantilla) {
         return new ContextoRender<>(documento, hashDocumento, qrBase64,
-                atributosPlantilla != null ? Map.copyOf(atributosPlantilla) : Map.of());
+                atributosPlantilla != null ? new HashMap<>(atributosPlantilla) : Map.of(), EstiloPlantilla.DEFAULT);
+    }
+
+    public static <T> ContextoRender<T> of(T documento, String hashDocumento, String qrBase64,
+                                           EstiloPlantilla estiloPlantilla) {
+        return new ContextoRender<>(documento, hashDocumento, qrBase64, Map.of(),
+                estiloPlantilla != null ? estiloPlantilla : EstiloPlantilla.DEFAULT);
+    }
+
+    public static <T> ContextoRender<T> of(T documento, String hashDocumento, String qrBase64,
+                                           Map<String, Object> atributosPlantilla, EstiloPlantilla estiloPlantilla) {
+        return new ContextoRender<>(documento, hashDocumento, qrBase64,
+                atributosPlantilla != null ? new HashMap<>(atributosPlantilla) : Map.of(),
+                estiloPlantilla != null ? estiloPlantilla : EstiloPlantilla.DEFAULT);
     }
 }

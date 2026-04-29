@@ -2,18 +2,22 @@ package com.cna.ublkit.render.html;
 
 import com.cna.ublkit.render.api.RenderizadorDocumento;
 import com.cna.ublkit.render.modelo.ContextoRender;
+import com.cna.ublkit.render.modelo.EstiloPlantilla;
 import com.cna.ublkit.render.modelo.ResultadoRender;
 import com.cna.ublkit.render.modelo.FormatoImpresion;
+import com.cna.ublkit.render.modelo.PlantillaRutas;
+import com.cna.ublkit.render.pebble.PebbleEngines;
 import com.cna.ublkit.ubl.modelo.guia.BorradorGuiaRemision;
 import com.cna.ublkit.ubl.modelo.guia.Conductor;
 import com.cna.ublkit.ubl.modelo.guia.Contenedor;
 import com.cna.ublkit.ubl.modelo.guia.DeclaracionAduanera;
 import com.cna.ublkit.ubl.modelo.guia.Vehiculo;
-import io.pebbletemplates.pebble.PebbleEngine;
 import io.pebbletemplates.pebble.template.PebbleTemplate;
 
 import java.io.StringWriter;
 import java.io.Writer;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -37,7 +41,7 @@ public class RenderizadorHtmlGuiaRemision implements RenderizadorDocumento<Borra
     private static final String KEY_NUMBER = "number";
     private static final String KEY_EXTRAS = "extras";
 
-    private final PebbleEngine engine;
+    private final io.pebbletemplates.pebble.PebbleEngine engine;
     private final FormatoImpresion formato;
 
     public RenderizadorHtmlGuiaRemision() {
@@ -45,20 +49,18 @@ public class RenderizadorHtmlGuiaRemision implements RenderizadorDocumento<Borra
     }
 
     public RenderizadorHtmlGuiaRemision(FormatoImpresion formato) {
-         this.engine = new PebbleEngine.Builder().build();
+         this.engine = PebbleEngines.crear();
          this.formato = formato;
     }
 
-    private String obtenerRutaPlantilla() {
-        return switch(formato) {
-            case A5 -> "templates/despatch.a5.html";
-            default -> "templates/despatch.a4.html";
-        };
+    private String obtenerRutaPlantilla(ContextoRender<BorradorGuiaRemision> contexto) {
+        return PlantillaRutas.ruta("despatch", formato, PlantillaRutas.resolver(contexto.estiloPlantilla(), EstiloPlantilla.DEFAULT));
     }
 
     @Override
     public ResultadoRender renderizar(ContextoRender<BorradorGuiaRemision> contexto) {
         BorradorGuiaRemision doc = contexto.documento();
+        LocalDateTime fechaEmision = fechaEmision(doc.getFechaEmision(), doc.getHoraEmision());
 
         Map<String, Object> receipt = new HashMap<>();
 
@@ -68,14 +70,17 @@ public class RenderizadorHtmlGuiaRemision implements RenderizadorDocumento<Borra
         receipt.put(KEY_IDENTITY, (texto(doc.getSerie()).isBlank() ? "-" : texto(doc.getSerie())) + "-" + (doc.getNumero() != null ? doc.getNumero() : "-"));
         receipt.put(KEY_NAME, "31".equals(doc.getTipoComprobante()) ? "GUÍA DE REMISIÓN TRANSPORTISTA" : "GUÍA DE REMISIÓN REMITENTE");
         receipt.put("version", texto(doc.getVersion()));
-        receipt.put("issueDate", texto(doc.getFechaEmision()));
-        receipt.put("issueTime", texto(doc.getHoraEmision()));
+        receipt.put("issueDate", fechaEmision);
+        receipt.put("issueTime", doc.getHoraEmision() != null ? doc.getHoraEmision() : LocalTime.MIDNIGHT);
         receipt.put("note", texto(doc.getObservaciones()));
 
         // Metadatos y firmas.
         receipt.put("hash", texto(contexto.hashDocumento()));
         receipt.put("qr", texto(contexto.qrBase64()));
         receipt.put("logo", "logo.jpg");
+        receipt.put("serie", texto(doc.getSerie()) + "-" + texto(doc.getNumero()));
+        receipt.put("correlativo", texto(doc.getNumero()));
+        receipt.put("fechaEmision", fechaEmision);
         if (doc.getFirmante() != null) {
             Map<String, Object> signer = new HashMap<>();
             signer.put(KEY_IDENTITY, texto(doc.getFirmante().ruc()));
@@ -88,7 +93,14 @@ public class RenderizadorHtmlGuiaRemision implements RenderizadorDocumento<Borra
             Map<String, Object> taxpayer = new HashMap<>();
             taxpayer.put(KEY_IDENTITY, texto(doc.getRemitente().ruc()));
             taxpayer.put(KEY_NAME, texto(doc.getRemitente().razonSocial()));
-            taxpayer.put(KEY_ADDRESS, doc.getEnvio() != null && doc.getEnvio().getPartida() != null
+            taxpayer.put("ruc", texto(doc.getRemitente().ruc()));
+            taxpayer.put("razonSocial", texto(doc.getRemitente().razonSocial()));
+            Map<String, Object> address = new HashMap<>();
+            address.put("direccion", doc.getEnvio() != null && doc.getEnvio().getPartida() != null
+                    ? texto(doc.getEnvio().getPartida().direccion())
+                    : "");
+            taxpayer.put(KEY_ADDRESS, address);
+            taxpayer.put("addressText", doc.getEnvio() != null && doc.getEnvio().getPartida() != null
                     ? texto(doc.getEnvio().getPartida().direccion())
                     : "");
 
@@ -99,6 +111,7 @@ public class RenderizadorHtmlGuiaRemision implements RenderizadorDocumento<Borra
             taxpayer.put("contact", contact);
 
             receipt.put("taxpayer", taxpayer);
+            receipt.put("company", taxpayer);
         }
 
         // Customer / Destinatario.
@@ -107,9 +120,13 @@ public class RenderizadorHtmlGuiaRemision implements RenderizadorDocumento<Borra
             customer.put(KEY_DOCUMENT_TYPE, texto(doc.getDestinatario().tipoDocumentoIdentidad()));
             customer.put(KEY_IDENTITY, texto(doc.getDestinatario().numeroDocumentoIdentidad()));
             customer.put(KEY_NAME, texto(doc.getDestinatario().nombre()));
-            customer.put(KEY_ADDRESS, doc.getEnvio() != null && doc.getEnvio().getDestino() != null
+            customer.put("rznSocial", texto(doc.getDestinatario().nombre()));
+            customer.put("numDoc", texto(doc.getDestinatario().numeroDocumentoIdentidad()));
+            Map<String, Object> address = new HashMap<>();
+            address.put("direccion", doc.getEnvio() != null && doc.getEnvio().getDestino() != null
                     ? texto(doc.getEnvio().getDestino().direccion())
                     : "");
+            customer.put(KEY_ADDRESS, address);
             receipt.put("customer", customer);
         }
 
@@ -131,7 +148,7 @@ public class RenderizadorHtmlGuiaRemision implements RenderizadorDocumento<Borra
 
         // Datos del traslado (envío).
         if (doc.getEnvio() != null) {
-            receipt.put("startDate", texto(doc.getEnvio().getFechaTraslado()));
+            receipt.put("startDate", doc.getEnvio().getFechaTraslado());
             receipt.put("weight", texto(doc.getEnvio().getPesoTotal()));
             receipt.put("unitCode", texto(doc.getEnvio().getPesoTotalUnidadMedida()));
             receipt.put("itemsWeight", texto(doc.getEnvio().getPesoItems()));
@@ -263,6 +280,7 @@ public class RenderizadorHtmlGuiaRemision implements RenderizadorDocumento<Borra
                 item.put("unitCode", texto(linea.unidadMedida()));
                 item.put(KEY_DESCRIPTION, texto(linea.descripcion()));
                 item.put(KEY_CODE, texto(linea.codigo()));
+                item.put("codigo", texto(linea.codigo()));
                 item.put("sunatCode", texto(linea.codigoSunat()));
                 if (linea.atributos() != null) {
                     List<Map<String, Object>> attributes = new ArrayList<>();
@@ -277,14 +295,19 @@ public class RenderizadorHtmlGuiaRemision implements RenderizadorDocumento<Borra
                 return item;
             }).toList();
             receipt.put("items", items);
+            receipt.put("details", items);
         }
+        receipt.putIfAbsent("details", List.of());
 
         Map<String, Object> scope = new HashMap<>();
         applyTemplateAttributes(receipt, contexto.atributosPlantilla());
         scope.put("receipt", receipt);
+        scope.put("doc", receipt);
+        scope.put("cl", receipt.get("customer"));
+        scope.put("moneda", "PEN");
 
         try {
-            PebbleTemplate compiledTemplate = engine.getTemplate(obtenerRutaPlantilla());
+            PebbleTemplate compiledTemplate = engine.getTemplate(obtenerRutaPlantilla(contexto));
             Writer writer = new StringWriter();
             compiledTemplate.evaluate(writer, scope);
             return ResultadoRender.html(writer.toString());
@@ -303,6 +326,11 @@ public class RenderizadorHtmlGuiaRemision implements RenderizadorDocumento<Borra
 
     private String texto(Object valor) {
         return valor == null ? "" : valor.toString();
+    }
+
+    private LocalDateTime fechaEmision(java.time.LocalDate fecha, java.time.LocalTime hora) {
+        return LocalDateTime.of(fecha != null ? fecha : java.time.LocalDate.now(),
+                hora != null ? hora : LocalTime.MIDNIGHT);
     }
 
     private String descripcionMotivoTraslado(String tipo, String descripcion) {
