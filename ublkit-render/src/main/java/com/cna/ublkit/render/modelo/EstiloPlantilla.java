@@ -6,11 +6,11 @@ package com.cna.ublkit.render.modelo;
  * @since 0.3.0
  */
 public enum EstiloPlantilla {
-    CLASSIC_MONO("01-classic-mono"),
-    CORPORATE_BLUE("02-corporate-blue"),
-    FOREST_MODERN("03-forest-modern"),
-    MINIMAL_SERIF("04-minimal-serif"),
-    BOLD_ACCENT("05-bold-accent");
+    CLASSIC_MONO("classic-mono"),
+    CORPORATE_BLUE("corporate-blue"),
+    FOREST_MODERN("forest-modern"),
+    MINIMAL_SERIF("minimal-serif"),
+    BOLD_ACCENT("bold-accent");
 
     public static final EstiloPlantilla DEFAULT = CLASSIC_MONO;
 

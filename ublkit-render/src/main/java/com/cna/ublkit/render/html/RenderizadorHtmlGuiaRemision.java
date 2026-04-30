@@ -3,308 +3,59 @@ package com.cna.ublkit.render.html;
 import com.cna.ublkit.render.api.RenderizadorDocumento;
 import com.cna.ublkit.render.modelo.ContextoRender;
 import com.cna.ublkit.render.modelo.EstiloPlantilla;
-import com.cna.ublkit.render.modelo.ResultadoRender;
 import com.cna.ublkit.render.modelo.FormatoImpresion;
 import com.cna.ublkit.render.modelo.PlantillaRutas;
+import com.cna.ublkit.render.modelo.ResultadoRender;
 import com.cna.ublkit.render.pebble.PebbleEngines;
 import com.cna.ublkit.ubl.modelo.guia.BorradorGuiaRemision;
-import com.cna.ublkit.ubl.modelo.guia.Conductor;
-import com.cna.ublkit.ubl.modelo.guia.Contenedor;
-import com.cna.ublkit.ubl.modelo.guia.DeclaracionAduanera;
-import com.cna.ublkit.ubl.modelo.guia.Vehiculo;
+import io.pebbletemplates.pebble.PebbleEngine;
 import io.pebbletemplates.pebble.template.PebbleTemplate;
 
 import java.io.StringWriter;
 import java.io.Writer;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
- * Convierte un BorradorGuiaRemision en HTML utilizando la plantilla Pebble de despacho (despatch.html).
- * Parsea el modelo de dominio en los diccionarios compatibles con las llaves que espera la vista.
- * Soporta formatos A4 y A5.
+ * Renderizador de guías de remisión en formato HTML usando Pebble.
+ * Permite usar tanto plantillas .html como .html.twig limpiamente.
  *
- * @since 0.1.0
+ * @since 0.3.0
  */
 public class RenderizadorHtmlGuiaRemision implements RenderizadorDocumento<BorradorGuiaRemision> {
-    private static final String KEY_TYPE = "type";
-    private static final String KEY_NAME = "name";
-    private static final String KEY_CODE = "code";
-    private static final String KEY_IDENTITY = "identity";
-    private static final String KEY_DOCUMENT_TYPE = "documentType";
-    private static final String KEY_ADDRESS = "address";
-    private static final String KEY_DESCRIPTION = "description";
-    private static final String KEY_NUMBER = "number";
-    private static final String KEY_EXTRAS = "extras";
 
-    private final io.pebbletemplates.pebble.PebbleEngine engine;
     private final FormatoImpresion formato;
+    private final PebbleEngine engine;
 
     public RenderizadorHtmlGuiaRemision() {
-         this(FormatoImpresion.A4);
+        this(FormatoImpresion.A4);
     }
 
     public RenderizadorHtmlGuiaRemision(FormatoImpresion formato) {
-         this.engine = PebbleEngines.crear();
-         this.formato = formato;
+        this.formato = formato;
+        this.engine = PebbleEngines.crear();
     }
 
     private String obtenerRutaPlantilla(ContextoRender<BorradorGuiaRemision> contexto) {
-        return PlantillaRutas.ruta("despatch", formato, PlantillaRutas.resolver(contexto.estiloPlantilla(), EstiloPlantilla.DEFAULT));
+        return PlantillaRutas.ruta(
+            "despatch", 
+            formato, 
+            PlantillaRutas.resolver(contexto.estiloPlantilla(), EstiloPlantilla.DEFAULT),
+            contexto.extensionPlantilla()
+        );
     }
 
     @Override
     public ResultadoRender renderizar(ContextoRender<BorradorGuiaRemision> contexto) {
-        BorradorGuiaRemision doc = contexto.documento();
-        LocalDateTime fechaEmision = fechaEmision(doc.getFechaEmision(), doc.getHoraEmision());
-
-        Map<String, Object> receipt = new HashMap<>();
-
-        // Identificadores y fechas.
-        receipt.put(KEY_TYPE, parseTipo(doc.getTipoComprobante()));
-        receipt.put("typedIdentity", texto(doc.getTipoComprobante()));
-        receipt.put(KEY_IDENTITY, (texto(doc.getSerie()).isBlank() ? "-" : texto(doc.getSerie())) + "-" + (doc.getNumero() != null ? doc.getNumero() : "-"));
-        receipt.put(KEY_NAME, "31".equals(doc.getTipoComprobante()) ? "GUÍA DE REMISIÓN TRANSPORTISTA" : "GUÍA DE REMISIÓN REMITENTE");
-        receipt.put("version", texto(doc.getVersion()));
-        receipt.put("issueDate", fechaEmision);
-        receipt.put("issueTime", doc.getHoraEmision() != null ? doc.getHoraEmision() : LocalTime.MIDNIGHT);
-        receipt.put("note", texto(doc.getObservaciones()));
-
-        // Metadatos y firmas.
-        receipt.put("hash", texto(contexto.hashDocumento()));
-        receipt.put("qr", texto(contexto.qrBase64()));
-        receipt.put("logo", "logo.jpg");
-        receipt.put("serie", texto(doc.getSerie()) + "-" + texto(doc.getNumero()));
-        receipt.put("correlativo", texto(doc.getNumero()));
-        receipt.put("fechaEmision", fechaEmision);
-        if (doc.getFirmante() != null) {
-            Map<String, Object> signer = new HashMap<>();
-            signer.put(KEY_IDENTITY, texto(doc.getFirmante().ruc()));
-            signer.put(KEY_NAME, texto(doc.getFirmante().razonSocial()));
-            receipt.put("signer", signer);
-        }
-
-        // Taxpayer / Remitente.
-        if (doc.getRemitente() != null) {
-            Map<String, Object> taxpayer = new HashMap<>();
-            taxpayer.put(KEY_IDENTITY, texto(doc.getRemitente().ruc()));
-            taxpayer.put(KEY_NAME, texto(doc.getRemitente().razonSocial()));
-            taxpayer.put("ruc", texto(doc.getRemitente().ruc()));
-            taxpayer.put("razonSocial", texto(doc.getRemitente().razonSocial()));
-            Map<String, Object> address = new HashMap<>();
-            address.put("direccion", doc.getEnvio() != null && doc.getEnvio().getPartida() != null
-                    ? texto(doc.getEnvio().getPartida().direccion())
-                    : "");
-            taxpayer.put(KEY_ADDRESS, address);
-            taxpayer.put("addressText", doc.getEnvio() != null && doc.getEnvio().getPartida() != null
-                    ? texto(doc.getEnvio().getPartida().direccion())
-                    : "");
-
-            Map<String, Object> contact = new HashMap<>();
-            contact.put("email", "");
-            contact.put("telephone", "");
-            contact.put("web", "");
-            taxpayer.put("contact", contact);
-
-            receipt.put("taxpayer", taxpayer);
-            receipt.put("company", taxpayer);
-        }
-
-        // Customer / Destinatario.
-        if (doc.getDestinatario() != null) {
-            Map<String, Object> customer = new HashMap<>();
-            customer.put(KEY_DOCUMENT_TYPE, texto(doc.getDestinatario().tipoDocumentoIdentidad()));
-            customer.put(KEY_IDENTITY, texto(doc.getDestinatario().numeroDocumentoIdentidad()));
-            customer.put(KEY_NAME, texto(doc.getDestinatario().nombre()));
-            customer.put("rznSocial", texto(doc.getDestinatario().nombre()));
-            customer.put("numDoc", texto(doc.getDestinatario().numeroDocumentoIdentidad()));
-            Map<String, Object> address = new HashMap<>();
-            address.put("direccion", doc.getEnvio() != null && doc.getEnvio().getDestino() != null
-                    ? texto(doc.getEnvio().getDestino().direccion())
-                    : "");
-            customer.put(KEY_ADDRESS, address);
-            receipt.put("customer", customer);
-        }
-
-        if (doc.getTercero() != null) {
-            Map<String, Object> third = new HashMap<>();
-            third.put(KEY_DOCUMENT_TYPE, texto(doc.getTercero().tipoDocumentoIdentidad()));
-            third.put(KEY_IDENTITY, texto(doc.getTercero().numeroDocumentoIdentidad()));
-            third.put(KEY_NAME, texto(doc.getTercero().nombre()));
-            receipt.put("thirdParty", third);
-        }
-
-        if (doc.getComprador() != null) {
-            Map<String, Object> buyer = new HashMap<>();
-            buyer.put(KEY_DOCUMENT_TYPE, texto(doc.getComprador().tipoDocumentoIdentidad()));
-            buyer.put(KEY_IDENTITY, texto(doc.getComprador().numeroDocumentoIdentidad()));
-            buyer.put(KEY_NAME, texto(doc.getComprador().nombre()));
-            receipt.put("buyer", buyer);
-        }
-
-        // Datos del traslado (envío).
-        if (doc.getEnvio() != null) {
-            receipt.put("startDate", doc.getEnvio().getFechaTraslado());
-            receipt.put("weight", texto(doc.getEnvio().getPesoTotal()));
-            receipt.put("unitCode", texto(doc.getEnvio().getPesoTotalUnidadMedida()));
-            receipt.put("itemsWeight", texto(doc.getEnvio().getPesoItems()));
-            receipt.put("weightReason", texto(doc.getEnvio().getSustentoPeso()));
-            receipt.put("packages", doc.getEnvio().getNumeroDeBultos());
-            receipt.put("handling", descripcionMotivoTraslado(doc.getEnvio().getTipoTraslado(), doc.getEnvio().getMotivoTraslado()));
-            receipt.put("lightVehicle", esVehiculoM1L(doc.getEnvio().getIndicadores()));
-            receipt.put("ownTransport", "01".equals(doc.getEnvio().getTipoModalidadTraslado()));
-            receipt.put("transportModeCode", texto(doc.getEnvio().getTipoModalidadTraslado()));
-            receipt.put("transportModeName", descripcionModalidadTraslado(doc.getEnvio().getTipoModalidadTraslado()));
-            receipt.put("manifest", texto(doc.getEnvio().getNumeroManifiesto()));
-            receipt.put("indicators", doc.getEnvio().getIndicadores() == null ? List.of() : doc.getEnvio().getIndicadores());
-
-            Map<String, Object> address = new HashMap<>();
-            if (doc.getEnvio().getPartida() != null) {
-                Map<String, String> origin = new HashMap<>();
-                origin.put("ubigeo", texto(doc.getEnvio().getPartida().ubigeo()));
-                origin.put("line", texto(doc.getEnvio().getPartida().direccion()));
-                origin.put(KEY_CODE, texto(doc.getEnvio().getPartida().codigoLocal()));
-                origin.put("ruc", texto(doc.getEnvio().getPartida().ruc()));
-                address.put("origin", origin);
-            }
-            if (doc.getEnvio().getDestino() != null) {
-                Map<String, String> delivery = new HashMap<>();
-                delivery.put("ubigeo", texto(doc.getEnvio().getDestino().ubigeo()));
-                delivery.put("line", texto(doc.getEnvio().getDestino().direccion()));
-                delivery.put(KEY_CODE, texto(doc.getEnvio().getDestino().codigoLocal()));
-                delivery.put("ruc", texto(doc.getEnvio().getDestino().ruc()));
-                address.put("delivery", delivery);
-            }
-            receipt.put("address", address);
-
-            if (doc.getEnvio().getTransportista() != null) {
-                Map<String, Object> carrier = new HashMap<>();
-                carrier.put(KEY_NAME, texto(doc.getEnvio().getTransportista().nombre()));
-                carrier.put(KEY_IDENTITY, texto(doc.getEnvio().getTransportista().numeroDocumentoIdentidad()));
-                carrier.put(KEY_DOCUMENT_TYPE, texto(doc.getEnvio().getTransportista().tipoDocumentoIdentidad()));
-                carrier.put("mtc", texto(doc.getEnvio().getTransportista().numeroRegistroMTC()));
-                receipt.put("carrier", carrier);
-            }
-
-            if (doc.getEnvio().getVehiculo() != null) {
-                List<Map<String, Object>> vehicles = new ArrayList<>();
-                vehicles.add(vehiculoMap(doc.getEnvio().getVehiculo(), true));
-                if (doc.getEnvio().getVehiculo().secundarios() != null) {
-                    for (Vehiculo secundario : doc.getEnvio().getVehiculo().secundarios()) {
-                        vehicles.add(vehiculoMap(secundario, false));
-                    }
-                }
-                receipt.put("vehicles", vehicles);
-            }
-
-            if (doc.getEnvio().getChoferes() != null) {
-                List<Map<String, Object>> drivers = doc.getEnvio().getChoferes().stream()
-                        .map(this::conductorMap)
-                        .toList();
-                receipt.put("drivers", drivers);
-            }
-
-            if (doc.getEnvio().getContenedores() != null) {
-                List<Map<String, Object>> containers = new ArrayList<>();
-                for (Contenedor c : doc.getEnvio().getContenedores()) {
-                    Map<String, Object> container = new HashMap<>();
-                    container.put(KEY_NUMBER, texto(c.numero()));
-                    container.put("seal", texto(c.precinto()));
-                    containers.add(container);
-                }
-                receipt.put("containers", containers);
-            }
-
-            if (doc.getEnvio().getDeclaracionesAduaneras() != null) {
-                List<Map<String, Object>> customsDeclarations = new ArrayList<>();
-                for (DeclaracionAduanera da : doc.getEnvio().getDeclaracionesAduaneras()) {
-                    Map<String, Object> d = new HashMap<>();
-                    d.put(KEY_TYPE, texto(da.tipoDocumento()));
-                    d.put(KEY_NUMBER, texto(da.numero()));
-                    d.put("customsOffice", texto(da.serieAduana()));
-                    customsDeclarations.add(d);
-                }
-                receipt.put("customsDeclarations", customsDeclarations);
-            }
-
-            if (doc.getEnvio().getPuerto() != null) {
-                Map<String, Object> port = new HashMap<>();
-                port.put(KEY_CODE, texto(doc.getEnvio().getPuerto().codigo()));
-                port.put(KEY_DESCRIPTION, texto(doc.getEnvio().getPuerto().descripcion()));
-                receipt.put("port", port);
-            }
-
-            if (doc.getEnvio().getAeropuerto() != null) {
-                Map<String, Object> airport = new HashMap<>();
-                airport.put(KEY_CODE, texto(doc.getEnvio().getAeropuerto().codigo()));
-                airport.put(KEY_DESCRIPTION, texto(doc.getEnvio().getAeropuerto().descripcion()));
-                receipt.put("airport", airport);
-            }
-        }
-
-        // Referencia documental.
-        Map<String, Object> reference = new HashMap<>();
-        reference.put("note", construirReferencia(doc));
-        if (doc.getDocumentosRelacionados() != null && !doc.getDocumentosRelacionados().isEmpty()) {
-            List<Map<String, Object>> relatedDocuments = new ArrayList<>();
-            doc.getDocumentosRelacionados().forEach(r -> {
-                Map<String, Object> d = new HashMap<>();
-                d.put(KEY_TYPE, texto(r.tipoDocumento()));
-                d.put("document", texto(r.serieNumero()));
-                relatedDocuments.add(d);
-            });
-            reference.put("relatedDocuments", relatedDocuments);
-        }
-        if (doc.getDocumentosAdicionales() != null && !doc.getDocumentosAdicionales().isEmpty()) {
-            List<Map<String, Object>> additionalDocuments = new ArrayList<>();
-            doc.getDocumentosAdicionales().forEach(r -> {
-                Map<String, Object> d = new HashMap<>();
-                d.put(KEY_TYPE, texto(r.tipoDocumento()));
-                d.put("document", texto(r.serieNumero()));
-                d.put("issuer", texto(r.emisor()));
-                additionalDocuments.add(d);
-            });
-            reference.put("additionalDocuments", additionalDocuments);
-        }
-        receipt.put("reference", reference);
-
-        // Ítems.
-        if (doc.getDetalles() != null) {
-            List<Map<String, Object>> items = doc.getDetalles().stream().map(linea -> {
-                Map<String, Object> item = new HashMap<>();
-                item.put("quantity", texto(linea.cantidad()));
-                item.put("unitCode", texto(linea.unidadMedida()));
-                item.put(KEY_DESCRIPTION, texto(linea.descripcion()));
-                item.put(KEY_CODE, texto(linea.codigo()));
-                item.put("codigo", texto(linea.codigo()));
-                item.put("sunatCode", texto(linea.codigoSunat()));
-                if (linea.atributos() != null) {
-                    List<Map<String, Object>> attributes = new ArrayList<>();
-                    linea.atributos().forEach(a -> {
-                        Map<String, Object> attr = new HashMap<>();
-                        attr.put(KEY_CODE, texto(a.codigo()));
-                        attr.put("value", texto(a.valor()));
-                        attributes.add(attr);
-                    });
-                    item.put("attributes", attributes);
-                }
-                return item;
-            }).toList();
-            receipt.put("items", items);
-            receipt.put("details", items);
-        }
-        receipt.putIfAbsent("details", List.of());
-
         Map<String, Object> scope = new HashMap<>();
-        applyTemplateAttributes(receipt, contexto.atributosPlantilla());
-        scope.put("receipt", receipt);
-        scope.put("doc", receipt);
-        scope.put("cl", receipt.get("customer"));
-        scope.put("moneda", "PEN");
+        scope.put("doc", contexto.documento());
+        scope.put("qrBase64", contexto.qrBase64());
+        scope.put("hashDocumento", contexto.hashDocumento());
+        
+        if (contexto.atributosPlantilla() != null) {
+            scope.put("params", contexto.atributosPlantilla());
+            scope.putAll(contexto.atributosPlantilla());
+        }
 
         try {
             PebbleTemplate compiledTemplate = engine.getTemplate(obtenerRutaPlantilla(contexto));
@@ -313,108 +64,6 @@ public class RenderizadorHtmlGuiaRemision implements RenderizadorDocumento<Borra
             return ResultadoRender.html(writer.toString());
         } catch (Exception e) {
             throw new RuntimeException("Error renderizando guía HTML: " + e.getMessage(), e);
-        }
-    }
-
-    private int parseTipo(String tipoComprobante) {
-        try {
-            return tipoComprobante != null ? Integer.parseInt(tipoComprobante) : 9;
-        } catch (NumberFormatException ex) {
-            return 9;
-        }
-    }
-
-    private String texto(Object valor) {
-        return valor == null ? "" : valor.toString();
-    }
-
-    private LocalDateTime fechaEmision(java.time.LocalDate fecha, java.time.LocalTime hora) {
-        return LocalDateTime.of(fecha != null ? fecha : java.time.LocalDate.now(),
-                hora != null ? hora : LocalTime.MIDNIGHT);
-    }
-
-    private String descripcionMotivoTraslado(String tipo, String descripcion) {
-        String cod = texto(tipo);
-        String desc = texto(descripcion);
-        String catalogo = switch (cod) {
-            case "01" -> "Venta";
-            case "02" -> "Compra";
-            case "04" -> "Traslado entre establecimientos";
-            case "08" -> "Importación";
-            case "09" -> "Exportación";
-            case "13" -> "Otros";
-            default -> "";
-        };
-        if (desc.isBlank()) {
-            desc = catalogo;
-        }
-        if (!cod.isBlank() && !desc.isBlank()) {
-            return cod + " - " + desc;
-        }
-        return !desc.isBlank() ? desc : cod;
-    }
-
-    private String descripcionModalidadTraslado(String tipoModalidad) {
-        return switch (texto(tipoModalidad)) {
-            case "01" -> "Privado";
-            case "02" -> "Público";
-            default -> "";
-        };
-    }
-
-    private boolean esVehiculoM1L(List<String> indicadores) {
-        if (indicadores == null) {
-            return false;
-        }
-        return indicadores.stream()
-                .filter(i -> i != null && !i.isBlank())
-                .map(String::toUpperCase)
-                .anyMatch(i -> i.contains("M1") || i.contains("L"));
-    }
-
-    private Map<String, Object> vehiculoMap(Vehiculo vehiculo, boolean principal) {
-        Map<String, Object> v = new HashMap<>();
-        v.put("identity", texto(vehiculo.placa()));
-        v.put("label", principal ? "Principal" : "Secundario");
-        v.put("number", texto(vehiculo.numeroCirculacion()));
-        v.put("authorization", texto(vehiculo.numeroAutorizacion()));
-        return v;
-    }
-
-    private Map<String, Object> conductorMap(Conductor conductor) {
-        Map<String, Object> driver = new HashMap<>();
-        driver.put("type", texto(conductor.tipo()));
-        driver.put("name", texto(conductor.nombres()));
-        driver.put("surname", texto(conductor.apellidos()));
-        driver.put("identity", texto(conductor.numeroDocumentoIdentidad()));
-        driver.put("documentType", texto(conductor.tipoDocumentoIdentidad()));
-        driver.put("license", texto(conductor.licencia()));
-        return driver;
-    }
-
-    private String construirReferencia(BorradorGuiaRemision doc) {
-        if (doc.getDocumentoRelacionado() != null) {
-            return texto(doc.getDocumentoRelacionado().tipoDocumento()) + " " + texto(doc.getDocumentoRelacionado().serieNumero()).trim();
-        }
-        if (doc.getDocumentoBaja() != null) {
-            return texto(doc.getDocumentoBaja().tipoDocumento()) + " " + texto(doc.getDocumentoBaja().serieNumero()).trim();
-        }
-        if (doc.getDocumentosRelacionados() != null && !doc.getDocumentosRelacionados().isEmpty()) {
-            return texto(doc.getDocumentosRelacionados().get(0).tipoDocumento()) + " "
-                    + texto(doc.getDocumentosRelacionados().get(0).serieNumero()).trim();
-        }
-        return "";
-    }
-
-    private void applyTemplateAttributes(Map<String, Object> receipt, Map<String, Object> attrs) {
-        if (attrs == null || attrs.isEmpty()) return;
-        receipt.put("header", texto(attrs.get("header")));
-        receipt.put("footer", texto(attrs.get("footer")));
-        Object extras = attrs.get(KEY_EXTRAS);
-        if (extras instanceof List<?> list) {
-            receipt.put(KEY_EXTRAS, list);
-        } else {
-            receipt.put(KEY_EXTRAS, List.of());
         }
     }
 }

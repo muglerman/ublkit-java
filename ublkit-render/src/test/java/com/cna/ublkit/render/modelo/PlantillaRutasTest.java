@@ -16,21 +16,21 @@ class PlantillaRutasTest {
     @Test
     @DisplayName("Should resolve invoice A4 in classic mono")
     void shouldResolveInvoiceA4InClassicMono() {
-        assertEquals("templates/01-classic-mono/invoice.a4.html",
+        assertEquals("templates/classic-mono/invoice.a4.html",
                 PlantillaRutas.ruta("invoice", FormatoImpresion.A4, EstiloPlantilla.CLASSIC_MONO));
     }
 
     @Test
     @DisplayName("Should resolve note ticket 80mm in classic mono")
     void shouldResolveNoteTicket80mmInClassicMono() {
-        assertEquals("templates/01-classic-mono/note.ticket80mm.html",
+        assertEquals("templates/classic-mono/note.ticket80mm.html",
                 PlantillaRutas.ruta("note", FormatoImpresion.TICKET_80MM, EstiloPlantilla.CLASSIC_MONO));
     }
 
     @Test
     @DisplayName("Should resolve summary with default style")
     void shouldResolveSummaryWithDefaultStyle() {
-        assertEquals("templates/01-classic-mono/summary.a4.html",
+        assertEquals("templates/classic-mono/summary.a4.html",
                 PlantillaRutas.ruta("summary", FormatoImpresion.A4, null));
     }
 
