@@ -64,6 +64,13 @@ public class SimuladorGateway implements PasarelaSunat {
     }
 
     @Override
+    public java.util.concurrent.CompletableFuture<com.cna.ublkit.gateway.respuesta.ArchivoCdr> enviarGuiaRemisionYEsperar(String xmlFirmado, String nombreArchivo, CredencialesEmpresa credenciales, TipoAmbiente ambiente) {
+        return java.util.concurrent.CompletableFuture.completedFuture(
+                new com.cna.ublkit.gateway.respuesta.ArchivoCdr(new byte[0], "0", "Aceptado", java.util.List.of())
+        );
+    }
+
+    @Override
     public ResultadoConsulta consultarTicketSoap(String ticket, CredencialesEmpresa credenciales, TipoAmbiente ambiente) {
         return respuestasTickets.getOrDefault(ticket, ResultadoConsulta.pendiente());
     }

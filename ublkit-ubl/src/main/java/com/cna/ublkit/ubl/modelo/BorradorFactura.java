@@ -23,8 +23,6 @@ import java.util.List;
  */
 public final class BorradorFactura extends DocumentoBase {
 
-    /** Tipo de comprobante según Catálogo 01 ("01" Factura, "03" Boleta). */
-    private String tipoComprobante;
 
     /** Tipo de operación según Catálogo 51 (ej. "0101" venta interna). */
     private String tipoOperacion;
@@ -64,7 +62,6 @@ public final class BorradorFactura extends DocumentoBase {
 
     // ── Getters ──────────────────────────────────────────────────
 
-    public String getTipoComprobante() { return tipoComprobante; }
     public String getTipoOperacion() { return tipoOperacion; }
     public LocalDate getFechaVencimiento() { return fechaVencimiento; }
     public String getObservaciones() { return observaciones; }
@@ -79,7 +76,6 @@ public final class BorradorFactura extends DocumentoBase {
 
     // ── Setters ──────────────────────────────────────────────────
 
-    public void setTipoComprobante(String tipoComprobante) { this.tipoComprobante = tipoComprobante; }
     public void setTipoOperacion(String tipoOperacion) { this.tipoOperacion = tipoOperacion; }
     public void setFechaVencimiento(LocalDate fechaVencimiento) { this.fechaVencimiento = fechaVencimiento; }
     public void setObservaciones(String observaciones) { this.observaciones = observaciones; }

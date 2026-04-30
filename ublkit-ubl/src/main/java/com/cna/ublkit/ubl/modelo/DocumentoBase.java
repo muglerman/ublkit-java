@@ -36,6 +36,7 @@ public abstract sealed class DocumentoBase
     private String moneda;
     private LocalDate fechaEmision;
     private LocalTime horaEmision;
+    private String tipoComprobante;
 
     // ── Actores ──────────────────────────────────────────────────
 
@@ -78,6 +79,7 @@ public abstract sealed class DocumentoBase
     public String getMoneda() { return moneda; }
     public LocalDate getFechaEmision() { return fechaEmision; }
     public LocalTime getHoraEmision() { return horaEmision; }
+    public String getTipoComprobante() { return tipoComprobante; }
     public EmisorDocumento getEmisor() { return emisor; }
     public ReceptorDocumento getReceptor() { return receptor; }
     public FirmanteDocumento getFirmante() { return firmante; }
@@ -100,6 +102,7 @@ public abstract sealed class DocumentoBase
     public void setMoneda(String moneda) { this.moneda = moneda; }
     public void setFechaEmision(LocalDate fechaEmision) { this.fechaEmision = fechaEmision; }
     public void setHoraEmision(LocalTime horaEmision) { this.horaEmision = horaEmision; }
+    public void setTipoComprobante(String tipoComprobante) { this.tipoComprobante = tipoComprobante; }
     public void setEmisor(EmisorDocumento emisor) { this.emisor = emisor; }
     public void setReceptor(ReceptorDocumento receptor) { this.receptor = receptor; }
     public void setFirmante(FirmanteDocumento firmante) { this.firmante = firmante; }
