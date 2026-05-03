@@ -1,8 +1,12 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>{{ doc.serie }}-{{ doc.correlativo }} · Factura Electrónica</title>
+<meta charset="UTF-8" />
+{% set cp = doc.emisor %}
+{% set cl = doc.receptor %}
+{% set mon = doc.moneda|catalog('02') %}
+{% set name = doc.tipoComprobante|catalog('01') %}
+<title>{{ doc.serie }}-{{ doc.numero|str_pad(8, '0', 'left') }} · {{ name }}</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
   * { box-sizing: border-box; }
@@ -113,27 +117,34 @@
         </svg>
       </div>
       <div>
-        <div class="co-name">MANUFACTURAS ANDINA TEXTIL</div>
-        <div class="co-tag">Premium textiles since 2001 — Lima, Perú</div>
+        <div class="co-name">{{ cp.razonSocial }}</div>
+        <div class="co-tag">{% if params.header is not empty %}{{ params.header }}{% else %}{{ cp.nombreComercial }}{% endif %}</div>
       </div>
     </div>
     <div class="info">
-      <p>{{ doc.company.address.direccion }} — Cercado de Lima</p>
-      <p>ventas@andinatextil.pe · (01) 555-0102 · andinatextil.pe</p>
-      <p>RUC <b>{{ doc.company.ruc }}</b></p>
+      <p>{{ cp.direccion.direccion }} — {{ cp.direccion.distrito }}</p>
+      <p>
+        {% if cp.contacto.email %}{{ cp.contacto.email }}{% endif %}
+        {% if cp.contacto.telefono %} · {{ cp.contacto.telefono }}{% endif %}
+      </p>
+      <p>RUC <b>{{ cp.ruc }}</b></p>
     </div>
   </div>
   <div class="right">
     <div>
-      <div class="kind">Factura Electrónica</div>
-      <div class="num">{{ doc.serie }}-{{ doc.correlativo }}</div>
+      <div class="kind">{{ name }}</div>
+      <div class="num">{{ doc.serie }}-{{ doc.numero|str_pad(8, '0', 'left') }}</div>
     </div>
     <div>
       <div class="rule"></div>
-      <div class="row"><span class="k">Emitido</span><span class="v">{{ doc.fechaEmision|date('d/m/Y') }} · 14:32</span></div>
-      <div class="row"><span class="k">Vence</span><span class="v">24/05/2026</span></div>
-      <div class="row"><span class="k">Moneda</span><span class="v">Soles · T/C 3.742</span></div>
-      <div class="row"><span class="k">Condición</span><span class="v">Crédito · 2 cuotas</span></div>
+      <div class="row"><span class="k">Emitido</span><span class="v">{{ doc.fechaEmision|date('d/m/Y') }}{% if doc.horaEmision is not null %} · {{ doc.horaEmision }}{% endif %}</span></div>
+      {% if doc.fechaVencimiento %}
+      <div class="row"><span class="k">Vence</span><span class="v">{{ doc.fechaVencimiento|date('d/m/Y') }}</span></div>
+      {% endif %}
+      <div class="row"><span class="k">Moneda</span><span class="v">{{ doc.moneda|catalog('021') }}{% if doc.tipoCambio %} · T/C {{ doc.tipoCambio.venta }}{% endif %}</span></div>
+      {% if doc.formaDePago is not null %}
+      <div class="row"><span class="k">Condición</span><span class="v">{{ doc.formaDePago.tipo }}</span></div>
+      {% endif %}
     </div>
   </div>
 </div>
@@ -141,19 +152,27 @@
 <div class="parties">
   <div class="party">
     <div class="label">Cliente</div>
-    <div class="name">{{ cl.rznSocial }}</div>
-    <div class="row"><span class="k">RUC</span><span class="mono">{{ cl.numDoc }}</span></div>
-    <div class="row"><span class="k">Dirección</span><span>{{ cl.address.direccion }}</span></div>
-    <div class="row"><span class="k">Ubicación</span><span>Lima — Lima — Miraflores</span></div>
-    <div class="row"><span class="k">O/C</span><span class="mono">OC-2026-00487</span></div>
+    <div class="name">{{ cl.nombre }}</div>
+    <div class="row"><span class="k">{{ cl.tipoDocIdentidad|catalog('06') }}</span><span class="mono">{{ cl.numDocIdentidad }}</span></div>
+    <div class="row"><span class="k">Dirección</span><span>{{ cl.direccion.direccion }}</span></div>
+    <div class="row"><span class="k">Ubicación</span><span>{{ cl.direccion.departamento }} — {{ cl.direccion.provincia }} — {{ cl.direccion.distrito }}</span></div>
+    {% if doc.ordenDeCompra %}
+    <div class="row"><span class="k">O/C</span><span class="mono">{{ doc.ordenDeCompra }}</span></div>
+    {% endif %}
   </div>
   <div class="party">
     <div class="label">Operación</div>
-    <div class="name">0101 — VENTA INTERNA</div>
-    <div class="row"><span class="k">Entrega</span><span>Almacén Los Portales · Callao</span></div>
-    <div class="row"><span class="k">Guía</span><span class="mono">GRE T001-00452</span></div>
-    <div class="row"><span class="k">Vendedor</span><span>Diego Paredes</span></div>
-    <div class="row"><span class="k">Ruta</span><span>Lima–Callao</span></div>
+    <div class="name">{% if doc.tipoOperacion %}{{ doc.tipoOperacion }} — {{ doc.tipoOperacion|catalog('51') }}{% else %}VENTA INTERNA{% endif %}</div>
+    {% if doc.direccionEntrega %}
+    <div class="row"><span class="k">Entrega</span><span>{{ doc.direccionEntrega.direccion }}</span></div>
+    {% endif %}
+    {% if doc.guias %}
+    <div class="row"><span class="k">Guía</span><span class="mono">
+      {% for guia in doc.guias %}
+        {{ guia.serie }}-{{ guia.numero }}{% if not loop.last %}, {% endif %}
+      {% endfor %}
+    </span></div>
+    {% endif %}
   </div>
 </div>
 
@@ -163,15 +182,17 @@
     <tr><th class="c-idx">#</th><th class="c-code">Código</th><th>Descripción</th><th class="c-unit">Und</th><th class="c-qty">Cant.</th><th class="c-price">P. Unit.</th><th class="c-tax">Importe</th></tr>
   </thead>
   <tbody>
-
-    {% for det in doc.details %}
+    {% for det in doc.detalles %}
     <tr>
       <td class="c-idx mono">{{ loop.index|str_pad(2, '0', 'left') }}</td>
-      <td class="c-code mono">{{ det.codProducto }}</td>
-      <td class="desc"><div class="main">{{ det.descripcion }}</div><div class="sub">{% if det.codProductoSUNAT %}SUNAT {{ det.codProductoSUNAT }}{% endif %}</div></td>
-      <td class="c-unit">{{ det.unidad }}</td>
+      <td class="c-code mono">{{ det.codigoProducto }}</td>
+      <td class="desc">
+        <div class="main">{{ det.descripcion }}</div>
+        <div class="sub">{% if det.codigoProductoSunat %}SUNAT {{ det.codigoProductoSunat }}{% endif %}</div>
+      </td>
+      <td class="c-unit">{{ det.unidadMedida }}</td>
       <td class="c-qty mono">{{ det.cantidad|n_format }}</td>
-      <td class="c-price mono">{{ det.mtoValorUnitario|n_format }}</td>
+      <td class="c-price mono">{{ det.precio|n_format }}</td>
       <td class="c-tax mono">{{ det.mtoValorVenta|n_format }}</td>
     </tr>
     {% endfor %}
@@ -181,62 +202,79 @@
 
 <div class="bottom">
   <div class="notes">
+    {% if doc.formaDePago and doc.formaDePago.cuotas %}
     <div class="block"><div class="head">Cuotas</div><div class="body">
-      <p class="small">Cuota 1 · 24/05/2026 · <b>{{ moneda }} 5,946.20</b></p>
-      <p class="small">Cuota 2 · 24/06/2026 · <b>{{ moneda }} 5,946.20</b></p>
+      {% for cuota in doc.formaDePago.cuotas %}
+      <p class="small">Cuota {{ loop.index }} · {{ cuota.fechaPago|date('d/m/Y') }} · <b>{{ mon }} {{ cuota.monto|n_format }}</b></p>
+      {% endfor %}
     </div></div>
+    {% endif %}
+
+    {% if doc.detraccion is not null %}
     <div class="block"><div class="head">Detracción</div><div class="body">
-      <p><b>{{ moneda }} 1,427.09</b> · 020 Bienes gravados con IGV</p>
-      <p class="small">Transferencia en cuenta · Cta. BN 00-032-019287</p>
+      <p><b>{{ mon }} {{ doc.detraccion.monto|n_format }}</b> · {{ doc.detraccion.codigoBien }} - {{ doc.detraccion.codigoBien|catalog('54') }}</p>
+      <p class="small">Medio: {{ doc.detraccion.medioPago|catalog('59') }} · Cta. BN {{ doc.detraccion.cuentaBanco }}</p>
     </div></div>
+    {% endif %}
+
+    {% if doc.observaciones %}
     <div class="block"><div class="head">Observaciones</div><div class="body">
-      <p>Pedido fraccionado — entrega en 2 camiones.</p>
+      <p>{{ doc.observaciones }}</p>
     </div></div>
+    {% endif %}
+
+    {% if doc.leyendas is not empty %}
     <div class="block"><div class="head">Leyendas SUNAT</div><div class="body">
-      <p class="small">· SON ONCE MIL OCHOCIENTOS NOVENTA Y DOS CON 40/100 {{ moneda }}</p>
-      <p class="small">· Operación sujeta a detracción</p>
+      {% for entry in doc.leyendas %}
+        <p class="small">· {{ entry.value }}</p>
+      {% endfor %}
     </div></div>
+    {% endif %}
   </div>
 
   <div class="totals">
     <div class="inner">
-      <div class="line"><span class="k">Op. gravadas</span><span class="v">{{ moneda }} {{ doc.mtoOperGravadas|n_format }}</span></div>
-      <div class="line"><span class="k">Op. exoneradas</span><span class="v">{{ moneda }} 0.00</span></div>
-      <div class="line"><span class="k">Op. inafectas</span><span class="v">{{ moneda }} 0.00</span></div>
-      <div class="line"><span class="k">Op. gratuitas</span><span class="v">{{ moneda }} 0.00</span></div>
+      {% if doc.totalImporte is defined and doc.totalImporte is not null and doc.totalImporte.importeSinImpuestos is not null %}
+      <div class="line"><span class="k">Subtotal</span><span class="v">{{ mon }} {{ doc.totalImporte.importeSinImpuestos|n_format }}</span></div>
+      {% endif %}
+      {% if doc.totalImpuestos.gravadoBaseImponible %}
+      <div class="line"><span class="k">Op. gravadas</span><span class="v">{{ mon }} {{ doc.totalImpuestos.gravadoBaseImponible|n_format }}</span></div>
+      {% endif %}
+      {% if doc.totalImpuestos.exoneradoBaseImponible %}
+      <div class="line"><span class="k">Op. exoneradas</span><span class="v">{{ mon }} {{ doc.totalImpuestos.exoneradoBaseImponible|n_format }}</span></div>
+      {% endif %}
+      {% if doc.totalImpuestos.inafectoBaseImponible %}
+      <div class="line"><span class="k">Op. inafectas</span><span class="v">{{ mon }} {{ doc.totalImpuestos.inafectoBaseImponible|n_format }}</span></div>
+      {% endif %}
+      {% if doc.totalImpuestos.gratuitoBaseImponible %}
+      <div class="line"><span class="k">Op. gratuitas</span><span class="v">{{ mon }} {{ doc.totalImpuestos.gratuitoBaseImponible|n_format }}</span></div>
+      {% endif %}
       <div class="rule"></div>
-      <div class="line"><span class="k">IGV (18%)</span><span class="v">{{ moneda }} {{ doc.mtoIGV|n_format }}</span></div>
-      <div class="line"><span class="k">ICBPER / ISC</span><span class="v">{{ moneda }} 0.00</span></div>
+      {% if doc.totalImpuestos.gravadoImporte %}
+      <div class="line"><span class="k">IGV (18%)</span><span class="v">{{ mon }} {{ doc.totalImpuestos.gravadoImporte|n_format }}</span></div>
+      {% endif %}
+      {% if doc.totalImpuestos.icbImporte %}
+      <div class="line"><span class="k">ICBPER</span><span class="v">{{ mon }} {{ doc.totalImpuestos.icbImporte|n_format }}</span></div>
+      {% endif %}
     </div>
     <div class="grand-wrap">
-      <div class="grand"><span class="k">Total</span><span class="v">{{ moneda }} {{ doc.mtoImpVenta|n_format }}</span></div>
-      <div class="words">Son: once mil ochocientos noventa y dos con 40/100 soles.</div>
+      <div class="grand"><span class="k">Total</span><span class="v">{{ mon }} {{ doc.totalImporte.importeConImpuestos|n_format }}</span></div>
+      <div class="words">{{ doc.leyendas['1000'] }}</div>
     </div>
   </div>
 </div>
 
 <div class="foot">
   <div class="qr">
-    <svg viewBox="0 0 21 21" shape-rendering="crispEdges"><rect width="21" height="21" fill="#fff"/>
-    <g fill="#0f0f10">
-      <rect x="0" y="0" width="7" height="7"/><rect x="1" y="1" width="5" height="5" fill="#fff"/><rect x="2" y="2" width="3" height="3"/>
-      <rect x="14" y="0" width="7" height="7"/><rect x="15" y="1" width="5" height="5" fill="#fff"/><rect x="16" y="2" width="3" height="3"/>
-      <rect x="0" y="14" width="7" height="7"/><rect x="1" y="15" width="5" height="5" fill="#fff"/><rect x="2" y="16" width="3" height="3"/>
-      <rect x="8" y="0" width="1" height="1"/><rect x="10" y="0" width="2" height="1"/><rect x="8" y="2" width="2" height="1"/>
-      <rect x="5" y="8" width="2" height="2"/><rect x="8" y="8" width="2" height="1"/><rect x="11" y="8" width="1" height="2"/><rect x="13" y="8" width="3" height="1"/><rect x="17" y="8" width="1" height="2"/>
-      <rect x="1" y="10" width="2" height="1"/><rect x="4" y="10" width="1" height="2"/><rect x="6" y="10" width="2" height="1"/><rect x="9" y="10" width="1" height="2"/><rect x="12" y="10" width="2" height="1"/><rect x="15" y="10" width="1" height="2"/>
-      <rect x="0" y="12" width="1" height="2"/><rect x="3" y="12" width="2" height="1"/><rect x="6" y="12" width="1" height="2"/><rect x="8" y="12" width="2" height="1"/><rect x="11" y="12" width="2" height="2"/><rect x="17" y="12" width="2" height="2"/>
-      <rect x="10" y="14" width="2" height="1"/><rect x="13" y="14" width="1" height="2"/><rect x="15" y="14" width="2" height="1"/><rect x="18" y="14" width="1" height="2"/>
-      <rect x="8" y="16" width="2" height="1"/><rect x="11" y="16" width="1" height="2"/><rect x="14" y="16" width="2" height="1"/>
-      <rect x="9" y="18" width="1" height="2"/><rect x="12" y="18" width="2" height="1"/><rect x="15" y="18" width="1" height="2"/>
-      <rect x="8" y="20" width="1" height="1"/><rect x="11" y="20" width="3" height="1"/>
-    </g></svg>
+    {% if qrBase64 is not empty %}
+      <img src="data:image/png;base64,{{ qrBase64 }}" alt="QR Code" />
+    {% endif %}
   </div>
   <div class="meta">
-    <p><strong>Representación impresa</strong> de la Factura Electrónica.</p>
+    <p><strong>Representación impresa</strong> de la {{ name }} Electrónica.</p>
     <p>Consulte la validez en <strong>sunat.gob.pe</strong> con el RUC del emisor y el número del comprobante.</p>
-    <p style="margin-top:6px;">Firmante: {{ doc.company.ruc }} · Manufacturas Andina Textil S.A.C.</p>
-    <p class="hash">Hash: 3f8a21bc9d7e04a6c2f1b8e0d4a7c9f2e5b6d8a1</p>
+    <p style="margin-top:6px;">Firmante: {{ cp.ruc }} · {{ cp.razonSocial }}</p>
+    <p class="hash">Hash: {{ hashDocumento }}</p>
   </div>
   <div class="stamp">
     <span class="badge">● CPE SUNAT</span>

@@ -58,7 +58,7 @@ class RenderizadorPdfNotaDataValidationTest {
         @DisplayName("✓ Serie-Número de nota presente")
         void serieNumerNotaCredito() {
             BorradorNotaCredito nota = crearNotaCredito();
-            String serieNumero = nota.getSerie() + "-" + nota.getNumero();
+            String serieNumero = nota.getSerie() + "-" + String.format("%08d", nota.getNumero());
 
             String html = renderizarHtml(nota);
 
@@ -151,7 +151,7 @@ class RenderizadorPdfNotaDataValidationTest {
         @DisplayName("✓ Serie-Número de nota presente")
         void serieNumerNotaDebito() {
             BorradorNotaDebito nota = crearNotaDebito();
-            String serieNumero = nota.getSerie() + "-" + nota.getNumero();
+            String serieNumero = nota.getSerie() + "-" + String.format("%08d", nota.getNumero());
 
             String html = renderizarHtml(nota);
 

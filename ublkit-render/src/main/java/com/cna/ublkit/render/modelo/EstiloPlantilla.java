@@ -12,7 +12,7 @@ public enum EstiloPlantilla {
     MINIMAL_SERIF("minimal-serif"),
     BOLD_ACCENT("bold-accent");
 
-    public static final EstiloPlantilla DEFAULT = CLASSIC_MONO;
+    public static final EstiloPlantilla DEFAULT = BOLD_ACCENT;
 
     private final String carpeta;
 

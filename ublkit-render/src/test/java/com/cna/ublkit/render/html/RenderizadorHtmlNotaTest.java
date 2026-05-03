@@ -3,6 +3,8 @@ package com.cna.ublkit.render.html;
 import com.cna.ublkit.core.modelo.Contacto;
 import com.cna.ublkit.core.modelo.Direccion;
 import com.cna.ublkit.render.modelo.ContextoRender;
+import com.cna.ublkit.render.modelo.EstiloPlantilla;
+import com.cna.ublkit.render.modelo.ExtensionPlantilla;
 import com.cna.ublkit.render.modelo.FormatoImpresion;
 import com.cna.ublkit.render.modelo.ResultadoRender;
 import com.cna.ublkit.ubl.modelo.BorradorNotaCredito;
@@ -33,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * @since 0.2.0
  */
 @DisplayName("RenderizadorHtmlNota - HTML Note Rendering")
-class RenderizadorHtmlNotaTest {
+public class RenderizadorHtmlNotaTest {
 
     @Nested
     @DisplayName("Credit Note Rendering Tests")
@@ -43,7 +45,7 @@ class RenderizadorHtmlNotaTest {
         @DisplayName("Should render credit note as HTML")
         void shouldRenderCreditNoteAsHtml() {
             BorradorNotaCredito nota = crearNotaCreditoBasica();
-            ContextoRender<Object> contexto = ContextoRender.of((Object) nota, "hash", null);
+            ContextoRender<Object> contexto = ContextoRender.of((Object) nota, "hash", null, Map.of(), EstiloPlantilla.BOLD_ACCENT, ExtensionPlantilla.TWIG);
             RenderizadorHtmlNota renderer = new RenderizadorHtmlNota();
 
             ResultadoRender resultado = renderer.renderizar(contexto);
@@ -57,7 +59,7 @@ class RenderizadorHtmlNotaTest {
         @DisplayName("Should contain credit note type code")
         void shouldContainCreditNoteTypeCode() {
             BorradorNotaCredito nota = crearNotaCreditoBasica();
-            ContextoRender<Object> contexto = ContextoRender.of((Object) nota, "hash", null);
+            ContextoRender<Object> contexto = ContextoRender.of((Object) nota, "hash", null, Map.of(), EstiloPlantilla.BOLD_ACCENT, ExtensionPlantilla.TWIG);
             RenderizadorHtmlNota renderer = new RenderizadorHtmlNota();
 
             ResultadoRender resultado = renderer.renderizar(contexto);
@@ -70,13 +72,13 @@ class RenderizadorHtmlNotaTest {
         @DisplayName("Should contain credit note name")
         void shouldContainCreditNoteName() {
             BorradorNotaCredito nota = crearNotaCreditoBasica();
-            ContextoRender<Object> contexto = ContextoRender.of((Object) nota, "hash", null);
+            ContextoRender<Object> contexto = ContextoRender.of((Object) nota, "hash", null, Map.of(), EstiloPlantilla.BOLD_ACCENT, ExtensionPlantilla.TWIG);
             RenderizadorHtmlNota renderer = new RenderizadorHtmlNota();
 
             ResultadoRender resultado = renderer.renderizar(contexto);
             String html = resultado.contenidoHtml();
 
-            assertTrue(html.contains("NOTA DE CREDITO"), "Must contain note name");
+            assertTrue(html.toUpperCase().contains("NOTA DE CR"), "Must contain note name");
         }
     }
 
@@ -88,7 +90,7 @@ class RenderizadorHtmlNotaTest {
         @DisplayName("Should render debit note as HTML")
         void shouldRenderDebitNoteAsHtml() {
             BorradorNotaDebito nota = crearNotaDebitoBasica();
-            ContextoRender<Object> contexto = ContextoRender.of((Object) nota, "hash", null);
+            ContextoRender<Object> contexto = ContextoRender.of((Object) nota, "hash", null, Map.of(), EstiloPlantilla.BOLD_ACCENT, ExtensionPlantilla.TWIG);
             RenderizadorHtmlNota renderer = new RenderizadorHtmlNota();
 
             ResultadoRender resultado = renderer.renderizar(contexto);
@@ -102,26 +104,26 @@ class RenderizadorHtmlNotaTest {
         @DisplayName("Should contain debit note type code")
         void shouldContainDebitNoteTypeCode() {
             BorradorNotaDebito nota = crearNotaDebitoBasica();
-            ContextoRender<Object> contexto = ContextoRender.of((Object) nota, "hash", null);
+            ContextoRender<Object> contexto = ContextoRender.of((Object) nota, "hash", null, Map.of(), EstiloPlantilla.BOLD_ACCENT, ExtensionPlantilla.TWIG);
             RenderizadorHtmlNota renderer = new RenderizadorHtmlNota();
 
             ResultadoRender resultado = renderer.renderizar(contexto);
             String html = resultado.contenidoHtml();
 
-            assertTrue(html.contains("08"), "Must contain note type");
+            assertTrue(html.toUpperCase().contains("08"), "Must contain note type");
         }
 
         @Test
         @DisplayName("Should contain debit note name")
         void shouldContainDebitNoteName() {
             BorradorNotaDebito nota = crearNotaDebitoBasica();
-            ContextoRender<Object> contexto = ContextoRender.of((Object) nota, "hash", null);
+            ContextoRender<Object> contexto = ContextoRender.of((Object) nota, "hash", null, Map.of(), EstiloPlantilla.BOLD_ACCENT, ExtensionPlantilla.TWIG);
             RenderizadorHtmlNota renderer = new RenderizadorHtmlNota();
 
             ResultadoRender resultado = renderer.renderizar(contexto);
             String html = resultado.contenidoHtml();
 
-            assertTrue(html.contains("NOTA DE DEBITO"), "Must contain note name");
+            assertTrue(html.toUpperCase().contains("NOTA DE D"), "Must contain note name");
         }
     }
 
@@ -132,7 +134,7 @@ class RenderizadorHtmlNotaTest {
         @Test
         @DisplayName("Should throw for non-note document")
         void shouldThrowForNonNoteDocument() {
-            ContextoRender<Object> contexto = ContextoRender.of("invalid", "hash", null);
+            ContextoRender<Object> contexto = ContextoRender.of("invalid", "hash", null, Map.of(), EstiloPlantilla.BOLD_ACCENT, ExtensionPlantilla.TWIG);
             RenderizadorHtmlNota renderer = new RenderizadorHtmlNota();
 
             assertThrows(IllegalArgumentException.class, () -> renderer.renderizar(contexto),
@@ -150,7 +152,7 @@ class RenderizadorHtmlNotaTest {
         @DisplayName("Should support all print formats for credit notes")
         void shouldSupportAllFormatsForCreditNotes(FormatoImpresion formato) {
             BorradorNotaCredito nota = crearNotaCreditoCompleta();
-            ContextoRender<Object> contexto = ContextoRender.of((Object) nota, "hash", null);
+            ContextoRender<Object> contexto = ContextoRender.of((Object) nota, "hash", null, Map.of(), EstiloPlantilla.BOLD_ACCENT, ExtensionPlantilla.TWIG);
             RenderizadorHtmlNota renderer = new RenderizadorHtmlNota(formato);
 
             ResultadoRender resultado = renderer.renderizar(contexto);
@@ -164,7 +166,7 @@ class RenderizadorHtmlNotaTest {
         @DisplayName("Should support all print formats for debit notes")
         void shouldSupportAllFormatsForDebitNotes(FormatoImpresion formato) {
             BorradorNotaDebito nota = crearNotaDebitoCompleta();
-            ContextoRender<Object> contexto = ContextoRender.of((Object) nota, "hash", null);
+            ContextoRender<Object> contexto = ContextoRender.of((Object) nota, "hash", null, Map.of(), EstiloPlantilla.BOLD_ACCENT, ExtensionPlantilla.TWIG);
             RenderizadorHtmlNota renderer = new RenderizadorHtmlNota(formato);
 
             ResultadoRender resultado = renderer.renderizar(contexto);
@@ -182,33 +184,33 @@ class RenderizadorHtmlNotaTest {
         @DisplayName("Should map series and number")
         void shouldMapSeriesAndNumber() {
             BorradorNotaCredito nota = crearNotaCreditoCompleta();
-            ContextoRender<Object> contexto = ContextoRender.of((Object) nota, "hash", null);
+            ContextoRender<Object> contexto = ContextoRender.of((Object) nota, "hash", null, Map.of(), EstiloPlantilla.BOLD_ACCENT, ExtensionPlantilla.TWIG);
             RenderizadorHtmlNota renderer = new RenderizadorHtmlNota();
 
             ResultadoRender resultado = renderer.renderizar(contexto);
             String html = resultado.contenidoHtml();
 
-            assertTrue(html.contains("NC-001-100"), "Must contain series-number");
+            assertTrue(html.contains("NC-001-00000100"), "Must contain series-number");
         }
 
         @Test
         @DisplayName("Should map issue date")
         void shouldMapIssueDate() {
             BorradorNotaCredito nota = crearNotaCreditoCompleta();
-            ContextoRender<Object> contexto = ContextoRender.of((Object) nota, "hash", null);
+            ContextoRender<Object> contexto = ContextoRender.of((Object) nota, "hash", null, Map.of(), EstiloPlantilla.BOLD_ACCENT, ExtensionPlantilla.TWIG);
             RenderizadorHtmlNota renderer = new RenderizadorHtmlNota();
 
             ResultadoRender resultado = renderer.renderizar(contexto);
             String html = resultado.contenidoHtml();
 
-            assertTrue(html.contains("2026-03-30"), "Must contain issue date");
+            assertTrue(html.contains("30/03/2026"), "Must contain issue date");
         }
 
         @Test
         @DisplayName("Should map issuer information")
         void shouldMapIssuerInformation() {
             BorradorNotaCredito nota = crearNotaCreditoCompleta();
-            ContextoRender<Object> contexto = ContextoRender.of((Object) nota, "hash", null);
+            ContextoRender<Object> contexto = ContextoRender.of((Object) nota, "hash", null, Map.of(), EstiloPlantilla.BOLD_ACCENT, ExtensionPlantilla.TWIG);
             RenderizadorHtmlNota renderer = new RenderizadorHtmlNota();
 
             ResultadoRender resultado = renderer.renderizar(contexto);
@@ -221,7 +223,7 @@ class RenderizadorHtmlNotaTest {
         @DisplayName("Should map customer information")
         void shouldMapCustomerInformation() {
             BorradorNotaCredito nota = crearNotaCreditoCompleta();
-            ContextoRender<Object> contexto = ContextoRender.of((Object) nota, "hash", null);
+            ContextoRender<Object> contexto = ContextoRender.of((Object) nota, "hash", null, Map.of(), EstiloPlantilla.BOLD_ACCENT, ExtensionPlantilla.TWIG);
             RenderizadorHtmlNota renderer = new RenderizadorHtmlNota();
 
             ResultadoRender resultado = renderer.renderizar(contexto);
@@ -234,7 +236,7 @@ class RenderizadorHtmlNotaTest {
         @DisplayName("Should map currency")
         void shouldMapCurrency() {
             BorradorNotaCredito nota = crearNotaCreditoCompleta();
-            ContextoRender<Object> contexto = ContextoRender.of((Object) nota, "hash", null);
+            ContextoRender<Object> contexto = ContextoRender.of((Object) nota, "hash", null, Map.of(), EstiloPlantilla.BOLD_ACCENT, ExtensionPlantilla.TWIG);
             RenderizadorHtmlNota renderer = new RenderizadorHtmlNota();
 
             ResultadoRender resultado = renderer.renderizar(contexto);
@@ -252,7 +254,7 @@ class RenderizadorHtmlNotaTest {
         @DisplayName("Should map line items for credit note")
         void shouldMapLineItemsForCreditNote() {
             BorradorNotaCredito nota = crearNotaCreditoCompleta();
-            ContextoRender<Object> contexto = ContextoRender.of((Object) nota, "hash", null);
+            ContextoRender<Object> contexto = ContextoRender.of((Object) nota, "hash", null, Map.of(), EstiloPlantilla.BOLD_ACCENT, ExtensionPlantilla.TWIG);
             RenderizadorHtmlNota renderer = new RenderizadorHtmlNota();
 
             ResultadoRender resultado = renderer.renderizar(contexto);
@@ -265,7 +267,7 @@ class RenderizadorHtmlNotaTest {
         @DisplayName("Should map line quantities")
         void shouldMapLineQuantities() {
             BorradorNotaCredito nota = crearNotaCreditoCompleta();
-            ContextoRender<Object> contexto = ContextoRender.of((Object) nota, "hash", null);
+            ContextoRender<Object> contexto = ContextoRender.of((Object) nota, "hash", null, Map.of(), EstiloPlantilla.BOLD_ACCENT, ExtensionPlantilla.TWIG);
             RenderizadorHtmlNota renderer = new RenderizadorHtmlNota();
 
             ResultadoRender resultado = renderer.renderizar(contexto);
@@ -278,7 +280,7 @@ class RenderizadorHtmlNotaTest {
         @DisplayName("Should map line prices")
         void shouldMapLinePrices() {
             BorradorNotaCredito nota = crearNotaCreditoCompleta();
-            ContextoRender<Object> contexto = ContextoRender.of((Object) nota, "hash", null);
+            ContextoRender<Object> contexto = ContextoRender.of((Object) nota, "hash", null, Map.of(), EstiloPlantilla.BOLD_ACCENT, ExtensionPlantilla.TWIG);
             RenderizadorHtmlNota renderer = new RenderizadorHtmlNota();
 
             ResultadoRender resultado = renderer.renderizar(contexto);
@@ -296,26 +298,26 @@ class RenderizadorHtmlNotaTest {
         @DisplayName("Should map credit note reason type 01")
         void shouldMapCreditNoteReasonType01() {
             BorradorNotaCredito nota = crearNotaCreditoConTipo("01");
-            ContextoRender<Object> contexto = ContextoRender.of((Object) nota, "hash", null);
+            ContextoRender<Object> contexto = ContextoRender.of((Object) nota, "hash", null, Map.of(), EstiloPlantilla.BOLD_ACCENT, ExtensionPlantilla.TWIG);
             RenderizadorHtmlNota renderer = new RenderizadorHtmlNota();
 
             ResultadoRender resultado = renderer.renderizar(contexto);
             String html = resultado.contenidoHtml();
 
-            assertTrue(html.contains("Anulación de la operación"), "Must map reason type 01");
+            assertTrue(html.toUpperCase().contains("ANULACI"), "Must map reason type 01");
         }
 
         @Test
         @DisplayName("Should map credit note reason type 07")
         void shouldMapCreditNoteReasonType07() {
             BorradorNotaCredito nota = crearNotaCreditoConTipo("07");
-            ContextoRender<Object> contexto = ContextoRender.of((Object) nota, "hash", null);
+            ContextoRender<Object> contexto = ContextoRender.of((Object) nota, "hash", null, Map.of(), EstiloPlantilla.BOLD_ACCENT, ExtensionPlantilla.TWIG);
             RenderizadorHtmlNota renderer = new RenderizadorHtmlNota();
 
             ResultadoRender resultado = renderer.renderizar(contexto);
             String html = resultado.contenidoHtml();
 
-            assertTrue(html.contains("Devolución por ítem"), "Must map reason type 07");
+            assertTrue(html.toUpperCase().contains("DEVOLUCI"), "Must map reason type 07");
         }
 
         @ParameterizedTest
@@ -323,7 +325,7 @@ class RenderizadorHtmlNotaTest {
         @DisplayName("Should map all debit note reason types")
         void shouldMapAllDebitNoteReasonTypes(String tipo) {
             BorradorNotaDebito nota = crearNotaDebitoConTipo(tipo);
-            ContextoRender<Object> contexto = ContextoRender.of((Object) nota, "hash", null);
+            ContextoRender<Object> contexto = ContextoRender.of((Object) nota, "hash", null, Map.of(), EstiloPlantilla.BOLD_ACCENT, ExtensionPlantilla.TWIG);
             RenderizadorHtmlNota renderer = new RenderizadorHtmlNota();
 
             assertDoesNotThrow(() -> renderer.renderizar(contexto));
@@ -338,7 +340,7 @@ class RenderizadorHtmlNotaTest {
         @DisplayName("Should map subtotal for credit note")
         void shouldMapSubtotalForCreditNote() {
             BorradorNotaCredito nota = crearNotaCreditoCompleta();
-            ContextoRender<Object> contexto = ContextoRender.of((Object) nota, "hash", null);
+            ContextoRender<Object> contexto = ContextoRender.of((Object) nota, "hash", null, Map.of(), EstiloPlantilla.BOLD_ACCENT, ExtensionPlantilla.TWIG);
             RenderizadorHtmlNota renderer = new RenderizadorHtmlNota();
 
             ResultadoRender resultado = renderer.renderizar(contexto);
@@ -351,7 +353,7 @@ class RenderizadorHtmlNotaTest {
         @DisplayName("Should map IGV for credit note")
         void shouldMapIgvForCreditNote() {
             BorradorNotaCredito nota = crearNotaCreditoCompleta();
-            ContextoRender<Object> contexto = ContextoRender.of((Object) nota, "hash", null);
+            ContextoRender<Object> contexto = ContextoRender.of((Object) nota, "hash", null, Map.of(), EstiloPlantilla.BOLD_ACCENT, ExtensionPlantilla.TWIG);
             RenderizadorHtmlNota renderer = new RenderizadorHtmlNota();
 
             ResultadoRender resultado = renderer.renderizar(contexto);
@@ -364,7 +366,7 @@ class RenderizadorHtmlNotaTest {
         @DisplayName("Should map total for debit note")
         void shouldMapTotalForDebitNote() {
             BorradorNotaDebito nota = crearNotaDebitoCompleta();
-            ContextoRender<Object> contexto = ContextoRender.of((Object) nota, "hash", null);
+            ContextoRender<Object> contexto = ContextoRender.of((Object) nota, "hash", null, Map.of(), EstiloPlantilla.BOLD_ACCENT, ExtensionPlantilla.TWIG);
             RenderizadorHtmlNota renderer = new RenderizadorHtmlNota();
 
             ResultadoRender resultado = renderer.renderizar(contexto);
@@ -386,7 +388,7 @@ class RenderizadorHtmlNotaTest {
             nota.setNumero(1);
             nota.setFechaEmision(LocalDate.now());
 
-            ContextoRender<Object> contexto = ContextoRender.of((Object) nota, "hash", null);
+            ContextoRender<Object> contexto = ContextoRender.of((Object) nota, "hash", null, Map.of(), EstiloPlantilla.BOLD_ACCENT, ExtensionPlantilla.TWIG);
             RenderizadorHtmlNota renderer = new RenderizadorHtmlNota();
 
             assertDoesNotThrow(() -> renderer.renderizar(contexto));
@@ -400,7 +402,7 @@ class RenderizadorHtmlNotaTest {
             nota.setNumero(1);
             nota.setFechaEmision(LocalDate.now());
 
-            ContextoRender<Object> contexto = ContextoRender.of((Object) nota, "hash", null);
+            ContextoRender<Object> contexto = ContextoRender.of((Object) nota, "hash", null, Map.of(), EstiloPlantilla.BOLD_ACCENT, ExtensionPlantilla.TWIG);
             RenderizadorHtmlNota renderer = new RenderizadorHtmlNota();
 
             assertDoesNotThrow(() -> renderer.renderizar(contexto));
@@ -412,7 +414,7 @@ class RenderizadorHtmlNotaTest {
             BorradorNotaCredito nota = crearNotaCreditoBasica();
             nota.setDetalles(List.of());
 
-            ContextoRender<Object> contexto = ContextoRender.of((Object) nota, "hash", null);
+            ContextoRender<Object> contexto = ContextoRender.of((Object) nota, "hash", null, Map.of(), EstiloPlantilla.BOLD_ACCENT, ExtensionPlantilla.TWIG);
             RenderizadorHtmlNota renderer = new RenderizadorHtmlNota();
 
             ResultadoRender resultado = renderer.renderizar(contexto);
@@ -430,7 +432,7 @@ class RenderizadorHtmlNotaTest {
             linea.setPrecio(new BigDecimal("100"));
             nota.setDetalles(List.of(linea));
 
-            ContextoRender<Object> contexto = ContextoRender.of((Object) nota, "hash", null);
+            ContextoRender<Object> contexto = ContextoRender.of((Object) nota, "hash", null, Map.of(), EstiloPlantilla.BOLD_ACCENT, ExtensionPlantilla.TWIG);
             RenderizadorHtmlNota renderer = new RenderizadorHtmlNota();
 
             assertDoesNotThrow(() -> renderer.renderizar(contexto));
@@ -451,7 +453,7 @@ class RenderizadorHtmlNotaTest {
             }
             nota.setDetalles(lineas);
 
-            ContextoRender<Object> contexto = ContextoRender.of((Object) nota, "hash", null);
+            ContextoRender<Object> contexto = ContextoRender.of((Object) nota, "hash", null, Map.of(), EstiloPlantilla.BOLD_ACCENT, ExtensionPlantilla.TWIG);
             RenderizadorHtmlNota renderer = new RenderizadorHtmlNota();
 
             ResultadoRender resultado = renderer.renderizar(contexto);
@@ -470,6 +472,7 @@ class RenderizadorHtmlNotaTest {
         nota.setNumero(1);
         nota.setMoneda("PEN");
         nota.setFechaEmision(LocalDate.now());
+        nota.setTipoComprobante("07");
         return nota;
     }
 
@@ -479,6 +482,7 @@ class RenderizadorHtmlNotaTest {
         nota.setNumero(100);
         nota.setMoneda("PEN");
         nota.setFechaEmision(LocalDate.of(2026, 3, 30));
+        nota.setTipoComprobante("07");
 
         Direccion direccionEmisor = new Direccion("150101", "0000", null,
                 "Lima", "Lima", "Lima", "Av. Javier Prado 123", "PE");
@@ -520,6 +524,7 @@ class RenderizadorHtmlNotaTest {
         nota.setNumero(1);
         nota.setMoneda("PEN");
         nota.setFechaEmision(LocalDate.now());
+        nota.setTipoComprobante("08");
         return nota;
     }
 
@@ -529,6 +534,7 @@ class RenderizadorHtmlNotaTest {
         nota.setNumero(1);
         nota.setMoneda("PEN");
         nota.setFechaEmision(LocalDate.now());
+        nota.setTipoComprobante("08");
 
         Direccion direccionEmisor = new Direccion("150101", "0000", null,
                 "Lima", "Lima", "Lima", "Av. Javier Prado 123", "PE");

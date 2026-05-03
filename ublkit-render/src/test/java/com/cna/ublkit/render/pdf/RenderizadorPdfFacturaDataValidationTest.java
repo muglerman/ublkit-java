@@ -180,7 +180,7 @@ class RenderizadorPdfFacturaDataValidationTest {
             BorradorFactura factura = crearFacturaCompleta();
             String serie = factura.getSerie();
             Integer numero = factura.getNumero();
-            String identidadEsperada = serie + "-" + numero;
+            String identidadEsperada = serie + "-" + String.format("%08d", numero);
 
             String html = renderizarHtml(factura);
 
@@ -210,7 +210,7 @@ class RenderizadorPdfFacturaDataValidationTest {
             String html = renderizarHtml(factura);
 
             // Validar formato ISO
-            String fechaStr = fecha.toString(); // "2026-03-30"
+            String fechaStr = "30/03/2026";
             assertTrue(html.contains(fechaStr), "HTML debe contener fecha: " + fechaStr);
         }
 
@@ -478,7 +478,7 @@ class RenderizadorPdfFacturaDataValidationTest {
             String html = renderizarHtml(factura);
 
             // Debe contener fecha específica o patrón de fecha
-            assertTrue(html.contains("2026-03-30") || html.contains("2026") && html.contains("03") && html.contains("30"),
+            assertTrue(html.contains("30/03/2026") || html.contains("2026") && html.contains("03") && html.contains("30"),
                 "HTML debe contener fecha en formato ISO o partes de la fecha");
         }
 

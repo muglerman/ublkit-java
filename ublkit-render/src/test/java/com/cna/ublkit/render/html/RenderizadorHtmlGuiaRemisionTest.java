@@ -105,7 +105,7 @@ class RenderizadorHtmlGuiaRemisionTest {
             ResultadoRender resultado = renderer.renderizar(contexto);
             String html = resultado.contenidoHtml();
 
-            assertTrue(html.contains("GR-123"), "Must contain series-number");
+            assertTrue(html.contains("GR-00000123"), "Must contain series-number");
         }
 
         @Test
@@ -118,7 +118,7 @@ class RenderizadorHtmlGuiaRemisionTest {
             ResultadoRender resultado = renderer.renderizar(contexto);
             String html = resultado.contenidoHtml();
 
-            assertTrue(html.contains("2026-03-30"), "Must contain date");
+            assertTrue(html.contains("30/03/2026"), "Must contain date");
         }
 
         @Test

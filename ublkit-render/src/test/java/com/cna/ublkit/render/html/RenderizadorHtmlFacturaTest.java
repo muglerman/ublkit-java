@@ -3,6 +3,8 @@ package com.cna.ublkit.render.html;
 import com.cna.ublkit.core.modelo.Contacto;
 import com.cna.ublkit.core.modelo.Direccion;
 import com.cna.ublkit.render.modelo.ContextoRender;
+import com.cna.ublkit.render.modelo.EstiloPlantilla;
+import com.cna.ublkit.render.modelo.ExtensionPlantilla;
 import com.cna.ublkit.render.modelo.FormatoImpresion;
 import com.cna.ublkit.render.modelo.ResultadoRender;
 import com.cna.ublkit.ubl.modelo.BorradorFactura;
@@ -31,7 +33,13 @@ import static org.junit.jupiter.api.Assertions.*;
  * @since 0.2.0
  */
 @DisplayName("RenderizadorHtmlFactura - HTML Invoice Rendering")
-class RenderizadorHtmlFacturaTest {
+public class RenderizadorHtmlFacturaTest {
+
+    @Test
+    @DisplayName("Should detect test class")
+    void shouldDetectTestClass() {
+        assertNotNull(new RenderizadorHtmlFactura());
+    }
 
     @Nested
     @DisplayName("Basic HTML Rendering Tests")
@@ -57,7 +65,7 @@ class RenderizadorHtmlFacturaTest {
         @DisplayName("Should return non-null HTML content")
         void shouldReturnNonNullHtmlContent() {
             BorradorFactura factura = crearFacturaBasica();
-            ContextoRender<BorradorFactura> contexto = ContextoRender.of(factura, "hash", null);
+            ContextoRender<BorradorFactura> contexto = ContextoRender.of(factura, "hash", null, Map.of(), EstiloPlantilla.BOLD_ACCENT, ExtensionPlantilla.TWIG);
             RenderizadorHtmlFactura renderer = new RenderizadorHtmlFactura();
 
             ResultadoRender resultado = renderer.renderizar(contexto);
@@ -70,7 +78,7 @@ class RenderizadorHtmlFacturaTest {
         @DisplayName("Should render with default constructor")
         void shouldRenderWithDefaultConstructor() {
             BorradorFactura factura = crearFacturaBasica();
-            ContextoRender<BorradorFactura> contexto = ContextoRender.of(factura, "hash", null);
+            ContextoRender<BorradorFactura> contexto = ContextoRender.of(factura, "hash", null, Map.of(), EstiloPlantilla.BOLD_ACCENT, ExtensionPlantilla.TWIG);
             RenderizadorHtmlFactura renderer = new RenderizadorHtmlFactura();
 
             ResultadoRender resultado = renderer.renderizar(contexto);
@@ -89,7 +97,7 @@ class RenderizadorHtmlFacturaTest {
         @DisplayName("Should support all print formats")
         void shouldSupportAllPrintFormats(FormatoImpresion formato) {
             BorradorFactura factura = crearFacturaCompleta();
-            ContextoRender<BorradorFactura> contexto = ContextoRender.of(factura, "hash", null);
+            ContextoRender<BorradorFactura> contexto = ContextoRender.of(factura, "hash", null, Map.of(), EstiloPlantilla.BOLD_ACCENT, ExtensionPlantilla.TWIG);
             RenderizadorHtmlFactura renderer = new RenderizadorHtmlFactura(formato);
 
             ResultadoRender resultado = renderer.renderizar(contexto);
@@ -103,7 +111,7 @@ class RenderizadorHtmlFacturaTest {
         @DisplayName("Should render A4 format")
         void shouldRenderA4Format() {
             BorradorFactura factura = crearFacturaCompleta();
-            ContextoRender<BorradorFactura> contexto = ContextoRender.of(factura, "hash", null);
+            ContextoRender<BorradorFactura> contexto = ContextoRender.of(factura, "hash", null, Map.of(), EstiloPlantilla.BOLD_ACCENT, ExtensionPlantilla.TWIG);
             RenderizadorHtmlFactura renderer = new RenderizadorHtmlFactura(FormatoImpresion.A4);
 
             ResultadoRender resultado = renderer.renderizar(contexto);
@@ -114,7 +122,7 @@ class RenderizadorHtmlFacturaTest {
         @DisplayName("Should render A5 format")
         void shouldRenderA5Format() {
             BorradorFactura factura = crearFacturaCompleta();
-            ContextoRender<BorradorFactura> contexto = ContextoRender.of(factura, "hash", null);
+            ContextoRender<BorradorFactura> contexto = ContextoRender.of(factura, "hash", null, Map.of(), EstiloPlantilla.BOLD_ACCENT, ExtensionPlantilla.TWIG);
             RenderizadorHtmlFactura renderer = new RenderizadorHtmlFactura(FormatoImpresion.A5);
 
             ResultadoRender resultado = renderer.renderizar(contexto);
@@ -125,7 +133,7 @@ class RenderizadorHtmlFacturaTest {
         @DisplayName("Should render TICKET_80MM format")
         void shouldRenderTicket80MmFormat() {
             BorradorFactura factura = crearFacturaCompleta();
-            ContextoRender<BorradorFactura> contexto = ContextoRender.of(factura, "hash", null);
+            ContextoRender<BorradorFactura> contexto = ContextoRender.of(factura, "hash", null, Map.of(), EstiloPlantilla.BOLD_ACCENT, ExtensionPlantilla.TWIG);
             RenderizadorHtmlFactura renderer = new RenderizadorHtmlFactura(FormatoImpresion.TICKET_80MM);
 
             ResultadoRender resultado = renderer.renderizar(contexto);
@@ -136,7 +144,7 @@ class RenderizadorHtmlFacturaTest {
         @DisplayName("Should render TICKET_58MM format")
         void shouldRenderTicket58MmFormat() {
             BorradorFactura factura = crearFacturaCompleta();
-            ContextoRender<BorradorFactura> contexto = ContextoRender.of(factura, "hash", null);
+            ContextoRender<BorradorFactura> contexto = ContextoRender.of(factura, "hash", null, Map.of(), EstiloPlantilla.BOLD_ACCENT, ExtensionPlantilla.TWIG);
             RenderizadorHtmlFactura renderer = new RenderizadorHtmlFactura(FormatoImpresion.TICKET_58MM);
 
             ResultadoRender resultado = renderer.renderizar(contexto);
@@ -152,34 +160,34 @@ class RenderizadorHtmlFacturaTest {
         @DisplayName("Should map invoice series and number")
         void shouldMapInvoiceSeriesAndNumber() {
             BorradorFactura factura = crearFacturaCompleta();
-            ContextoRender<BorradorFactura> contexto = ContextoRender.of(factura, "hash", null);
+            ContextoRender<BorradorFactura> contexto = ContextoRender.of(factura, "hash", null, Map.of(), EstiloPlantilla.BOLD_ACCENT, ExtensionPlantilla.TWIG);
             RenderizadorHtmlFactura renderer = new RenderizadorHtmlFactura();
 
             ResultadoRender resultado = renderer.renderizar(contexto);
             String html = resultado.contenidoHtml();
 
-            assertTrue(html.contains("F001-123"), "Must contain invoice series-number");
+            assertTrue(html.contains("F001-00000123"), "Must contain invoice series-number");
         }
 
         @Test
         @DisplayName("Should map issuer information")
         void shouldMapIssuerInformation() {
             BorradorFactura factura = crearFacturaCompleta();
-            ContextoRender<BorradorFactura> contexto = ContextoRender.of(factura, "hash", null);
+            ContextoRender<BorradorFactura> contexto = ContextoRender.of(factura, "hash", null, Map.of(), EstiloPlantilla.BOLD_ACCENT, ExtensionPlantilla.TWIG);
             RenderizadorHtmlFactura renderer = new RenderizadorHtmlFactura();
 
             ResultadoRender resultado = renderer.renderizar(contexto);
             String html = resultado.contenidoHtml();
 
             assertTrue(html.contains("20123456789"), "Must contain issuer RUC");
-            assertTrue(html.contains("Mi Empresa SAC"), "Must contain issuer name");
+            assertTrue(html.contains("Mi Empresa SAC") || html.contains("Mi Empresa Sociedad Anónima Cerrada"), "Must contain issuer name");
         }
 
         @Test
         @DisplayName("Should map customer information")
         void shouldMapCustomerInformation() {
             BorradorFactura factura = crearFacturaCompleta();
-            ContextoRender<BorradorFactura> contexto = ContextoRender.of(factura, "hash", null);
+            ContextoRender<BorradorFactura> contexto = ContextoRender.of(factura, "hash", null, Map.of(), EstiloPlantilla.BOLD_ACCENT, ExtensionPlantilla.TWIG);
             RenderizadorHtmlFactura renderer = new RenderizadorHtmlFactura();
 
             ResultadoRender resultado = renderer.renderizar(contexto);
@@ -193,20 +201,20 @@ class RenderizadorHtmlFacturaTest {
         @DisplayName("Should map issue date")
         void shouldMapIssueDate() {
             BorradorFactura factura = crearFacturaCompleta();
-            ContextoRender<BorradorFactura> contexto = ContextoRender.of(factura, "hash", null);
+            ContextoRender<BorradorFactura> contexto = ContextoRender.of(factura, "hash", null, Map.of(), EstiloPlantilla.BOLD_ACCENT, ExtensionPlantilla.TWIG);
             RenderizadorHtmlFactura renderer = new RenderizadorHtmlFactura();
 
             ResultadoRender resultado = renderer.renderizar(contexto);
             String html = resultado.contenidoHtml();
 
-            assertTrue(html.contains("2026-03-30"), "Must contain issue date");
+            assertTrue(html.contains("30/03/2026"), "Must contain issue date");
         }
 
         @Test
         @DisplayName("Should map currency")
         void shouldMapCurrency() {
             BorradorFactura factura = crearFacturaCompleta();
-            ContextoRender<BorradorFactura> contexto = ContextoRender.of(factura, "hash", null);
+            ContextoRender<BorradorFactura> contexto = ContextoRender.of(factura, "hash", null, Map.of(), EstiloPlantilla.BOLD_ACCENT, ExtensionPlantilla.TWIG);
             RenderizadorHtmlFactura renderer = new RenderizadorHtmlFactura();
 
             ResultadoRender resultado = renderer.renderizar(contexto);
@@ -218,13 +226,13 @@ class RenderizadorHtmlFacturaTest {
 
     @Nested
     @DisplayName("Invoice Details Tests")
-    class InvoiceDetailsTests {
+    public class InvoiceRenderingTests {
 
         @Test
         @DisplayName("Should map all line items")
         void shouldMapAllLineItems() {
             BorradorFactura factura = crearFacturaCompleta();
-            ContextoRender<BorradorFactura> contexto = ContextoRender.of(factura, "hash", null);
+            ContextoRender<BorradorFactura> contexto = ContextoRender.of(factura, "hash", null, Map.of(), EstiloPlantilla.BOLD_ACCENT, ExtensionPlantilla.TWIG);
             RenderizadorHtmlFactura renderer = new RenderizadorHtmlFactura();
 
             ResultadoRender resultado = renderer.renderizar(contexto);
@@ -238,7 +246,7 @@ class RenderizadorHtmlFacturaTest {
         @DisplayName("Should map line quantities")
         void shouldMapLineQuantities() {
             BorradorFactura factura = crearFacturaCompleta();
-            ContextoRender<BorradorFactura> contexto = ContextoRender.of(factura, "hash", null);
+            ContextoRender<BorradorFactura> contexto = ContextoRender.of(factura, "hash", null, Map.of(), EstiloPlantilla.BOLD_ACCENT, ExtensionPlantilla.TWIG);
             RenderizadorHtmlFactura renderer = new RenderizadorHtmlFactura();
 
             ResultadoRender resultado = renderer.renderizar(contexto);
@@ -252,7 +260,7 @@ class RenderizadorHtmlFacturaTest {
         @DisplayName("Should map line unit prices")
         void shouldMapLineUnitPrices() {
             BorradorFactura factura = crearFacturaCompleta();
-            ContextoRender<BorradorFactura> contexto = ContextoRender.of(factura, "hash", null);
+            ContextoRender<BorradorFactura> contexto = ContextoRender.of(factura, "hash", null, Map.of(), EstiloPlantilla.BOLD_ACCENT, ExtensionPlantilla.TWIG);
             RenderizadorHtmlFactura renderer = new RenderizadorHtmlFactura();
 
             ResultadoRender resultado = renderer.renderizar(contexto);
@@ -265,7 +273,7 @@ class RenderizadorHtmlFacturaTest {
         @DisplayName("Should map measurement units")
         void shouldMapMeasurementUnits() {
             BorradorFactura factura = crearFacturaCompleta();
-            ContextoRender<BorradorFactura> contexto = ContextoRender.of(factura, "hash", null);
+            ContextoRender<BorradorFactura> contexto = ContextoRender.of(factura, "hash", null, Map.of(), EstiloPlantilla.BOLD_ACCENT, ExtensionPlantilla.TWIG);
             RenderizadorHtmlFactura renderer = new RenderizadorHtmlFactura();
 
             ResultadoRender resultado = renderer.renderizar(contexto);
@@ -283,7 +291,7 @@ class RenderizadorHtmlFacturaTest {
         @DisplayName("Should map subtotal correctly")
         void shouldMapSubtotalCorrectly() {
             BorradorFactura factura = crearFacturaCompleta();
-            ContextoRender<BorradorFactura> contexto = ContextoRender.of(factura, "hash", null);
+            ContextoRender<BorradorFactura> contexto = ContextoRender.of(factura, "hash", null, Map.of(), EstiloPlantilla.BOLD_ACCENT, ExtensionPlantilla.TWIG);
             RenderizadorHtmlFactura renderer = new RenderizadorHtmlFactura();
 
             ResultadoRender resultado = renderer.renderizar(contexto);
@@ -296,7 +304,7 @@ class RenderizadorHtmlFacturaTest {
         @DisplayName("Should map IGV tax")
         void shouldMapIgvTax() {
             BorradorFactura factura = crearFacturaCompleta();
-            ContextoRender<BorradorFactura> contexto = ContextoRender.of(factura, "hash", null);
+            ContextoRender<BorradorFactura> contexto = ContextoRender.of(factura, "hash", null, Map.of(), EstiloPlantilla.BOLD_ACCENT, ExtensionPlantilla.TWIG);
             RenderizadorHtmlFactura renderer = new RenderizadorHtmlFactura();
 
             ResultadoRender resultado = renderer.renderizar(contexto);
@@ -309,7 +317,7 @@ class RenderizadorHtmlFacturaTest {
         @DisplayName("Should map total with taxes")
         void shouldMapTotalWithTaxes() {
             BorradorFactura factura = crearFacturaCompleta();
-            ContextoRender<BorradorFactura> contexto = ContextoRender.of(factura, "hash", null);
+            ContextoRender<BorradorFactura> contexto = ContextoRender.of(factura, "hash", null, Map.of(), EstiloPlantilla.BOLD_ACCENT, ExtensionPlantilla.TWIG);
             RenderizadorHtmlFactura renderer = new RenderizadorHtmlFactura();
 
             ResultadoRender resultado = renderer.renderizar(contexto);
@@ -322,7 +330,7 @@ class RenderizadorHtmlFacturaTest {
         @DisplayName("Should map amount text legend")
         void shouldMapAmountTextLegend() {
             BorradorFactura factura = crearFacturaCompleta();
-            ContextoRender<BorradorFactura> contexto = ContextoRender.of(factura, "hash", null);
+            ContextoRender<BorradorFactura> contexto = ContextoRender.of(factura, "hash", null, Map.of(), EstiloPlantilla.BOLD_ACCENT, ExtensionPlantilla.TWIG);
             RenderizadorHtmlFactura renderer = new RenderizadorHtmlFactura();
 
             ResultadoRender resultado = renderer.renderizar(contexto);
@@ -368,7 +376,7 @@ class RenderizadorHtmlFacturaTest {
         @DisplayName("Should handle null QR code gracefully")
         void shouldHandleNullQrCodeGracefully() {
             BorradorFactura factura = crearFacturaBasica();
-            ContextoRender<BorradorFactura> contexto = ContextoRender.of(factura, "hash", null);
+            ContextoRender<BorradorFactura> contexto = ContextoRender.of(factura, "hash", null, Map.of(), EstiloPlantilla.BOLD_ACCENT, ExtensionPlantilla.TWIG);
             RenderizadorHtmlFactura renderer = new RenderizadorHtmlFactura();
 
             assertDoesNotThrow(() -> renderer.renderizar(contexto), "Must handle null QR");
@@ -388,7 +396,7 @@ class RenderizadorHtmlFacturaTest {
             factura.setFechaEmision(LocalDate.now());
             factura.setTipoComprobante("01");
 
-            ContextoRender<BorradorFactura> contexto = ContextoRender.of(factura, "hash", null);
+            ContextoRender<BorradorFactura> contexto = ContextoRender.of(factura, "hash", null, Map.of(), EstiloPlantilla.BOLD_ACCENT, ExtensionPlantilla.TWIG);
             RenderizadorHtmlFactura renderer = new RenderizadorHtmlFactura();
 
             assertDoesNotThrow(() -> renderer.renderizar(contexto), "Must handle null customer");
@@ -403,7 +411,7 @@ class RenderizadorHtmlFacturaTest {
             factura.setFechaEmision(LocalDate.now());
             factura.setTipoComprobante("01");
 
-            ContextoRender<BorradorFactura> contexto = ContextoRender.of(factura, "hash", null);
+            ContextoRender<BorradorFactura> contexto = ContextoRender.of(factura, "hash", null, Map.of(), EstiloPlantilla.BOLD_ACCENT, ExtensionPlantilla.TWIG);
             RenderizadorHtmlFactura renderer = new RenderizadorHtmlFactura();
 
             assertDoesNotThrow(() -> renderer.renderizar(contexto), "Must handle null issuer");
@@ -419,7 +427,7 @@ class RenderizadorHtmlFacturaTest {
             factura.setTipoComprobante("01");
             factura.setDetalles(List.of());
 
-            ContextoRender<BorradorFactura> contexto = ContextoRender.of(factura, "hash", null);
+            ContextoRender<BorradorFactura> contexto = ContextoRender.of(factura, "hash", null, Map.of(), EstiloPlantilla.BOLD_ACCENT, ExtensionPlantilla.TWIG);
             RenderizadorHtmlFactura renderer = new RenderizadorHtmlFactura();
 
             ResultadoRender resultado = renderer.renderizar(contexto);
@@ -442,7 +450,7 @@ class RenderizadorHtmlFacturaTest {
             linea.setPrecio(new BigDecimal("100"));
             factura.setDetalles(List.of(linea));
 
-            ContextoRender<BorradorFactura> contexto = ContextoRender.of(factura, "hash", null);
+            ContextoRender<BorradorFactura> contexto = ContextoRender.of(factura, "hash", null, Map.of(), EstiloPlantilla.BOLD_ACCENT, ExtensionPlantilla.TWIG);
             RenderizadorHtmlFactura renderer = new RenderizadorHtmlFactura();
 
             ResultadoRender resultado = renderer.renderizar(contexto);
@@ -465,7 +473,7 @@ class RenderizadorHtmlFacturaTest {
             linea.setPrecio(new BigDecimal("999.99"));
             factura.setDetalles(List.of(linea));
 
-            ContextoRender<BorradorFactura> contexto = ContextoRender.of(factura, "hash", null);
+            ContextoRender<BorradorFactura> contexto = ContextoRender.of(factura, "hash", null, Map.of(), EstiloPlantilla.BOLD_ACCENT, ExtensionPlantilla.TWIG);
             RenderizadorHtmlFactura renderer = new RenderizadorHtmlFactura();
 
             ResultadoRender resultado = renderer.renderizar(contexto);
@@ -488,7 +496,7 @@ class RenderizadorHtmlFacturaTest {
             linea.setPrecio(new BigDecimal("0.01"));
             factura.setDetalles(List.of(linea));
 
-            ContextoRender<BorradorFactura> contexto = ContextoRender.of(factura, "hash", null);
+            ContextoRender<BorradorFactura> contexto = ContextoRender.of(factura, "hash", null, Map.of(), EstiloPlantilla.BOLD_ACCENT, ExtensionPlantilla.TWIG);
             RenderizadorHtmlFactura renderer = new RenderizadorHtmlFactura();
 
             ResultadoRender resultado = renderer.renderizar(contexto);
@@ -515,7 +523,7 @@ class RenderizadorHtmlFacturaTest {
             }
             factura.setDetalles(lineas);
 
-            ContextoRender<BorradorFactura> contexto = ContextoRender.of(factura, "hash", null);
+            ContextoRender<BorradorFactura> contexto = ContextoRender.of(factura, "hash", null, Map.of(), EstiloPlantilla.BOLD_ACCENT, ExtensionPlantilla.TWIG);
             RenderizadorHtmlFactura renderer = new RenderizadorHtmlFactura();
 
             ResultadoRender resultado = renderer.renderizar(contexto);

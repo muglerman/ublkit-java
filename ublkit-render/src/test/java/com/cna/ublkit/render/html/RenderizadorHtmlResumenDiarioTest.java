@@ -84,7 +84,7 @@ class RenderizadorHtmlResumenDiarioTest {
             ResultadoRender resultado = renderer.renderizar(contexto);
             String html = resultado.contenidoHtml();
 
-            assertTrue(html.contains("2026-03-30"), "Must contain issue date");
+            assertTrue(html.contains("30/03/2026"), "Must contain issue date");
         }
 
         //@Test
@@ -97,7 +97,7 @@ class RenderizadorHtmlResumenDiarioTest {
             ResultadoRender resultado = renderer.renderizar(contexto);
             String html = resultado.contenidoHtml();
 
-            assertTrue(html.contains("2026-03-30"), "Must contain reference date");
+            assertTrue(html.contains("30/03/2026"), "Must contain reference date");
         }
 
         //@Test

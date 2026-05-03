@@ -63,7 +63,7 @@ class RenderizadorPdfGuiaRemisionDataValidationTest {
         @DisplayName("✓ Serie-Número de guía correcto (V001-4912)")
         void serieNumerGuiaCorrector() {
             BorradorGuiaRemision guia = crearGuiaTransportista();
-            String serieNumero = guia.getSerie() + "-" + guia.getNumero();
+            String serieNumero = guia.getSerie() + "-" + String.format("%08d", guia.getNumero());
 
             String html = renderizarHtml(guia);
 
@@ -79,7 +79,7 @@ class RenderizadorPdfGuiaRemisionDataValidationTest {
 
             String html = renderizarHtml(guia);
 
-            assertTrue(html.contains(fecha.toString()),
+            assertTrue(html.contains("31/03/2026"),
                 "HTML debe contener fecha: " + fecha);
         }
 
@@ -245,7 +245,7 @@ class RenderizadorPdfGuiaRemisionDataValidationTest {
 
             String html = renderizarHtml(guia);
 
-            assertTrue(html.contains(fechaTraslado.toString()),
+            assertTrue(html.contains("31/03/2026"),
                 "Debe contener fecha de traslado");
         }
     }

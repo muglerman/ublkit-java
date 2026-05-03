@@ -1,8 +1,11 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>T001-0001287 · Guía De Remisión Electrónica</title>
+<meta charset="UTF-8" />
+{% set cp = doc.remitente %}
+{% set cl = doc.destinatario %}
+{% set name = doc.tipoComprobante|catalog('01') %}
+<title>{{ doc.serie }}-{{ doc.numero|str_pad(8, '0', 'left') }} · {{ name }}</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
   * { box-sizing: border-box; }
@@ -91,7 +94,7 @@
 
   .foot { display: grid; grid-template-columns: 96px 1fr auto; gap: 18px; align-items: start; margin-top: 18px; padding-top: 14px; border-top: 2px solid var(--ink); }
   .foot .qr { width: 96px; height: 96px; background: #fff; padding: 4px; border-radius: 4px; border: 1.5px solid var(--ink); }
-  .foot .qr svg { width: 100%; height: 100%; display: block; }
+  .foot .qr img { width: 100%; height: 100%; display: block; }
   .foot .meta { font-size: 9.5px; color: var(--ink-2); }
   .foot .meta strong { color: var(--ink); }
   .foot .meta .hash { font-family: 'JetBrains Mono', monospace; word-break: break-all; font-size: 8.5px; margin-top: 4px; color: var(--ink-3); }
@@ -101,6 +104,12 @@
 </style>
 </head>
 <body>
+
+{% if params.header is not null %}
+<div id="custom-header-box" style="background: var(--accent-soft); padding: 10px; border-radius: 4px; margin-bottom: 10px; border: 1px solid var(--accent);">
+  {{ params.header }}
+</div>
+{% endif %}
 
 <div class="hero">
   <div class="left">
@@ -112,95 +121,101 @@
         </svg>
       </div>
       <div>
-        <div class="co-name">MANUFACTURAS ANDINA TEXTIL</div>
-        <div class="co-tag">Premium textiles since 2001 — Lima, Perú</div>
+        <div class="co-name">{% if cp is not null %}{% if cp.nombreComercial is not empty %}{{ cp.nombreComercial }}{% else %}{{ cp.razonSocial }}{% endif %}{% endif %}</div>
+        <div class="co-tag">{% if cp is not null %}{{ cp.razonSocial }}{% endif %}</div>
       </div>
     </div>
     <div class="info">
-      <p>{{ doc.company.address.direccion }} — Cercado de Lima</p>
-      <p>ventas@andinatextil.pe · (01) 555-0102 · andinatextil.pe</p>
-      <p>RUC <b>{{ doc.company.ruc }}</b></p>
+      <p>{% if cp is not null and cp.direccion is not null %}{{ cp.direccion.direccion }} — {{ cp.direccion.distrito }}{% endif %}</p>
+      <p>
+        {% if cp is not null and cp.contacto is not null and cp.contacto.email is not empty %}{{ cp.contacto.email }}{% endif %}
+        {% if cp is not null and cp.contacto is not null and cp.contacto.telefono is not empty %} · {{ cp.contacto.telefono }}{% endif %}
+      </p>
+      <p>RUC <b>{% if cp is not null %}{{ cp.ruc }}{% endif %}</b></p>
     </div>
   </div>
   <div class="right">
     <div>
-      <div class="kind">Guía De Remisión Electrónica</div>
-      <div class="num">T001-0001287</div>
+      <div class="kind">{% if doc.tipoComprobante is not empty %}{{ name|upper }} ELECTRONICA{% else %}GUIA DE REMISION ELECTRONICA{% endif %}</div>
+      <div class="num">{{ doc.serie }}-{{ doc.numero|str_pad(8, '0', 'left') }}</div>
     </div>
     <div>
       <div class="rule"></div>
-      <div class="row"><span class="k">Emitido</span><span class="v">{{ doc.fechaEmision|date('d/m/Y') }} · 14:32</span></div>
-      <div class="row"><span class="k">Vence</span><span class="v">24/05/2026</span></div>
-      <div class="row"><span class="k">Moneda</span><span class="v">Soles · T/C 3.742</span></div>
-      <div class="row"><span class="k">Condición</span><span class="v">Crédito · 2 cuotas</span></div>
+      <div class="row"><span class="k">Emitido</span><span class="v">{{ doc.fechaEmision|date('d/m/Y') }}{% if doc.horaEmision is not null %} · {{ doc.horaEmision }}{% endif %}</span></div>
+      {% if doc.envio is not null %}
+      <div class="row"><span class="k">Inicio Traslado</span><span class="v">{{ doc.envio.fechaTraslado|date('d/m/Y') }}</span></div>
+      <div class="row"><span class="k">Modalidad</span><span class="v">{{ doc.envio.tipoModalidadTraslado|catalog('18') }}</span></div>
+      <div class="row"><span class="k">Motivo</span><span class="v">{{ doc.envio.tipoTraslado|catalog('20') }}</span></div>
+      {% endif %}
     </div>
   </div>
 </div>
 
 <div class="parties">
   <div class="party">
-    <div class="label">Cliente</div>
-    <div class="name">{{ cl.rznSocial }}</div>
-    <div class="row"><span class="k">RUC</span><span class="mono">{{ cl.numDoc }}</span></div>
-    <div class="row"><span class="k">Dirección</span><span>{{ cl.address.direccion }}</span></div>
-    <div class="row"><span class="k">Ubicación</span><span>Lima — Lima — Miraflores</span></div>
-    <div class="row"><span class="k">O/C</span><span class="mono">OC-2026-00487</span></div>
+    <div class="label">Destinatario</div>
+    <div class="name">{% if cl is not null %}{{ cl.nombre }}{% endif %}</div>
+    <div class="row"><span class="k">{% if cl is not null %}{{ cl.tipoDocumentoIdentidad|catalog('06') }}{% endif %}</span><span class="mono">{% if cl is not null %}{{ cl.numeroDocumentoIdentidad }}{% endif %}</span></div>
+    {% if doc.envio is not null and doc.envio.destino is not null %}
+    <div class="row"><span class="k">Llegada</span><span>{{ doc.envio.destino.direccion }}</span></div>
+    <div class="row"><span class="k">Ubigeo</span><span>{{ doc.envio.destino.ubigeo }}</span></div>
+    {% endif %}
   </div>
   <div class="party">
-    <div class="label">Operación</div>
-    <div class="name">0101 — VENTA INTERNA</div>
-    <div class="row"><span class="k">Entrega</span><span>Almacén Los Portales · Callao</span></div>
-    <div class="row"><span class="k">Guía</span><span class="mono">GRE T001-00452</span></div>
-    <div class="row"><span class="k">Vendedor</span><span>Diego Paredes</span></div>
-    <div class="row"><span class="k">Ruta</span><span>Lima–Callao</span></div>
+    <div class="label">Datos del Envío</div>
+    {% if doc.envio is not null %}
+    <div class="row"><span class="k">Peso Bruto</span><span>{{ doc.envio.pesoTotal }} {{ doc.envio.pesoTotalUnidadMedida }}</span></div>
+    <div class="row"><span class="k">Bultos</span><span>{{ doc.envio.numeroDeBultos }}</span></div>
+    {% if doc.envio.partida is not null %}
+    <div class="row"><span class="k">Partida</span><span>{{ doc.envio.partida.direccion }}</span></div>
+    {% endif %}
+    {% if doc.envio.transportista is not null %}
+    <div class="row"><span class="k">Transporte</span><span>{{ doc.envio.transportista.nombre }}</span></div>
+    <div class="row"><span class="k">RUC Transp.</span><span class="mono">{{ doc.envio.transportista.numeroDocumentoIdentidad }}</span></div>
+    {% endif %}
+    {% if doc.envio.choferes is not empty %}
+    <div class="row"><span class="k">Conductor</span><span>{{ doc.envio.choferes[0].nombres }} {{ doc.envio.choferes[0].apellidos }}</span></div>
+    {% endif %}
+    {% if doc.envio.vehiculo is not null %}
+    <div class="row"><span class="k">Vehículo</span><span class="mono">{{ doc.envio.vehiculo.placa }}</span></div>
+    {% endif %}
+    {% endif %}
   </div>
 </div>
 
 <div class="items-wrap">
 <table class="items">
   <thead>
-    <tr><th class="c-idx">#</th>
-      <th class="c-code">Código</th>
-      <th>Descripción</th>
-      <th class="c-unit">Und</th>
-      <th class="c-qty">Cant.</th></tr>
+    <tr><th class="c-idx">#</th><th class="c-code">Código</th><th>Descripción</th><th class="c-unit">Und</th><th class="c-qty">Cant.</th></tr>
   </thead>
   <tbody>
-
-    {% for det in doc.details %}
+    {% for det in doc.detalles %}
     <tr>
       <td class="c-idx mono">{{ loop.index|str_pad(2, '0', 'left') }}</td>
       <td class="c-code mono">{{ det.codigo }}</td>
-      <td class="desc"><div class="main">{{ det.descripcion }}</div></td>
-      <td class="c-unit">{{ det.unidad }}</td>
-      <td class="c-qty mono">{{ det.cantidad }}</td>
+      <td class="desc">
+        <div class="main">{{ det.descripcion }}</div>
+      </td>
+      <td class="c-unit">{{ det.unidadMedida }}</td>
+      <td class="c-qty mono">{{ det.cantidad|n_format }}</td>
     </tr>
     {% endfor %}
   </tbody>
 </table>
+</div>
 
 <div class="foot">
   <div class="qr">
-    <svg viewBox="0 0 21 21" shape-rendering="crispEdges"><rect width="21" height="21" fill="#fff"/>
-    <g fill="#0f0f10">
-      <rect x="0" y="0" width="7" height="7"/><rect x="1" y="1" width="5" height="5" fill="#fff"/><rect x="2" y="2" width="3" height="3"/>
-      <rect x="14" y="0" width="7" height="7"/><rect x="15" y="1" width="5" height="5" fill="#fff"/><rect x="16" y="2" width="3" height="3"/>
-      <rect x="0" y="14" width="7" height="7"/><rect x="1" y="15" width="5" height="5" fill="#fff"/><rect x="2" y="16" width="3" height="3"/>
-      <rect x="8" y="0" width="1" height="1"/><rect x="10" y="0" width="2" height="1"/><rect x="8" y="2" width="2" height="1"/>
-      <rect x="5" y="8" width="2" height="2"/><rect x="8" y="8" width="2" height="1"/><rect x="11" y="8" width="1" height="2"/><rect x="13" y="8" width="3" height="1"/><rect x="17" y="8" width="1" height="2"/>
-      <rect x="1" y="10" width="2" height="1"/><rect x="4" y="10" width="1" height="2"/><rect x="6" y="10" width="2" height="1"/><rect x="9" y="10" width="1" height="2"/><rect x="12" y="10" width="2" height="1"/><rect x="15" y="10" width="1" height="2"/>
-      <rect x="0" y="12" width="1" height="2"/><rect x="3" y="12" width="2" height="1"/><rect x="6" y="12" width="1" height="2"/><rect x="8" y="12" width="2" height="1"/><rect x="11" y="12" width="2" height="2"/><rect x="17" y="12" width="2" height="2"/>
-      <rect x="10" y="14" width="2" height="1"/><rect x="13" y="14" width="1" height="2"/><rect x="15" y="14" width="2" height="1"/><rect x="18" y="14" width="1" height="2"/>
-      <rect x="8" y="16" width="2" height="1"/><rect x="11" y="16" width="1" height="2"/><rect x="14" y="16" width="2" height="1"/>
-      <rect x="9" y="18" width="1" height="2"/><rect x="12" y="18" width="2" height="1"/><rect x="15" y="18" width="1" height="2"/>
-      <rect x="8" y="20" width="1" height="1"/><rect x="11" y="20" width="3" height="1"/>
-    </g></svg>
+    {% if qrBase64 is not empty %}
+      <img src="data:image/png;base64,{{ qrBase64 }}" style="width:100%;height:100%;display:block;" alt="QR Code" />
+    {% endif %}
   </div>
   <div class="meta">
-    <p><strong>Representación impresa</strong> de la Guía De Remisión Electrónica.</p>
+    <p><strong>Representación impresa</strong> de la {% if doc.tipoComprobante is not empty %}{{ name }}{% else %}Guía de Remisión{% endif %} Electrónica.</p>
     <p>Consulte la validez en <strong>sunat.gob.pe</strong> con el RUC del emisor y el número del comprobante.</p>
-    <p style="margin-top:6px;">Firmante: {{ doc.company.ruc }} · Manufacturas Andina Textil S.A.C.</p>
-    <p class="hash">Hash: 3f8a21bc9d7e04a6c2f1b8e0d4a7c9f2e5b6d8a1</p>
+    <p style="margin-top:6px;">Firmante: {% if cp is not null %}{{ cp.ruc }} · {{ cp.razonSocial }}{% endif %}</p>
+    <p class="hash">Hash: {{ hashDocumento }}</p>
+    {% if params.footer is not null %}<p id="custom-footer-box" style="margin-top:10px; font-style:italic;">{{ params.footer }}</p>{% endif %}
   </div>
   <div class="stamp">
     <span class="badge">● CPE SUNAT</span>
@@ -210,3 +225,4 @@
 
 </body>
 </html>
+

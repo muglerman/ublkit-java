@@ -1,6 +1,8 @@
 package com.cna.ublkit.render.html;
 
 import com.cna.ublkit.render.modelo.ContextoRender;
+import com.cna.ublkit.render.modelo.EstiloPlantilla;
+import com.cna.ublkit.render.modelo.ExtensionPlantilla;
 import com.cna.ublkit.render.modelo.ResultadoRender;
 import com.cna.ublkit.ubl.modelo.sunat.baja.ComunicacionBaja;
 import com.cna.ublkit.ubl.modelo.sunat.baja.ItemBaja;
@@ -83,7 +85,7 @@ class RenderizadorHtmlComunicacionBajaTest {
             ResultadoRender resultado = renderer.renderizar(contexto);
             String html = resultado.contenidoHtml();
 
-            assertTrue(html.contains("2026-03-30"), "Must contain issue date");
+            assertTrue(html.contains("30/03/2026"), "Must contain issue date");
         }
 
         //@Test

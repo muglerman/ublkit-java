@@ -116,7 +116,7 @@ class RenderizadorPdfCompletesTest {
             ResultadoRender resultado = renderer.renderizar(contexto);
             String html = resultado.contenidoHtml();
 
-            assertTrue(html.contains("F001-123"), "Debe contener serie y número: F001-123");
+            assertTrue(html.contains("F001-00000123"), "Debe contener serie y número: F001-00000123");
         }
 
         @Test
@@ -129,7 +129,7 @@ class RenderizadorPdfCompletesTest {
             ResultadoRender resultado = renderer.renderizar(contexto);
             String html = resultado.contenidoHtml();
 
-            assertTrue(html.contains("2026-03-30"), "Debe contener fecha de emisión");
+            assertTrue(html.contains("30/03/2026"), "Debe contener fecha de emisión");
         }
     }
 

@@ -9,7 +9,7 @@ public enum ExtensionPlantilla {
     HTML(".html"),
     TWIG(".html.twig");
 
-    public static final ExtensionPlantilla DEFAULT = HTML;
+    public static final ExtensionPlantilla DEFAULT = TWIG;
 
     private final String sufijo;
 

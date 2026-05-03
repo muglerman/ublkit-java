@@ -62,7 +62,7 @@ class RenderizadorPdfFacturaDiagnosticTest {
                 verifyContent("RUC Cliente (10987654321)", html, "10987654321");
                 verifyContent("Nombre Cliente (Cliente Ejemplo EIRL)", html, "Cliente Ejemplo EIRL");
                 verifyContent("Serie-Número (F001-123)", html, "F001-123");
-                verifyContent("Fecha Emisión (2026-03-30)", html, "2026-03-30");
+                verifyContent("Fecha Emisión (30/03/2026)", html, "30/03/2026");
                 verifyContent("Moneda (PEN)", html, "PEN");
                 verifyContent("Subtotal (2200)", html, "2200");
                 verifyContent("IGV (396)", html, "396");
