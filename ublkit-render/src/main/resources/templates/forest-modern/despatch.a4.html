@@ -97,7 +97,7 @@
       </div>
     </div>
     <div class="meta">
-      <p>Av. Argentina 2740 Int. 301 — Lima, Perú</p>
+      <p>{{ doc.company.address.direccion }} — Lima, Perú</p>
       <p>logistica@andinatextil.pe · (01) 555-0102</p>
     </div>
   </div>
@@ -106,14 +106,14 @@
     <div class="kind">Guía de Remisión</div>
     <div class="sub">Remitente electrónica</div>
     <div class="num">T001-00452</div>
-    <div class="ruc">RUC <b>20512345678</b></div>
+    <div class="ruc">RUC <b>{{ doc.company.ruc }}</b></div>
   </div>
 </div>
 
 <div class="trip-band">
   <div class="leg">
     <div class="k">Partida</div>
-    <div class="v">Av. Argentina 2740 Int. 301</div>
+    <div class="v">{{ doc.company.address.direccion }}</div>
     <div class="addr">Cercado de Lima · Lima · Lima</div>
   </div>
   <div class="arrow">→</div>
@@ -125,8 +125,8 @@
 </div>
 
 <div class="meta-row">
-  <div class="chip"><span class="k">Fecha emisión</span><span class="v">24/04/2026</span></div>
-  <div class="chip"><span class="k">Inicio traslado</span><span class="v">24/04/2026 · 16:00</span></div>
+  <div class="chip"><span class="k">Fecha emisión</span><span class="v">{{ doc.fechaEmision|date('d/m/Y') }}</span></div>
+  <div class="chip"><span class="k">Inicio traslado</span><span class="v">{{ doc.fechaEmision|date('d/m/Y') }} · 16:00</span></div>
   <div class="chip"><span class="k">Motivo</span><span class="v">01 Venta</span></div>
   <div class="chip"><span class="k">Modalidad</span><span class="v">02 Transporte privado</span></div>
 </div>
@@ -135,13 +135,13 @@
   <div class="party">
     <div class="label">Destinatario</div>
     <div class="name">Comercial Los Portales S.A.</div>
-    <div class="row"><span class="k">RUC</span><span class="mono">20498123456</span></div>
+    <div class="row"><span class="k">RUC</span><span class="mono">{{ cl.numDoc }}</span></div>
     <div class="row"><span class="k">Contacto</span><span>Sra. Ana Quispe · (01) 555-2210</span></div>
     <div class="row"><span class="k">Horario recep.</span><span>L–V · 08:00 a 16:30</span></div>
   </div>
   <div class="party">
     <div class="label">Documento relacionado</div>
-    <div class="name">Factura F001-0001287</div>
+    <div class="name">Factura {{ doc.serie }}-{{ doc.correlativo }}</div>
     <div class="row"><span class="k">Orden compra</span><span class="mono">OC-2026-00487</span></div>
     <div class="row"><span class="k">Bultos</span><span>14 cajas de cartón</span></div>
     <div class="row"><span class="k">Peso total</span><span>58.40 kg</span></div>
@@ -192,7 +192,7 @@
   <div class="meta">
     <p><strong>Representación impresa</strong> de la Guía de Remisión Electrónica.</p>
     <p>Consulte la validez en <strong>sunat.gob.pe</strong> con el RUC del remitente y el número del documento.</p>
-    <p style="margin-top:6px;">Firmante: 20512345678 · Manufacturas Andina Textil S.A.C.</p>
+    <p style="margin-top:6px;">Firmante: {{ doc.company.ruc }} · Manufacturas Andina Textil S.A.C.</p>
   </div>
   <div class="stamp">
     <span class="badge">GRE autorizada</span>

@@ -109,21 +109,21 @@
       </svg>
     </div>
     <div>
-      <div class="co-name">MANUFACTURAS ANDINA TEXTIL S.A.C.</div>
-      <div class="co-sub">Av. Argentina 2740 Int. 301 — Lima, Perú · ventas@andinatextil.pe · (01) 555-0102</div>
+      <div class="co-name">{{ doc.company.razonSocial }}</div>
+      <div class="co-sub">{{ doc.company.address.direccion }} — Lima, Perú · ventas@andinatextil.pe · (01) 555-0102</div>
     </div>
   </div>
   <div class="docbox">
-    <div class="ruc">R.U.C. <b class="mono">20512345678</b></div>
+    <div class="ruc">R.U.C. <b class="mono">{{ doc.company.ruc }}</b></div>
     <div class="kind">NOTA DE CRÉDITO ELECTRÓNICA</div>
     <div class="num">FC01-0001287</div>
   </div>
 </div>
 
 <div class="sub-band">
-  <div><span class="k">Fecha de emisión</span><span class="v">24/04/2026 · 14:32</span></div>
+  <div><span class="k">Fecha de emisión</span><span class="v">{{ doc.fechaEmision|date('d/m/Y') }} · 14:32</span></div>
   <div><span class="k">Vencimiento</span><span class="v">24/05/2026</span></div>
-  <div><span class="k">Moneda</span><span class="v">Soles (PEN) · T/C 3.742</span></div>
+  <div><span class="k">Moneda</span><span class="v">Soles ({{ moneda }}) · T/C 3.742</span></div>
   <div><span class="k">Condición</span><span class="v">Crédito · 2 cuotas</span></div>
 </div>
 
@@ -132,9 +132,9 @@
 <div class="parties">
   <div class="party">
     <div class="label">Cliente / Adquirente</div>
-    <div class="name">COMERCIAL LOS PORTALES S.A.</div>
-    <div class="row"><span class="k">RUC</span><span class="mono">20498123456</span></div>
-    <div class="row"><span class="k">Dirección</span><span>Av. Jorge Chavez 455 — Miraflores</span></div>
+    <div class="name">{{ cl.rznSocial }}</div>
+    <div class="row"><span class="k">RUC</span><span class="mono">{{ cl.numDoc }}</span></div>
+    <div class="row"><span class="k">Dirección</span><span>{{ cl.address.direccion }}</span></div>
     <div class="row"><span class="k">Ubicación</span><span>Lima — Lima — Miraflores</span></div>
     <div class="row"><span class="k">Orden compra</span><span class="mono">OC-2026-00487</span></div>
   </div>
@@ -160,11 +160,18 @@
     </tr>
   </thead>
   <tbody>
-    <tr><td class="c-idx mono">01</td><td class="c-code mono">TX-0014</td><td class="desc"><div class="main">Polo algodón pima Premium — Talla M / Azul marino</div><div class="sub">SUNAT 53102400 · GS1 7750112000142 · IGV 10 Gravado</div></td><td class="c-unit">NIU</td><td class="c-qty mono">48.00</td><td class="c-price mono">65.00</td><td class="c-tax mono">3,120.00</td></tr>
-    <tr><td class="c-idx mono">02</td><td class="c-code mono">TX-0022</td><td class="desc"><div class="main">Polo algodón pima Premium — Talla L / Blanco</div><div class="sub">SUNAT 53102400 · IGV 10 Gravado</div></td><td class="c-unit">NIU</td><td class="c-qty mono">36.00</td><td class="c-price mono">65.00</td><td class="c-tax mono">2,340.00</td></tr>
-    <tr><td class="c-idx mono">03</td><td class="c-code mono">TX-0031</td><td class="desc"><div class="main">Camisa lino básica — Talla M / Beige arena</div><div class="sub">IGV 10 Gravado Onerosa</div></td><td class="c-unit">NIU</td><td class="c-qty mono">24.00</td><td class="c-price mono">89.00</td><td class="c-tax mono">2,136.00</td></tr>
-    <tr><td class="c-idx mono">04</td><td class="c-code mono">TX-0045</td><td class="desc"><div class="main">Pantalón chino casual — Talla 32 / Caqui</div><div class="sub">IGV 10 Gravado Onerosa</div></td><td class="c-unit">NIU</td><td class="c-qty mono">18.00</td><td class="c-price mono">149.00</td><td class="c-tax mono">2,682.00</td></tr>
-    <tr><td class="c-idx mono">05</td><td class="c-code mono">SV-001</td><td class="desc"><div class="main">Servicio de bordado personalizado — logo en pecho</div><div class="sub">IGV 10 Gravado Onerosa</div></td><td class="c-unit">ZZ</td><td class="c-qty mono">126.00</td><td class="c-price mono">4.50</td><td class="c-tax mono">567.00</td></tr>
+
+    {% for det in doc.details %}
+    <tr>
+      <td class="c-idx mono">{{ loop.index|str_pad(2, '0', 'left') }}</td>
+      <td class="c-code mono">{{ det.codProducto }}</td>
+      <td class="desc"><div class="main">{{ det.descripcion }}</div><div class="sub">{% if det.codProductoSUNAT %}SUNAT {{ det.codProductoSUNAT }}{% endif %}</div></td>
+      <td class="c-unit">{{ det.unidad }}</td>
+      <td class="c-qty mono">{{ det.cantidad|n_format }}</td>
+      <td class="c-price mono">{{ det.mtoValorUnitario|n_format }}</td>
+      <td class="c-tax mono">{{ det.mtoValorVenta|n_format }}</td>
+    </tr>
+    {% endfor %}
   </tbody>
 </table>
 
@@ -173,14 +180,14 @@
     <div class="block">
       <div class="head">Cuotas de pago</div>
       <div class="body">
-        <p class="small">Cuota 1 · vence 24/05/2026 · <b>S/ 5,946.20</b></p>
-        <p class="small">Cuota 2 · vence 24/06/2026 · <b>S/ 5,946.20</b></p>
+        <p class="small">Cuota 1 · vence 24/05/2026 · <b>{{ moneda }} 5,946.20</b></p>
+        <p class="small">Cuota 2 · vence 24/06/2026 · <b>{{ moneda }} 5,946.20</b></p>
       </div>
     </div>
     <div class="block">
       <div class="head">Detracción SPOT</div>
       <div class="body">
-        <p><b>S/ 1,427.09</b> · 020 Bienes gravados con IGV</p>
+        <p><b>{{ moneda }} 1,427.09</b> · 020 Bienes gravados con IGV</p>
         <p class="small">Transferencia en cuenta · Cta. BN 00-032-019287</p>
       </div>
     </div>
@@ -193,23 +200,23 @@
     <div class="block">
       <div class="head">Leyendas SUNAT</div>
       <div class="body">
-        <p class="small">· SON ONCE MIL OCHOCIENTOS NOVENTA Y DOS CON 40/100 SOLES</p>
+        <p class="small">· SON ONCE MIL OCHOCIENTOS NOVENTA Y DOS CON 40/100 {{ moneda }}</p>
         <p class="small">· Operación sujeta a detracción</p>
       </div>
     </div>
   </div>
 
   <div class="totals">
-    <div class="line"><span class="k">Op. gravadas</span><span class="v">S/ 10,078.31</span></div>
-    <div class="line"><span class="k">Op. exoneradas</span><span class="v">S/ 0.00</span></div>
-    <div class="line"><span class="k">Op. inafectas</span><span class="v">S/ 0.00</span></div>
-    <div class="line"><span class="k">Op. gratuitas</span><span class="v">S/ 0.00</span></div>
+    <div class="line"><span class="k">Op. gravadas</span><span class="v">{{ moneda }} {{ doc.mtoOperGravadas|n_format }}</span></div>
+    <div class="line"><span class="k">Op. exoneradas</span><span class="v">{{ moneda }} 0.00</span></div>
+    <div class="line"><span class="k">Op. inafectas</span><span class="v">{{ moneda }} 0.00</span></div>
+    <div class="line"><span class="k">Op. gratuitas</span><span class="v">{{ moneda }} 0.00</span></div>
     <div class="rule"></div>
-    <div class="line"><span class="k">IGV (18.00%)</span><span class="v">S/ 1,814.10</span></div>
-    <div class="line"><span class="k">ICBPER</span><span class="v">S/ 0.00</span></div>
-    <div class="line"><span class="k">ISC</span><span class="v">S/ 0.00</span></div>
+    <div class="line"><span class="k">IGV (18.00%)</span><span class="v">{{ moneda }} {{ doc.mtoIGV|n_format }}</span></div>
+    <div class="line"><span class="k">ICBPER</span><span class="v">{{ moneda }} 0.00</span></div>
+    <div class="line"><span class="k">ISC</span><span class="v">{{ moneda }} 0.00</span></div>
     <div class="in-words">Son: Once mil ochocientos noventa y dos con 40/100 soles.</div>
-    <div class="grand"><span>TOTAL</span><span class="v">S/ 11,892.40</span></div>
+    <div class="grand"><span>TOTAL</span><span class="v">{{ moneda }} {{ doc.mtoImpVenta|n_format }}</span></div>
   </div>
 </div>
 
@@ -233,7 +240,7 @@
   <div class="meta">
     <p><strong>Representación impresa</strong> de la Nota De Crédito Electrónica.</p>
     <p>Consulte la validez en <strong>sunat.gob.pe</strong> con el RUC del emisor y el número del documento.</p>
-    <p style="margin-top:6px;">Firmante digital: 20512345678 · Manufacturas Andina Textil S.A.C.</p>
+    <p style="margin-top:6px;">Firmante digital: {{ doc.company.ruc }} · Manufacturas Andina Textil S.A.C.</p>
     <p class="hash">Hash: 3f8a21bc9d7e04a6c2f1b8e0d4a7c9f2e5b6d8a1</p>
   </div>
   <div class="stamp">

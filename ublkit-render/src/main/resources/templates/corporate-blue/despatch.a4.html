@@ -107,21 +107,21 @@
       </svg>
     </div>
     <div>
-      <div class="co-name">MANUFACTURAS ANDINA TEXTIL S.A.C.</div>
-      <div class="co-sub">Av. Argentina 2740 Int. 301 — Lima, Perú · ventas@andinatextil.pe · (01) 555-0102</div>
+      <div class="co-name">{{ doc.company.razonSocial }}</div>
+      <div class="co-sub">{{ doc.company.address.direccion }} — Lima, Perú · ventas@andinatextil.pe · (01) 555-0102</div>
     </div>
   </div>
   <div class="docbox">
-    <div class="ruc">R.U.C. <b class="mono">20512345678</b></div>
+    <div class="ruc">R.U.C. <b class="mono">{{ doc.company.ruc }}</b></div>
     <div class="kind">GUÍA DE REMISIÓN ELECTRÓNICA</div>
     <div class="num">T001-0001287</div>
   </div>
 </div>
 
 <div class="sub-band">
-  <div><span class="k">Fecha de emisión</span><span class="v">24/04/2026 · 14:32</span></div>
+  <div><span class="k">Fecha de emisión</span><span class="v">{{ doc.fechaEmision|date('d/m/Y') }} · 14:32</span></div>
   <div><span class="k">Vencimiento</span><span class="v">24/05/2026</span></div>
-  <div><span class="k">Moneda</span><span class="v">Soles (PEN) · T/C 3.742</span></div>
+  <div><span class="k">Moneda</span><span class="v">Soles ({{ moneda }}) · T/C 3.742</span></div>
   <div><span class="k">Condición</span><span class="v">Crédito · 2 cuotas</span></div>
 </div>
 
@@ -130,9 +130,9 @@
 <div class="parties">
   <div class="party">
     <div class="label">Cliente / Adquirente</div>
-    <div class="name">COMERCIAL LOS PORTALES S.A.</div>
-    <div class="row"><span class="k">RUC</span><span class="mono">20498123456</span></div>
-    <div class="row"><span class="k">Dirección</span><span>Av. Jorge Chavez 455 — Miraflores</span></div>
+    <div class="name">{{ cl.rznSocial }}</div>
+    <div class="row"><span class="k">RUC</span><span class="mono">{{ cl.numDoc }}</span></div>
+    <div class="row"><span class="k">Dirección</span><span>{{ cl.address.direccion }}</span></div>
     <div class="row"><span class="k">Ubicación</span><span>Lima — Lima — Miraflores</span></div>
     <div class="row"><span class="k">Orden compra</span><span class="mono">OC-2026-00487</span></div>
   </div>
@@ -188,7 +188,7 @@
   <div class="meta">
     <p><strong>Representación impresa</strong> de la Guía De Remisión Electrónica.</p>
     <p>Consulte la validez en <strong>sunat.gob.pe</strong> con el RUC del emisor y el número del documento.</p>
-    <p style="margin-top:6px;">Firmante digital: 20512345678 · Manufacturas Andina Textil S.A.C.</p>
+    <p style="margin-top:6px;">Firmante digital: {{ doc.company.ruc }} · Manufacturas Andina Textil S.A.C.</p>
     <p class="hash">Hash: 3f8a21bc9d7e04a6c2f1b8e0d4a7c9f2e5b6d8a1</p>
   </div>
   <div class="stamp">

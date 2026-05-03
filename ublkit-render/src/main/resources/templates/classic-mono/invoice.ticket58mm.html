@@ -2,6 +2,10 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
+{% set cp = doc.emisor %}
+{% set cl = doc.receptor %}
+{% set mon = doc.moneda|catalog("02") %}
+{% set name = doc.tipoComprobante|catalog("01") %}
 <title>{{ doc.serie }}-{{ doc.numero }} · Factura Electrónica</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');

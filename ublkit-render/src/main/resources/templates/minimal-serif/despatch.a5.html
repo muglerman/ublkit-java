@@ -96,13 +96,13 @@
 
 <div class="hero">
   <div class="co-name">Manufacturas Andina Textil</div>
-  <div class="co-sub">Av. Argentina 2740 Int. 301 · Lima · RUC 20512345678 · ventas@andinatextil.pe</div>
+  <div class="co-sub">{{ doc.company.address.direccion }} · Lima · RUC {{ doc.company.ruc }} · ventas@andinatextil.pe</div>
   <div class="doc-kind">Guía De Remisión Electrónica</div>
   <div class="doc-num">T001 · 0001287</div>
 </div>
 
 <div class="meta-grid">
-  <div><div class="k">Emitido</div><div class="v">24/04/2026</div></div>
+  <div><div class="k">Emitido</div><div class="v">{{ doc.fechaEmision|date('d/m/Y') }}</div></div>
   <div><div class="k">Vencimiento</div><div class="v">24/05/2026</div></div>
   <div><div class="k">Moneda</div><div class="v">Soles · T/C 3.742</div></div>
   <div><div class="k">Condición</div><div class="v">Crédito · 2 cuotas</div></div>
@@ -112,8 +112,8 @@
   <div class="party">
     <div class="label">Facturado a</div>
     <div class="name">Comercial Los Portales S.A.</div>
-    <div class="row"><span class="k">RUC</span><span class="mono">20498123456</span></div>
-    <div class="row"><span class="k">Dirección</span><span>Av. Jorge Chavez 455 — Miraflores</span></div>
+    <div class="row"><span class="k">RUC</span><span class="mono">{{ cl.numDoc }}</span></div>
+    <div class="row"><span class="k">Dirección</span><span>{{ cl.address.direccion }}</span></div>
     <div class="row"><span class="k">Ubicación</span><span>Lima · Miraflores</span></div>
     <div class="row"><span class="k">O/C</span><span class="mono">OC-2026-00487</span></div>
   </div>
@@ -171,7 +171,7 @@
   <div class="meta">
     <p><strong>Representación impresa</strong> de la Guía De Remisión Electrónica.</p>
     <p>Verifique este documento en <strong>sunat.gob.pe</strong> con el RUC del emisor y el número del comprobante.</p>
-    <p style="margin-top:6px;">Firmante: 20512345678 · Manufacturas Andina Textil S.A.C.</p>
+    <p style="margin-top:6px;">Firmante: {{ doc.company.ruc }} · Manufacturas Andina Textil S.A.C.</p>
     <p class="hash">Hash: 3f8a21bc9d7e04a6c2f1b8e0d4a7c9f2e5b6d8a1</p>
   </div>
   <div class="stamp">

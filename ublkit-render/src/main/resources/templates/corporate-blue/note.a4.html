@@ -88,12 +88,12 @@
   <div class="logo-block">
     <div class="logo"><svg viewBox="0 0 40 40" fill="none" stroke="#fff" stroke-width="2.4"><rect x="6" y="6" width="28" height="28" rx="3"/><path d="M12 20h16M12 14h10M12 26h14"/></svg></div>
     <div>
-      <div class="co-name">MANUFACTURAS ANDINA TEXTIL S.A.C.</div>
-      <div class="co-sub">Av. Argentina 2740 Int. 301 — Lima · ventas@andinatextil.pe · (01) 555-0102</div>
+      <div class="co-name">{{ doc.company.razonSocial }}</div>
+      <div class="co-sub">{{ doc.company.address.direccion }} — Lima · ventas@andinatextil.pe · (01) 555-0102</div>
     </div>
   </div>
   <div class="docbox">
-    <div class="ruc">R.U.C. <b class="mono">20512345678</b></div>
+    <div class="ruc">R.U.C. <b class="mono">{{ doc.company.ruc }}</b></div>
     <div class="kind">NOTA DE CRÉDITO ELECTRÓNICA</div>
     <div class="num">FC01-000045</div>
   </div>
@@ -103,22 +103,22 @@
 
 <div class="ref-bar">
   <span class="tag">Modifica</span>
-  <div class="text">Aplica a <b>Factura F001-0001287</b> emitida el 24/04/2026 — motivo: <b>Devolución por ítem</b> (SUNAT 07).</div>
-  <div class="amount">− S/ 767.10</div>
+  <div class="text">Aplica a <b>Factura {{ doc.serie }}-{{ doc.correlativo }}</b> emitida el {{ doc.fechaEmision|date('d/m/Y') }} — motivo: <b>Devolución por ítem</b> (SUNAT 07).</div>
+  <div class="amount">− {{ moneda }} 767.10</div>
 </div>
 
 <div class="parties">
   <div class="party">
     <div class="label">Cliente / Adquirente</div>
-    <div class="name">COMERCIAL LOS PORTALES S.A.</div>
-    <div class="row"><span class="k">RUC</span><span class="mono">20498123456</span></div>
-    <div class="row"><span class="k">Dirección</span><span>Av. Jorge Chavez 455 — Miraflores</span></div>
+    <div class="name">{{ cl.rznSocial }}</div>
+    <div class="row"><span class="k">RUC</span><span class="mono">{{ cl.numDoc }}</span></div>
+    <div class="row"><span class="k">Dirección</span><span>{{ cl.address.direccion }}</span></div>
   </div>
   <div class="party">
     <div class="label">Documento referente</div>
-    <div class="name">Factura F001-0001287</div>
-    <div class="row"><span class="k">Emitida</span><span>24/04/2026</span></div>
-    <div class="row"><span class="k">Total orig.</span><span class="mono">S/ 11,892.40</span></div>
+    <div class="name">Factura {{ doc.serie }}-{{ doc.correlativo }}</div>
+    <div class="row"><span class="k">Emitida</span><span>{{ doc.fechaEmision|date('d/m/Y') }}</span></div>
+    <div class="row"><span class="k">Total orig.</span><span class="mono">{{ moneda }} {{ doc.mtoImpVenta|n_format }}</span></div>
     <div class="row"><span class="k">Moneda</span><span>Soles · T/C 3.742</span></div>
   </div>
 </div>
@@ -134,33 +134,44 @@
     <tr><th class="c-idx">#</th><th class="c-code">Código</th><th>Descripción</th><th class="c-unit">Und</th><th class="c-qty">Cant.</th><th class="c-price">P. Unit.</th><th class="c-tax">Importe</th></tr>
   </thead>
   <tbody>
-    <tr><td class="c-idx mono">01</td><td class="c-code mono">TX-0031</td><td class="desc"><div class="main">Camisa lino básica — Talla M / Beige arena</div><div class="sub">Devolución · defecto de confección · lote L-2026-04</div></td><td class="c-unit">NIU</td><td class="c-qty mono">10.00</td><td class="c-price mono">65.00</td><td class="c-tax mono">650.00</td></tr>
+
+    {% for det in doc.details %}
+    <tr>
+      <td class="c-idx mono">{{ loop.index|str_pad(2, '0', 'left') }}</td>
+      <td class="c-code mono">{{ det.codProducto }}</td>
+      <td class="desc"><div class="main">{{ det.descripcion }}</div><div class="sub">{% if det.codProductoSUNAT %}SUNAT {{ det.codProductoSUNAT }}{% endif %}</div></td>
+      <td class="c-unit">{{ det.unidad }}</td>
+      <td class="c-qty mono">{{ det.cantidad|n_format }}</td>
+      <td class="c-price mono">{{ det.mtoValorUnitario|n_format }}</td>
+      <td class="c-tax mono">{{ det.mtoValorVenta|n_format }}</td>
+    </tr>
+    {% endfor %}
   </tbody>
 </table>
 
 <div class="bottom">
   <div class="notes">
     <div class="block"><div class="head">Acciones</div><div class="body">
-      <p>Nota aplicada contra saldo pendiente de la Factura F001-0001287.</p>
-      <p class="small">Saldo recalculado: S/ 11,125.30 · Cuota 1: S/ 5,562.65 · Cuota 2: S/ 5,562.65</p>
+      <p>Nota aplicada contra saldo pendiente de la Factura {{ doc.serie }}-{{ doc.correlativo }}.</p>
+      <p class="small">Saldo recalculado: {{ moneda }} 11,125.30 · Cuota 1: {{ moneda }} 5,562.65 · Cuota 2: {{ moneda }} 5,562.65</p>
     </div></div>
     <div class="block"><div class="head">Validación</div><div class="body">
       <p>Inspeccionado por: Rocío Vega (Control de calidad)</p>
       <p class="small">Acta 2026-04-ADT-018 · Devolución aprobada 23/04/2026</p>
     </div></div>
     <div class="block"><div class="head">Leyendas SUNAT</div><div class="body">
-      <p class="small">· SON SETECIENTOS SESENTA Y SIETE CON 10/100 SOLES</p>
+      <p class="small">· SON SETECIENTOS SESENTA Y SIETE CON 10/100 {{ moneda }}</p>
       <p class="small">· Nota de crédito por devolución — tipo 07</p>
     </div></div>
   </div>
 
   <div class="totals">
-    <div class="line"><span class="k">Op. gravadas</span><span class="v">S/ 650.00</span></div>
-    <div class="line"><span class="k">Op. exoneradas</span><span class="v">S/ 0.00</span></div>
-    <div class="line"><span class="k">Op. inafectas</span><span class="v">S/ 0.00</span></div>
-    <div class="line"><span class="k">IGV (18.00%)</span><span class="v">S/ 117.10</span></div>
+    <div class="line"><span class="k">Op. gravadas</span><span class="v">{{ moneda }} 650.00</span></div>
+    <div class="line"><span class="k">Op. exoneradas</span><span class="v">{{ moneda }} 0.00</span></div>
+    <div class="line"><span class="k">Op. inafectas</span><span class="v">{{ moneda }} 0.00</span></div>
+    <div class="line"><span class="k">IGV (18.00%)</span><span class="v">{{ moneda }} 117.10</span></div>
     <div class="in-words">Son: setecientos sesenta y siete con 10/100 soles.</div>
-    <div class="grand"><span>TOTAL NOTA</span><span class="v">S/ 767.10</span></div>
+    <div class="grand"><span>TOTAL NOTA</span><span class="v">{{ moneda }} 767.10</span></div>
   </div>
 </div>
 
