@@ -5,12 +5,12 @@
 	<parent>
 		<groupId>com.cna</groupId>
 		<artifactId>ublkit-parent</artifactId>
-		<version>1.0.0-SNAPSHOT</version>
+		<version>1.0.0</version>
 	</parent>
 	<artifactId>ublkit-quarkus</artifactId>
 	<name>ublkit-quarkus</name>
 	<description>Quarkus Integration</description>
-    
+
     <dependencies>
         <dependency>
             <groupId>com.cna</groupId>

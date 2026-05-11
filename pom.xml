@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.cna</groupId>
 	<artifactId>ublkit-parent</artifactId>
-	<version>1.0.0-SNAPSHOT</version>
+	<version>1.0.0</version>
     <packaging>pom</packaging>
 	<name>ublkit-parent</name>
 	<description>Parent POM for UBLKit Java</description>
@@ -91,7 +91,7 @@
         <module>ublkit-testkit</module>
         <module>ublkit-spring-boot-starter</module>
         <module>ublkit-quarkus</module>
-    
+
     <module>ublkit-storage</module>
     </modules>
 
