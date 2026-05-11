@@ -10,26 +10,32 @@ import java.util.logging.Logger;
 
 public class FontResolver {
     private static final Logger LOGGER = Logger.getLogger(FontResolver.class.getName());
+    private static final byte[] CACHED_ICC_PROFILE = loadIccProfile();
+    private static final boolean VALID_ICC_PROFILE = CACHED_ICC_PROFILE != null && isValidIccProfile(CACHED_ICC_PROFILE);
+
+    private static byte[] loadIccProfile() {
+        try (InputStream is = FontResolver.class.getClassLoader().getResourceAsStream("color/sRGB.icc")) {
+            if (is != null) {
+                return readAllBytes(is);
+            } else {
+                LOGGER.warning("Color profile not found in classpath: color/sRGB.icc; using non-PDF/A fallback");
+                return null;
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Error loading ICC profile; using non-PDF/A fallback", e);
+            return null;
+        }
+    }
 
     public static void configurePdfA(PdfRendererBuilder builder) {
         try {
             builder.useFont(new ResourceSupplier("fonts/Roboto-Regular.ttf"), "Roboto", 400, com.openhtmltopdf.outputdevice.helper.BaseRendererBuilder.FontStyle.NORMAL, true);
             builder.useFont(new ResourceSupplier("fonts/Roboto-Bold.ttf"), "Roboto", 700, com.openhtmltopdf.outputdevice.helper.BaseRendererBuilder.FontStyle.NORMAL, true);
 
-            // PDF/A requires a valid ICC color profile. If it is missing/corrupt,
-            // we fall back to standard PDF rendering to avoid hard failures.
-            try (InputStream is = FontResolver.class.getClassLoader().getResourceAsStream("color/sRGB.icc")) {
-                if (is != null) {
-                    byte[] colorProfile = readAllBytes(is);
-                    if (isValidIccProfile(colorProfile)) {
-                        builder.usePdfAConformance(PdfRendererBuilder.PdfAConformance.PDFA_3_B);
-                        builder.useColorProfile(colorProfile);
-                    } else {
-                        LOGGER.warning("Invalid ICC profile at color/sRGB.icc; using non-PDF/A fallback");
-                    }
-                } else {
-                    LOGGER.warning("Color profile not found in classpath: color/sRGB.icc; using non-PDF/A fallback");
-                }
+            // PDF/A requires a valid ICC color profile. Use cached profile if available.
+            if (VALID_ICC_PROFILE) {
+                builder.usePdfAConformance(PdfRendererBuilder.PdfAConformance.PDFA_3_B);
+                builder.useColorProfile(CACHED_ICC_PROFILE);
             }
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, "Error configuring PDF/A fonts/color profile; using non-PDF/A fallback", e);
