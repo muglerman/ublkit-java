@@ -10,7 +10,7 @@
 	<artifactId>ublkit-quarkus</artifactId>
 	<name>ublkit-quarkus</name>
 	<description>Quarkus Integration</description>
-    
+
     <dependencies>
         <dependency>
             <groupId>com.cna</groupId>
