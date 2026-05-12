@@ -24,7 +24,7 @@ Para utilizar este módulo, agrégalo como dependencia en tu archivo `pom.xml`:
 <dependency>
     <groupId>com.cna</groupId>
     <artifactId>ublkit-sign</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
+    <version>0.1.0</version>
 </dependency>
 ```
 

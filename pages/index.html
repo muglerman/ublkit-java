@@ -297,7 +297,7 @@ ResultadoEnvio envio = pasarela.enviarComprobante(
 
 if (envio.esExitoso()) {
   String ticket = envio.getNumeroTicket();
-  
+
   // Consultar CDR
   ResultadoConsulta consulta = pasarela
     .consultarTicket(ticket);
@@ -328,12 +328,12 @@ if (envio.esExitoso()) {
   .setHashCdr(hashCdr);
 
 // Renderizar a HTML
-RenderizadorFacturaHtml htmlRender = 
+RenderizadorFacturaHtml htmlRender =
   new RenderizadorFacturaHtml();
 String html = htmlRender.renderizar(contexto);
 
 // Renderizar a PDF
-RenderizadorFacturaPdf pdfRender = 
+RenderizadorFacturaPdf pdfRender =
   new RenderizadorFacturaPdf();
 byte[] pdf = pdfRender.renderizar(contexto);</code></pre>
         </div>
@@ -509,10 +509,10 @@ public static void main(String[] args) {
 public class FacturaResource {
   @Inject
   SerializadorXmlFactura serializador;
-  
+
   @Inject
   PasarelaSunat pasarela;
-  
+
   @POST
   public Response emitir(BorradorFactura factura) {
     // Uso directo
@@ -536,7 +536,7 @@ public class FacturaResource {
       <pre class="code reveal"><code>&lt;dependency&gt;
   &lt;groupId&gt;com.cna&lt;/groupId&gt;
   &lt;artifactId&gt;ublkit-spring-boot-starter&lt;/artifactId&gt;
-  &lt;version&gt;0.1.0-SNAPSHOT&lt;/version&gt;
+  &lt;version&gt;0.1.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
     </section>
 
@@ -653,7 +653,7 @@ String xml = serializador.serializar(boleta);
 String xmlFirmado = servicioFirma.firmarXml(xml, cert);
 
 // 4. Enviar async
-completableFuture(() -> 
+completableFuture(() ->
   pasarela.enviarComprobante(xmlFirmado)
 );
 
@@ -721,7 +721,7 @@ Resultado resultado = validador.validar(percepcion);
 if (resultado.esValido()) {
   // 3. Render HTML para envio
   String html = renderizador.renderizar(percepcion);
-  
+
   // 4. Enviar reporte a SUNAT
   pasarela.enviarPercepcion(html);
 }</code></pre>
@@ -767,7 +767,7 @@ String qr = generadorQr.generarQr(guia);</code></pre>
         <h2>Matriz de compatibilidad</h2>
         <p>Versiones soportadas y dependencias externas clave.</p>
       </div>
-      
+
       <div class="compat-grid reveal">
         <div class="compat-card">
           <h4>Java</h4>

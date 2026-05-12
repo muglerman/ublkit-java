@@ -32,7 +32,7 @@ Si utilizas **Spring Boot**, añade el siguiente starter a tu `pom.xml`:
 <dependency>
     <groupId>com.cna</groupId>
     <artifactId>ublkit-spring-boot-starter</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
+    <version>0.1.0</version>
 </dependency>
 ```
 
@@ -41,7 +41,7 @@ Si usas Java plano (o necesitas solo módulos puntuales), puedes importar partes
 <dependency>
     <groupId>com.cna</groupId>
     <artifactId>ublkit-ubl</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
+    <version>0.1.0</version>
 </dependency>
 ```
 
