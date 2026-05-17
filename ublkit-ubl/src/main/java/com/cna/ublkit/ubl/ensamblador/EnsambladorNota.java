@@ -86,10 +86,10 @@ private static void ensamblarLineas(DocumentoBase documento) {
             BigDecimal igv = orZero(linea.getIgv());
             BigDecimal base = orZero(linea.getIgvBaseImponible());
 
-            if (EnsambladorFactura.esGravado(tipo)) { gravadoImp = gravadoImp.add(igv); gravadoBase = gravadoBase.add(base); }
+            if (EnsambladorFactura.esGratuito(tipo)) { gratuitoImp = gratuitoImp.add(igv); gratuitoBase = gratuitoBase.add(base); }
+            else if (EnsambladorFactura.esGravado(tipo)) { gravadoImp = gravadoImp.add(igv); gravadoBase = gravadoBase.add(base); }
             else if (EnsambladorFactura.esExonerado(tipo)) { exoneradoImp = exoneradoImp.add(igv); exoneradoBase = exoneradoBase.add(base); }
             else if (EnsambladorFactura.esInafecto(tipo)) { inafectoImp = inafectoImp.add(igv); inafectoBase = inafectoBase.add(base); }
-            else if (EnsambladorFactura.esGratuito(tipo)) { gratuitoImp = gratuitoImp.add(igv); gratuitoBase = gratuitoBase.add(base); }
             else if (EnsambladorFactura.esExportacion(tipo)) { exportacionImp = exportacionImp.add(igv); exportacionBase = exportacionBase.add(base); }
             else if (EnsambladorFactura.esIvap(tipo)) { ivapImp = ivapImp.add(igv); ivapBase = ivapBase.add(base); }
 

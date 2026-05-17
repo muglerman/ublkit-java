@@ -419,7 +419,10 @@ public static void ajustarRedondeoLineas(List<LineaDetalle> detalles) {
             BigDecimal igv = orZero(linea.getIgv());
             BigDecimal base = orZero(linea.getIgvBaseImponible());
 
-            if (esGravado(tipo)) {
+            if (esGratuito(tipo)) {
+                gratuitoImp = gratuitoImp.add(igv);
+                gratuitoBase = gratuitoBase.add(base);
+            } else if (esGravado(tipo)) {
                 gravadoImp = gravadoImp.add(igv);
                 gravadoBase = gravadoBase.add(base);
             } else if (esExonerado(tipo)) {
@@ -428,9 +431,6 @@ public static void ajustarRedondeoLineas(List<LineaDetalle> detalles) {
             } else if (esInafecto(tipo)) {
                 inafectoImp = inafectoImp.add(igv);
                 inafectoBase = inafectoBase.add(base);
-            } else if (esGratuito(tipo)) {
-                gratuitoImp = gratuitoImp.add(igv);
-                gratuitoBase = gratuitoBase.add(base);
             } else if (esExportacion(tipo)) {
                 exportacionImp = exportacionImp.add(igv);
                 exportacionBase = exportacionBase.add(base);
