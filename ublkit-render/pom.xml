@@ -28,11 +28,11 @@
 			<artifactId>pebble</artifactId>
 			<version>3.2.2</version>
 		</dependency>
-		<!-- HTML to PDF (Java Puro, basado en PDFBox) -->
+		<!-- Playwright para renderizar HTML/CSS moderno a PDF -->
 		<dependency>
-			<groupId>io.github.openhtmltopdf</groupId>
-			<artifactId>openhtmltopdf-pdfbox</artifactId>
-			<version>1.1.37</version>
+			<groupId>com.microsoft.playwright</groupId>
+			<artifactId>playwright</artifactId>
+			<version>1.44.0</version>
 		</dependency>
 		<!-- Domain Model -->
 		<dependency>

@@ -8,10 +8,9 @@ import com.cna.ublkit.render.modelo.ResultadoRender;
 import com.cna.ublkit.qr.GeneradorQrSunat;
 import com.cna.ublkit.ubl.modelo.DocumentoBase;
 
-import com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
-import com.cna.ublkit.render.pdf.helper.FontResolver;
-
-import java.io.ByteArrayOutputStream;
+import com.microsoft.playwright.Page;
+import com.microsoft.playwright.options.WaitUntilState;
+import com.cna.ublkit.render.pdf.helper.PlaywrightBrowserManager;
 
 /**
  * Convierte Notas Electrónicas en PDF usando HTML + OpenHTMLtoPDF.
@@ -21,6 +20,7 @@ import java.io.ByteArrayOutputStream;
 public class RenderizadorPdfNota implements RenderizadorDocumento<Object> {
 
     private final RenderizadorHtmlNota renderizadorHtml;
+    private final FormatoImpresion formato;
 
     public RenderizadorPdfNota() {
         this(FormatoImpresion.A4);
@@ -28,6 +28,7 @@ public class RenderizadorPdfNota implements RenderizadorDocumento<Object> {
 
     public RenderizadorPdfNota(FormatoImpresion formato) {
         this.renderizadorHtml = new RenderizadorHtmlNota(formato);
+        this.formato = formato;
     }
 
     @Override
@@ -47,18 +48,14 @@ public class RenderizadorPdfNota implements RenderizadorDocumento<Object> {
         }
 
         ResultadoRender resultadoHtml = renderizadorHtml.renderizar(contexto);
-        String html = HtmlXhtmlSanitizer.sanear(resultadoHtml.contenidoHtml());
+        String html = resultadoHtml.contenidoHtml();
 
-        try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
-            PdfRendererBuilder builder = new PdfRendererBuilder();
-            builder.useFastMode();
-            FontResolver.configurePdfA(builder);
-            builder.withHtmlContent(html, null);
-            builder.toStream(os);
-            builder.run();
-            return ResultadoRender.pdf(os.toByteArray());
+        try (Page page = PlaywrightBrowserManager.getBrowser().newPage()) {
+            page.setContent(html, new Page.SetContentOptions().setWaitUntil(WaitUntilState.NETWORKIDLE));
+            byte[] pdfBytes = page.pdf(PlaywrightBrowserManager.getPdfOptions(this.formato));
+            return ResultadoRender.pdf(pdfBytes);
         } catch (Exception e) {
-            throw new RuntimeException("Error convirtiendo Nota Electrónica a PDF: " + e.getMessage(), e);
+            throw new RuntimeException("Error convirtiendo Nota Electrónica a PDF con Playwright: " + e.getMessage(), e);
         }
     }
 

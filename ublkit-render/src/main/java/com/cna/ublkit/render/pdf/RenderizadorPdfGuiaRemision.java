@@ -6,10 +6,9 @@ import com.cna.ublkit.render.modelo.ContextoRender;
 import com.cna.ublkit.render.modelo.FormatoImpresion;
 import com.cna.ublkit.render.modelo.ResultadoRender;
 import com.cna.ublkit.ubl.modelo.guia.BorradorGuiaRemision;
-import com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
-import com.cna.ublkit.render.pdf.helper.FontResolver;
-
-import java.io.ByteArrayOutputStream;
+import com.microsoft.playwright.Page;
+import com.microsoft.playwright.options.WaitUntilState;
+import com.cna.ublkit.render.pdf.helper.PlaywrightBrowserManager;
 
 /**
  * Convierte una {@link BorradorGuiaRemision} en PDF usando HTML + OpenHTMLtoPDF.
@@ -19,6 +18,7 @@ import java.io.ByteArrayOutputStream;
 public class RenderizadorPdfGuiaRemision implements RenderizadorDocumento<BorradorGuiaRemision> {
 
     private final RenderizadorHtmlGuiaRemision renderizadorHtml;
+    private final FormatoImpresion formato;
 
     public RenderizadorPdfGuiaRemision() {
         this(FormatoImpresion.A4);
@@ -26,23 +26,20 @@ public class RenderizadorPdfGuiaRemision implements RenderizadorDocumento<Borrad
 
     public RenderizadorPdfGuiaRemision(FormatoImpresion formato) {
         this.renderizadorHtml = new RenderizadorHtmlGuiaRemision(formato);
+        this.formato = formato;
     }
 
     @Override
     public ResultadoRender renderizar(ContextoRender<BorradorGuiaRemision> contexto) {
         ResultadoRender resultadoHtml = renderizadorHtml.renderizar(contexto);
-        String html = HtmlXhtmlSanitizer.sanear(resultadoHtml.contenidoHtml());
+        String html = resultadoHtml.contenidoHtml();
 
-        try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
-            PdfRendererBuilder builder = new PdfRendererBuilder();
-            builder.useFastMode();
-            FontResolver.configurePdfA(builder);
-            builder.withHtmlContent(html, null);
-            builder.toStream(os);
-            builder.run();
-            return ResultadoRender.pdf(os.toByteArray());
+        try (Page page = PlaywrightBrowserManager.getBrowser().newPage()) {
+            page.setContent(html, new Page.SetContentOptions().setWaitUntil(WaitUntilState.NETWORKIDLE));
+            byte[] pdfBytes = page.pdf(PlaywrightBrowserManager.getPdfOptions(this.formato));
+            return ResultadoRender.pdf(pdfBytes);
         } catch (Exception e) {
-            throw new RuntimeException("Error convirtiendo Guía de Remisión a PDF: " + e.getMessage(), e);
+            throw new RuntimeException("Error convirtiendo Guía de Remisión a PDF con Playwright: " + e.getMessage(), e);
         }
     }
 

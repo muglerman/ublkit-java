@@ -8,10 +8,9 @@ import com.cna.ublkit.render.modelo.ResultadoRender;
 import com.cna.ublkit.ubl.modelo.BorradorFactura;
 import com.cna.ublkit.qr.GeneradorQrSunat;
 
-import com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
-import com.cna.ublkit.render.pdf.helper.FontResolver;
-
-import java.io.ByteArrayOutputStream;
+import com.microsoft.playwright.Page;
+import com.microsoft.playwright.options.WaitUntilState;
+import com.cna.ublkit.render.pdf.helper.PlaywrightBrowserManager;
 
 /**
  * Convierte un {@link BorradorFactura} en PDF usando HTML + OpenHTMLtoPDF.
@@ -21,6 +20,7 @@ import java.io.ByteArrayOutputStream;
 public class RenderizadorPdfFactura implements RenderizadorDocumento<BorradorFactura> {
 
     private final RenderizadorHtmlFactura renderizadorHtml;
+    private final FormatoImpresion formato;
 
     public RenderizadorPdfFactura() {
         this(FormatoImpresion.A4);
@@ -28,6 +28,7 @@ public class RenderizadorPdfFactura implements RenderizadorDocumento<BorradorFac
 
     public RenderizadorPdfFactura(FormatoImpresion formato) {
         this.renderizadorHtml = new RenderizadorHtmlFactura(formato);
+        this.formato = formato;
     }
 
     @Override
@@ -45,18 +46,14 @@ public class RenderizadorPdfFactura implements RenderizadorDocumento<BorradorFac
         }
 
         ResultadoRender resultadoHtml = renderizadorHtml.renderizar(contexto);
-        String html = HtmlXhtmlSanitizer.sanear(resultadoHtml.contenidoHtml());
+        String html = resultadoHtml.contenidoHtml();
 
-        try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
-            PdfRendererBuilder builder = new PdfRendererBuilder();
-            builder.useFastMode();
-            FontResolver.configurePdfA(builder);
-            builder.withHtmlContent(html, null);
-            builder.toStream(os);
-            builder.run();
-            return ResultadoRender.pdf(os.toByteArray());
+        try (Page page = PlaywrightBrowserManager.getBrowser().newPage()) {
+            page.setContent(html, new Page.SetContentOptions().setWaitUntil(WaitUntilState.NETWORKIDLE));
+            byte[] pdfBytes = page.pdf(PlaywrightBrowserManager.getPdfOptions(this.formato));
+            return ResultadoRender.pdf(pdfBytes);
         } catch (Exception e) {
-            throw new RuntimeException("Error convirtiendo HTML a PDF: " + e.getMessage(), e);
+            throw new RuntimeException("Error convirtiendo HTML a PDF con Playwright: " + e.getMessage(), e);
         }
     }
 
