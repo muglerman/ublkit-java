@@ -9,9 +9,11 @@ import com.cna.ublkit.render.pdf.*;
 import com.cna.ublkit.storage.AlmacenDocumentos;
 import com.cna.ublkit.storage.AlmacenLocalStorage;
 import com.cna.ublkit.storage.AlmacenS3;
+import com.cna.ublkit.qr.GeneradorQrSunat;
 import com.cna.ublkit.ubl.xml.*;
 import com.cna.ublkit.validation.validador.*;
 import java.net.URI;
+import jakarta.annotation.PostConstruct;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -30,6 +32,20 @@ import software.amazon.awssdk.services.s3.model.S3Exception;
 @AutoConfiguration
 @EnableConfigurationProperties({UblKitProperties.class, UblKitStorageProperties.class})
 public class UblKitAutoConfiguration {
+
+    private static final String PROP_VALIDACION_SUNAT = "ublkit.validation.sunat.enabled";
+
+    private final UblKitProperties ublKitProperties;
+
+    public UblKitAutoConfiguration(UblKitProperties ublKitProperties) {
+        this.ublKitProperties = ublKitProperties;
+    }
+
+    @PostConstruct
+    void configurarValidacionSunatXsl() {
+        boolean habilitada = ublKitProperties.getValidation().getSunat().isEnabled();
+        System.setProperty(PROP_VALIDACION_SUNAT, Boolean.toString(habilitada));
+    }
 
     @Bean
     @ConditionalOnMissingBean
@@ -199,6 +215,13 @@ public class UblKitAutoConfiguration {
     @ConditionalOnMissingBean
     public SerializadorXmlRetencion serializadorXmlRetencion() {
         return new SerializadorXmlRetencion();
+    }
+
+    // --- QR ---
+    @Bean
+    @ConditionalOnMissingBean
+    public GeneradorQrSunat generadorQrSunat() {
+        return new GeneradorQrSunat();
     }
 
     // --- Validadores ---

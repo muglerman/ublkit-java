@@ -11,9 +11,14 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class UblKitProperties {
 
     private final Gateway gateway = new Gateway();
+    private final Validation validation = new Validation();
 
     public Gateway getGateway() {
         return gateway;
+    }
+
+    public Validation getValidation() {
+        return validation;
     }
 
     public static class Gateway {
@@ -84,6 +89,26 @@ public class UblKitProperties {
 
         public void setMaxConnections(int maxConnections) {
             this.maxConnections = maxConnections;
+        }
+    }
+
+    public static class Validation {
+        private final Sunat sunat = new Sunat();
+
+        public Sunat getSunat() {
+            return sunat;
+        }
+    }
+
+    public static class Sunat {
+        private boolean enabled = true;
+
+        public boolean isEnabled() {
+            return enabled;
+        }
+
+        public void setEnabled(boolean enabled) {
+            this.enabled = enabled;
         }
     }
 }

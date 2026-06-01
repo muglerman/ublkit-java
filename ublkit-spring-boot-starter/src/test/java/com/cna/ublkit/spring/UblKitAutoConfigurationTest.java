@@ -26,6 +26,8 @@ import static org.mockito.Mockito.mock;
 
 class UblKitAutoConfigurationTest {
 
+    private static final String PROP_VALIDACION_SUNAT = "ublkit.validation.sunat.enabled";
+
     private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
             .withConfiguration(AutoConfigurations.of(UblKitAutoConfiguration.class));
 
@@ -126,5 +128,23 @@ class UblKitAutoConfigurationTest {
         contextRunner
                 .withBean(AlmacenDocumentos.class, () -> custom)
                 .run(context -> assertThat(context.getBean(AlmacenDocumentos.class)).isSameAs(custom));
+    }
+
+    @Test
+    void autoConfiguration_ShouldBridgeSunatValidationPropertyToSystemProperty() {
+        String previous = System.getProperty(PROP_VALIDACION_SUNAT);
+        try {
+            System.clearProperty(PROP_VALIDACION_SUNAT);
+
+            contextRunner
+                    .withPropertyValues("ublkit.validation.sunat.enabled=false")
+                    .run(context -> assertThat(System.getProperty(PROP_VALIDACION_SUNAT)).isEqualTo("false"));
+        } finally {
+            if (previous != null) {
+                System.setProperty(PROP_VALIDACION_SUNAT, previous);
+            } else {
+                System.clearProperty(PROP_VALIDACION_SUNAT);
+            }
+        }
     }
 }

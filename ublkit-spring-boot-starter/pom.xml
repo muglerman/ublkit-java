@@ -63,6 +63,11 @@
         </dependency>
         <dependency>
             <groupId>com.cna</groupId>
+            <artifactId>ublkit-qr</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.cna</groupId>
             <artifactId>ublkit-storage</artifactId>
             <version>${project.version}</version>
         </dependency>

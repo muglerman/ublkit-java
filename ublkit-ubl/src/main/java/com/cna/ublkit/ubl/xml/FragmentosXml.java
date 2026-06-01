@@ -66,7 +66,10 @@ final class FragmentosXml {
     static void agregarDatosGenerales(Document doc, Element raiz, DocumentoBase documento) {
         raiz.appendChild(cbc(doc, "UBLVersionID", ConstantesUbl.UBL_VERSION));
         raiz.appendChild(cbc(doc, "CustomizationID", ConstantesUbl.CUSTOMIZATION_ID));
-        raiz.appendChild(cbc(doc, "ID", documento.getSerie() + "-" + documento.getNumero()));
+        String correlativo = documento.getNumero() != null
+                ? String.format("%08d", documento.getNumero())
+                : "00000001";
+        raiz.appendChild(cbc(doc, "ID", documento.getSerie() + "-" + correlativo));
         raiz.appendChild(cbc(doc, "IssueDate", documento.getFechaEmision()));
         if (documento.getHoraEmision() != null) {
             raiz.appendChild(cbc(doc, "IssueTime", documento.getHoraEmision()));

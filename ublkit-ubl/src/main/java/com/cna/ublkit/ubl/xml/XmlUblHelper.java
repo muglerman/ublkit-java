@@ -110,8 +110,6 @@ public final class XmlUblHelper {
         Element el = doc.createElementNS(NS_CBC, "cbc:" + nombre);
         el.setTextContent(cantidad.toPlainString());
         el.setAttribute("unitCode", unidad);
-        el.setAttribute("unitCodeListAgencyName", "United Nations Economic Commission for Europe");
-        el.setAttribute("unitCodeListID", "UN/ECE rec 20");
         return el;
     }
 
