@@ -76,9 +76,10 @@
     {% for det in doc.detalles %}
     <div class="it">
       <div class="desc">{{ det.descripcion }}</div>
+      <div class="muted" style="font-size:8px;">{% if det.igvTipo %}{{ det.igvTipo|catalog('07') }}{% endif %}</div>
       <div class="ln muted">
         <span>{% if det.codigoProducto %}{{ det.codigoProducto }} · {% endif %}{{ det.cantidad|n_format }} {{ det.unidadMedida }} × {{ det.precio|n_format }}</span>
-        <span class="b" style="color:#000;">{{ det.precio|n_format }}</span>
+        <span class="b" style="color:#000;">{{ (det.precio * det.cantidad)|n_format }}</span>
       </div>
     </div>
     {% endfor %}
@@ -107,7 +108,7 @@
 
   {% if doc.leyendas is not empty and doc.leyendas['1000'] %}
   <hr class="sep" />
-  <div style="font-size:9.5px;">{{ doc.leyendas['1000'] }}</div>
+  <div style="font-size:9.5px;">{% if doc.leyendas['1000'] %}Son: {{ doc.leyendas['1000'] }}{% endif %}</div>
   {% endif %}
 
   {% if qrBase64 is not empty %}
