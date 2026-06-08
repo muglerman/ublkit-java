@@ -23,9 +23,8 @@
     line-height: 1.5;
     color: var(--ink);
     background: var(--paper);
-    width: 559px;
-    min-height: 794px;
-    min-height: 1123px;
+    width: 794px;
+    min-height: 559px;
     padding: 40px 44px;
   }
   .mono { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
@@ -249,7 +248,7 @@
   </div>
   <div class="meta">
     <p><strong>Representación impresa</strong> de la Nota De Débito Electrónica.</p>
-    <p>Consulte la validez de este documento en <strong>sunat.gob.pe</strong> con el RUC del emisor y el número del comprobante.</p>
+    <p>Consulte la validez de este documento en <strong>{{ params.consultaUrl|default('sunat.gob.pe') }}</strong> con el RUC del emisor y el número del comprobante.</p>
     <p style="margin-top:6px;">Firmante: {{ doc.company.ruc }} · Manufacturas Andina Textil S.A.C.</p>
     <p class="hash">Hash SHA1: 3f8a21bc9d7e04a6c2f1b8e0d4a7c9f2e5b6d8a1</p>
   </div>

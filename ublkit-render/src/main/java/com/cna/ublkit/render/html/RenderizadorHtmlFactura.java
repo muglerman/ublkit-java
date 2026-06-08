@@ -57,9 +57,12 @@ public class RenderizadorHtmlFactura implements RenderizadorDocumento<BorradorFa
         scope.put("qrBase64", contexto.qrBase64());
         scope.put("hashDocumento", contexto.hashDocumento());
 
-        // Fuentes embebidas (base64) del estilo: render offline sin CDN
-        scope.put("fontStyle", FuentesEmbebidas.cssParaEstilo(
-                PlantillaRutas.resolver(contexto.estiloPlantilla(), EstiloPlantilla.DEFAULT)));
+        // Fuentes embebidas (base64): el ticket usa la monoespaciada genérica (sin estilo);
+        // A4/A5 usan las del estilo. Render offline sin CDN.
+        scope.put("fontStyle", PlantillaRutas.esTicket(formato)
+                ? FuentesEmbebidas.cssTicketGenerico()
+                : FuentesEmbebidas.cssParaEstilo(
+                        PlantillaRutas.resolver(contexto.estiloPlantilla(), EstiloPlantilla.DEFAULT)));
 
         // Atributos dinámicos de estilo y configuración
         if (contexto.atributosPlantilla() != null) {

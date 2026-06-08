@@ -220,7 +220,9 @@ public class RenderizadorHtmlFacturaTest {
             ResultadoRender resultado = renderer.renderizar(contexto);
             String html = resultado.contenidoHtml();
 
-            assertTrue(html.contains("PEN"), "Must contain currency");
+            // La etiqueta "Moneda" muestra el nombre (Soles) y los importes el símbolo (S/)
+            assertTrue(html.contains("Soles"), "Must contain currency name");
+            assertTrue(html.contains("S/"), "Must contain currency symbol");
         }
     }
 

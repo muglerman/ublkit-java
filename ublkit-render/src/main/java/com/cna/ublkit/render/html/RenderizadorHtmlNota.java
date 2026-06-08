@@ -59,8 +59,10 @@ public class RenderizadorHtmlNota implements RenderizadorDocumento<Object> {
         scope.put("doc", contexto.documento());
         scope.put("qrBase64", contexto.qrBase64());
         scope.put("hashDocumento", contexto.hashDocumento());
-        scope.put("fontStyle", FuentesEmbebidas.cssParaEstilo(
-                PlantillaRutas.resolver(contexto.estiloPlantilla(), EstiloPlantilla.DEFAULT)));
+        scope.put("fontStyle", PlantillaRutas.esTicket(formato)
+                ? FuentesEmbebidas.cssTicketGenerico()
+                : FuentesEmbebidas.cssParaEstilo(
+                        PlantillaRutas.resolver(contexto.estiloPlantilla(), EstiloPlantilla.DEFAULT)));
 
         if (contexto.atributosPlantilla() != null) {
             scope.put("params", contexto.atributosPlantilla());

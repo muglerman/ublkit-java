@@ -155,7 +155,7 @@
   <div class="party">
     <div class="label">Destinatario</div>
     <div class="name">{% if cl is not null %}{{ cl.nombre }}{% endif %}</div>
-    <div class="row"><span class="k">{% if cl is not null %}{{ cl.tipoDocumentoIdentidad|catalog('06') }}{% endif %}</span><span class="mono">{% if cl is not null %}{{ cl.numeroDocumentoIdentidad }}{% endif %}</span></div>
+    <div class="row"><span class="k">{% if cl is not null %}{{ cl.tipoDocumentoIdentidad|catalogAttr('06','abreviatura') }}{% endif %}</span><span class="mono">{% if cl is not null %}{{ cl.numeroDocumentoIdentidad }}{% endif %}</span></div>
     {% if doc.envio is not null and doc.envio.destino is not null %}
     <div class="row"><span class="k">Llegada</span><span>{{ doc.envio.destino.direccion }}</span></div>
     <div class="row"><span class="k">Ubigeo</span><span>{{ doc.envio.destino.ubigeo }}</span></div>
@@ -212,7 +212,7 @@
   </div>
   <div class="meta">
     <p><strong>Representación impresa</strong> de la {% if doc.tipoComprobante is not empty %}{{ name }}{% else %}Guía de Remisión{% endif %} Electrónica.</p>
-    <p>Consulte la validez en <strong>sunat.gob.pe</strong> con el RUC del emisor y el número del comprobante.</p>
+    <p>Consulte la validez en <strong>{{ params.consultaUrl|default('sunat.gob.pe') }}</strong> con el RUC del emisor y el número del comprobante.</p>
     <p style="margin-top:6px;">Firmante: {% if cp is not null %}{{ cp.ruc }} · {{ cp.razonSocial }}{% endif %}</p>
     <p class="hash">Hash: {{ hashDocumento }}</p>
     {% if params.footer is not null %}<p id="custom-footer-box" style="margin-top:10px; font-style:italic;">{{ params.footer }}</p>{% endif %}

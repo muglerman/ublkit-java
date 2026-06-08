@@ -202,7 +202,7 @@ class RenderizadorPdfCompletesTest {
             ResultadoRender resultado = renderer.renderizar(contexto);
             String html = resultado.contenidoHtml();
 
-            assertTrue(html.contains("PEN"), "Debe contener moneda PEN");
+            assertTrue(html.contains("Soles"), "Debe contener moneda");
         }
     }
 

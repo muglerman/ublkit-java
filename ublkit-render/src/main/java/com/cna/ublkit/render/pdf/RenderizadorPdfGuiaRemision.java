@@ -7,7 +7,6 @@ import com.cna.ublkit.render.modelo.FormatoImpresion;
 import com.cna.ublkit.render.modelo.ResultadoRender;
 import com.cna.ublkit.ubl.modelo.guia.BorradorGuiaRemision;
 import com.microsoft.playwright.Page;
-import com.microsoft.playwright.options.WaitUntilState;
 import com.cna.ublkit.render.pdf.helper.PlaywrightBrowserManager;
 
 /**
@@ -35,8 +34,7 @@ public class RenderizadorPdfGuiaRemision implements RenderizadorDocumento<Borrad
         String html = resultadoHtml.contenidoHtml();
 
         try (Page page = PlaywrightBrowserManager.getBrowser().newPage()) {
-            page.setContent(html, new Page.SetContentOptions().setWaitUntil(WaitUntilState.NETWORKIDLE));
-            byte[] pdfBytes = page.pdf(PlaywrightBrowserManager.getPdfOptions(this.formato));
+            byte[] pdfBytes = PlaywrightBrowserManager.renderizarPdf(page, html, this.formato);
             return ResultadoRender.pdf(pdfBytes);
         } catch (Exception e) {
             throw new RuntimeException("Error convirtiendo Guía de Remisión a PDF con Playwright: " + e.getMessage(), e);

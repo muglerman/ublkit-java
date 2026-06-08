@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+{% set mon = doc.moneda|catalog('021') %}
+{% set sym = doc.moneda|catalogAttr('021','simbolo') %}
+<title>{{ doc.serie }}-{{ doc.numero|str_pad(8, '0', 'left') }} · Nota de Crédito</title>
+<style>
+  {{ fontStyle | raw }}
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: #fff; }
+  body {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    line-height: 1.4;
+    color: #000;
+    width: 302px; /* 80mm @96dpi */
+    padding: 12px 14px;
+    font-variant-numeric: tabular-nums;
+  }
+  p { margin: 0; }
+  .c { text-align: center; }
+  .b { font-weight: 700; }
+  .muted { color: #444; }
+  .sep { border: 0; border-top: 1px dashed #000; margin: 8px 0; }
+  .row { display: flex; justify-content: space-between; gap: 8px; }
+  .head .name { font-size: 13px; font-weight: 700; }
+  .head .sub { font-size: 10px; }
+  .doctype { margin-top: 8px; border: 1px solid #000; padding: 5px 4px; text-align: center; }
+  .doctype .kind { font-weight: 700; letter-spacing: 0.08em; }
+  .doctype .num { font-size: 14px; font-weight: 700; margin-top: 2px; }
+  .meta, .cliente, .ref, .totals, .items { font-size: 10px; }
+  .items .it { margin: 5px 0; }
+  .items .desc { font-weight: 500; }
+  .items .ln { display: flex; justify-content: space-between; gap: 8px; }
+  .totals .grand { font-size: 13px; font-weight: 700; border-top: 1px solid #000; margin-top: 4px; padding-top: 4px; }
+  .qr { width: 132px; height: 132px; margin: 10px auto 0; }
+  .qr img { width: 100%; height: 100%; display: block; }
+  .foot { margin-top: 8px; font-size: 9.5px; text-align: center; }
+  .hash { word-break: break-all; }
+</style>
+</head>
+<body>
+  <div class="head c">
+    <div class="name">{{ doc.emisor.razonSocial }}</div>
+    {% if doc.emisor.nombreComercial %}<div class="sub">{{ doc.emisor.nombreComercial }}</div>{% endif %}
+    <div class="sub b">RUC {{ doc.emisor.ruc }}</div>
+    {% if doc.emisor.direccion is not null and doc.emisor.direccion.direccion %}<div class="sub muted">{{ doc.emisor.direccion.direccion }}</div>{% endif %}
+  </div>
+
+  <div class="doctype">
+    <div class="kind">NOTA DE CRÉDITO ELECTRÓNICA</div>
+    <div class="num">{{ doc.serie }}-{{ doc.numero|str_pad(8, '0', 'left') }}</div>
+  </div>
+
+  <div class="meta" style="margin-top:8px;">
+    <div class="row"><span class="muted">Emisión</span><span>{{ doc.fechaEmision|date('dd/MM/yyyy') }}{% if doc.horaEmision is not null %} {{ doc.horaEmision|date('HH:mm') }}{% endif %}</span></div>
+    <div class="row"><span class="muted">Moneda</span><span>{{ mon }}</span></div>
+  </div>
+
+  <hr class="sep" />
+
+  <div class="ref">
+    <div class="b">MODIFICA AL DOCUMENTO</div>
+    {% if doc.comprobanteAfectadoSerieNumero %}<div>{{ doc.comprobanteAfectadoTipo|catalog('01') }} {{ doc.comprobanteAfectadoSerieNumero }}</div>{% endif %}
+    {% if doc.tipoNota %}<div class="muted">Motivo: {{ doc.tipoNota|catalog('09') }}</div>{% endif %}
+    {% if doc.sustentoDescripcion %}<div class="muted">{{ doc.sustentoDescripcion }}</div>{% endif %}
+  </div>
+
+  <hr class="sep" />
+
+  <div class="cliente">
+    <div class="b">CLIENTE</div>
+    <div>{{ doc.receptor.nombre }}</div>
+    {% if doc.receptor.numDocIdentidad %}<div class="muted">{{ doc.receptor.tipoDocIdentidad|catalogAttr('06','abreviatura') }} {{ doc.receptor.numDocIdentidad }}</div>{% endif %}
+  </div>
+
+  <hr class="sep" />
+
+  <div class="items">
+    {% for det in doc.detalles %}
+    <div class="it">
+      <div class="desc">{{ det.descripcion }}</div>
+      <div class="ln muted">
+        <span>{% if det.codigoProducto %}{{ det.codigoProducto }} · {% endif %}{{ det.cantidad|n_format }} {{ det.unidadMedida }} × {{ det.precio|n_format }}</span>
+        <span class="b" style="color:#000;">{{ det.precio|n_format }}</span>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <hr class="sep" />
+
+  <div class="totals">
+    {% if doc.totalImpuestos is not null and doc.totalImpuestos.gravadoBaseImponible is not null %}
+    <div class="row"><span class="muted">Op. gravada</span><span>{{ sym }} {{ doc.totalImpuestos.gravadoBaseImponible|n_format }}</span></div>
+    {% endif %}
+    {% if doc.totalImpuestos is not null and doc.totalImpuestos.gravadoImporte is not null %}
+    <div class="row"><span class="muted">IGV</span><span>{{ sym }} {{ doc.totalImpuestos.gravadoImporte|n_format }}</span></div>
+    {% endif %}
+    <div class="row grand"><span>TOTAL</span><span>{{ sym }} {{ doc.totalImporte.importeConImpuestos|n_format }}</span></div>
+  </div>
+
+  {% if doc.leyendas is not empty and doc.leyendas['1000'] %}
+  <hr class="sep" />
+  <div style="font-size:9.5px;">{{ doc.leyendas['1000'] }}</div>
+  {% endif %}
+
+  {% if qrBase64 is not empty %}
+  <div class="qr"><img src="data:image/png;base64,{{ qrBase64 }}" alt="QR" /></div>
+  {% endif %}
+
+  <div class="foot muted">
+    <div>Representación impresa de la nota de crédito electrónica.</div>
+    <div>Valide en {{ params.consultaUrl|default('sunat.gob.pe') }}</div>
+    {% if hashDocumento %}<div class="hash">Hash: {{ hashDocumento }}</div>{% endif %}
+  </div>
+</body>
+</html>

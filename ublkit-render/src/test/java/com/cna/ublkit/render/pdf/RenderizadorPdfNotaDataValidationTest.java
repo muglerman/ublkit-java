@@ -118,7 +118,7 @@ class RenderizadorPdfNotaDataValidationTest {
 
             String html = renderizarHtml(nota);
 
-            assertTrue(html.contains("PEN"),
+            assertTrue(html.contains("Soles"),
                 "Debe contener moneda");
         }
 
@@ -211,7 +211,7 @@ class RenderizadorPdfNotaDataValidationTest {
 
             String html = renderizarHtml(nota);
 
-            assertTrue(html.contains("PEN"),
+            assertTrue(html.contains("Soles"),
                 "Debe contener moneda");
         }
 

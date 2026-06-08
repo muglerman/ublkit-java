@@ -7,6 +7,13 @@ package com.cna.ublkit.render.modelo;
  */
 public final class PlantillaRutas {
 
+    /**
+     * Carpeta de las plantillas genéricas (sin estilo). Los tickets térmicos son monoespaciados y
+     * de rollo angosto: el estilo visual no aplica, así que viven en una única plantilla por
+     * tipo/ancho, compartida por todos los estilos.
+     */
+    public static final String CARPETA_GENERICA = "generico";
+
     private PlantillaRutas() {
     }
 
@@ -14,7 +21,13 @@ public final class PlantillaRutas {
         EstiloPlantilla estiloSeguro = estilo != null ? estilo : EstiloPlantilla.DEFAULT;
         FormatoImpresion formatoSeguro = formato != null ? formato : FormatoImpresion.A4;
         ExtensionPlantilla extensionSegura = extension != null ? extension : ExtensionPlantilla.DEFAULT;
-        return "templates/" + estiloSeguro.carpeta() + "/" + plantillaBase + sufijo(formatoSeguro, extensionSegura);
+        String carpeta = esTicket(formatoSeguro) ? CARPETA_GENERICA : estiloSeguro.carpeta();
+        return "templates/" + carpeta + "/" + plantillaBase + sufijo(formatoSeguro, extensionSegura);
+    }
+
+    /** {@code true} si el formato es un ticket térmico (58 mm u 80 mm). */
+    public static boolean esTicket(FormatoImpresion formato) {
+        return formato == FormatoImpresion.TICKET_58MM || formato == FormatoImpresion.TICKET_80MM;
     }
     
     // Retrocompatibilidad

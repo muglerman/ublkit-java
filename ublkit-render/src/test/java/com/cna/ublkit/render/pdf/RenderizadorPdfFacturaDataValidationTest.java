@@ -483,8 +483,8 @@ class RenderizadorPdfFacturaDataValidationTest {
         }
 
         @Test
-        @DisplayName("✓ Moneda siempre en mayúsculas (PEN no pen)")
-        void monedaMayusculas() {
+        @DisplayName("✓ Moneda: nombre (Soles) en etiqueta y símbolo (S/) en importes")
+        void monedaNombreYSimbolo() {
             BorradorFactura factura = crearFacturaCompleta();
 
             String html = renderizarHtml(factura);
@@ -493,7 +493,8 @@ class RenderizadorPdfFacturaDataValidationTest {
             // puede contener "pen" por azar) para validar solo el contenido visible.
             String htmlVisible = html.replaceAll("(?s)<style>.*?</style>", "");
 
-            assertTrue(html.contains("PEN"), "Moneda debe ser PEN (mayúsculas)");
+            assertTrue(htmlVisible.contains("Soles"), "La etiqueta de moneda debe mostrar el nombre (Soles)");
+            assertTrue(htmlVisible.contains("S/"), "Los importes deben mostrar el símbolo (S/)");
             assertFalse(htmlVisible.contains("pen"), "NO debe haber pen en minúsculas");
         }
 

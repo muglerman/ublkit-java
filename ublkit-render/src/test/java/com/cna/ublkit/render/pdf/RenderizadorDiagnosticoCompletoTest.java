@@ -53,41 +53,60 @@ import com.cna.ublkit.ubl.modelo.total.TotalImpuestos;
  * vivas (cada estilo × tipo de documento × formato) y las guarda en {@code target/diagnostico/}
  * para inspección visual.
  *
- * <p>Cubre los 6 tipos (invoice, note, debit, despatch en A4/A5/ticket80mm/ticket58mm; summary y
- * voided en A4) para los 5 estilos → 90 plantillas {@code .html.twig}. Sirve además como red de
- * seguridad de que toda plantilla compila/renderiza con las fuentes embebidas (sin CDN).</p>
+ * <p>Cubre A4/A5 de invoice/note/debit/despatch + summary/voided (A4) para los 5 estilos
+ * → 50 plantillas con estilo; y los tickets térmicos genéricos (invoice/note/debit/despatch en
+ * ticket80mm/ticket58mm, sin estilo) → 8 plantillas en {@code templates/generico/}. Total 58
+ * plantillas {@code .html.twig}. Sirve además como red de seguridad de que toda plantilla
+ * compila/renderiza con las fuentes embebidas (sin CDN).</p>
  */
 @DisplayName("🧪 DIAGNÓSTICO INTEGRAL - HTML + PDF de todas las plantillas")
 class RenderizadorDiagnosticoCompletoTest {
 
     private static final Path BASE = Paths.get("target", "diagnostico");
-    private static final FormatoImpresion[] FORMATOS_DOCUMENTO = {
-            FormatoImpresion.A4, FormatoImpresion.A5, FormatoImpresion.TICKET_80MM, FormatoImpresion.TICKET_58MM
+    /** Formatos con variante por estilo (papel). */
+    private static final FormatoImpresion[] FORMATOS_DISENO = {
+            FormatoImpresion.A4, FormatoImpresion.A5
+    };
+    /** Formatos de ticket térmico: plantilla genérica única (sin estilo). */
+    private static final FormatoImpresion[] FORMATOS_TICKET = {
+            FormatoImpresion.TICKET_80MM, FormatoImpresion.TICKET_58MM
     };
 
     private int htmlGenerados = 0;
     private int pdfGenerados = 0;
 
     @Test
-    @DisplayName("📦 Generar HTML + PDF de cada plantilla viva en los 5 estilos")
+    @DisplayName("📦 Generar HTML + PDF de cada plantilla viva (50 con estilo + 8 tickets genéricos)")
     void generarTodasLasPlantillas() throws IOException {
+        // Plantillas con estilo: A4/A5 por estilo + documentos solo-A4 (summary, voided)
         for (EstiloPlantilla estilo : EstiloPlantilla.values()) {
-            // Documentos disponibles en A4/A5/ticket80mm/ticket58mm
-            for (FormatoImpresion formato : FORMATOS_DOCUMENTO) {
-                render("invoice", estilo, formato,
+            for (FormatoImpresion formato : FORMATOS_DISENO) {
+                render("invoice", estilo, estilo.carpeta(), formato,
                         new RenderizadorHtmlFactura(formato), new RenderizadorPdfFactura(formato), crearFactura());
-                render("note", estilo, formato,
+                render("note", estilo, estilo.carpeta(), formato,
                         new RenderizadorHtmlNota(formato), new RenderizadorPdfNota(formato), (Object) crearNotaCredito());
-                render("debit", estilo, formato,
+                render("debit", estilo, estilo.carpeta(), formato,
                         new RenderizadorHtmlNota(formato), new RenderizadorPdfNota(formato), (Object) crearNotaDebito());
-                render("despatch", estilo, formato,
+                render("despatch", estilo, estilo.carpeta(), formato,
                         new RenderizadorHtmlGuiaRemision(formato), new RenderizadorPdfGuiaRemision(formato), crearGuia());
             }
-            // Documentos solo A4
-            render("summary", estilo, FormatoImpresion.A4,
+            render("summary", estilo, estilo.carpeta(), FormatoImpresion.A4,
                     new RenderizadorHtmlResumenDiario(), new RenderizadorPdfResumenDiario(), crearResumen());
-            render("voided", estilo, FormatoImpresion.A4,
+            render("voided", estilo, estilo.carpeta(), FormatoImpresion.A4,
                     new RenderizadorHtmlComunicacionBaja(), new RenderizadorPdfComunicacionBaja(), crearComunicacion());
+        }
+
+        // Tickets genéricos: una sola plantilla por tipo/ancho (sin estilo). El estilo es indiferente
+        // (la ruta cae en templates/generico/), pero pasamos DEFAULT por consistencia del contexto.
+        for (FormatoImpresion formato : FORMATOS_TICKET) {
+            render("invoice", EstiloPlantilla.DEFAULT, "generico", formato,
+                    new RenderizadorHtmlFactura(formato), new RenderizadorPdfFactura(formato), crearFactura());
+            render("note", EstiloPlantilla.DEFAULT, "generico", formato,
+                    new RenderizadorHtmlNota(formato), new RenderizadorPdfNota(formato), (Object) crearNotaCredito());
+            render("debit", EstiloPlantilla.DEFAULT, "generico", formato,
+                    new RenderizadorHtmlNota(formato), new RenderizadorPdfNota(formato), (Object) crearNotaDebito());
+            render("despatch", EstiloPlantilla.DEFAULT, "generico", formato,
+                    new RenderizadorHtmlGuiaRemision(formato), new RenderizadorPdfGuiaRemision(formato), crearGuia());
         }
 
         System.out.println("\n" + "=".repeat(80));
@@ -96,30 +115,30 @@ class RenderizadorDiagnosticoCompletoTest {
         System.out.println("   Salida: " + BASE.toAbsolutePath());
         System.out.println("=".repeat(80) + "\n");
 
-        // 5 estilos × (4 formatos × 4 tipos + 2 tipos A4) = 90 plantillas
-        assertEquals(90, htmlGenerados, "Deben generarse 90 HTML (todas las plantillas vivas)");
-        assertEquals(90, pdfGenerados, "Deben generarse 90 PDF (todas las plantillas vivas)");
+        // 5 estilos × (2 formatos × 4 tipos + 2 tipos A4) = 50  +  8 tickets genéricos (2 × 4 tipos) = 58
+        assertEquals(58, htmlGenerados, "Deben generarse 58 HTML (todas las plantillas vivas)");
+        assertEquals(58, pdfGenerados, "Deben generarse 58 PDF (todas las plantillas vivas)");
     }
 
-    private <T> void render(String tipo, EstiloPlantilla estilo, FormatoImpresion formato,
+    private <T> void render(String tipo, EstiloPlantilla estilo, String carpetaSalida, FormatoImpresion formato,
                             RenderizadorDocumento<T> html, RenderizadorDocumento<T> pdf, T documento) throws IOException {
         ContextoRender<T> contexto = ContextoRender.of(documento, "hash123", null, estilo);
 
         String contenidoHtml = html.renderizar(contexto).contenidoHtml();
         byte[] contenidoPdf = pdf.renderizar(contexto).contenidoPdf();
 
-        Path dir = BASE.resolve(estilo.carpeta());
+        Path dir = BASE.resolve(carpetaSalida);
         Files.createDirectories(dir);
         String base = tipo + "." + sufijo(formato);
         Files.writeString(dir.resolve(base + ".html"), contenidoHtml);
         Files.write(dir.resolve(base + ".pdf"), contenidoPdf);
 
         assertTrue(contenidoHtml.length() > 100,
-                "HTML vacío: " + estilo.carpeta() + "/" + base);
+                "HTML vacío: " + carpetaSalida + "/" + base);
         assertTrue(contenidoPdf.length > 500,
-                "PDF demasiado pequeño: " + estilo.carpeta() + "/" + base);
+                "PDF demasiado pequeño: " + carpetaSalida + "/" + base);
         assertEquals("%PDF-", new String(contenidoPdf, 0, 5),
-                "Cabecera PDF inválida: " + estilo.carpeta() + "/" + base);
+                "Cabecera PDF inválida: " + carpetaSalida + "/" + base);
 
         htmlGenerados++;
         pdfGenerados++;

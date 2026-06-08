@@ -4,7 +4,8 @@
 <meta charset="UTF-8" />
 {% set cp = doc.emisor %}
 {% set cl = doc.receptor %}
-{% set mon = doc.moneda|catalog('02') %}
+{% set mon = doc.moneda|catalog('021') %}
+{% set sym = doc.moneda|catalogAttr('021','simbolo') %}
 {% set name = doc.tipoComprobante|catalog('01') %}
 <title>{{ doc.serie }}-{{ doc.numero|str_pad(8, '0', 'left') }} · {{ name }}</title>
 <style>
@@ -26,9 +27,8 @@
     line-height: 1.45;
     color: var(--ink);
     background: var(--paper);
-    width: 559px;
-    min-height: 794px;
-    min-height: 1123px;
+    width: 794px;
+    min-height: 559px;
     padding: 36px 40px;
   }
   .mono { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
@@ -153,7 +153,7 @@
   <div class="party">
     <div class="label">Cliente</div>
     <div class="name">{{ cl.nombre }}</div>
-    <div class="row"><span class="k">{{ cl.tipoDocIdentidad|catalog('06') }}</span><span class="mono">{{ cl.numDocIdentidad }}</span></div>
+    <div class="row"><span class="k">{{ cl.tipoDocIdentidad|catalogAttr('06','abreviatura') }}</span><span class="mono">{{ cl.numDocIdentidad }}</span></div>
     <div class="row"><span class="k">Dirección</span><span>{{ cl.direccion.direccion }}</span></div>
     <div class="row"><span class="k">Ubicación</span><span>{{ cl.direccion.departamento }} — {{ cl.direccion.provincia }} — {{ cl.direccion.distrito }}</span></div>
     {% if doc.ordenDeCompra %}
@@ -205,14 +205,14 @@
     {% if doc.formaDePago and doc.formaDePago.cuotas %}
     <div class="block"><div class="head">Cuotas</div><div class="body">
       {% for cuota in doc.formaDePago.cuotas %}
-      <p class="small">Cuota {{ loop.index }} · {{ cuota.fechaPago|date('d/m/Y') }} · <b>{{ mon }} {{ cuota.monto|n_format }}</b></p>
+      <p class="small">Cuota {{ loop.index }} · {{ cuota.fechaPago|date('d/m/Y') }} · <b>{{ sym }} {{ cuota.monto|n_format }}</b></p>
       {% endfor %}
     </div></div>
     {% endif %}
 
     {% if doc.detraccion is not null %}
     <div class="block"><div class="head">Detracción</div><div class="body">
-      <p><b>{{ mon }} {{ doc.detraccion.monto|n_format }}</b> · {{ doc.detraccion.codigoBien }} - {{ doc.detraccion.codigoBien|catalog('54') }}</p>
+      <p><b>{{ sym }} {{ doc.detraccion.monto|n_format }}</b> · {{ doc.detraccion.codigoBien }} - {{ doc.detraccion.codigoBien|catalog('54') }}</p>
       <p class="small">Medio: {{ doc.detraccion.medioPago|catalog('59') }} · Cta. BN {{ doc.detraccion.cuentaBanco }}</p>
     </div></div>
     {% endif %}
@@ -235,30 +235,30 @@
   <div class="totals">
     <div class="inner">
       {% if doc.totalImporte is defined and doc.totalImporte is not null and doc.totalImporte.importeSinImpuestos is not null %}
-      <div class="line"><span class="k">Subtotal</span><span class="v">{{ mon }} {{ doc.totalImporte.importeSinImpuestos|n_format }}</span></div>
+      <div class="line"><span class="k">Subtotal</span><span class="v">{{ sym }} {{ doc.totalImporte.importeSinImpuestos|n_format }}</span></div>
       {% endif %}
       {% if doc.totalImpuestos.gravadoBaseImponible %}
-      <div class="line"><span class="k">Op. gravadas</span><span class="v">{{ mon }} {{ doc.totalImpuestos.gravadoBaseImponible|n_format }}</span></div>
+      <div class="line"><span class="k">Op. gravadas</span><span class="v">{{ sym }} {{ doc.totalImpuestos.gravadoBaseImponible|n_format }}</span></div>
       {% endif %}
       {% if doc.totalImpuestos.exoneradoBaseImponible %}
-      <div class="line"><span class="k">Op. exoneradas</span><span class="v">{{ mon }} {{ doc.totalImpuestos.exoneradoBaseImponible|n_format }}</span></div>
+      <div class="line"><span class="k">Op. exoneradas</span><span class="v">{{ sym }} {{ doc.totalImpuestos.exoneradoBaseImponible|n_format }}</span></div>
       {% endif %}
       {% if doc.totalImpuestos.inafectoBaseImponible %}
-      <div class="line"><span class="k">Op. inafectas</span><span class="v">{{ mon }} {{ doc.totalImpuestos.inafectoBaseImponible|n_format }}</span></div>
+      <div class="line"><span class="k">Op. inafectas</span><span class="v">{{ sym }} {{ doc.totalImpuestos.inafectoBaseImponible|n_format }}</span></div>
       {% endif %}
       {% if doc.totalImpuestos.gratuitoBaseImponible %}
-      <div class="line"><span class="k">Op. gratuitas</span><span class="v">{{ mon }} {{ doc.totalImpuestos.gratuitoBaseImponible|n_format }}</span></div>
+      <div class="line"><span class="k">Op. gratuitas</span><span class="v">{{ sym }} {{ doc.totalImpuestos.gratuitoBaseImponible|n_format }}</span></div>
       {% endif %}
       <div class="rule"></div>
       {% if doc.totalImpuestos.gravadoImporte %}
-      <div class="line"><span class="k">IGV (18%)</span><span class="v">{{ mon }} {{ doc.totalImpuestos.gravadoImporte|n_format }}</span></div>
+      <div class="line"><span class="k">IGV (18%)</span><span class="v">{{ sym }} {{ doc.totalImpuestos.gravadoImporte|n_format }}</span></div>
       {% endif %}
       {% if doc.totalImpuestos.icbImporte %}
-      <div class="line"><span class="k">ICBPER</span><span class="v">{{ mon }} {{ doc.totalImpuestos.icbImporte|n_format }}</span></div>
+      <div class="line"><span class="k">ICBPER</span><span class="v">{{ sym }} {{ doc.totalImpuestos.icbImporte|n_format }}</span></div>
       {% endif %}
     </div>
     <div class="grand-wrap">
-      <div class="grand"><span class="k">Total</span><span class="v">{{ mon }} {{ doc.totalImporte.importeConImpuestos|n_format }}</span></div>
+      <div class="grand"><span class="k">Total</span><span class="v">{{ sym }} {{ doc.totalImporte.importeConImpuestos|n_format }}</span></div>
       <div class="words">{{ doc.leyendas['1000'] }}</div>
     </div>
   </div>
@@ -272,7 +272,7 @@
   </div>
   <div class="meta">
     <p><strong>Representación impresa</strong> de la {{ name }} Electrónica.</p>
-    <p>Consulte la validez en <strong>sunat.gob.pe</strong> con el RUC del emisor y el número del comprobante.</p>
+    <p>Consulte la validez en <strong>{{ params.consultaUrl|default('sunat.gob.pe') }}</strong> con el RUC del emisor y el número del comprobante.</p>
     <p style="margin-top:6px;">Firmante: {{ cp.ruc }} · {{ cp.razonSocial }}</p>
     <p class="hash">Hash: {{ hashDocumento }}</p>
   </div>

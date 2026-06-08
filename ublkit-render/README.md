@@ -34,12 +34,12 @@ Para utilizar este módulo, agrégalo como dependencia en tu archivo `pom.xml`:
 La estructura del módulo abarca:
 - `src/main/java/com/cna/ublkit/render/`: Clases renderizadoras HTML y PDF separadas por tipo de comprobante.
 - `src/main/java/com/cna/ublkit/render/context/`: El `ContextoRender` donde se inyectan variables externas (logos, parámetros de sistema, variables de marca).
-- `src/main/resources/oti/templates/`: Archivos `.html` y `.html.twig` organizados por documento, formato y tema visual.
+- `src/main/resources/templates/`: Archivos `.html.twig`. Los formatos **A4/A5** se organizan por tema visual: una carpeta por estilo (`bold-accent/`, `classic-mono/`, `corporate-blue/`, `forest-modern/`, `minimal-serif/`), cada una con `invoice/note/debit/despatch` (A4 y A5) + `summary/voided` (A4). Los **tickets térmicos** (`ticket58mm`/`ticket80mm`) **no** tienen variante por diseño: viven en una única plantilla genérica por tipo/ancho bajo `templates/generico/` (resuelta por `PlantillaRutas` ignorando el estilo).
 - `src/main/resources/fonts/`: Fuentes requeridas para el motor PDF.
 
 ## Características Principales
 - Soporte para visualización `HTML` directa o exportación a `PDF`.
-- Variedad de Formatos: A4, A5, Rollos Térmicos (Ticket 58mm, Ticket 80mm).
+- Variedad de Formatos: A4 y A5 con tema visual por estilo; Rollos Térmicos (Ticket 58mm, Ticket 80mm) con plantilla genérica única (sin diseño), monoespaciada.
 - Renderizadores con multitenencia integrada inyectando configuraciones visuales dinámicas al `ContextoRender`.
 - **In-Memory**: Funciona 100% en memoria en la JVM, ideal para ambientes serverless, requiriendo que los logos e imágenes se envíen como `Data URIs` (Base64).
 - Paginación robusta de tablas gestionada por CSS tradicional (`page-break-inside`).

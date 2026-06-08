@@ -4,7 +4,8 @@
 <meta charset="UTF-8" />
 {% set cp = doc.emisor %}
 {% set cl = doc.receptor %}
-{% set mon = doc.moneda|catalog('02') %}
+{% set mon = doc.moneda|catalog('021') %}
+{% set sym = doc.moneda|catalogAttr('021','simbolo') %}
 {% set name = doc.tipoComprobante|catalog('01') %}
 <title>{{ doc.serie }}-{{ doc.numero|str_pad(8, '0', 'left') }} · {{ name }}</title>
 <style>
@@ -27,7 +28,7 @@
     color: var(--ink);
     background: var(--paper);
     width: 794px;
-    min-height: 1123px;
+    min-height: 559px;
     padding: 36px 40px;
   }
   .mono { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
@@ -145,7 +146,7 @@
   <div class="party">
     <div class="label">Cliente</div>
     <div class="name">{% if cl is not null %}{{ cl.nombre }}{% endif %}</div>
-    <div class="row"><span class="k">{% if cl is not null %}{{ cl.tipoDocIdentidad|catalog('06') }}{% endif %}</span><span class="mono">{% if cl is not null %}{{ cl.numDocIdentidad }}{% endif %}</span></div>
+    <div class="row"><span class="k">{% if cl is not null %}{{ cl.tipoDocIdentidad|catalogAttr('06','abreviatura') }}{% endif %}</span><span class="mono">{% if cl is not null %}{{ cl.numDocIdentidad }}{% endif %}</span></div>
     <div class="row"><span class="k">Dirección</span><span>{% if cl is not null %}{{ cl.direccion.direccion }}{% endif %}</span></div>
     <div class="row"><span class="k">Ubicación</span><span>{% if cl is not null %}{{ cl.direccion.departamento }} — {{ cl.direccion.provincia }} — {{ cl.direccion.distrito }}{% endif %}</span></div>
   </div>
@@ -200,18 +201,18 @@
   <div class="totals">
     <div class="inner">
       {% if doc.totalImporte is defined and doc.totalImporte is not null and doc.totalImporte.importeSinImpuestos is not null %}
-      <div class="line"><span class="k">Subtotal</span><span class="v">{{ mon }} {{ doc.totalImporte.importeSinImpuestos|n_format }}</span></div>
+      <div class="line"><span class="k">Subtotal</span><span class="v">{{ sym }} {{ doc.totalImporte.importeSinImpuestos|n_format }}</span></div>
       {% endif %}
       {% if doc.totalImpuestos is not null and doc.totalImpuestos.gravadoBaseImponible %}
-      <div class="line"><span class="k">Op. gravadas</span><span class="v">{{ mon }} {{ doc.totalImpuestos.gravadoBaseImponible|n_format }}</span></div>
+      <div class="line"><span class="k">Op. gravadas</span><span class="v">{{ sym }} {{ doc.totalImpuestos.gravadoBaseImponible|n_format }}</span></div>
       {% endif %}
       <div class="rule"></div>
       {% if doc.totalImpuestos is not null and doc.totalImpuestos.gravadoImporte %}
-      <div class="line"><span class="k">IGV (18%)</span><span class="v">{{ mon }} {{ doc.totalImpuestos.gravadoImporte|n_format }}</span></div>
+      <div class="line"><span class="k">IGV (18%)</span><span class="v">{{ sym }} {{ doc.totalImpuestos.gravadoImporte|n_format }}</span></div>
       {% endif %}
     </div>
     <div class="grand-wrap">
-      <div class="grand"><span class="k">Total</span><span class="v">{{ mon }} {{ doc.totalImporte.importeConImpuestos|n_format }}</span></div>
+      <div class="grand"><span class="k">Total</span><span class="v">{{ sym }} {{ doc.totalImporte.importeConImpuestos|n_format }}</span></div>
       <div class="words">{{ doc.leyendas['1000'] }}</div>
     </div>
   </div>
@@ -225,7 +226,7 @@
   </div>
   <div class="meta">
     <p><strong>Representación impresa</strong> de la {{ name }} Electrónica.</p>
-    <p>Consulte la validez en <strong>sunat.gob.pe</strong> con el RUC del emisor y el número del comprobante.</p>
+    <p>Consulte la validez en <strong>{{ params.consultaUrl|default('sunat.gob.pe') }}</strong> con el RUC del emisor y el número del comprobante.</p>
     <p style="margin-top:6px;">Firmante: {% if cp is not null %}{{ cp.ruc }} · {{ cp.razonSocial }}{% endif %}</p>
     <p class="hash">Hash: {{ hashDocumento }}</p>
     {% if params.footer is not empty %}<p style="margin-top:10px; font-style:italic;">{{ params.footer }}</p>{% endif %}

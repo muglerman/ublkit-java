@@ -9,7 +9,6 @@ import com.cna.ublkit.ubl.modelo.BorradorFactura;
 import com.cna.ublkit.qr.GeneradorQrSunat;
 
 import com.microsoft.playwright.Page;
-import com.microsoft.playwright.options.WaitUntilState;
 import com.cna.ublkit.render.pdf.helper.PlaywrightBrowserManager;
 
 /**
@@ -49,8 +48,7 @@ public class RenderizadorPdfFactura implements RenderizadorDocumento<BorradorFac
         String html = resultadoHtml.contenidoHtml();
 
         try (Page page = PlaywrightBrowserManager.getBrowser().newPage()) {
-            page.setContent(html, new Page.SetContentOptions().setWaitUntil(WaitUntilState.NETWORKIDLE));
-            byte[] pdfBytes = page.pdf(PlaywrightBrowserManager.getPdfOptions(this.formato));
+            byte[] pdfBytes = PlaywrightBrowserManager.renderizarPdf(page, html, this.formato);
             return ResultadoRender.pdf(pdfBytes);
         } catch (Exception e) {
             throw new RuntimeException("Error convirtiendo HTML a PDF con Playwright: " + e.getMessage(), e);

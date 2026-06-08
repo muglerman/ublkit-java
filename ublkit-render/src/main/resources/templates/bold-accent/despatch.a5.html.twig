@@ -25,9 +25,8 @@
     line-height: 1.45;
     color: var(--ink);
     background: var(--paper);
-    width: 559px;
-    min-height: 794px;
-    min-height: 1123px;
+    width: 794px;
+    min-height: 559px;
     padding: 36px 40px;
   }
   .mono { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
@@ -118,7 +117,7 @@
   <div class="party">
     <div class="label">Destinatario</div>
     <div class="name">{{ cl.nombre }}</div>
-    <div class="row"><span class="k">{{ cl.tipoDocumentoIdentidad|catalog('06') }}</span><span class="mono">{{ cl.numeroDocumentoIdentidad }}</span></div>
+    <div class="row"><span class="k">{{ cl.tipoDocumentoIdentidad|catalogAttr('06','abreviatura') }}</span><span class="mono">{{ cl.numeroDocumentoIdentidad }}</span></div>
     <div class="row"><span class="k">Dirección</span><span>{{ cl.direccion.direccion }}</span></div>
   </div>
 
@@ -165,7 +164,7 @@
   </div>
   <div class="meta">
     <p><strong>Representación impresa</strong> de la {{ name }}.</p>
-    <p>Consulte la validez en <strong>sunat.gob.pe</strong></p>
+    <p>Consulte la validez en <strong>{{ params.consultaUrl|default('sunat.gob.pe') }}</strong></p>
     <p style="margin-top:6px;">Firmante: {{ cp.ruc }} · {{ cp.razonSocial }}</p>
     <p class="hash">Hash: {{ hashDocumento }}</p>
   </div>

@@ -30,6 +30,10 @@ public final class FuentesEmbebidas {
     private static final Map<EstiloPlantilla, List<Fuente>> FUENTES_POR_ESTILO = new EnumMap<>(EstiloPlantilla.class);
     private static final Map<EstiloPlantilla, String> CACHE = new ConcurrentHashMap<>();
 
+    /** Fuente monoespaciada única para los tickets térmicos genéricos (sin estilo). */
+    private static final List<Fuente> FUENTES_TICKET = jetBrainsMono();
+    private static volatile String cacheTicket;
+
     static {
         FUENTES_POR_ESTILO.put(EstiloPlantilla.CLASSIC_MONO, concat(inter(), ibmPlexMono()));
         FUENTES_POR_ESTILO.put(EstiloPlantilla.CORPORATE_BLUE, concat(inter(), ibmPlexMono()));
@@ -47,12 +51,26 @@ public final class FuentesEmbebidas {
      */
     public static String cssParaEstilo(EstiloPlantilla estilo) {
         EstiloPlantilla seguro = estilo != null ? estilo : EstiloPlantilla.DEFAULT;
-        return CACHE.computeIfAbsent(seguro, FuentesEmbebidas::construir);
+        return CACHE.computeIfAbsent(seguro, e -> construir(FUENTES_POR_ESTILO.getOrDefault(e, List.of())));
     }
 
-    private static String construir(EstiloPlantilla estilo) {
+    /**
+     * CSS con los {@code @font-face} (base64) de la monoespaciada de los tickets genéricos.
+     * Independiente del estilo: pensado para inyectarse como {@code {{ fontStyle | raw }}} en las
+     * plantillas de {@code templates/generico/}.
+     */
+    public static String cssTicketGenerico() {
+        String cached = cacheTicket;
+        if (cached == null) {
+            cached = construir(FUENTES_TICKET);
+            cacheTicket = cached;
+        }
+        return cached;
+    }
+
+    private static String construir(List<Fuente> fuentes) {
         StringBuilder css = new StringBuilder();
-        for (Fuente fuente : FUENTES_POR_ESTILO.getOrDefault(estilo, List.of())) {
+        for (Fuente fuente : fuentes) {
             css.append("@font-face{font-family:'").append(fuente.familia())
                     .append("';font-style:normal;font-weight:").append(fuente.peso())
                     .append(";font-display:swap;src:url(data:font/woff2;base64,")

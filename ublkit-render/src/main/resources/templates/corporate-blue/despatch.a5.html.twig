@@ -22,9 +22,8 @@
     line-height: 1.45;
     color: var(--ink);
     background: #fff;
-    width: 559px;
-    min-height: 794px;
-    min-height: 1123px;
+    width: 794px;
+    min-height: 559px;
     padding: 0;
   }
   .mono { font-family: 'IBM Plex Mono', monospace; font-variant-numeric: tabular-nums; }
@@ -188,7 +187,7 @@
   </div>
   <div class="meta">
     <p><strong>Representación impresa</strong> de la Guía De Remisión Electrónica.</p>
-    <p>Consulte la validez en <strong>sunat.gob.pe</strong> con el RUC del emisor y el número del documento.</p>
+    <p>Consulte la validez en <strong>{{ params.consultaUrl|default('sunat.gob.pe') }}</strong> con el RUC del emisor y el número del documento.</p>
     <p style="margin-top:6px;">Firmante digital: {{ doc.company.ruc }} · Manufacturas Andina Textil S.A.C.</p>
     <p class="hash">Hash: 3f8a21bc9d7e04a6c2f1b8e0d4a7c9f2e5b6d8a1</p>
   </div>

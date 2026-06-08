@@ -32,6 +32,7 @@ public final class UblkitPebbleExtension extends AbstractExtension {
     private static final List<String> NUMBER_ARGUMENTS = List.of();
     private static final List<String> PAD_ARGUMENTS = List.of("width", "pad", "side");
     private static final List<String> CATALOG_ARGUMENTS = List.of("catalogo");
+    private static final List<String> CATALOG_ATTR_ARGUMENTS = List.of("catalogo", "clave");
     private static final List<String> IMAGE_ARGUMENTS = List.of("mimeType");
 
     private final ProveedorCatalogos proveedorCatalogos = new LectorCsvCatalogos();
@@ -43,6 +44,7 @@ public final class UblkitPebbleExtension extends AbstractExtension {
         filters.put("n_format", new NumberFormatFilter());
         filters.put("str_pad", new StringPadFilter());
         filters.put("catalog", new CatalogFilter());
+        filters.put("catalogAttr", new CatalogAttrFilter());
         filters.put("image_b64", new ImageBase64Filter());
         return filters;
     }
@@ -184,12 +186,31 @@ public final class UblkitPebbleExtension extends AbstractExtension {
                     .filter(descripcion -> !descripcion.isBlank())
                     .orElse(codigo);
         }
+    }
 
-        private String normalizarCatalogo(String catalogo) {
-            if (catalogo.length() == 1) {
-                return "0" + catalogo;
+    /**
+     * Resuelve un atributo arbitrario de una entrada de catálogo (p. ej. la abreviatura
+     * del tipo de documento de identidad o el símbolo de la moneda). Si no existe la
+     * entrada o el atributo, devuelve el código original como respaldo.
+     */
+    private final class CatalogAttrFilter implements Filter {
+        @Override
+        public List<String> getArgumentNames() {
+            return CATALOG_ATTR_ARGUMENTS;
+        }
+
+        @Override
+        public Object apply(Object input, Map<String, Object> args, PebbleTemplate self, EvaluationContext context, int lineNumber) throws PebbleException {
+            String catalogo = stringArg(args, "catalogo", "");
+            String clave = stringArg(args, "clave", "");
+            String codigo = input == null ? "" : input.toString();
+            if (catalogo.isBlank() || clave.isBlank() || codigo.isBlank()) {
+                return codigo;
             }
-            return catalogo;
+            return proveedorCatalogos.buscar(normalizarCatalogo(catalogo), codigo)
+                    .flatMap(entrada -> entrada.getAtributoAdicional(clave))
+                    .filter(valor -> !valor.isBlank())
+                    .orElse(codigo);
         }
     }
 
@@ -209,6 +230,13 @@ public final class UblkitPebbleExtension extends AbstractExtension {
             }
             return input.toString();
         }
+    }
+
+    private static String normalizarCatalogo(String catalogo) {
+        if (catalogo.length() == 1) {
+            return "0" + catalogo;
+        }
+        return catalogo;
     }
 
     private static String stringArg(Map<String, Object> args, String key, String defaultValue) {

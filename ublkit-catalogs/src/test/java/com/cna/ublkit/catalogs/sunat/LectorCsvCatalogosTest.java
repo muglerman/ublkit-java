@@ -58,6 +58,34 @@ class LectorCsvCatalogosTest {
     }
 
     @Test
+    void testBuscar_Catalogo06_Abreviatura() {
+        // Act
+        Optional<EntradaCatalogo> ruc = proveedor.buscar("06", "6");
+        Optional<EntradaCatalogo> dni = proveedor.buscar("06", "1");
+
+        // Assert: el tipo de documento de identidad expone su abreviatura
+        assertThat(ruc).isPresent();
+        assertThat(ruc.get().getAtributoAdicional("abreviatura")).hasValue("RUC");
+        assertThat(dni).isPresent();
+        assertThat(dni.get().getAtributoAdicional("abreviatura")).hasValue("DNI");
+    }
+
+    @Test
+    void testBuscar_Catalogo021_NombreYSimbolo() {
+        // Act
+        Optional<EntradaCatalogo> soles = proveedor.buscar("021", "PEN");
+        Optional<EntradaCatalogo> dolares = proveedor.buscar("021", "USD");
+
+        // Assert: la moneda expone nombre (descripcion) y símbolo
+        assertThat(soles).isPresent();
+        assertThat(soles.get().getDescripcion()).isEqualTo("Soles");
+        assertThat(soles.get().getAtributoAdicional("simbolo")).hasValue("S/");
+        assertThat(dolares).isPresent();
+        assertThat(dolares.get().getDescripcion()).isEqualTo("Dólares");
+        assertThat(dolares.get().getAtributoAdicional("simbolo")).hasValue("$");
+    }
+
+    @Test
     void testObtenerCatalogo_NoExistente() {
         // Act
         List<EntradaCatalogo> vacio = proveedor.obtenerCatalogo("00_inexistente");

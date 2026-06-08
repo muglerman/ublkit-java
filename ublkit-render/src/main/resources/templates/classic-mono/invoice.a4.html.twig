@@ -4,7 +4,8 @@
 <meta charset="UTF-8">
 {% set cp = doc.emisor %}
 {% set cl = doc.receptor %}
-{% set mon = doc.moneda|catalog('02') %}
+{% set mon = doc.moneda|catalog('021') %}
+{% set sym = doc.moneda|catalogAttr('021','simbolo') %}
 {% set name = doc.tipoComprobante|catalog('01') %}
 <title>{{ doc.serie }}-{{ doc.numero|str_pad(8, '0', 'left') }} · {{ name }}</title>
 <style>
@@ -130,7 +131,7 @@
   <div class="party">
     <div class="label">Cliente</div>
     <div class="name">{{ doc.receptor.nombre }}</div>
-    <div class="row"><span>RUC</span><span class="mono">{{ doc.receptor.numDocIdentidad }}</span></div>
+    <div class="row"><span>{{ doc.receptor.tipoDocIdentidad|catalogAttr('06','abreviatura') }}</span><span class="mono">{{ doc.receptor.numDocIdentidad }}</span></div>
     <div class="row"><span>Dirección</span><span>{{ doc.receptor.direccion.direccion }}</span></div>
     <div class="row"><span>Ubicación</span><span>{% if cl is not null and cl.direccion is not null %}{{ cl.direccion.departamento }} — {{ cl.direccion.provincia }} — {{ cl.direccion.distrito }}{% endif %}</span></div>
   </div>
@@ -183,10 +184,10 @@
     <div class="block">
       <div class="head">Condiciones de pago</div>
       <div class="body">
-        <p>{% if doc.formaDePago is not null %}{{ doc.formaDePago.tipo }}{% endif %} — {{ mon }} {{ doc.totalImporte.importeConImpuestos|n_format }}</p>
+        <p>{% if doc.formaDePago is not null %}{{ doc.formaDePago.tipo }}{% endif %} — {{ sym }} {{ doc.totalImporte.importeConImpuestos|n_format }}</p>
         {% if doc.formaDePago is not null and doc.formaDePago.cuotas is not empty %}
           {% for cuota in doc.formaDePago.cuotas %}
-            <p class="small">Cuota {{ loop.index }} · vence {{ cuota.fechaPago|date('dd/MM/yyyy') }} · {{ mon }} {{ cuota.monto|n_format }}</p>
+            <p class="small">Cuota {{ loop.index }} · vence {{ cuota.fechaPago|date('dd/MM/yyyy') }} · {{ sym }} {{ cuota.monto|n_format }}</p>
           {% endfor %}
         {% endif %}
       </div>
@@ -195,7 +196,7 @@
       <div class="head">Detracción</div>
       <div class="body">
         {% if doc.detraccion is not null %}
-          <p>{{ mon }} {{ doc.detraccion.monto|n_format }} · {{ doc.detraccion.codigoBien }} - {{ doc.detraccion.codigoBien|catalog('54') }}</p>
+          <p>{{ sym }} {{ doc.detraccion.monto|n_format }} · {{ doc.detraccion.codigoBien }} - {{ doc.detraccion.codigoBien|catalog('54') }}</p>
           <p class="small">Medio: {{ doc.detraccion.medioPago|catalog('59') }} · Cta. BN {{ doc.detraccion.cuentaBanco }}</p>
         {% endif %}
       </div>
@@ -216,25 +217,25 @@
 
   <div class="totals">
     {% if doc.totalImpuestos is not null and doc.totalImpuestos.gravadoBaseImponible is not null %}
-    <div class="line"><span class="k">Op. gravadas</span><span class="v">{{ mon }} {{ doc.totalImpuestos.gravadoBaseImponible|n_format }}</span></div>
+    <div class="line"><span class="k">Op. gravadas</span><span class="v">{{ sym }} {{ doc.totalImpuestos.gravadoBaseImponible|n_format }}</span></div>
     {% endif %}
     {% if doc.totalImpuestos is not null and doc.totalImpuestos.exoneradoBaseImponible is not null %}
-    <div class="line"><span class="k">Op. exoneradas</span><span class="v">{{ mon }} {{ doc.totalImpuestos.exoneradoBaseImponible|n_format }}</span></div>
+    <div class="line"><span class="k">Op. exoneradas</span><span class="v">{{ sym }} {{ doc.totalImpuestos.exoneradoBaseImponible|n_format }}</span></div>
     {% endif %}
     {% if doc.totalImpuestos is not null and doc.totalImpuestos.inafectoBaseImponible is not null %}
-    <div class="line"><span class="k">Op. inafectas</span><span class="v">{{ mon }} {{ doc.totalImpuestos.inafectoBaseImponible|n_format }}</span></div>
+    <div class="line"><span class="k">Op. inafectas</span><span class="v">{{ sym }} {{ doc.totalImpuestos.inafectoBaseImponible|n_format }}</span></div>
     {% endif %}
     {% if doc.totalImpuestos is not null and doc.totalImpuestos.gratuitoBaseImponible is not null %}
-    <div class="line"><span class="k">Op. gratuitas</span><span class="v">{{ mon }} {{ doc.totalImpuestos.gratuitoBaseImponible|n_format }}</span></div>
+    <div class="line"><span class="k">Op. gratuitas</span><span class="v">{{ sym }} {{ doc.totalImpuestos.gratuitoBaseImponible|n_format }}</span></div>
     {% endif %}
     <div class="rule"></div>
     {% if doc.totalImpuestos is not null and doc.totalImpuestos.gravadoImporte is not null %}
-    <div class="line"><span class="k">IGV (18%)</span><span class="v">{{ mon }} {{ doc.totalImpuestos.gravadoImporte|n_format }}</span></div>
+    <div class="line"><span class="k">IGV (18%)</span><span class="v">{{ sym }} {{ doc.totalImpuestos.gravadoImporte|n_format }}</span></div>
     {% endif %}
     {% if doc.totalImpuestos is not null and doc.totalImpuestos.icbImporte is not null %}
-    <div class="line"><span class="k">ICBPER</span><span class="v">{{ mon }} {{ doc.totalImpuestos.icbImporte|n_format }}</span></div>
+    <div class="line"><span class="k">ICBPER</span><span class="v">{{ sym }} {{ doc.totalImpuestos.icbImporte|n_format }}</span></div>
     {% endif %}
-    <div class="grand"><span>Total</span><span class="v">{{ mon }} {{ doc.totalImporte.importeConImpuestos|n_format }}</span></div>
+    <div class="grand"><span>Total</span><span class="v">{{ sym }} {{ doc.totalImporte.importeConImpuestos|n_format }}</span></div>
     <div class="in-words">{{ doc.leyendas['1000'] }}</div>
   </div>
 </div>
@@ -245,7 +246,7 @@
   </div>
   <div class="meta">
     <p><strong>Representación impresa</strong> de la {% if name is defined %}{{ name }}{% else %}Factura{% endif %} Electrónica.</p>
-    <p>Consulte la validez en <strong>sunat.gob.pe</strong> con el RUC del emisor y el número del comprobante.</p>
+    <p>Consulte la validez en <strong>{{ params.consultaUrl|default('sunat.gob.pe') }}</strong> con el RUC del emisor y el número del comprobante.</p>
     <p style="margin-top:6px;">Firmante: {% if cp is not null %}{{ cp.ruc }} · {{ cp.razonSocial }}{% endif %}</p>
     <p class="hash">Hash: {{ hashDocumento }}</p>
     {% if params.footer is not null %}<p id="custom-footer-box" style="margin-top:10px; font-style:italic;">{{ params.footer }}</p>{% endif %}

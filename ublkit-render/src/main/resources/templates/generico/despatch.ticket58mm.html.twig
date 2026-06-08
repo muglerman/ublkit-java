@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+{% set mon = doc.moneda|catalog('021') %}
+{% set sym = doc.moneda|catalogAttr('021','simbolo') %}
+<title>{{ doc.serie }}-{{ doc.numero|str_pad(8, '0', 'left') }} · Guía de Remisión</title>
+<style>
+  {{ fontStyle | raw }}
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: #fff; }
+  body {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9.5px;
+    line-height: 1.38;
+    color: #000;
+    width: 219px; /* 58mm @96dpi */
+    padding: 9px 10px;
+    font-variant-numeric: tabular-nums;
+  }
+  p { margin: 0; }
+  .c { text-align: center; }
+  .b { font-weight: 700; }
+  .muted { color: #444; }
+  .sep { border: 0; border-top: 1px dashed #000; margin: 6px 0; }
+  .row { display: flex; justify-content: space-between; gap: 6px; }
+  .head .name { font-size: 11px; font-weight: 700; }
+  .head .sub { font-size: 9px; }
+  .doctype { margin-top: 6px; border: 1px solid #000; padding: 4px 3px; text-align: center; }
+  .doctype .kind { font-weight: 700; }
+  .doctype .num { font-size: 12px; font-weight: 700; margin-top: 2px; }
+  .block, .items { font-size: 9px; }
+  .block .t { font-weight: 700; }
+  .items .it { margin: 4px 0; }
+  .items .desc { font-weight: 500; }
+  .items .ln { display: flex; justify-content: space-between; gap: 6px; }
+  .qr { width: 108px; height: 108px; margin: 8px auto 0; }
+  .qr img { width: 100%; height: 100%; display: block; }
+  .foot { margin-top: 6px; font-size: 8.5px; text-align: center; }
+  .hash { word-break: break-all; }
+</style>
+</head>
+<body>
+  <div class="head c">
+    <div class="name">{{ doc.remitente.razonSocial }}</div>
+    <div class="sub b">RUC {{ doc.remitente.ruc }}</div>
+    {% if doc.remitente.direccion is not null and doc.remitente.direccion.direccion %}<div class="sub muted">{{ doc.remitente.direccion.direccion }}</div>{% endif %}
+  </div>
+
+  <div class="doctype">
+    <div class="kind">GUÍA DE REMISIÓN ELECTRÓNICA</div>
+    <div class="num">{{ doc.serie }}-{{ doc.numero|str_pad(8, '0', 'left') }}</div>
+  </div>
+
+  <div class="block" style="margin-top:6px;">
+    <div class="row"><span class="muted">Emisión</span><span>{{ doc.fechaEmision|date('dd/MM/yyyy') }}</span></div>
+    {% if doc.envio is not null and doc.envio.fechaTraslado is not null %}<div class="row"><span class="muted">Traslado</span><span>{{ doc.envio.fechaTraslado|date('dd/MM/yyyy') }}</span></div>{% endif %}
+    {% if doc.envio is not null and doc.envio.motivoTraslado %}<div class="row"><span class="muted">Motivo</span><span>{{ doc.envio.motivoTraslado }}</span></div>{% endif %}
+  </div>
+
+  <hr class="sep" />
+
+  <div class="block">
+    <div class="t">DESTINATARIO</div>
+    <div>{{ doc.destinatario.nombre }}</div>
+    {% if doc.destinatario.numeroDocumentoIdentidad %}<div class="muted">Doc. {{ doc.destinatario.numeroDocumentoIdentidad }}</div>{% endif %}
+  </div>
+
+  {% if doc.envio is not null %}
+  <hr class="sep" />
+  <div class="block">
+    <div class="t">TRANSPORTE</div>
+    {% if doc.envio.transportista is not null %}<div>{{ doc.envio.transportista.nombre }}</div>{% endif %}
+    {% if doc.envio.vehiculo is not null and doc.envio.vehiculo.placa %}<div class="muted">Placa: {{ doc.envio.vehiculo.placa }}</div>{% endif %}
+    {% for ch in doc.envio.choferes %}
+    <div class="muted">Conductor: {{ ch.nombres }} {{ ch.apellidos }}</div>
+    {% endfor %}
+    {% if doc.envio.pesoTotal is not null %}<div class="muted">Peso: {{ doc.envio.pesoTotal|n_format }} {{ doc.envio.pesoTotalUnidadMedida }}{% if doc.envio.numeroDeBultos is not null %} · Bultos: {{ doc.envio.numeroDeBultos }}{% endif %}</div>{% endif %}
+  </div>
+  {% endif %}
+
+  <hr class="sep" />
+
+  <div class="items">
+    <div class="t b">BIENES</div>
+    {% for det in doc.detalles %}
+    <div class="it">
+      <div class="desc">{{ det.descripcion }}</div>
+      <div class="ln muted">
+        <span>{% if det.codigo %}{{ det.codigo }}{% endif %}</span>
+        <span class="b" style="color:#000;">{{ det.cantidad|n_format }} {{ det.unidadMedida }}</span>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  {% if doc.observaciones %}
+  <hr class="sep" />
+  <div style="font-size:8.5px;"><span class="muted">Obs.:</span> {{ doc.observaciones }}</div>
+  {% endif %}
+
+  {% if qrBase64 is not empty %}
+  <div class="qr"><img src="data:image/png;base64,{{ qrBase64 }}" alt="QR" /></div>
+  {% endif %}
+
+  <div class="foot muted">
+    <div>Representación impresa de la guía de remisión.</div>
+    <div>Valide en {{ params.consultaUrl|default('sunat.gob.pe') }}</div>
+  </div>
+</body>
+</html>

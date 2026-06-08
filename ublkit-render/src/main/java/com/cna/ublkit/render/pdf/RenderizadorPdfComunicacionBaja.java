@@ -8,7 +8,6 @@ import com.cna.ublkit.render.modelo.ResultadoRender;
 import com.cna.ublkit.ubl.modelo.sunat.baja.ComunicacionBaja;
 
 import com.microsoft.playwright.Page;
-import com.microsoft.playwright.options.WaitUntilState;
 import com.cna.ublkit.render.pdf.helper.PlaywrightBrowserManager;
 
 /**
@@ -24,8 +23,7 @@ public class RenderizadorPdfComunicacionBaja implements RenderizadorDocumento<Co
     public ResultadoRender renderizar(ContextoRender<ComunicacionBaja> contexto) {
         String html = renderizadorHtml.renderizar(contexto).contenidoHtml();
         try (Page page = PlaywrightBrowserManager.getBrowser().newPage()) {
-            page.setContent(html, new Page.SetContentOptions().setWaitUntil(WaitUntilState.NETWORKIDLE));
-            byte[] pdfBytes = page.pdf(PlaywrightBrowserManager.getPdfOptions(FormatoImpresion.A4));
+            byte[] pdfBytes = PlaywrightBrowserManager.renderizarPdf(page, html, FormatoImpresion.A4);
             return ResultadoRender.pdf(pdfBytes);
         } catch (Exception e) {
             throw new RuntimeException("Error renderizando PDF de comunicación de baja con Playwright: " + e.getMessage(), e);
