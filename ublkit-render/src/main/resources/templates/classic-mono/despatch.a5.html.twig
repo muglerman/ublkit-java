@@ -2,10 +2,8 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-{% set cp = doc.emisor %}
-{% set cl = doc.receptor %}
-{% set mon = doc.moneda|catalog('021') %}
-{% set sym = doc.moneda|catalogAttr('021','simbolo') %}
+{% set cp = doc.remitente %}
+{% set cl = doc.destinatario %}
 {% set name = doc.tipoComprobante|catalog("01") %}
 <title>T001-0001287 · Guía De Remisión Electrónica</title>
 <style>
@@ -102,44 +100,46 @@
         <rect x="6" y="6" width="28" height="28" rx="3"/>
         <path d="M12 20h16M12 14h10M12 26h14"/>
       </svg>{% endif %}
-      <div class="name">{{ doc.emisor.razonSocial }}</div>
+      <div class="name">{% if cp is not null %}{{ cp.razonSocial }}{% endif %}</div>
     </div>
     <dl class="meta">
-      <dt>Dirección</dt><dd>{{ doc.emisor.direccion.direccion }}</dd>
-      <dt>Ubicación</dt><dd>LIMA — LIMA — CERCADO DE LIMA</dd>
-      <dt>Contacto</dt><dd>ventas@andinatextil.pe · (01) 555-0102 · www.andinatextil.pe</dd>
+      <dt>Dirección</dt><dd>{% if cp is not null and cp.direccion is not null %}{{ cp.direccion.direccion }}{% endif %}</dd>
+      <dt>Contacto</dt><dd>{% if cp is not null and cp.contacto is not null %}{{ cp.contacto.email }} · {{ cp.contacto.telefono }}{% endif %}</dd>
     </dl>
   </div>
   <div class="doc-id">
-    <div class="ruc">RUC <strong>{{ doc.emisor.ruc }}</strong></div>
-    <div class="kind">GUÍA DE REMISIÓN ELECTRÓNICA</div>
-    <div class="num">T001 — 0001287</div>
-    <div class="issued">Emitido {{ doc.fechaEmision|date('d/m/Y') }} · {{ doc.fechaEmision|date('H:i:s') }}</div>
+    <div class="ruc">RUC <strong>{% if cp is not null %}{{ cp.ruc }}{% endif %}</strong></div>
+    <div class="kind">{% if doc.tipoComprobante is not empty %}{{ name }}{% else %}GUÍA DE REMISIÓN ELECTRÓNICA{% endif %}</div>
+    <div class="num">{{ doc.serie }} — {{ doc.numero }}</div>
+    <div class="issued">Emitido {{ doc.fechaEmision|date('d/m/Y') }}{% if doc.horaEmision is not null %} · {{ doc.horaEmision }}{% endif %}</div>
   </div>
 </div>
 
 <div class="parties">
   <div class="party">
-    <div class="label">Cliente</div>
-    <div class="name">{{ doc.receptor.nombre }}</div>
-    <div class="row"><span>{{ doc.receptor.tipoDocIdentidad|catalogAttr('06','abreviatura') }}</span><span class="mono">{{ doc.receptor.numDocIdentidad }}</span></div>
-    <div class="row"><span>Dirección</span><span>{{ doc.receptor.direccion.direccion }}</span></div>
-    <div class="row"><span>Ubicación</span><span>LIMA — LIMA — MIRAFLORES</span></div>
+    <div class="label">Destinatario</div>
+    <div class="name">{% if cl is not null %}{{ cl.nombre }}{% endif %}</div>
+    <div class="row"><span>{% if cl is not null %}{{ cl.tipoDocumentoIdentidad|catalogAttr('06','abreviatura') }}{% endif %}</span><span class="mono">{% if cl is not null %}{{ cl.numeroDocumentoIdentidad }}{% endif %}</span></div>
+    {% if doc.envio is not null and doc.envio.destino is not null %}
+    <div class="row"><span>Llegada</span><span>{{ doc.envio.destino.direccion }}</span></div>
+    <div class="row"><span>Ubigeo</span><span>{{ doc.envio.destino.ubigeo }}</span></div>
+    {% endif %}
   </div>
   <div class="party">
-    <div class="label">Entrega</div>
-    <div class="name">Almacén Los Portales — Callao</div>
-    <div class="row"><span>O/C</span><span class="mono">OC-2026-00487</span></div>
-    <div class="row"><span>Guía</span><span class="mono">GRE T001-00452</span></div>
-    <div class="row"><span>Operación</span><span>0101 · Venta interna</span></div>
+    <div class="label">Envío</div>
+    {% if doc.envio is not null %}
+    {% if doc.envio.partida is not null %}<div class="row"><span>Partida</span><span>{{ doc.envio.partida.direccion }}</span></div>{% endif %}
+    {% if doc.envio.transportista is not null %}<div class="row"><span>Transporte</span><span>{{ doc.envio.transportista.nombre }}</span></div>{% endif %}
+    {% if doc.envio.vehiculo is not null %}<div class="row"><span>Vehículo</span><span class="mono">{{ doc.envio.vehiculo.placa }}</span></div>{% endif %}
+    {% endif %}
   </div>
 </div>
 
 <div class="strip">
-  <div><span class="k">Moneda</span><span class="v">{{ mon }}</span></div>
-  <div><span class="k">T/C</span><span class="v mono">3.742</span></div>
-  <div><span class="k">Vencimiento</span><span class="v">24/05/2026</span></div>
-  <div><span class="k">Forma de pago</span><span class="v">Crédito · 2 cuotas</span></div>
+  <div><span class="k">Inicio traslado</span><span class="v">{% if doc.envio is not null and doc.envio.fechaTraslado is not null %}{{ doc.envio.fechaTraslado|date('d/m/Y') }}{% endif %}</span></div>
+  <div><span class="k">Motivo</span><span class="v">{% if doc.envio is not null %}{{ doc.envio.tipoTraslado|catalog('20') }}{% endif %}</span></div>
+  <div><span class="k">Modalidad</span><span class="v">{% if doc.envio is not null %}{{ doc.envio.tipoModalidadTraslado|catalog('18') }}{% endif %}</span></div>
+  <div><span class="k">Peso / bultos</span><span class="v">{% if doc.envio is not null %}{{ doc.envio.pesoTotal }} {{ doc.envio.pesoTotalUnidadMedida }} · {{ doc.envio.numeroDeBultos }}{% endif %}</span></div>
 </div>
 
 <table class="items">
@@ -172,7 +172,7 @@
   <div class="meta">
     <p><strong>Representación impresa</strong> de la Guía De Remisión Electrónica.</p>
     <p>Consulte la validez en <strong>{{ params.consultaUrl|default('sunat.gob.pe') }}</strong> usando el RUC del emisor y el número del documento.</p>
-    <p style="margin-top:6px;">Firmante: {{ doc.emisor.ruc }} · {{ doc.emisor.razonSocial }}</p>
+    <p style="margin-top:6px;">Firmante: {% if cp is not null %}{{ cp.ruc }} · {{ cp.razonSocial }}{% endif %}</p>
     <p class="hash">Resumen: {{ hashDocumento }}</p>
   </div>
   <div class="stamp">

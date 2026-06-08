@@ -127,11 +127,10 @@
     <div class="row"><span>Ubicación</span><span>LIMA — LIMA — MIRAFLORES</span></div>
   </div>
   <div class="party">
-    <div class="label">Entrega</div>
-    <div class="name">Almacén Los Portales — Callao</div>
-    <div class="row"><span>O/C</span><span class="mono">OC-2026-00487</span></div>
-    <div class="row"><span>Guía</span><span class="mono">GRE T001-00452</span></div>
-    <div class="row"><span>Operación</span><span>0101 · Venta interna</span></div>
+    <div class="label">Documento de referencia</div>
+    <div class="name">{{ doc.comprobanteAfectadoTipo|catalog('01') }} {{ doc.comprobanteAfectadoSerieNumero }}</div>
+    <div class="row"><span>Motivo</span><span>{{ doc.tipoNota|catalog('10') }}</span></div>
+    <div class="row"><span>Sustento</span><span>{{ doc.sustentoDescripcion }}</span></div>
   </div>
 </div>
 

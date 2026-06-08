@@ -2,7 +2,10 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>T001-0001287 · Guía De Remisión Electrónica</title>
+{% set cp = doc.remitente %}
+{% set cl = doc.destinatario %}
+{% set name = doc.tipoComprobante|catalog('01') %}
+<title>{{ doc.serie }}-{{ doc.numero|str_pad(8, '0', 'left') }} · {{ name }}</title>
 <style>
   {{ fontStyle | raw }}
   * { box-sizing: border-box; }
@@ -31,6 +34,8 @@
   p { margin: 0; }
 
   .hero { text-align: center; padding-bottom: 22px; border-bottom: 1px solid var(--rule); }
+  .hero .logo { width: 46px; height: 46px; margin: 0 auto 10px; color: var(--ink); }
+  .hero .logo img { max-width: 46px; max-height: 46px; object-fit: contain; }
   .hero .co-name { font-family: 'Newsreader', serif; font-size: 22px; font-weight: 500; letter-spacing: 0.02em; }
   .hero .co-sub { font-size: 10px; color: var(--ink-2); margin-top: 3px; letter-spacing: 0.04em; }
   .hero .doc-kind { margin-top: 18px; font-family: 'Newsreader', serif; font-style: italic; font-size: 14px; color: var(--ink-2); }
@@ -56,33 +61,14 @@
   .items tbody td { padding: 12px 10px 12px 0; border-bottom: 1px solid var(--line); vertical-align: top; font-size: 10.5px; }
   .items .c-idx { width: 28px; color: var(--ink-3); }
   .items .c-code { width: 86px; }
-  .items .c-qty, .items .c-price, .items .c-tax, .items .c-unit { text-align: right; }
-  .items .c-qty { width: 60px; }
+  .items .c-qty { text-align: right; width: 60px; }
   .items .c-unit { width: 48px; text-align: center; color: var(--ink-3); }
-  .items .c-price { width: 82px; }
-  .items .c-tax { width: 84px; padding-right: 0; }
   .items .desc .main { font-weight: 500; }
   .items .desc .sub { font-size: 9.5px; color: var(--ink-3); margin-top: 2px; }
 
-  .bottom { display: grid; grid-template-columns: 1fr 300px; gap: 40px; margin-top: 22px; }
-  .notes .block { margin-bottom: 14px; }
-  .notes .block .head { font-size: 9px; text-transform: uppercase; letter-spacing: 0.16em; color: var(--ink-3); margin-bottom: 3px; }
-  .notes .block .body { font-size: 10px; }
-  .notes .small { font-size: 9.5px; color: var(--ink-2); }
-  .notes .block .body p + p { margin-top: 2px; }
-
-  .totals .line { display: flex; justify-content: space-between; padding: 4px 0; font-size: 10.5px; }
-  .totals .line .k { color: var(--ink-2); }
-  .totals .line .v { font-family: 'JetBrains Mono', monospace; white-space: nowrap; }
-  .totals .rule { border-top: 1px solid var(--line); margin: 6px 0; }
-  .totals .grand { display: flex; justify-content: space-between; align-items: baseline; padding: 12px 0 6px; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); margin-top: 6px; }
-  .totals .grand .k { font-family: 'Newsreader', serif; font-style: italic; font-size: 14px; color: var(--ink-2); }
-  .totals .grand .v { font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 600; white-space: nowrap; }
-  .totals .in-words { margin-top: 10px; font-size: 9.5px; color: var(--ink-2); font-style: italic; text-align: right; }
-
   .foot { display: grid; grid-template-columns: 90px 1fr auto; gap: 22px; align-items: start; margin-top: 30px; padding-top: 18px; border-top: 1px solid var(--line); }
   .foot .qr { width: 90px; height: 90px; background: #fff; padding: 4px; border: 1px solid var(--line); }
-  .foot .qr svg { width: 100%; height: 100%; display: block; }
+  .foot .qr img { width: 100%; height: 100%; display: block; }
   .foot .meta { font-size: 9.5px; color: var(--ink-2); }
   .foot .meta strong { color: var(--ink); }
   .foot .meta .hash { font-family: 'JetBrains Mono', monospace; word-break: break-all; font-size: 8.5px; margin-top: 2px; color: var(--ink-3); }
@@ -94,88 +80,82 @@
 <body>
 
 <div class="hero">
-  <div class="co-name">Manufacturas Andina Textil</div>
-  <div class="co-sub">{{ doc.company.address.direccion }} · Lima · RUC {{ doc.company.ruc }} · ventas@andinatextil.pe</div>
-  <div class="doc-kind">Guía De Remisión Electrónica</div>
-  <div class="doc-num">T001 · 0001287</div>
+  {% if params.logo is not empty %}<div class="logo"><img src="{{ params.logo }}" alt="logo"/></div>{% endif %}
+  <div class="co-name">{% if cp is not null %}{{ cp.razonSocial }}{% endif %}</div>
+  <div class="co-sub">{% if cp is not null and cp.direccion is not null %}{{ cp.direccion.direccion }}{% endif %} · RUC {% if cp is not null %}{{ cp.ruc }}{% endif %}</div>
+  <div class="doc-kind">{% if doc.tipoComprobante is not empty %}{{ name }}{% else %}Guía de Remisión Electrónica{% endif %}</div>
+  <div class="doc-num">{{ doc.serie }} · {{ doc.numero|str_pad(8, '0', 'left') }}</div>
 </div>
 
 <div class="meta-grid">
   <div><div class="k">Emitido</div><div class="v">{{ doc.fechaEmision|date('d/m/Y') }}</div></div>
-  <div><div class="k">Vencimiento</div><div class="v">24/05/2026</div></div>
-  <div><div class="k">Moneda</div><div class="v">Soles · T/C 3.742</div></div>
-  <div><div class="k">Condición</div><div class="v">Crédito · 2 cuotas</div></div>
+  <div><div class="k">Inicio traslado</div><div class="v">{% if doc.envio is not null and doc.envio.fechaTraslado is not null %}{{ doc.envio.fechaTraslado|date('d/m/Y') }}{% endif %}</div></div>
+  <div><div class="k">Motivo</div><div class="v">{% if doc.envio is not null %}{{ doc.envio.tipoTraslado|catalog('20') }}{% endif %}</div></div>
+  <div><div class="k">Modalidad</div><div class="v">{% if doc.envio is not null %}{{ doc.envio.tipoModalidadTraslado|catalog('18') }}{% endif %}</div></div>
 </div>
 
 <div class="parties">
   <div class="party">
-    <div class="label">Facturado a</div>
-    <div class="name">Comercial Los Portales S.A.</div>
-    <div class="row"><span class="k">RUC</span><span class="mono">{{ cl.numDoc }}</span></div>
-    <div class="row"><span class="k">Dirección</span><span>{{ cl.address.direccion }}</span></div>
-    <div class="row"><span class="k">Ubicación</span><span>Lima · Miraflores</span></div>
-    <div class="row"><span class="k">O/C</span><span class="mono">OC-2026-00487</span></div>
+    <div class="label">Destinatario</div>
+    <div class="name">{% if cl is not null %}{{ cl.nombre }}{% endif %}</div>
+    <div class="row"><span class="k">{% if cl is not null %}{{ cl.tipoDocumentoIdentidad|catalogAttr('06','abreviatura') }}{% endif %}</span><span class="mono">{% if cl is not null %}{{ cl.numeroDocumentoIdentidad }}{% endif %}</span></div>
+    {% if doc.envio is not null and doc.envio.destino is not null %}
+    <div class="row"><span class="k">Llegada</span><span>{{ doc.envio.destino.direccion }}</span></div>
+    <div class="row"><span class="k">Ubigeo</span><span>{{ doc.envio.destino.ubigeo }}</span></div>
+    {% endif %}
+    {% if doc.envio is not null %}
+    <div class="row"><span class="k">Peso · bultos</span><span>{{ doc.envio.pesoTotal }} {{ doc.envio.pesoTotalUnidadMedida }} · {{ doc.envio.numeroDeBultos }}</span></div>
+    {% endif %}
   </div>
   <div class="party">
-    <div class="label">Operación</div>
-    <div class="name serif">0101 — Venta interna</div>
-    <div class="row"><span class="k">Entrega</span><span>Almacén Los Portales · Callao</span></div>
-    <div class="row"><span class="k">Guía</span><span class="mono">GRE T001-00452</span></div>
-    <div class="row"><span class="k">Vendedor</span><span>Diego Paredes</span></div>
-    <div class="row"><span class="k">Ruta</span><span>Lima–Callao</span></div>
+    <div class="label">Transporte</div>
+    {% if doc.envio is not null and doc.envio.transportista is not null %}
+    <div class="name serif">{{ doc.envio.transportista.nombre }}</div>
+    <div class="row"><span class="k">RUC transp.</span><span class="mono">{{ doc.envio.transportista.numeroDocumentoIdentidad }}</span></div>
+    {% endif %}
+    {% if doc.envio is not null and doc.envio.vehiculo is not null %}
+    <div class="row"><span class="k">Vehículo</span><span class="mono">{{ doc.envio.vehiculo.placa }}</span></div>
+    {% endif %}
+    {% if doc.envio is not null and doc.envio.partida is not null %}
+    <div class="row"><span class="k">Partida</span><span>{{ doc.envio.partida.direccion }}</span></div>
+    {% endif %}
   </div>
 </div>
 
 <div class="section">
-  <div class="section-title">Detalle</div>
+  <div class="section-title">Bienes trasladados</div>
   <table class="items">
     <thead>
-      <tr><th class="c-idx">#</th>
-      <th class="c-code">Código</th>
-      <th>Descripción</th>
-      <th class="c-unit">Und</th>
-      <th class="c-qty">Cant.</th></tr>
+      <tr><th class="c-idx">#</th><th class="c-code">Código</th><th>Descripción</th><th class="c-unit">Und</th><th class="c-qty">Cant.</th></tr>
     </thead>
     <tbody>
 
-    {% for det in doc.details %}
+    {% for det in doc.detalles %}
     <tr>
       <td class="c-idx mono">{{ (loop.index + 1)|str_pad(2, '0', 'left') }}</td>
       <td class="c-code mono">{{ det.codigo }}</td>
       <td class="desc"><div class="main">{{ det.descripcion }}</div></td>
-      <td class="c-unit">{{ det.unidad }}</td>
-      <td class="c-qty mono">{{ det.cantidad }}</td>
+      <td class="c-unit">{{ det.unidadMedida }}</td>
+      <td class="c-qty mono">{{ det.cantidad|n_format }}</td>
     </tr>
     {% endfor %}
   </tbody>
   </table>
+</div>
 
 <div class="foot">
   <div class="qr">
-    <svg viewBox="0 0 21 21" shape-rendering="crispEdges"><rect width="21" height="21" fill="#fff"/>
-    <g fill="#161411">
-      <rect x="0" y="0" width="7" height="7"/><rect x="1" y="1" width="5" height="5" fill="#fff"/><rect x="2" y="2" width="3" height="3"/>
-      <rect x="14" y="0" width="7" height="7"/><rect x="15" y="1" width="5" height="5" fill="#fff"/><rect x="16" y="2" width="3" height="3"/>
-      <rect x="0" y="14" width="7" height="7"/><rect x="1" y="15" width="5" height="5" fill="#fff"/><rect x="2" y="16" width="3" height="3"/>
-      <rect x="8" y="0" width="1" height="1"/><rect x="10" y="0" width="2" height="1"/><rect x="8" y="2" width="2" height="1"/>
-      <rect x="5" y="8" width="2" height="2"/><rect x="8" y="8" width="2" height="1"/><rect x="11" y="8" width="1" height="2"/><rect x="13" y="8" width="3" height="1"/><rect x="17" y="8" width="1" height="2"/>
-      <rect x="1" y="10" width="2" height="1"/><rect x="4" y="10" width="1" height="2"/><rect x="6" y="10" width="2" height="1"/><rect x="9" y="10" width="1" height="2"/><rect x="12" y="10" width="2" height="1"/><rect x="15" y="10" width="1" height="2"/>
-      <rect x="0" y="12" width="1" height="2"/><rect x="3" y="12" width="2" height="1"/><rect x="6" y="12" width="1" height="2"/><rect x="8" y="12" width="2" height="1"/><rect x="11" y="12" width="2" height="2"/><rect x="17" y="12" width="2" height="2"/>
-      <rect x="10" y="14" width="2" height="1"/><rect x="13" y="14" width="1" height="2"/><rect x="15" y="14" width="2" height="1"/><rect x="18" y="14" width="1" height="2"/>
-      <rect x="8" y="16" width="2" height="1"/><rect x="11" y="16" width="1" height="2"/><rect x="14" y="16" width="2" height="1"/>
-      <rect x="9" y="18" width="1" height="2"/><rect x="12" y="18" width="2" height="1"/><rect x="15" y="18" width="1" height="2"/>
-      <rect x="8" y="20" width="1" height="1"/><rect x="11" y="20" width="3" height="1"/>
-    </g></svg>
+    {% if qrBase64 is not empty %}<img src="data:image/png;base64,{{ qrBase64 }}" alt="QR Code" />{% endif %}
   </div>
   <div class="meta">
-    <p><strong>Representación impresa</strong> de la Guía De Remisión Electrónica.</p>
-    <p>Verifique este documento en <strong>{{ params.consultaUrl|default('sunat.gob.pe') }}</strong> con el RUC del emisor y el número del comprobante.</p>
-    <p style="margin-top:6px;">Firmante: {{ doc.company.ruc }} · Manufacturas Andina Textil S.A.C.</p>
-    <p class="hash">Hash: 3f8a21bc9d7e04a6c2f1b8e0d4a7c9f2e5b6d8a1</p>
+    <p><strong>Representación impresa</strong> de la {% if doc.tipoComprobante is not empty %}{{ name }}{% else %}Guía de Remisión{% endif %} Electrónica.</p>
+    <p>Verifique este documento en <strong>{{ params.consultaUrl|default('sunat.gob.pe') }}</strong> con el RUC del remitente y el número del documento.</p>
+    <p style="margin-top:6px;">Firmante: {% if cp is not null %}{{ cp.ruc }} · {{ cp.razonSocial }}{% endif %}</p>
+    {% if params.footer is not null %}<p id="custom-footer-box" style="margin-top:10px; font-style:italic;">{{ params.footer }}</p>{% endif %}
   </div>
   <div class="stamp">
-    <span class="badge">Documento válido</span>
-    <div class="line">Emitido conforme al RCP SUNAT. Consultable en el portal oficial.</div>
+    <span class="badge">Guía válida</span>
+    <div class="line">Emitido conforme a la RS SUNAT 271-2019.</div>
   </div>
 </div>
 

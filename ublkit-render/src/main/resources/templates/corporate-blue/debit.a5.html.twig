@@ -2,7 +2,12 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>FD01-0001287 · Nota De Débito Electrónica</title>
+{% set cp = doc.emisor %}
+{% set cl = doc.receptor %}
+{% set mon = doc.moneda|catalog('021') %}
+{% set sym = doc.moneda|catalogAttr('021','simbolo') %}
+{% set name = doc.tipoComprobante|catalog('01') %}
+<title>{{ doc.serie }}-{{ doc.numero|str_pad(8, '0', 'left') }} · {{ name }}</title>
 <style>
   {{ fontStyle | raw }}
   * { box-sizing: border-box; }
@@ -33,6 +38,7 @@
   .band .logo-block { display: flex; align-items: center; gap: 14px; }
   .band .logo { width: 52px; height: 52px; background: rgba(255,255,255,.14); border-radius: 10px; display: flex; align-items: center; justify-content: center; }
   .band .logo svg { width: 32px; height: 32px; }
+  .band .logo img { width: 100%; height: 100%; object-fit: contain; border-radius: 10px; }
   .band .co-name { font-size: 16px; font-weight: 700; letter-spacing: 0.01em; }
   .band .co-sub { font-size: 9px; opacity: 0.8; margin-top: 2px; }
   .band .docbox { background: #fff; color: var(--ink); border-radius: 10px; padding: 14px 18px; min-width: 250px; text-align: right; box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
@@ -87,7 +93,7 @@
 
   .foot { display: grid; grid-template-columns: 100px 1fr auto; gap: 18px; align-items: start; margin-top: 20px; padding-top: 14px; border-top: 2px solid var(--ink); }
   .foot .qr { width: 100px; height: 100px; background: #fff; padding: 4px; border: 1px solid var(--line); border-radius: 6px; }
-  .foot .qr svg { width: 100%; height: 100%; display: block; }
+  .foot .qr img { width: 100%; height: 100%; display: block; }
   .foot .meta { font-size: 9.5px; color: var(--ink-2); }
   .foot .meta strong { color: var(--ink); }
   .foot .meta .hash { font-family: 'IBM Plex Mono', monospace; word-break: break-all; font-size: 8.5px; margin-top: 2px; }
@@ -101,28 +107,28 @@
 <div class="band">
   <div class="logo-block">
     <div class="logo">
-      {% if params.logo is not empty %}<img src="{{ params.logo }}" alt="logo" style="width:100%;height:100%;object-fit:contain"/>{% else %}<svg viewBox="0 0 40 40" fill="none" stroke="#fff" stroke-width="2.4">
+      {% if params.logo is not empty %}<img src="{{ params.logo }}" alt="logo"/>{% else %}<svg viewBox="0 0 40 40" fill="none" stroke="#fff" stroke-width="2.4">
         <rect x="6" y="6" width="28" height="28" rx="3"/>
         <path d="M12 20h16M12 14h10M12 26h14"/>
       </svg>{% endif %}
     </div>
     <div>
-      <div class="co-name">{{ doc.company.razonSocial }}</div>
-      <div class="co-sub">{{ doc.company.address.direccion }} — Lima, Perú · ventas@andinatextil.pe · (01) 555-0102</div>
+      <div class="co-name">{{ doc.emisor.razonSocial }}</div>
+      <div class="co-sub">{{ doc.emisor.direccion.direccion }}{% if cp is not null and cp.contacto is not null %} · {{ cp.contacto.email }} · {{ cp.contacto.telefono }}{% endif %}</div>
     </div>
   </div>
   <div class="docbox">
-    <div class="ruc">R.U.C. <b class="mono">{{ doc.company.ruc }}</b></div>
-    <div class="kind">NOTA DE DÉBITO ELECTRÓNICA</div>
-    <div class="num">FD01-0001287</div>
+    <div class="ruc">R.U.C. <b class="mono">{{ doc.emisor.ruc }}</b></div>
+    <div class="kind">{{ name }}</div>
+    <div class="num">{{ doc.serie }}-{{ doc.numero }}</div>
   </div>
 </div>
 
 <div class="sub-band">
-  <div><span class="k">Fecha de emisión</span><span class="v">{{ doc.fechaEmision|date('d/m/Y') }} · 14:32</span></div>
-  <div><span class="k">Vencimiento</span><span class="v">24/05/2026</span></div>
-  <div><span class="k">Moneda</span><span class="v">Soles ({{ moneda }}) · T/C 3.742</span></div>
-  <div><span class="k">Condición</span><span class="v">Crédito · 2 cuotas</span></div>
+  <div><span class="k">Fecha de emisión</span><span class="v">{{ doc.fechaEmision|date('d/m/Y') }} · {{ doc.fechaEmision|date('H:i:s') }}</span></div>
+  <div><span class="k">Doc. afectado</span><span class="v">{{ doc.comprobanteAfectadoSerieNumero }}</span></div>
+  <div><span class="k">Moneda</span><span class="v">{{ mon }}{% if doc.tipoCambio is not null %} · T/C {{ doc.tipoCambio.venta }}{% endif %}</span></div>
+  <div><span class="k">Motivo</span><span class="v">{{ doc.tipoNota|catalog('10') }}</span></div>
 </div>
 
 <div class="body-wrap">
@@ -130,18 +136,16 @@
 <div class="parties">
   <div class="party">
     <div class="label">Cliente / Adquirente</div>
-    <div class="name">{{ cl.rznSocial }}</div>
-    <div class="row"><span class="k">RUC</span><span class="mono">{{ cl.numDoc }}</span></div>
-    <div class="row"><span class="k">Dirección</span><span>{{ cl.address.direccion }}</span></div>
-    <div class="row"><span class="k">Ubicación</span><span>Lima — Lima — Miraflores</span></div>
-    <div class="row"><span class="k">Orden compra</span><span class="mono">OC-2026-00487</span></div>
+    <div class="name">{{ doc.receptor.nombre }}</div>
+    <div class="row"><span class="k">{{ doc.receptor.tipoDocIdentidad|catalogAttr('06','abreviatura') }}</span><span class="mono">{{ doc.receptor.numDocIdentidad }}</span></div>
+    <div class="row"><span class="k">Dirección</span><span>{{ doc.receptor.direccion.direccion }}</span></div>
+    <div class="row"><span class="k">Ubicación</span><span>{% if cl is not null and cl.direccion is not null %}{{ cl.direccion.departamento }} — {{ cl.direccion.provincia }} — {{ cl.direccion.distrito }}{% endif %}</span></div>
   </div>
   <div class="party">
-    <div class="label">Datos de la operación</div>
-    <div class="name">0101 — Venta interna</div>
-    <div class="row"><span class="k">Entrega</span><span>Almacén Los Portales · Av. Argentina 5520 — Callao</span></div>
-    <div class="row"><span class="k">Guía ref.</span><span class="mono">GRE T001-00452</span></div>
-    <div class="row"><span class="k">Vendedor</span><span>Diego Paredes · Ruta Lima–Callao</span></div>
+    <div class="label">Documento referente</div>
+    <div class="name">{{ doc.comprobanteAfectadoTipo|catalog('01') }} {{ doc.comprobanteAfectadoSerieNumero }}</div>
+    <div class="row"><span class="k">Motivo</span><span>{{ doc.tipoNota|catalog('10') }}</span></div>
+    <div class="row"><span class="k">Sustento</span><span>{{ doc.sustentoDescripcion }}</span></div>
   </div>
 </div>
 
@@ -159,14 +163,14 @@
   </thead>
   <tbody>
 
-    {% for det in doc.details %}
+    {% for det in doc.detalles %}
     <tr>
       <td class="c-idx mono">{{ (loop.index + 1)|str_pad(2, '0', 'left') }}</td>
-      <td class="c-code mono">{{ det.codProducto }}</td>
-      <td class="desc"><div class="main">{{ det.descripcion }}</div><div class="sub">{% if det.codProductoSUNAT %}SUNAT {{ det.codProductoSUNAT }}{% endif %}</div></td>
-      <td class="c-unit">{{ det.unidad }}</td>
+      <td class="c-code mono">{{ det.codigoProducto }}</td>
+      <td class="desc"><div class="main">{{ det.descripcion }}</div><div class="sub">{% if det.codProductoSUNAT %}SUNAT {{ det.codigoProductoSunat }}{% endif %}</div></td>
+      <td class="c-unit">{{ det.unidadMedida }}</td>
       <td class="c-qty mono">{{ det.cantidad|n_format }}</td>
-      <td class="c-price mono">{{ det.mtoValorUnitario|n_format }}</td>
+      <td class="c-price mono">{{ det.precio|n_format }}</td>
       <td class="c-tax mono">{{ det.mtoValorVenta|n_format }}</td>
     </tr>
     {% endfor %}
@@ -175,75 +179,54 @@
 
 <div class="bottom">
   <div class="notes">
-    <div class="block">
-      <div class="head">Cuotas de pago</div>
-      <div class="body">
-        <p class="small">Cuota 1 · vence 24/05/2026 · <b>{{ moneda }} 5,946.20</b></p>
-        <p class="small">Cuota 2 · vence 24/06/2026 · <b>{{ moneda }} 5,946.20</b></p>
-      </div>
-    </div>
-    <div class="block">
-      <div class="head">Detracción SPOT</div>
-      <div class="body">
-        <p><b>{{ moneda }} 1,427.09</b> · 020 Bienes gravados con IGV</p>
-        <p class="small">Transferencia en cuenta · Cta. BN 00-032-019287</p>
-      </div>
-    </div>
+    {% if doc.observaciones %}
     <div class="block">
       <div class="head">Observaciones</div>
-      <div class="body">
-        <p>Pedido fraccionado — entrega en 2 camiones.</p>
-      </div>
+      <div class="body"><p>{{ doc.observaciones }}</p></div>
+    </div>
+    {% endif %}
+    <div class="block">
+      <div class="head">Sustento</div>
+      <div class="body"><p>{{ doc.sustentoDescripcion }}</p></div>
     </div>
     <div class="block">
       <div class="head">Leyendas SUNAT</div>
       <div class="body">
-        <p class="small">· SON ONCE MIL OCHOCIENTOS NOVENTA Y DOS CON 40/100 {{ moneda }}</p>
-        <p class="small">· Operación sujeta a detracción</p>
+        {% if doc.leyendas is not empty %}{% for entry in doc.leyendas %}<p class="small">· {{ entry.value }}</p>{% endfor %}{% endif %}
       </div>
     </div>
   </div>
 
   <div class="totals">
-    <div class="line"><span class="k">Op. gravadas</span><span class="v">{{ moneda }} {{ doc.mtoOperGravadas|n_format }}</span></div>
-    <div class="line"><span class="k">Op. exoneradas</span><span class="v">{{ moneda }} 0.00</span></div>
-    <div class="line"><span class="k">Op. inafectas</span><span class="v">{{ moneda }} 0.00</span></div>
-    <div class="line"><span class="k">Op. gratuitas</span><span class="v">{{ moneda }} 0.00</span></div>
+    {% if doc.totalImporte is not null and doc.totalImporte.importeSinImpuestos is not null %}
+    <div class="line"><span class="k">Subtotal</span><span class="v">{{ sym }} {{ doc.totalImporte.importeSinImpuestos|n_format }}</span></div>
+    {% endif %}
+    {% if doc.totalImpuestos is not null and doc.totalImpuestos.gravadoBaseImponible is not null %}
+    <div class="line"><span class="k">Op. gravadas</span><span class="v">{{ sym }} {{ doc.totalImpuestos.gravadoBaseImponible|n_format }}</span></div>
+    {% endif %}
     <div class="rule"></div>
-    <div class="line"><span class="k">IGV (18.00%)</span><span class="v">{{ moneda }} {{ doc.mtoIGV|n_format }}</span></div>
-    <div class="line"><span class="k">ICBPER</span><span class="v">{{ moneda }} 0.00</span></div>
-    <div class="line"><span class="k">ISC</span><span class="v">{{ moneda }} 0.00</span></div>
-    <div class="in-words">Son: Once mil ochocientos noventa y dos con 40/100 soles.</div>
-    <div class="grand"><span>TOTAL</span><span class="v">{{ moneda }} {{ doc.mtoImpVenta|n_format }}</span></div>
+    {% if doc.totalImpuestos is not null and doc.totalImpuestos.gravadoImporte is not null %}
+    <div class="line"><span class="k">IGV (18%)</span><span class="v">{{ sym }} {{ doc.totalImpuestos.gravadoImporte|n_format }}</span></div>
+    {% endif %}
+    <div class="in-words">{{ doc.leyendas['1000'] }}</div>
+    <div class="grand"><span>TOTAL NOTA</span><span class="v">{{ sym }} {{ doc.totalImporte.importeConImpuestos|n_format }}</span></div>
   </div>
 </div>
 
 <div class="foot">
   <div class="qr">
-    <svg viewBox="0 0 21 21" shape-rendering="crispEdges"><rect width="21" height="21" fill="#fff"/>
-    <g fill="#0b1f3a">
-      <rect x="0" y="0" width="7" height="7"/><rect x="1" y="1" width="5" height="5" fill="#fff"/><rect x="2" y="2" width="3" height="3"/>
-      <rect x="14" y="0" width="7" height="7"/><rect x="15" y="1" width="5" height="5" fill="#fff"/><rect x="16" y="2" width="3" height="3"/>
-      <rect x="0" y="14" width="7" height="7"/><rect x="1" y="15" width="5" height="5" fill="#fff"/><rect x="2" y="16" width="3" height="3"/>
-      <rect x="8" y="0" width="1" height="1"/><rect x="10" y="0" width="2" height="1"/><rect x="8" y="2" width="2" height="1"/><rect x="12" y="2" width="1" height="2"/>
-      <rect x="5" y="8" width="2" height="2"/><rect x="8" y="8" width="2" height="1"/><rect x="11" y="8" width="1" height="2"/><rect x="13" y="8" width="3" height="1"/><rect x="17" y="8" width="1" height="2"/><rect x="19" y="8" width="2" height="1"/>
-      <rect x="1" y="10" width="2" height="1"/><rect x="4" y="10" width="1" height="2"/><rect x="6" y="10" width="2" height="1"/><rect x="9" y="10" width="1" height="2"/><rect x="12" y="10" width="2" height="1"/><rect x="15" y="10" width="1" height="2"/><rect x="18" y="10" width="2" height="1"/>
-      <rect x="0" y="12" width="1" height="2"/><rect x="3" y="12" width="2" height="1"/><rect x="6" y="12" width="1" height="2"/><rect x="8" y="12" width="2" height="1"/><rect x="11" y="12" width="2" height="2"/><rect x="17" y="12" width="2" height="2"/>
-      <rect x="8" y="14" width="1" height="1"/><rect x="10" y="14" width="2" height="1"/><rect x="13" y="14" width="1" height="2"/><rect x="15" y="14" width="2" height="1"/><rect x="18" y="14" width="1" height="2"/>
-      <rect x="8" y="16" width="2" height="1"/><rect x="11" y="16" width="1" height="2"/><rect x="14" y="16" width="2" height="1"/><rect x="17" y="16" width="1" height="1"/>
-      <rect x="9" y="18" width="1" height="2"/><rect x="12" y="18" width="2" height="1"/><rect x="15" y="18" width="1" height="2"/><rect x="17" y="18" width="2" height="1"/>
-      <rect x="8" y="20" width="1" height="1"/><rect x="11" y="20" width="3" height="1"/><rect x="15" y="20" width="1" height="1"/><rect x="18" y="20" width="1" height="1"/>
-    </g></svg>
+    {% if qrBase64 is not empty %}<img src="data:image/png;base64,{{ qrBase64 }}" alt="QR Code" />{% endif %}
   </div>
   <div class="meta">
-    <p><strong>Representación impresa</strong> de la Nota De Débito Electrónica.</p>
+    <p><strong>Representación impresa</strong> de la {{ name }}.</p>
     <p>Consulte la validez en <strong>{{ params.consultaUrl|default('sunat.gob.pe') }}</strong> con el RUC del emisor y el número del documento.</p>
-    <p style="margin-top:6px;">Firmante digital: {{ doc.company.ruc }} · Manufacturas Andina Textil S.A.C.</p>
-    <p class="hash">Hash: 3f8a21bc9d7e04a6c2f1b8e0d4a7c9f2e5b6d8a1</p>
+    <p style="margin-top:6px;">Firmante digital: {% if cp is not null %}{{ cp.ruc }} · {{ cp.razonSocial }}{% endif %}</p>
+    <p class="hash">Hash: {{ hashDocumento }}</p>
+    {% if params.footer is not null %}<p id="custom-footer-box" style="margin-top:10px; font-style:italic;">{{ params.footer }}</p>{% endif %}
   </div>
   <div class="stamp">
     <span class="badge">● CPE autorizado SUNAT</span>
-    <div class="line">Documento electrónico emitido conforme al Reglamento de Comprobantes de Pago.</div>
+    <div class="line">Documento electrónico que modifica el comprobante referenciado.</div>
   </div>
 </div>
 

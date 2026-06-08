@@ -2,7 +2,12 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>FC01-000045 · Nota de Crédito</title>
+{% set cp = doc.emisor %}
+{% set cl = doc.receptor %}
+{% set mon = doc.moneda|catalog('021') %}
+{% set sym = doc.moneda|catalogAttr('021','simbolo') %}
+{% set name = doc.tipoComprobante|catalog('01') %}
+<title>{{ doc.serie }}-{{ doc.numero|str_pad(8, '0', 'left') }} · {{ name }}</title>
 <style>
   {{ fontStyle | raw }}
   * { box-sizing: border-box; }
@@ -16,6 +21,7 @@
   .band .logo-block { display: flex; align-items: center; gap: 14px; }
   .band .logo { width: 52px; height: 52px; background: rgba(255,255,255,.14); border-radius: 10px; display: flex; align-items: center; justify-content: center; }
   .band .logo svg { width: 32px; height: 32px; }
+  .band .logo img { width: 100%; height: 100%; object-fit: contain; border-radius: 10px; }
   .band .co-name { font-size: 16px; font-weight: 700; }
   .band .co-sub { font-size: 10.5px; opacity: 0.85; margin-top: 2px; }
   .band .docbox { background: #fff; color: var(--ink); border-radius: 10px; padding: 14px 18px; min-width: 260px; text-align: right; }
@@ -74,9 +80,10 @@
 
   .foot { display: grid; grid-template-columns: 100px 1fr auto; gap: 18px; align-items: start; margin-top: 22px; padding-top: 14px; border-top: 2px solid var(--accent); }
   .foot .qr { width: 100px; height: 100px; background: #fff; padding: 4px; border: 1px solid var(--line); border-radius: 6px; }
-  .foot .qr svg { width: 100%; height: 100%; display: block; }
+  .foot .qr img { width: 100%; height: 100%; display: block; }
   .foot .meta { font-size: 9.5px; color: var(--ink-2); }
   .foot .meta strong { color: var(--ink); }
+  .foot .meta .hash { font-family: 'IBM Plex Mono', monospace; word-break: break-all; font-size: 8.5px; margin-top: 2px; }
   .foot .stamp { text-align: right; }
   .foot .stamp .badge { display: inline-block; background: var(--accent-soft); color: var(--accent); padding: 5px 12px; border-radius: 999px; font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.12em; }
   .foot .stamp .line { font-size: 9.5px; color: var(--ink-2); margin-top: 8px; max-width: 180px; }
@@ -86,16 +93,16 @@
 
 <div class="band">
   <div class="logo-block">
-    <div class="logo">{% if params.logo is not empty %}<img src="{{ params.logo }}" alt="logo" style="width:100%;height:100%;object-fit:contain"/>{% else %}<svg viewBox="0 0 40 40" fill="none" stroke="#fff" stroke-width="2.4"><rect x="6" y="6" width="28" height="28" rx="3"/><path d="M12 20h16M12 14h10M12 26h14"/></svg>{% endif %}</div>
+    <div class="logo">{% if params.logo is not empty %}<img src="{{ params.logo }}" alt="logo"/>{% else %}<svg viewBox="0 0 40 40" fill="none" stroke="#fff" stroke-width="2.4"><rect x="6" y="6" width="28" height="28" rx="3"/><path d="M12 20h16M12 14h10M12 26h14"/></svg>{% endif %}</div>
     <div>
-      <div class="co-name">{{ doc.company.razonSocial }}</div>
-      <div class="co-sub">{{ doc.company.address.direccion }} — Lima · ventas@andinatextil.pe · (01) 555-0102</div>
+      <div class="co-name">{{ doc.emisor.razonSocial }}</div>
+      <div class="co-sub">{{ doc.emisor.direccion.direccion }}{% if cp is not null and cp.contacto is not null %} · {{ cp.contacto.email }} · {{ cp.contacto.telefono }}{% endif %}</div>
     </div>
   </div>
   <div class="docbox">
-    <div class="ruc">R.U.C. <b class="mono">{{ doc.company.ruc }}</b></div>
-    <div class="kind">NOTA DE CRÉDITO ELECTRÓNICA</div>
-    <div class="num">FC01-000045</div>
+    <div class="ruc">R.U.C. <b class="mono">{{ doc.emisor.ruc }}</b></div>
+    <div class="kind">{{ name }}</div>
+    <div class="num">{{ doc.serie }}-{{ doc.numero }}</div>
   </div>
 </div>
 
@@ -103,30 +110,29 @@
 
 <div class="ref-bar">
   <span class="tag">Modifica</span>
-  <div class="text">Aplica a <b>Factura {{ doc.serie }}-{{ doc.correlativo }}</b> emitida el {{ doc.fechaEmision|date('d/m/Y') }} — motivo: <b>Devolución por ítem</b> (SUNAT 07).</div>
-  <div class="amount">− {{ moneda }} 767.10</div>
+  <div class="text">Aplica a <b>{{ doc.comprobanteAfectadoTipo|catalog('01') }} {{ doc.comprobanteAfectadoSerieNumero }}</b> — motivo: <b>{{ doc.tipoNota|catalog('09') }}</b>.</div>
+  <div class="amount">− {{ sym }} {{ doc.totalImporte.importe|n_format }}</div>
 </div>
 
 <div class="parties">
   <div class="party">
     <div class="label">Cliente / Adquirente</div>
-    <div class="name">{{ cl.rznSocial }}</div>
-    <div class="row"><span class="k">RUC</span><span class="mono">{{ cl.numDoc }}</span></div>
-    <div class="row"><span class="k">Dirección</span><span>{{ cl.address.direccion }}</span></div>
+    <div class="name">{{ doc.receptor.nombre }}</div>
+    <div class="row"><span class="k">{{ doc.receptor.tipoDocIdentidad|catalogAttr('06','abreviatura') }}</span><span class="mono">{{ doc.receptor.numDocIdentidad }}</span></div>
+    <div class="row"><span class="k">Dirección</span><span>{{ doc.receptor.direccion.direccion }}</span></div>
   </div>
   <div class="party">
     <div class="label">Documento referente</div>
-    <div class="name">Factura {{ doc.serie }}-{{ doc.correlativo }}</div>
+    <div class="name">{{ doc.comprobanteAfectadoTipo|catalog('01') }} {{ doc.comprobanteAfectadoSerieNumero }}</div>
     <div class="row"><span class="k">Emitida</span><span>{{ doc.fechaEmision|date('d/m/Y') }}</span></div>
-    <div class="row"><span class="k">Total orig.</span><span class="mono">{{ moneda }} {{ doc.mtoImpVenta|n_format }}</span></div>
-    <div class="row"><span class="k">Moneda</span><span>Soles · T/C 3.742</span></div>
+    <div class="row"><span class="k">Moneda</span><span>{{ mon }}{% if doc.tipoCambio is not null %} · T/C {{ doc.tipoCambio.venta }}{% endif %}</span></div>
   </div>
 </div>
 
 <div class="reason-box">
-  <div class="k">Motivo de la nota · Código SUNAT 07</div>
-  <div class="v">Devolución por ítem</div>
-  <div class="desc">Devolución de 10 unidades del ítem TX-0031 (Camisa lino básica — Talla M / Beige arena) por defecto en costura lateral detectado en recepción. Nota ingresada por cliente el 22/04/2026 vía correo.</div>
+  <div class="k">Motivo de la nota</div>
+  <div class="v">{{ doc.tipoNota|catalog('09') }}</div>
+  <div class="desc">{{ doc.sustentoDescripcion }}</div>
 </div>
 
 <table class="items">
@@ -135,14 +141,14 @@
   </thead>
   <tbody>
 
-    {% for det in doc.details %}
+    {% for det in doc.detalles %}
     <tr>
       <td class="c-idx mono">{{ (loop.index + 1)|str_pad(2, '0', 'left') }}</td>
-      <td class="c-code mono">{{ det.codProducto }}</td>
-      <td class="desc"><div class="main">{{ det.descripcion }}</div><div class="sub">{% if det.codProductoSUNAT %}SUNAT {{ det.codProductoSUNAT }}{% endif %}</div></td>
-      <td class="c-unit">{{ det.unidad }}</td>
+      <td class="c-code mono">{{ det.codigoProducto }}</td>
+      <td class="desc"><div class="main">{{ det.descripcion }}</div><div class="sub">{% if det.codProductoSUNAT %}SUNAT {{ det.codigoProductoSunat }}{% endif %}</div></td>
+      <td class="c-unit">{{ det.unidadMedida }}</td>
       <td class="c-qty mono">{{ det.cantidad|n_format }}</td>
-      <td class="c-price mono">{{ det.mtoValorUnitario|n_format }}</td>
+      <td class="c-price mono">{{ det.precio|n_format }}</td>
       <td class="c-tax mono">{{ det.mtoValorVenta|n_format }}</td>
     </tr>
     {% endfor %}
@@ -151,50 +157,44 @@
 
 <div class="bottom">
   <div class="notes">
-    <div class="block"><div class="head">Acciones</div><div class="body">
-      <p>Nota aplicada contra saldo pendiente de la Factura {{ doc.serie }}-{{ doc.correlativo }}.</p>
-      <p class="small">Saldo recalculado: {{ moneda }} 11,125.30 · Cuota 1: {{ moneda }} 5,562.65 · Cuota 2: {{ moneda }} 5,562.65</p>
+    {% if doc.observaciones %}
+    <div class="block"><div class="head">Observaciones</div><div class="body">
+      <p>{{ doc.observaciones }}</p>
     </div></div>
-    <div class="block"><div class="head">Validación</div><div class="body">
-      <p>Inspeccionado por: Rocío Vega (Control de calidad)</p>
-      <p class="small">Acta 2026-04-ADT-018 · Devolución aprobada 23/04/2026</p>
+    {% endif %}
+    <div class="block"><div class="head">Sustento</div><div class="body">
+      <p>{{ doc.sustentoDescripcion }}</p>
     </div></div>
     <div class="block"><div class="head">Leyendas SUNAT</div><div class="body">
-      <p class="small">· SON SETECIENTOS SESENTA Y SIETE CON 10/100 {{ moneda }}</p>
-      <p class="small">· Nota de crédito por devolución — tipo 07</p>
+      {% if doc.leyendas is not empty %}{% for entry in doc.leyendas %}<p class="small">· {{ entry.value }}</p>{% endfor %}{% endif %}
     </div></div>
   </div>
 
   <div class="totals">
-    <div class="line"><span class="k">Op. gravadas</span><span class="v">{{ moneda }} 650.00</span></div>
-    <div class="line"><span class="k">Op. exoneradas</span><span class="v">{{ moneda }} 0.00</span></div>
-    <div class="line"><span class="k">Op. inafectas</span><span class="v">{{ moneda }} 0.00</span></div>
-    <div class="line"><span class="k">IGV (18.00%)</span><span class="v">{{ moneda }} 117.10</span></div>
-    <div class="in-words">Son: setecientos sesenta y siete con 10/100 soles.</div>
-    <div class="grand"><span>TOTAL NOTA</span><span class="v">{{ moneda }} 767.10</span></div>
+    {% if doc.totalImporte is not null and doc.totalImporte.importeSinImpuestos is not null %}
+    <div class="line"><span class="k">Subtotal</span><span class="v">{{ sym }} {{ doc.totalImporte.importeSinImpuestos|n_format }}</span></div>
+    {% endif %}
+    {% if doc.totalImpuestos is not null and doc.totalImpuestos.gravadoBaseImponible is not null %}
+    <div class="line"><span class="k">Op. gravadas</span><span class="v">{{ sym }} {{ doc.totalImpuestos.gravadoBaseImponible|n_format }}</span></div>
+    {% endif %}
+    {% if doc.totalImpuestos is not null and doc.totalImpuestos.gravadoImporte is not null %}
+    <div class="line"><span class="k">IGV (18%)</span><span class="v">{{ sym }} {{ doc.totalImpuestos.gravadoImporte|n_format }}</span></div>
+    {% endif %}
+    <div class="in-words">{{ doc.leyendas['1000'] }}</div>
+    <div class="grand"><span>TOTAL NOTA</span><span class="v">{{ sym }} {{ doc.totalImporte.importeConImpuestos|n_format }}</span></div>
   </div>
 </div>
 
 <div class="foot">
   <div class="qr">
-    <svg viewBox="0 0 21 21" shape-rendering="crispEdges"><rect width="21" height="21" fill="#fff"/>
-    <g fill="#c0392b">
-      <rect x="0" y="0" width="7" height="7"/><rect x="1" y="1" width="5" height="5" fill="#fff"/><rect x="2" y="2" width="3" height="3"/>
-      <rect x="14" y="0" width="7" height="7"/><rect x="15" y="1" width="5" height="5" fill="#fff"/><rect x="16" y="2" width="3" height="3"/>
-      <rect x="0" y="14" width="7" height="7"/><rect x="1" y="15" width="5" height="5" fill="#fff"/><rect x="2" y="16" width="3" height="3"/>
-      <rect x="8" y="0" width="1" height="1"/><rect x="10" y="0" width="2" height="1"/><rect x="8" y="2" width="2" height="1"/>
-      <rect x="5" y="8" width="2" height="2"/><rect x="8" y="8" width="2" height="1"/><rect x="11" y="8" width="1" height="2"/><rect x="13" y="8" width="3" height="1"/><rect x="17" y="8" width="1" height="2"/>
-      <rect x="1" y="10" width="2" height="1"/><rect x="4" y="10" width="1" height="2"/><rect x="6" y="10" width="2" height="1"/><rect x="9" y="10" width="1" height="2"/><rect x="12" y="10" width="2" height="1"/><rect x="15" y="10" width="1" height="2"/>
-      <rect x="0" y="12" width="1" height="2"/><rect x="3" y="12" width="2" height="1"/><rect x="6" y="12" width="1" height="2"/><rect x="8" y="12" width="2" height="1"/><rect x="11" y="12" width="2" height="2"/><rect x="17" y="12" width="2" height="2"/>
-      <rect x="10" y="14" width="2" height="1"/><rect x="13" y="14" width="1" height="2"/><rect x="15" y="14" width="2" height="1"/><rect x="18" y="14" width="1" height="2"/>
-      <rect x="8" y="16" width="2" height="1"/><rect x="11" y="16" width="1" height="2"/><rect x="14" y="16" width="2" height="1"/>
-      <rect x="9" y="18" width="1" height="2"/><rect x="12" y="18" width="2" height="1"/><rect x="15" y="18" width="1" height="2"/>
-      <rect x="8" y="20" width="1" height="1"/><rect x="11" y="20" width="3" height="1"/>
-    </g></svg>
+    {% if qrBase64 is not empty %}<img src="data:image/png;base64,{{ qrBase64 }}" alt="QR Code" />{% endif %}
   </div>
   <div class="meta">
-    <p><strong>Representación impresa</strong> de la Nota de Crédito Electrónica.</p>
+    <p><strong>Representación impresa</strong> de la {{ name }}.</p>
     <p>Valide en <strong>{{ params.consultaUrl|default('sunat.gob.pe') }}</strong> con el RUC del emisor y el número del documento.</p>
+    <p style="margin-top:6px;">Firmante: {% if cp is not null %}{{ cp.ruc }} · {{ cp.razonSocial }}{% endif %}</p>
+    <p class="hash">Hash: {{ hashDocumento }}</p>
+    {% if params.footer is not null %}<p id="custom-footer-box" style="margin-top:10px; font-style:italic;">{{ params.footer }}</p>{% endif %}
   </div>
   <div class="stamp">
     <span class="badge">● Nota aceptada SUNAT</span>
