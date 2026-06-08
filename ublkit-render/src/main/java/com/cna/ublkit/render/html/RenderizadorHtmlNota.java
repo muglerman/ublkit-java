@@ -6,6 +6,7 @@ import com.cna.ublkit.render.modelo.EstiloPlantilla;
 import com.cna.ublkit.render.modelo.FormatoImpresion;
 import com.cna.ublkit.render.modelo.PlantillaRutas;
 import com.cna.ublkit.render.modelo.ResultadoRender;
+import com.cna.ublkit.render.pebble.FuentesEmbebidas;
 import com.cna.ublkit.render.pebble.PebbleEngines;
 import com.cna.ublkit.ubl.modelo.BorradorNotaCredito;
 import com.cna.ublkit.ubl.modelo.BorradorNotaDebito;
@@ -58,7 +59,9 @@ public class RenderizadorHtmlNota implements RenderizadorDocumento<Object> {
         scope.put("doc", contexto.documento());
         scope.put("qrBase64", contexto.qrBase64());
         scope.put("hashDocumento", contexto.hashDocumento());
-        
+        scope.put("fontStyle", FuentesEmbebidas.cssParaEstilo(
+                PlantillaRutas.resolver(contexto.estiloPlantilla(), EstiloPlantilla.DEFAULT)));
+
         if (contexto.atributosPlantilla() != null) {
             scope.put("params", contexto.atributosPlantilla());
             scope.putAll(contexto.atributosPlantilla());

@@ -7,7 +7,7 @@
 {% set name = doc.tipoComprobante|catalog('01') %}
 <title>{{ doc.serie }}-{{ doc.numero|str_pad(8, '0', 'left') }} · {{ name }}</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
+  {{ fontStyle | raw }}
   * { box-sizing: border-box; }
   html, body { margin: 0; }
   :root {
@@ -126,7 +126,7 @@
     <div class="label">Traslado / Transporte</div>
     <div class="row"><span class="k">Partida</span><span>{{ doc.envio.puntoPartida.direccion }}</span></div>
     <div class="row"><span class="k">Llegada</span><span>{{ doc.envio.puntoLlegada.direccion }}</span></div>
-    {% if doc.envio.transportista %}
+    {% if doc.envio.transportista is not null %}
     <div class="row"><span class="k">Transporte</span><span>{{ doc.envio.transportista.nombre }}</span></div>
     <div class="row"><span class="k">RUC</span><span class="mono">{{ doc.envio.transportista.numeroDocumentoIdentidad }}</span></div>
     {% endif %}

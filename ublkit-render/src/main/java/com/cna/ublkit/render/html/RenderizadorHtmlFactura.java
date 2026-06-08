@@ -6,6 +6,7 @@ import com.cna.ublkit.render.modelo.EstiloPlantilla;
 import com.cna.ublkit.render.modelo.FormatoImpresion;
 import com.cna.ublkit.render.modelo.PlantillaRutas;
 import com.cna.ublkit.render.modelo.ResultadoRender;
+import com.cna.ublkit.render.pebble.FuentesEmbebidas;
 import com.cna.ublkit.render.pebble.PebbleEngines;
 import com.cna.ublkit.ubl.modelo.BorradorFactura;
 import io.pebbletemplates.pebble.PebbleEngine;
@@ -55,7 +56,11 @@ public class RenderizadorHtmlFactura implements RenderizadorDocumento<BorradorFa
         // Metadatos de renderizado y firma
         scope.put("qrBase64", contexto.qrBase64());
         scope.put("hashDocumento", contexto.hashDocumento());
-        
+
+        // Fuentes embebidas (base64) del estilo: render offline sin CDN
+        scope.put("fontStyle", FuentesEmbebidas.cssParaEstilo(
+                PlantillaRutas.resolver(contexto.estiloPlantilla(), EstiloPlantilla.DEFAULT)));
+
         // Atributos dinámicos de estilo y configuración
         if (contexto.atributosPlantilla() != null) {
             scope.put("params", contexto.atributosPlantilla());

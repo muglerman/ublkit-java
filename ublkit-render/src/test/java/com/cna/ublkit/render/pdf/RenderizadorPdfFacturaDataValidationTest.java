@@ -489,8 +489,12 @@ class RenderizadorPdfFacturaDataValidationTest {
 
             String html = renderizarHtml(factura);
 
+            // Excluir el bloque <style> (incluye las fuentes embebidas en base64, cuyo texto
+            // puede contener "pen" por azar) para validar solo el contenido visible.
+            String htmlVisible = html.replaceAll("(?s)<style>.*?</style>", "");
+
             assertTrue(html.contains("PEN"), "Moneda debe ser PEN (mayúsculas)");
-            assertFalse(html.contains("pen"), "NO debe haber pen en minúsculas");
+            assertFalse(htmlVisible.contains("pen"), "NO debe haber pen en minúsculas");
         }
 
         @Test

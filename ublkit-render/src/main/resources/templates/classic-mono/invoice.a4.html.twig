@@ -8,7 +8,7 @@
 {% set name = doc.tipoComprobante|catalog('01') %}
 <title>{{ doc.serie }}-{{ doc.numero|str_pad(8, '0', 'left') }} · {{ name }}</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+  {{ fontStyle | raw }}
   * { box-sizing: border-box; }
   html, body { margin: 0; }
   :root {
@@ -136,7 +136,7 @@
   </div>
   <div class="party">
     <div class="label">Entrega</div>
-    <div class="name">{% if doc.direccionEntrega is defined and doc.direccionEntrega %}{{ doc.direccionEntrega.direccion }}{% endif %}</div>
+    <div class="name">{% if doc.direccionEntrega is defined and doc.direccionEntrega is not null %}{{ doc.direccionEntrega.direccion }}{% endif %}</div>
     <div class="row"><span>O/C</span><span class="mono">{{ doc.ordenDeCompra }}</span></div>
     <div class="row"><span>Guía</span><span class="mono">{% if doc.guias is not empty %}{% for guia in doc.guias %}{{ guia.serie }}-{{ guia.numero }}{% if not loop.last %}, {% endif %}{% endfor %}{% endif %}</span></div>
     <div class="row"><span>Operación</span><span>{{ doc.tipoOperacion }} · {{ doc.tipoOperacion | catalog('51') }}</span></div>
