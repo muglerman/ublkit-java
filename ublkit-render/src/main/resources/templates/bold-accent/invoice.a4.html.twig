@@ -117,10 +117,10 @@
   <div class="left">
     <div class="mark">
       <div class="logo">
-        <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="3">
+        {% if params.logo is not empty %}<img src="{{ params.logo }}" alt="logo" style="width:100%;height:100%;object-fit:contain"/>{% else %}<svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="3">
           <rect x="6" y="6" width="28" height="28" rx="2"/>
           <path d="M12 20h16M12 14h10M12 26h14"/>
-        </svg>
+        </svg>{% endif %}
       </div>
       <div>
         <div class="co-name">{% if cp is not null %}{% if cp.nombreComercial is not empty %}{{ cp.nombreComercial }}{% else %}{{ cp.razonSocial }}{% endif %}{% endif %}</div>
@@ -190,7 +190,7 @@
   <tbody>
     {% for det in doc.detalles %}
     <tr>
-      <td class="c-idx mono">{{ loop.index|str_pad(2, '0', 'left') }}</td>
+      <td class="c-idx mono">{{ (loop.index + 1)|str_pad(2, '0', 'left') }}</td>
       <td class="c-code mono">{{ det.codigoProducto }}</td>
       <td class="desc">
         <div class="main">{{ det.descripcion }}</div>
@@ -211,7 +211,7 @@
     {% if doc.formaDePago is not null and doc.formaDePago.cuotas is not empty %}
     <div class="block"><div class="head">Cuotas</div><div class="body">
       {% for cuota in doc.formaDePago.cuotas %}
-      <p class="small">Cuota {{ loop.index }} · {{ cuota.fechaPago|date('d/m/Y') }} · <b>{{ sym }} {{ cuota.monto|n_format }}</b></p>
+      <p class="small">Cuota {{ loop.index + 1 }} · {{ cuota.fechaPago|date('d/m/Y') }} · <b>{{ sym }} {{ cuota.monto|n_format }}</b></p>
       {% endfor %}
     </div></div>
     {% endif %}

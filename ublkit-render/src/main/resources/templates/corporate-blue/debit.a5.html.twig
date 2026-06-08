@@ -101,10 +101,10 @@
 <div class="band">
   <div class="logo-block">
     <div class="logo">
-      <svg viewBox="0 0 40 40" fill="none" stroke="#fff" stroke-width="2.4">
+      {% if params.logo is not empty %}<img src="{{ params.logo }}" alt="logo" style="width:100%;height:100%;object-fit:contain"/>{% else %}<svg viewBox="0 0 40 40" fill="none" stroke="#fff" stroke-width="2.4">
         <rect x="6" y="6" width="28" height="28" rx="3"/>
         <path d="M12 20h16M12 14h10M12 26h14"/>
-      </svg>
+      </svg>{% endif %}
     </div>
     <div>
       <div class="co-name">{{ doc.company.razonSocial }}</div>
@@ -161,7 +161,7 @@
 
     {% for det in doc.details %}
     <tr>
-      <td class="c-idx mono">{{ loop.index|str_pad(2, '0', 'left') }}</td>
+      <td class="c-idx mono">{{ (loop.index + 1)|str_pad(2, '0', 'left') }}</td>
       <td class="c-code mono">{{ det.codProducto }}</td>
       <td class="desc"><div class="main">{{ det.descripcion }}</div><div class="sub">{% if det.codProductoSUNAT %}SUNAT {{ det.codProductoSUNAT }}{% endif %}</div></td>
       <td class="c-unit">{{ det.unidad }}</td>

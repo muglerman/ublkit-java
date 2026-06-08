@@ -139,7 +139,7 @@
 
     {% for det in doc.details %}
     <tr>
-      <td class="c-idx mono">{{ loop.index|str_pad(2, '0', 'left') }}</td>
+      <td class="c-idx mono">{{ (loop.index + 1)|str_pad(2, '0', 'left') }}</td>
       <td class="c-code mono">{{ det.serie }}-{{ det.correlativo }}</td>
       <td class="desc"><div class="main">{{ det.desMotivoBaja }}</div></td>
       <td class="c-unit">{{ det.tipoDoc|catalog('01') }}</td>
