@@ -146,7 +146,8 @@
     <div class="label">Datos de la operación</div>
     <div class="name">{{ doc.tipoOperacion }}{% if doc.tipoOperacion is not null %} — {{ doc.tipoOperacion | catalog('51') }}{% endif %}</div>
     <div class="row"><span class="k">Entrega</span><span>{% if doc.direccionEntrega is defined and doc.direccionEntrega is not null %}{{ doc.direccionEntrega.direccion }}{% endif %}</span></div>
-    <div class="row"><span class="k">Guía ref.</span><span class="mono">{% if doc.guias is not empty %}{% for guia in doc.guias %}{{ guia.serie }}-{{ guia.numero }}{% if not loop.last %}, {% endif %}{% endfor %}{% endif %}</span></div>
+    {% if doc.guias is not empty %}<div class="row"><span class="k">Guía ref.</span><span class="mono">{% for guia in doc.guias %}{{ guia.serieNumero }}{% if not loop.last %}, {% endif %}{% endfor %}</span></div>{% endif %}
+    {% if doc.documentosRelacionados is not empty %}<div class="row"><span class="k">Doc. relacionado</span><span class="mono">{% for rel in doc.documentosRelacionados %}{{ rel.serieNumero }}{% if not loop.last %}, {% endif %}{% endfor %}</span></div>{% endif %}
     <div class="row"><span class="k">Vencimiento</span><span>{% if doc.fechaVencimiento is not null %}{{ doc.fechaVencimiento|date('d/m/Y') }}{% endif %}</span></div>
   </div>
 </div>
@@ -201,12 +202,14 @@
         {% endif %}
       </div>
     </div>
+    {% if doc.observaciones is not empty %}
     <div class="block">
       <div class="head">Observaciones</div>
       <div class="body">
         <p>{{ doc.observaciones }}</p>
       </div>
     </div>
+    {% endif %}
     <div class="block">
       <div class="head">Leyendas SUNAT</div>
       <div class="body">

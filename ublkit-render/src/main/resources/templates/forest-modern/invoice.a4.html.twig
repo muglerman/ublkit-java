@@ -162,7 +162,8 @@
     <div class="label">Operación</div>
     <div class="name">{{ doc.tipoOperacion }}{% if doc.tipoOperacion is not null %} — {{ doc.tipoOperacion | catalog('51') }}{% endif %}</div>
     <div class="row"><span class="k">Entrega</span><span>{% if doc.direccionEntrega is defined and doc.direccionEntrega is not null %}{{ doc.direccionEntrega.direccion }}{% endif %}</span></div>
-    <div class="row"><span class="k">Guía</span><span class="mono">{% if doc.guias is not empty %}{% for guia in doc.guias %}{{ guia.serie }}-{{ guia.numero }}{% if not loop.last %}, {% endif %}{% endfor %}{% endif %}</span></div>
+    {% if doc.guias is not empty %}<div class="row"><span class="k">Guía</span><span class="mono">{% for guia in doc.guias %}{{ guia.serieNumero }}{% if not loop.last %}, {% endif %}{% endfor %}</span></div>{% endif %}
+    {% if doc.documentosRelacionados is not empty %}<div class="row"><span class="k">Doc. relacionado</span><span class="mono">{% for rel in doc.documentosRelacionados %}{{ rel.serieNumero }}{% if not loop.last %}, {% endif %}{% endfor %}</span></div>{% endif %}
     <div class="row"><span class="k">Forma pago</span><span>{% if doc.formaDePago is not null %}{{ doc.formaDePago.tipo }}{% endif %}</span></div>
   </div>
 </div>

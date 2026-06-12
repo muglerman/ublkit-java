@@ -25,6 +25,8 @@ import com.cna.ublkit.ubl.modelo.BorradorFactura;
 import com.cna.ublkit.ubl.modelo.BorradorNotaCredito;
 import com.cna.ublkit.ubl.modelo.actor.EmisorDocumento;
 import com.cna.ublkit.ubl.modelo.actor.ReceptorDocumento;
+import com.cna.ublkit.ubl.modelo.complemento.DocumentoRelacionado;
+import com.cna.ublkit.ubl.modelo.complemento.GuiaRelacionada;
 import com.cna.ublkit.ubl.modelo.guia.BorradorGuiaRemision;
 import com.cna.ublkit.ubl.modelo.guia.Conductor;
 import com.cna.ublkit.ubl.modelo.guia.DatosEnvio;
@@ -64,6 +66,9 @@ class RenderizadorEstilosDataValidationTest {
         assertContiene(html, factura.getReceptor().numDocIdentidad(), estilo, "documento del receptor");
         assertContiene(html, "Servicio de consultoría", estilo, "descripción del ítem");
         assertContiene(html, "Licencia de software anual", estilo, "descripción del segundo ítem");
+        assertContiene(html, "T001-4912", estilo, "guía de remisión relacionada");
+        assertContiene(html, "F001-99", estilo, "documento relacionado");
+        assertContiene(html, "Entrega en Lima Metropolitana", estilo, "observaciones");
         assertSinPlaceholders(html, estilo);
     }
 
@@ -171,6 +176,8 @@ class RenderizadorEstilosDataValidationTest {
         factura.setLeyendas(Map.of("1000", "SON: DOS MIL QUINIENTOS NOVENTA Y SEIS CON 00/100 SOLES"));
         factura.setOrdenDeCompra("OC-2026-001");
         factura.setObservaciones("Entrega en Lima Metropolitana");
+        factura.setGuias(List.of(new GuiaRelacionada("T001-4912", "09")));
+        factura.setDocumentosRelacionados(List.of(new DocumentoRelacionado("01", "F001-99")));
         return factura;
     }
 

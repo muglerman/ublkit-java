@@ -169,7 +169,14 @@
     {% if doc.guias is not empty %}
     <div class="row"><span class="k">Guía</span><span class="mono">
       {% for guia in doc.guias %}
-        {{ guia.serie }}-{{ guia.numero }}{% if not loop.last %}, {% endif %}
+        {{ guia.serieNumero }}{% if not loop.last %}, {% endif %}
+      {% endfor %}
+    </span></div>
+    {% endif %}
+    {% if doc.documentosRelacionados is not empty %}
+    <div class="row"><span class="k">Doc. relacionado</span><span class="mono">
+      {% for rel in doc.documentosRelacionados %}
+        {{ rel.serieNumero }}{% if not loop.last %}, {% endif %}
       {% endfor %}
     </span></div>
     {% endif %}

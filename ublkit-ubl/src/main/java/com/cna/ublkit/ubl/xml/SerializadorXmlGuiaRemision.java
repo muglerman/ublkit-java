@@ -117,8 +117,10 @@ public final class SerializadorXmlGuiaRemision implements SerializadorXml<Borrad
                     guia.getComprador().nombre());
         }
 
-        // 13. SellerSupplierParty (tercero, opcional)
-        if (guia.getTercero() != null) {
+        // 13. SellerSupplierParty (tercero, opcional). En la GRE-Transportista el
+        // tercero ES el remitente y SUNAT lo valida en cac:Despatch/cac:DespatchParty
+        // (error 3383 si falta) — ahí lo emite agregarDelivery; no se duplica aquí.
+        if (guia.getTercero() != null && !guia.isGRETransportista()) {
             agregarParteConIdentidad(doc, raiz, "SellerSupplierParty",
                     guia.getTercero().tipoDocumentoIdentidad(),
                     guia.getTercero().numeroDocumentoIdentidad(),
@@ -276,8 +278,8 @@ public final class SerializadorXmlGuiaRemision implements SerializadorXml<Borrad
         // ShipmentStage
         agregarShipmentStage(doc, shipment, envio);
 
-        // Delivery (destino + partida)
-        agregarDelivery(doc, shipment, envio);
+        // Delivery (destino + partida + remitente en GRE-Transportista)
+        agregarDelivery(doc, shipment, guia);
 
         // Contenedores
         agregarContenedores(doc, shipment, envio);
@@ -344,7 +346,8 @@ public final class SerializadorXmlGuiaRemision implements SerializadorXml<Borrad
         shipment.appendChild(stage);
     }
 
-    private void agregarDelivery(Document doc, Element shipment, DatosEnvio envio) {
+    private void agregarDelivery(Document doc, Element shipment, BorradorGuiaRemision guia) {
+        DatosEnvio envio = guia.getEnvio();
         Element delivery = cac(doc, "Delivery");
 
         if (envio.getDestino() != null) {
@@ -374,6 +377,25 @@ public final class SerializadorXmlGuiaRemision implements SerializadorXml<Borrad
             line.appendChild(cbc(doc, "Line", envio.getPartida().direccion()));
             addr.appendChild(line);
             despatch.appendChild(addr);
+
+            // Datos del remitente (solo GRE-Transportista): SUNAT los exige en
+            // cac:Despatch/cac:DespatchParty — error 3383 si faltan.
+            if (guia.isGRETransportista() && guia.getTercero() != null) {
+                Element despatchParty = cac(doc, "DespatchParty");
+                Element pid = cac(doc, "PartyIdentification");
+                pid.appendChild(cbcConAtributos(doc, "ID",
+                        guia.getTercero().numeroDocumentoIdentidad(),
+                        "schemeID", guia.getTercero().tipoDocumentoIdentidad(),
+                        "schemeName", "Documento de Identidad",
+                        "schemeAgencyName", "PE:SUNAT",
+                        "schemeURI", "urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo06"));
+                despatchParty.appendChild(pid);
+                Element legal = cac(doc, "PartyLegalEntity");
+                legal.appendChild(cbcCdata(doc, "RegistrationName", guia.getTercero().nombre()));
+                despatchParty.appendChild(legal);
+                despatch.appendChild(despatchParty);
+            }
+
             delivery.appendChild(despatch);
         }
 

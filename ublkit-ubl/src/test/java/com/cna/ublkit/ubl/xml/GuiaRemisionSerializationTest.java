@@ -147,4 +147,51 @@ class GuiaRemisionSerializationTest {
         assertNotNull(guia.getEnvio());
         assertEquals(2, guia.getDetalles().size());
     }
+
+    @Test
+    @DisplayName("GRE Transportista: el remitente (tercero) va en Despatch/DespatchParty, no en SellerSupplierParty")
+    void testGreTransportistaEmiteRemitenteEnDespatchParty() {
+        // SUNAT valida el remitente de la GRE-T en cac:Shipment/cac:Delivery/cac:Despatch/
+        // cac:DespatchParty (error 3383 si falta); SellerSupplierParty no se considera.
+        BorradorGuiaRemision guia = guiaConTercero("31");
+
+        String xml = new SerializadorXmlGuiaRemision().serializar(guia);
+
+        assertTrue(xml.contains("<cac:DespatchParty>"), "Debe emitir cac:DespatchParty con el remitente");
+        assertTrue(xml.contains("42523276"), "Debe consignar el numero de documento del remitente");
+        assertTrue(xml.contains("MORY ALANIA, LUIS"), "Debe consignar el nombre del remitente");
+        assertFalse(xml.contains("<cac:SellerSupplierParty>"),
+                "La GRE-T no debe duplicar el remitente en SellerSupplierParty");
+    }
+
+    @Test
+    @DisplayName("GRE Remitente: el tercero sigue saliendo en SellerSupplierParty")
+    void testGreRemitenteMantieneTerceroEnSellerSupplierParty() {
+        BorradorGuiaRemision guia = guiaConTercero("09");
+
+        String xml = new SerializadorXmlGuiaRemision().serializar(guia);
+
+        assertTrue(xml.contains("<cac:SellerSupplierParty>"));
+        assertFalse(xml.contains("<cac:DespatchParty>"));
+    }
+
+    private BorradorGuiaRemision guiaConTercero(String tipoComprobante) {
+        return BorradorGuiaRemisionBuilder.aBorradorGuiaRemision()
+                .withVersion("2.0")
+                .withSerie("31".equals(tipoComprobante) ? "V001" : "T001")
+                .withNumero(1)
+                .withTipoComprobante(tipoComprobante)
+                .withFechaEmision(LocalDate.of(2026, 6, 12))
+                .withTercero(new TerceroGuia("1", "42523276", "MORY ALANIA, LUIS"))
+                .withDestinatario(new DestinatarioGuia("6", "20606514540", "BRENDENA S.A.C."))
+                .withEnvio(DatosEnvioBuilder.aDatosEnvio()
+                        .withTipoTraslado("01")
+                        .withPesoTotal(new BigDecimal("100.00"))
+                        .withFechaTraslado(LocalDate.of(2026, 6, 12))
+                        .withPartida(GuiaTestFactories.puntoPartida("150131", "Jr. Salida", "0000", "20123456789"))
+                        .withDestino(GuiaTestFactories.puntoDestino("080131", "Jr. Llegada", "0001", "20987654321"))
+                        .build())
+                .addDetalle(GuiaTestFactories.lineaGuia("ART001", "Articulo 1", new BigDecimal("500")))
+                .build();
+    }
 }
