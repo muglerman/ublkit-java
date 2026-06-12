@@ -99,7 +99,7 @@
   <div class="docbox">
     <div class="ruc">R.U.C. <b class="mono">{% if cp is not null %}{{ cp.ruc }}{% endif %}</b></div>
     <div class="kind">{% if doc.tipoComprobante is not empty %}{{ name }}{% else %}GUÍA DE REMISIÓN ELECTRÓNICA{% endif %}</div>
-    <div class="num">{{ doc.serie }}-{{ doc.numero }}</div>
+    <div class="num">{{ doc.serie }}-{{ doc.numero|str_pad(8, '0', 'left') }}</div>
   </div>
 </div>
 

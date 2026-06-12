@@ -23,31 +23,20 @@
   .brand .mark .name { font-size: 14px; font-weight: 700; letter-spacing: 0.02em; }
   .brand .meta { display: grid; grid-template-columns: 72px 1fr; column-gap: 16px; row-gap: 2px; font-size: 10px; margin: 0; }
   .brand .meta dt { text-transform: uppercase; letter-spacing: 0.08em; font-size: 9px; color: #737373; }
-  .brand .meta dd { margin: 0; }
+  .brand .meta dd { margin: 0; color: #0a0a0a; }
 
   .doc-id { text-align: right; min-width: 240px; }
   .doc-id .ruc { font-size: 10px; color: #737373; text-transform: uppercase; letter-spacing: 0.1em; }
-  .doc-id .ruc strong { color: #0a0a0a; font-family: 'IBM Plex Mono', monospace; }
-  .doc-id .kind { font-size: 16px; font-weight: 700; letter-spacing: 0.02em; margin-top: 2px; line-height: 1.15; }
+  .doc-id .ruc strong { color: #0a0a0a; font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.02em; }
+  .doc-id .kind { font-size: 17px; font-weight: 700; letter-spacing: 0.02em; margin-top: 2px; line-height: 1.15; }
   .doc-id .num { font-family: 'IBM Plex Mono', monospace; font-size: 22px; font-weight: 600; margin-top: 6px; letter-spacing: 0.04em; }
   .doc-id .issued { margin-top: 8px; font-size: 10px; color: #404040; }
-
-  .ref { display: grid; grid-template-columns: auto 1fr auto; gap: 16px; align-items: center; padding: 14px 0; border-bottom: 1px solid #0a0a0a; }
-  .ref .tag { border: 1px solid #0a0a0a; padding: 4px 10px; font-size: 9px; text-transform: uppercase; letter-spacing: 0.14em; font-weight: 600; }
-  .ref .text { font-size: 11px; }
-  .ref .text b { font-family: 'IBM Plex Mono', monospace; }
-  .ref .amount { font-family: 'IBM Plex Mono', monospace; font-size: 16px; font-weight: 700; }
 
   .parties { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; padding: 18px 0; border-bottom: 1px solid #0a0a0a; }
   .party .label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.14em; color: #737373; margin-bottom: 6px; }
   .party .name { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
   .party .row { display: flex; gap: 10px; font-size: 10px; margin-top: 2px; }
-  .party .row span:first-child { color: #737373; min-width: 76px; text-transform: uppercase; letter-spacing: 0.06em; font-size: 9px; }
-
-  .reason { padding: 16px 0; border-bottom: 1px solid #0a0a0a; }
-  .reason .head { font-size: 9px; text-transform: uppercase; letter-spacing: 0.14em; color: #737373; margin-bottom: 4px; }
-  .reason .v { font-size: 13px; font-weight: 600; }
-  .reason .desc { font-size: 10px; color: #404040; margin-top: 4px; max-width: 560px; }
+  .party .row span:first-child { color: #737373; min-width: 68px; text-transform: uppercase; letter-spacing: 0.06em; font-size: 9px; }
 
   .items { width: 100%; border-collapse: collapse; margin-top: 16px; }
   .items thead th { font-size: 9px; text-transform: uppercase; letter-spacing: 0.1em; color: #737373; font-weight: 500; text-align: left; padding: 0 8px 8px 0; border-bottom: 1px solid #0a0a0a; }
@@ -67,12 +56,14 @@
   .notes .block .head { font-size: 9px; text-transform: uppercase; letter-spacing: 0.14em; color: #737373; margin-bottom: 4px; }
   .notes .block .body { font-size: 10px; }
   .notes .small { font-size: 9.5px; color: #525252; }
+  .notes .pay { display: flex; gap: 10px; font-size: 10px; margin-top: 2px; }
+  .notes .pay span:first-child { color: #737373; min-width: 90px; }
 
   .totals .line { display: flex; justify-content: space-between; padding: 4px 0; font-size: 10.5px; }
   .totals .line .k { color: #525252; }
   .totals .line .v { font-family: 'IBM Plex Mono', monospace; white-space: nowrap; }
   .totals .rule { border-top: 1px solid #0a0a0a; margin: 4px 0; }
-  .totals .grand { display: flex; justify-content: space-between; padding: 10px 0 4px; font-size: 15px; font-weight: 700; border-top: 2px solid #0a0a0a; margin-top: 4px; }
+  .totals .grand { display: flex; justify-content: space-between; padding: 10px 0 4px; font-size: 16px; font-weight: 700; border-top: 2px solid #0a0a0a; margin-top: 4px; }
   .totals .grand .v { font-family: 'IBM Plex Mono', monospace; white-space: nowrap; }
   .totals .in-words { margin-top: 6px; padding: 8px 10px; background: #fafafa; border: 1px solid #e5e5e5; font-size: 10px; color: #404040; }
 
@@ -97,21 +88,26 @@
     </div>
     <dl class="meta">
       <dt>Dirección</dt><dd>{{ doc.emisor.direccion.direccion }}</dd>
-      {% if cp is not null and cp.contacto is not null %}<dt>Contacto</dt><dd>{{ cp.contacto.email }} · {{ cp.contacto.telefono }}</dd>{% endif %}
+      {% if cp is not null and cp.direccion is not null and cp.direccion.distrito is not empty %}
+      <dt>Ubicación</dt><dd>{{ cp.direccion.departamento }} — {{ cp.direccion.provincia }} — {{ cp.direccion.distrito }}{% if cp.direccion.ubigeo is not empty %} · Ubigeo {{ cp.direccion.ubigeo }}{% endif %}</dd>
+      {% endif %}
+      {% if params.establishmentName is not empty %}
+      <dt>Establecimiento</dt><dd>{{ params.establishmentName }}</dd>
+      {% endif %}
+      {% if cp is not null and cp.nombreComercial is not null %}
+      <dt>Comercial</dt><dd>{{ cp.nombreComercial }}</dd>
+      {% endif %}
+      {% if cp is not null and cp.contacto is not null %}
+      <dt>Contacto</dt><dd>{{ cp.contacto.email }} · {{ cp.contacto.telefono }}{% if cp.contacto.web %} · {{ cp.contacto.web }}{% endif %}</dd>
+      {% endif %}
     </dl>
   </div>
   <div class="doc-id">
     <div class="ruc">RUC <strong>{{ doc.emisor.ruc }}</strong></div>
-    <div class="kind">{{ name|upper }}</div>
+    <div class="kind">{{ name }}</div>
     <div class="num">{{ doc.serie }} — {{ doc.numero|str_pad(8, '0', 'left') }}</div>
     <div class="issued">Emitido {{ doc.fechaEmision|date('dd/MM/yyyy') }} · {{ doc.fechaEmision|date('HH:mm:ss') }}</div>
   </div>
-</div>
-
-<div class="ref">
-  <span class="tag">Modifica</span>
-  <div class="text">Aplica a <b>{{ doc.comprobanteAfectadoTipo|catalog('01') }} {{ doc.comprobanteAfectadoSerieNumero }}</b> — tipo de nota <b>{{ doc.tipoNota }} · {{ doc.tipoNota|catalog('09') }}</b>.</div>
-  <div class="amount">− {{ sym }} {{ doc.totalImporte.importeConImpuestos|n_format }}</div>
 </div>
 
 <div class="parties">
@@ -124,17 +120,13 @@
     {% endif %}
   </div>
   <div class="party">
-    <div class="label">Documento referente</div>
-    <div class="name">{{ doc.comprobanteAfectadoTipo|catalog('01') }} {{ doc.comprobanteAfectadoSerieNumero }}</div>
-    <div class="row"><span>Emitida</span><span>{{ doc.fechaEmision|date('dd/MM/yyyy') }}</span></div>
-    <div class="row"><span>Moneda</span><span>{{ mon }}{% if doc.tipoCambio is not null %} · T/C {{ doc.tipoCambio.venta }}{% endif %}</span></div>
+    <div class="label">Venta</div>
+    <div class="name">{% if doc.formaDePago is not null %}{{ doc.formaDePago.tipo }}{% endif %}</div>
+    <div class="row"><span>Moneda</span><span>{{ mon }}</span></div>
+    {% if doc.tipoCambio is not null %}
+    <div class="row"><span>T/C</span><span class="mono">{{ doc.tipoCambio.venta }}</span></div>
+    {% endif %}
   </div>
-</div>
-
-<div class="reason">
-  <div class="head">Motivo de la nota · Código SUNAT {{ doc.tipoNota }}</div>
-  <div class="v">{{ doc.tipoNota|catalog('09') }}</div>
-  {% if doc.sustentoDescripcion is not empty %}<div class="desc">{{ doc.sustentoDescripcion }}</div>{% endif %}
 </div>
 
 <table class="items">
@@ -158,11 +150,13 @@
 
 <div class="bottom">
   <div class="notes">
-    {% if doc.sustentoDescripcion is not empty %}
+    {% if doc.formaDePago is not null and doc.formaDePago.cuotas is not empty %}
     <div class="block">
-      <div class="head">Sustento</div>
+      <div class="head">Cuotas</div>
       <div class="body">
-        <p>{{ doc.sustentoDescripcion }}</p>
+        {% for cuota in doc.formaDePago.cuotas %}
+        <div class="pay"><span>Cuota {{ loop.index + 1 }} · {{ cuota.fechaPago|date('dd/MM/yyyy') }}</span><span class="mono">{{ sym }} {{ cuota.monto|n_format }}</span></div>
+        {% endfor %}
       </div>
     </div>
     {% endif %}
@@ -174,12 +168,14 @@
       </div>
     </div>
     {% endif %}
+    {% if doc.leyendas is not empty and (doc.leyendas|length > 1 or doc.leyendas['1000'] is null) %}
     <div class="block">
       <div class="head">Leyendas SUNAT</div>
       <div class="body">
         {% for entry in doc.leyendas %}{% if entry.key != '1000' %}<p class="small">· {{ entry.value }}</p>{% endif %}{% endfor %}
       </div>
     </div>
+    {% endif %}
   </div>
 
   <div class="totals">
@@ -192,11 +188,17 @@
     {% if doc.totalImpuestos is not null and doc.totalImpuestos.inafectoBaseImponible is not null %}
     <div class="line"><span class="k">Op. inafectas</span><span class="v">{{ sym }} {{ doc.totalImpuestos.inafectoBaseImponible|n_format }}</span></div>
     {% endif %}
+    {% if doc.totalImpuestos is not null and doc.totalImpuestos.gratuitoBaseImponible is not null %}
+    <div class="line"><span class="k">Op. gratuitas</span><span class="v">{{ sym }} {{ doc.totalImpuestos.gratuitoBaseImponible|n_format }}</span></div>
+    {% endif %}
     <div class="rule"></div>
     {% if doc.totalImpuestos is not null and doc.totalImpuestos.gravadoImporte is not null %}
     <div class="line"><span class="k">IGV (18%)</span><span class="v">{{ sym }} {{ doc.totalImpuestos.gravadoImporte|n_format }}</span></div>
     {% endif %}
-    <div class="grand"><span>Total nota</span><span class="v">{{ sym }} {{ doc.totalImporte.importeConImpuestos|n_format }}</span></div>
+    {% if doc.totalImpuestos is not null and doc.totalImpuestos.icbImporte is not null %}
+    <div class="line"><span class="k">ICBPER</span><span class="v">{{ sym }} {{ doc.totalImpuestos.icbImporte|n_format }}</span></div>
+    {% endif %}
+    <div class="grand"><span>Total</span><span class="v">{{ sym }} {{ doc.totalImporte.importeConImpuestos|n_format }}</span></div>
     <div class="in-words">{% if doc.leyendas['1000'] %}Son: {{ doc.leyendas['1000'] }}{% endif %}</div>
   </div>
 </div>
@@ -206,15 +208,15 @@
     {% if qrBase64 is not empty %}<img src="data:image/png;base64,{{ qrBase64 }}" alt="QR Code" />{% endif %}
   </div>
   <div class="meta">
-    <p><strong>Representación impresa</strong> de la {{ name }}.</p>
+    <p><strong>Representación impresa</strong> de la {{ name }} Electrónica.</p>
     <p>Consulte la validez en <strong>{{ params.consultaUrl|default('sunat.gob.pe') }}</strong> con el RUC del emisor y el número del documento.</p>
     <p style="margin-top:6px;">Firmante: {% if cp is not null %}{{ cp.ruc }} · {{ cp.razonSocial }}{% endif %}</p>
     <p class="hash">Hash: {{ hashDocumento }}</p>
     {% if params.footer is not null %}<p id="custom-footer-box" style="margin-top:10px; font-style:italic;">{{ params.footer }}</p>{% endif %}
   </div>
   <div class="stamp">
-    <span class="badge">Nota aceptada</span>
-    <div class="line">Documento electrónico que modifica el comprobante referenciado.</div>
+    <span class="badge">CPE válido</span>
+    <div class="line">Documento electrónico emitido conforme al RCP SUNAT.</div>
   </div>
 </div>
 

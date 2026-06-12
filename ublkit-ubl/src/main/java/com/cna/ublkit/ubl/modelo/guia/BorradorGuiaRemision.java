@@ -67,6 +67,12 @@ public class BorradorGuiaRemision {
     /** Datos del tercero (vendedor/remitente original, aplica en GRE-31). */
     private TerceroGuia tercero;
 
+    /**
+     * Transportista subcontratado (aplica en GRE-31 cuando el emisor subcontrata el traslado).
+     * Solo presentación PDF; no se serializa a UBL.
+     */
+    private TerceroGuia subcontratado;
+
     /** Datos del comprador/adquiriente. */
     private CompradorGuia comprador;
 
@@ -108,6 +114,7 @@ public class BorradorGuiaRemision {
     public EmisorDocumento getRemitente() { return remitente; }
     public DestinatarioGuia getDestinatario() { return destinatario; }
     public TerceroGuia getTercero() { return tercero; }
+    public TerceroGuia getSubcontratado() { return subcontratado; }
     public CompradorGuia getComprador() { return comprador; }
     public DatosEnvio getEnvio() { return envio; }
     public List<LineaGuia> getDetalles() { return detalles; }
@@ -129,6 +136,7 @@ public class BorradorGuiaRemision {
     public void setRemitente(EmisorDocumento remitente) { this.remitente = remitente; }
     public void setDestinatario(DestinatarioGuia destinatario) { this.destinatario = destinatario; }
     public void setTercero(TerceroGuia tercero) { this.tercero = tercero; }
+    public void setSubcontratado(TerceroGuia subcontratado) { this.subcontratado = subcontratado; }
     public void setComprador(CompradorGuia comprador) { this.comprador = comprador; }
     public void setEnvio(DatosEnvio envio) { this.envio = envio; }
     public void setDetalles(List<LineaGuia> detalles) { this.detalles = detalles; }

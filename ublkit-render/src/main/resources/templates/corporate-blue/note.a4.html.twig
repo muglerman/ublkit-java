@@ -102,7 +102,7 @@
   <div class="docbox">
     <div class="ruc">R.U.C. <b class="mono">{{ doc.emisor.ruc }}</b></div>
     <div class="kind">{{ name }}</div>
-    <div class="num">{{ doc.serie }}-{{ doc.numero }}</div>
+    <div class="num">{{ doc.serie }}-{{ doc.numero|str_pad(8, '0', 'left') }}</div>
   </div>
 </div>
 
@@ -159,14 +159,14 @@
   <div class="notes">
     {% if doc.observaciones %}
     <div class="block"><div class="head">Observaciones</div><div class="body">
-      <p>{{ doc.observaciones }}</p>
+      {% for obs in doc.observaciones|split('\n') %}<p class="small">· {{ obs }}</p>{% endfor %}
     </div></div>
     {% endif %}
     <div class="block"><div class="head">Sustento</div><div class="body">
       <p>{{ doc.sustentoDescripcion }}</p>
     </div></div>
     <div class="block"><div class="head">Leyendas SUNAT</div><div class="body">
-      {% if doc.leyendas is not empty %}{% for entry in doc.leyendas %}<p class="small">· {{ entry.value }}</p>{% endfor %}{% endif %}
+      {% for entry in doc.leyendas %}{% if entry.key != '1000' %}<p class="small">· {{ entry.value }}</p>{% endif %}{% endfor %}
     </div></div>
   </div>
 

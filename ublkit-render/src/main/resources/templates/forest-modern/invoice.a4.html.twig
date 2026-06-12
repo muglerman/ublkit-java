@@ -125,18 +125,18 @@
       </div>
       <div>
         <div class="co-name">{{ doc.emisor.razonSocial }}</div>
-        <div class="co-tagline">{% if cp is not null and cp.nombreComercial is not null %}{{ cp.nombreComercial }}{% endif %}</div>
+        <div class="co-tagline">{% if params.establishmentName is not empty %}{{ params.establishmentName }}{% elseif cp is not null and cp.nombreComercial is not null %}{{ cp.nombreComercial }}{% endif %}</div>
       </div>
     </div>
     <div class="meta">
-      <p>{{ doc.emisor.direccion.direccion }}</p>
+      <p>{{ doc.emisor.direccion.direccion }}{% if cp.direccion.distrito is not empty %} · {{ cp.direccion.departamento }} — {{ cp.direccion.provincia }} — {{ cp.direccion.distrito }}{% endif %}{% if cp.direccion.ubigeo is not empty %} · Ubigeo {{ cp.direccion.ubigeo }}{% endif %}</p>
       <p>{% if cp is not null and cp.contacto is not null %}{{ cp.contacto.email }} · {{ cp.contacto.telefono }}{% if cp.contacto.web %} · {{ cp.contacto.web }}{% endif %}{% endif %}</p>
     </div>
   </div>
   <div class="doc-id">
     <div class="tag">Comprobante</div>
     <div class="kind">{{ name }}</div>
-    <div class="num">{{ doc.serie }}-{{ doc.numero }}</div>
+    <div class="num">{{ doc.serie }}-{{ doc.numero|str_pad(8, '0', 'left') }}</div>
     <div class="ruc">RUC <b>{{ doc.emisor.ruc }}</b></div>
     <div class="issued">Emitido {{ doc.fechaEmision|date('d/m/Y') }} · {{ doc.fechaEmision|date('H:i:s') }}</div>
   </div>
@@ -144,7 +144,9 @@
 
 <div class="meta-row">
   <div class="chip"><span class="k">Moneda</span><span class="v">{{ mon }}</span></div>
-  <div class="chip"><span class="k">T/C</span><span class="v mono">{% if doc.tipoCambio is not null %}{{ doc.tipoCambio.venta }}{% endif %}</span></div>
+  {% if doc.tipoCambio is not null %}
+  <div class="chip"><span class="k">T/C</span><span class="v mono">{{ doc.tipoCambio.venta }}</span></div>
+  {% endif %}
   <div class="chip"><span class="k">Vencimiento</span><span class="v">{% if doc.fechaVencimiento is not null %}{{ doc.fechaVencimiento|date('d/m/Y') }}{% endif %}</span></div>
   <div class="chip"><span class="k">Condición</span><span class="v">{% if doc.formaDePago is not null %}{{ doc.formaDePago.tipo }}{% if doc.formaDePago.cuotas is not empty %} {{ doc.formaDePago.cuotas|length }} cuotas{% endif %}{% endif %}</span></div>
 </div>
@@ -201,14 +203,13 @@
 
 <div class="bottom">
   <div class="notes">
-    <div class="block"><div class="head">Condiciones de pago</div><div class="body">
-      <p class="small">{% if doc.formaDePago is not null %}{{ doc.formaDePago.tipo }}{% endif %} · {{ sym }} {{ doc.totalImporte.importeConImpuestos|n_format }}</p>
-      {% if doc.formaDePago is not null and doc.formaDePago.cuotas is not empty %}
-        {% for cuota in doc.formaDePago.cuotas %}
-          <p class="small">Cuota {{ loop.index + 1 }} · {{ cuota.fechaPago|date('d/m/Y') }} · <b>{{ sym }} {{ cuota.monto|n_format }}</b></p>
-        {% endfor %}
-      {% endif %}
+    {% if doc.formaDePago is not null and doc.formaDePago.cuotas is not empty %}
+    <div class="block"><div class="head">Cuotas</div><div class="body">
+      {% for cuota in doc.formaDePago.cuotas %}
+      <p class="small">Cuota {{ loop.index + 1 }} · {{ cuota.fechaPago|date('d/m/Y') }} · <b>{{ sym }} {{ cuota.monto|n_format }}</b></p>
+      {% endfor %}
     </div></div>
+    {% endif %}
     {% if doc.detraccion is not null %}
     <div class="block"><div class="head">Detracción</div><div class="body">
       <p><b>{{ sym }} {{ doc.detraccion.monto|n_format }}</b> · {{ doc.detraccion.codigoBien }} - {{ doc.detraccion.codigoBien|catalog('54') }}</p>
@@ -217,12 +218,14 @@
     {% endif %}
     {% if doc.observaciones %}
     <div class="block"><div class="head">Observaciones</div><div class="body">
-      <p>{{ doc.observaciones }}</p>
+      {% for obs in doc.observaciones|split('\n') %}<p class="small">· {{ obs }}</p>{% endfor %}
     </div></div>
     {% endif %}
+    {% if doc.leyendas is not empty and (doc.leyendas|length > 1 or doc.leyendas['1000'] is null) %}
     <div class="block"><div class="head">Leyendas SUNAT</div><div class="body">
-      {% if doc.leyendas is not empty %}{% for entry in doc.leyendas %}<p class="small">· {{ entry.value }}</p>{% endfor %}{% endif %}
+      {% for entry in doc.leyendas %}{% if entry.key != '1000' %}<p class="small">· {{ entry.value }}</p>{% endif %}{% endfor %}
     </div></div>
+    {% endif %}
   </div>
 
   <div class="totals">

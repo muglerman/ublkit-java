@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 {% set cp = doc.remitente %}
+{% set tercero = doc.tercero %}
 {% set cl = doc.destinatario %}
 {% set name = doc.tipoComprobante|catalog('01') %}
 <title>{{ doc.serie }}-{{ doc.numero|str_pad(8, '0', 'left') }} · {{ name }}</title>
@@ -21,14 +22,14 @@
   .hero .left .logo { width: 44px; height: 44px; background: var(--ink); color: var(--accent); border-radius: 2px; display: flex; align-items: center; justify-content: center; }
   .hero .left .logo svg { width: 26px; height: 26px; }
   .hero .left .logo img { width: 100%; height: 100%; object-fit: contain; border-radius: 2px; }
-  .hero .left .co-name { font-size: 18px; font-weight: 900; letter-spacing: -0.01em; line-height: 1.1; }
+  .hero .left .co-name { font-size: 17px; font-weight: 900; letter-spacing: -0.01em; line-height: 1.1; }
   .hero .left .co-tag { font-size: 10px; color: var(--ink-2); margin-top: 2px; font-weight: 500; }
   .hero .left .info { font-size: 10px; color: var(--ink-2); }
   .hero .left .info p { padding: 1px 0; }
   .hero .left .info b { color: var(--ink); font-family: 'JetBrains Mono', monospace; }
 
   .hero .right { padding: 20px 22px; background: var(--ink); color: #fff; border-radius: 4px; display: flex; flex-direction: column; justify-content: space-between; }
-  .hero .right .kind { font-size: 13px; font-weight: 700; color: var(--accent); letter-spacing: 0.04em; text-transform: uppercase; }
+  .hero .right .kind { font-size: 12px; font-weight: 700; color: var(--accent); letter-spacing: 0.04em; text-transform: uppercase; }
   .hero .right .subkind { font-size: 10px; opacity: 0.7; margin-top: 1px; }
   .hero .right .num { font-family: 'JetBrains Mono', monospace; font-size: 24px; font-weight: 700; margin-top: 4px; letter-spacing: 0.02em; }
   .hero .right .rule { height: 1px; background: rgba(255,255,255,0.18); margin: 12px 0; }
@@ -48,7 +49,7 @@
   .party::before { content: ""; position: absolute; left: 0; top: 14px; bottom: 14px; width: 3px; background: var(--accent); border-radius: 0 2px 2px 0; }
   .party .label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.16em; color: var(--accent); font-weight: 700; margin-bottom: 4px; }
   .party .name { font-size: 13px; font-weight: 700; margin-bottom: 5px; letter-spacing: -0.005em; }
-  .party .row { display: grid; grid-template-columns: 80px 1fr; font-size: 10px; padding: 1px 0; }
+  .party .row { display: grid; grid-template-columns: 72px 1fr; font-size: 10px; padding: 1px 0; }
   .party .row .k { color: var(--ink-3); }
 
   .strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 14px; }
@@ -97,7 +98,7 @@
 <div class="hero">
   <div class="left">
     <div class="mark">
-      <div class="logo">{% if params.logo is not empty %}<img src="{{ params.logo }}" alt="logo"/>{% else %}<svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="3"><rect x="6" y="6" width="28" height="28" rx="2"/><path d="M12 20h16M12 14h10M12 26h14"/></svg>{% endif %}</div>
+      <div class="logo">{% if params.logo is not empty %}<img src="{{ params.logo }}" alt="logo"/>{% else %}<svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="3"><circle cx="20" cy="20" r="14"/><path d="M9 23l5-9 6 4 6-7"/></svg>{% endif %}</div>
       <div>
         <div class="co-name">{% if cp is not null %}{{ cp.razonSocial }}{% endif %}</div>
         <div class="co-tag">{% if cp is not null and cp.nombreComercial is not null %}{{ cp.nombreComercial }}{% endif %}</div>
@@ -106,21 +107,21 @@
     <div class="info">
       {% if cp is not null and cp.direccion is not null %}<p>{{ cp.direccion.direccion }}</p>{% endif %}
       {% if cp is not null and cp.contacto is not null %}<p>{{ cp.contacto.email }} · {{ cp.contacto.telefono }}</p>{% endif %}
-      <p>RUC <b>{% if cp is not null %}{{ cp.ruc }}{% endif %}</b></p>
+      <p>RUC <b>{% if cp is not null %}{{ cp.ruc }}{% endif %}</b>{% if doc.envio is not null and doc.envio.transportista is not null and doc.envio.transportista.numeroRegistroMTC is not empty %} · Reg. MTC <b>{{ doc.envio.transportista.numeroRegistroMTC }}</b>{% endif %}</p>
     </div>
   </div>
   <div class="right">
     <div>
       <div class="kind">Guía de Remisión</div>
-      <div class="subkind">Remitente · Tipo 09</div>
+      <div class="subkind">Transportista · Tipo 31</div>
       <div class="num">{{ doc.serie }}-{{ doc.numero|str_pad(8, '0', 'left') }}</div>
     </div>
     <div>
       <div class="rule"></div>
       <div class="row"><span class="k">Emitido</span><span class="v">{{ doc.fechaEmision|date('d/m/Y') }}{% if doc.horaEmision is not null %} · {{ doc.horaEmision }}{% endif %}</span></div>
       <div class="row"><span class="k">Inicio traslado</span><span class="v">{% if doc.envio is not null and doc.envio.fechaTraslado is not null %}{{ doc.envio.fechaTraslado|date('d/m/Y') }}{% endif %}</span></div>
-      <div class="row"><span class="k">Motivo</span><span class="v">{% if doc.envio is not null %}{{ doc.envio.tipoTraslado }} {{ doc.envio.tipoTraslado|catalog('20') }}{% endif %}</span></div>
-      <div class="row"><span class="k">Modalidad</span><span class="v">{% if doc.envio is not null %}{{ doc.envio.tipoModalidadTraslado }} {{ doc.envio.tipoModalidadTraslado|catalog('18') }}{% endif %}</span></div>
+      <div class="row"><span class="k">Modalidad</span><span class="v">{% if doc.envio is not null %}{{ doc.envio.tipoModalidadTraslado|catalog('18') }}{% endif %}</span></div>
+      <div class="row"><span class="k">Peso · bultos</span><span class="v">{% if doc.envio is not null %}{{ doc.envio.pesoTotal }} {{ doc.envio.pesoTotalUnidadMedida }}{% if doc.envio.numeroDeBultos is not null %} · {{ doc.envio.numeroDeBultos }}{% endif %}{% endif %}</span></div>
     </div>
   </div>
 </div>
@@ -141,27 +142,19 @@
 
 <div class="parties">
   <div class="party">
+    <div class="label">Remitente</div>
+    {% if tercero is not null %}
+    <div class="name">{{ tercero.nombre }}</div>
+    <div class="row"><span class="k">{{ tercero.tipoDocumentoIdentidad|catalogAttr('06','abreviatura') }}</span><span class="mono">{{ tercero.numeroDocumentoIdentidad }}</span></div>
+    {% endif %}
+  </div>
+  <div class="party">
     <div class="label">Destinatario</div>
     {% if cl is not null %}
     <div class="name">{{ cl.nombre }}</div>
     <div class="row"><span class="k">{{ cl.tipoDocumentoIdentidad|catalogAttr('06','abreviatura') }}</span><span class="mono">{{ cl.numeroDocumentoIdentidad }}</span></div>
     {% endif %}
   </div>
-  <div class="party">
-    <div class="label">Documento relacionado</div>
-    {% if doc.documentosRelacionados is not empty %}
-    {% for rel in doc.documentosRelacionados %}
-    <div class="row"><span class="k">{{ rel.tipoDocumento }}</span><span class="mono">{{ rel.serieNumero }}</span></div>
-    {% endfor %}
-    {% endif %}
-  </div>
-</div>
-
-<div class="strip">
-  <div class="chip"><span class="k">Inicio</span><span class="v">{% if doc.envio is not null and doc.envio.fechaTraslado is not null %}{{ doc.envio.fechaTraslado|date('d/m/Y') }}{% endif %}</span></div>
-  <div class="chip"><span class="k">Motivo</span><span class="v">{% if doc.envio is not null %}{{ doc.envio.tipoTraslado }} {{ doc.envio.tipoTraslado|catalog('20') }}{% endif %}</span></div>
-  <div class="chip"><span class="k">Modalidad</span><span class="v">{% if doc.envio is not null %}{{ doc.envio.tipoModalidadTraslado }} {{ doc.envio.tipoModalidadTraslado|catalog('18') }}{% endif %}</span></div>
-  <div class="chip"><span class="k">Peso · bultos</span><span class="v">{% if doc.envio is not null %}{{ doc.envio.pesoTotal }} {{ doc.envio.pesoTotalUnidadMedida }}{% if doc.envio.numeroDeBultos is not null %} · {{ doc.envio.numeroDeBultos }}{% endif %}{% endif %}</span></div>
 </div>
 
 <div class="items-wrap">
@@ -188,18 +181,18 @@
     <div class="head"><div class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 17V7h13l5 5v5M3 17h2M9 17h10M5 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm14 0a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"/></svg></div><div class="title">Vehículo</div></div>
     {% if doc.envio is not null and doc.envio.transportista is not null %}
     <div class="row"><span class="k">Transportista</span><span class="v">{{ doc.envio.transportista.nombre }} · {{ doc.envio.transportista.numeroDocumentoIdentidad }}</span></div>
-    {% if doc.envio.transportista.numeroRegistroMTC is not empty %}
-    <div class="row"><span class="k">Registro MTC</span><span class="v mono">{{ doc.envio.transportista.numeroRegistroMTC }}</span></div>
-    {% endif %}
-    {% endif %}
-    {% if doc.subcontratado is not null %}
-    <div class="row"><span class="k">Subcontratado</span><span class="v">{{ doc.subcontratado.nombre }}{% if doc.subcontratado.numeroDocumentoIdentidad is not empty %} · {{ doc.subcontratado.numeroDocumentoIdentidad }}{% endif %}</span></div>
     {% endif %}
     {% if doc.envio is not null and doc.envio.vehiculo is not null %}
     <div class="row"><span class="k">Placa</span><span class="v mono">{{ doc.envio.vehiculo.placa }}</span></div>
     {% if doc.envio.vehiculo.numeroCirculacion is not empty %}
     <div class="row"><span class="k">Cert. insc.</span><span class="v mono">{{ doc.envio.vehiculo.numeroCirculacion }}</span></div>
     {% endif %}
+    {% if doc.envio.vehiculo.numeroAutorizacion is not empty %}
+    <div class="row"><span class="k">Autorización</span><span class="v mono">{{ doc.envio.vehiculo.numeroAutorizacion }}</span></div>
+    {% endif %}
+    {% endif %}
+    {% if doc.subcontratado is not null %}
+    <div class="row"><span class="k">Subcontratado</span><span class="v">{{ doc.subcontratado.nombre }}{% if doc.subcontratado.numeroDocumentoIdentidad is not empty %} · {{ doc.subcontratado.numeroDocumentoIdentidad }}{% endif %}</span></div>
     {% endif %}
   </div>
   <div class="card">
@@ -238,14 +231,14 @@
     {% if qrBase64 is not empty %}<img src="data:image/png;base64,{{ qrBase64 }}" alt="QR Code" />{% endif %}
   </div>
   <div class="meta">
-    <p><strong>Representación impresa</strong> de la Guía de Remisión Remitente Electrónica.</p>
-    <p>Consulte la validez en <strong>{{ params.consultaUrl|default('sunat.gob.pe') }}</strong> con el RUC del remitente y el número del documento.</p>
+    <p><strong>Representación impresa</strong> de la Guía de Remisión Transportista Electrónica.</p>
+    <p>Consulte la validez en <strong>{{ params.consultaUrl|default('sunat.gob.pe') }}</strong> con el RUC del transportista y el número del documento.</p>
     <p style="margin-top:6px;">Firmante: {% if cp is not null %}{{ cp.ruc }} · {{ cp.razonSocial }}{% endif %}</p>
     {% if hashDocumento is not empty %}<p class="hash">Hash: {{ hashDocumento }}</p>{% endif %}
     {% if params.footer is not null %}<p id="custom-footer-box" style="margin-top:10px; font-style:italic;">{{ params.footer }}</p>{% endif %}
   </div>
   <div class="stamp">
-    <span class="badge">● GRE-R SUNAT</span>
+    <span class="badge">● GRE-T SUNAT</span>
     <div class="line">Documento electrónico emitido conforme a la RS SUNAT 271-2019.</div>
   </div>
 </div>

@@ -113,16 +113,24 @@
     </div>
     <dl class="meta">
       <dt>Dirección</dt><dd>{{ doc.emisor.direccion.direccion }}</dd>
-      {% if doc.company.tradeName is defined and doc.company.tradeName %}
-      <dt>Nombre comercial</dt><dd>{% if cp is not null and cp.nombreComercial is not null %}{{ cp.nombreComercial }}{% endif %}</dd>
+      {% if cp is not null and cp.direccion is not null and cp.direccion.distrito is not empty %}
+      <dt>Ubicación</dt><dd>{{ cp.direccion.departamento }} — {{ cp.direccion.provincia }} — {{ cp.direccion.distrito }}{% if cp.direccion.ubigeo is not empty %} · Ubigeo {{ cp.direccion.ubigeo }}{% endif %}</dd>
       {% endif %}
-      <dt>Contacto</dt><dd>{% if cp is not null and cp.contacto is not null %}{{ cp.contacto.email }} · {{ cp.contacto.telefono }}{% if cp.contacto.web %} · {{ cp.contacto.web }}{% endif %}{% endif %}</dd>
+      {% if params.establishmentName is not empty %}
+      <dt>Establecimiento</dt><dd>{{ params.establishmentName }}</dd>
+      {% endif %}
+      {% if cp is not null and cp.nombreComercial is not null %}
+      <dt>Comercial</dt><dd>{{ cp.nombreComercial }}</dd>
+      {% endif %}
+      {% if cp is not null and cp.contacto is not null %}
+      <dt>Contacto</dt><dd>{{ cp.contacto.email }} · {{ cp.contacto.telefono }}{% if cp.contacto.web %} · {{ cp.contacto.web }}{% endif %}</dd>
+      {% endif %}
     </dl>
   </div>
   <div class="doc-id">
     <div class="ruc">RUC <strong>{{ doc.emisor.ruc }}</strong></div>
     <div class="kind">{{ name }}</div>
-    <div class="num">{{ doc.serie }} — {{ doc.numero }}</div>
+    <div class="num">{{ doc.serie }} — {{ doc.numero|str_pad(8, '0', 'left') }}</div>
     <div class="issued">Emitido {{ doc.fechaEmision|date('dd/MM/yyyy') }} · {{ doc.fechaEmision|date('HH:mm:ss') }}</div>
   </div>
 </div>
@@ -147,7 +155,7 @@
 
 <div class="strip">
   <div><span class="k">Moneda</span><span class="v">{{ mon }}</span></div>
-  <div><span class="k">T/C</span><span class="v mono">{% if doc.tipoCambio is not null %} {{ doc.tipoCambio.venta }}{% endif %}</span></div>
+  {% if doc.tipoCambio is not null %}<div><span class="k">T/C</span><span class="v mono">{{ doc.tipoCambio.venta }}</span></div>{% endif %}
   <div><span class="k">Vencimiento</span><span class="v">{% if doc.fechaVencimiento is not null %}{{ doc.fechaVencimiento|date('dd/MM/yyyy') }}{% endif %}</span></div>
   <div><span class="k">Forma de pago</span><span class="v">{% if doc.formaDePago is not null %}{{ doc.formaDePago.tipo }}{% if doc.formaDePago.cuotas is not empty %} · {{ doc.formaDePago.cuotas|length }} cuotas{% endif %}{% endif %}</span></div>
 </div>
@@ -182,17 +190,16 @@
 
 <div class="bottom">
   <div class="notes">
+    {% if doc.formaDePago is not null and doc.formaDePago.cuotas is not empty %}
     <div class="block">
-      <div class="head">Condiciones de pago</div>
+      <div class="head">Cuotas</div>
       <div class="body">
-        <p>{% if doc.formaDePago is not null %}{{ doc.formaDePago.tipo }}{% endif %} — {{ sym }} {{ doc.totalImporte.importeConImpuestos|n_format }}</p>
-        {% if doc.formaDePago is not null and doc.formaDePago.cuotas is not empty %}
-          {% for cuota in doc.formaDePago.cuotas %}
-            <p class="small">Cuota {{ loop.index + 1 }} · vence {{ cuota.fechaPago|date('dd/MM/yyyy') }} · {{ sym }} {{ cuota.monto|n_format }}</p>
-          {% endfor %}
-        {% endif %}
+        {% for cuota in doc.formaDePago.cuotas %}
+        <p class="small">Cuota {{ loop.index + 1 }} · vence {{ cuota.fechaPago|date('dd/MM/yyyy') }} · {{ sym }} {{ cuota.monto|n_format }}</p>
+        {% endfor %}
       </div>
     </div>
+    {% endif %}
     <div class="block">
       <div class="head">Detracción</div>
       <div class="body">
@@ -206,16 +213,18 @@
     <div class="block">
       <div class="head">Observaciones</div>
       <div class="body">
-        <p>{{ doc.observaciones }}</p>
+        {% for obs in doc.observaciones|split('\n') %}<p class="small">· {{ obs }}</p>{% endfor %}
       </div>
     </div>
     {% endif %}
+    {% if doc.leyendas is not empty and (doc.leyendas|length > 1 or doc.leyendas['1000'] is null) %}
     <div class="block">
       <div class="head">Leyendas SUNAT</div>
       <div class="body">
-        <p class="small">· {{ doc.leyendas['1000'] }}</p>
+        {% for entry in doc.leyendas %}{% if entry.key != '1000' %}<p class="small">· {{ entry.value }}</p>{% endif %}{% endfor %}
       </div>
     </div>
+    {% endif %}
   </div>
 
   <div class="totals">

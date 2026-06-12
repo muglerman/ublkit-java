@@ -32,6 +32,7 @@ import com.cna.ublkit.ubl.modelo.guia.Conductor;
 import com.cna.ublkit.ubl.modelo.guia.DatosEnvio;
 import com.cna.ublkit.ubl.modelo.guia.DestinatarioGuia;
 import com.cna.ublkit.ubl.modelo.guia.LineaGuia;
+import com.cna.ublkit.ubl.modelo.guia.TerceroGuia;
 import com.cna.ublkit.ubl.modelo.guia.TransportistaGuia;
 import com.cna.ublkit.ubl.modelo.guia.Vehiculo;
 import com.cna.ublkit.ubl.modelo.linea.LineaDetalle;
@@ -97,6 +98,40 @@ class RenderizadorEstilosDataValidationTest {
         assertContiene(html, guia.getDestinatario().nombre(), estilo, "nombre del destinatario");
         assertContiene(html, guia.getDestinatario().numeroDocumentoIdentidad(), estilo, "documento del destinatario");
         assertContiene(html, "Producto A", estilo, "descripción del bien trasladado");
+        assertSinPlaceholders(html, estilo);
+    }
+
+    @ParameterizedTest(name = "boleta · estilo {0}")
+    @EnumSource(EstiloPlantilla.class)
+    void boletaCablaDatosRealesEnCadaEstilo(EstiloPlantilla estilo) {
+        BorradorFactura boleta = crearBoleta();
+        String html = renderizarFactura(boleta, estilo);
+
+        assertContiene(html, boleta.getEmisor().ruc(), estilo, "RUC del emisor");
+        assertContiene(html, boleta.getEmisor().razonSocial(), estilo, "razón social del emisor");
+        assertContiene(html, boleta.getReceptor().nombre(), estilo, "nombre del receptor");
+        assertContiene(html, boleta.getReceptor().numDocIdentidad(), estilo, "DNI del receptor");
+        assertContiene(html, "Polo algodón pima", estilo, "descripción del ítem");
+        assertContiene(html, "B001", estilo, "serie de la boleta");
+        assertTrue(html.toUpperCase().contains("BOLETA"),
+                "El estilo " + estilo.carpeta() + " debe rotular el documento como BOLETA");
+        assertSinPlaceholders(html, estilo);
+    }
+
+    @ParameterizedTest(name = "guía transportista · estilo {0}")
+    @EnumSource(EstiloPlantilla.class)
+    void guiaTransportistaCablaDatosRealesEnCadaEstilo(EstiloPlantilla estilo) {
+        BorradorGuiaRemision guia = crearGuiaTransportista();
+        String html = renderizarGuia(guia, estilo);
+
+        assertContiene(html, guia.getRemitente().ruc(), estilo, "RUC del transportista emisor");
+        assertContiene(html, guia.getRemitente().razonSocial(), estilo, "razón social del transportista emisor");
+        assertContiene(html, guia.getTercero().nombre(), estilo, "nombre del remitente (tercero)");
+        assertContiene(html, guia.getDestinatario().nombre(), estilo, "nombre del destinatario");
+        assertContiene(html, "MTC-123456", estilo, "registro MTC del transportista");
+        assertContiene(html, guia.getSubcontratado().nombre(), estilo, "transportista subcontratado");
+        assertContiene(html, "Producto A", estilo, "descripción del bien transportado");
+        assertContiene(html, "Tipo 31", estilo, "rótulo de GRE transportista");
         assertSinPlaceholders(html, estilo);
     }
 
@@ -179,6 +214,39 @@ class RenderizadorEstilosDataValidationTest {
         factura.setGuias(List.of(new GuiaRelacionada("T001-4912", "09")));
         factura.setDocumentosRelacionados(List.of(new DocumentoRelacionado("01", "F001-99")));
         return factura;
+    }
+
+    private BorradorFactura crearBoleta() {
+        BorradorFactura boleta = crearFactura();
+        boleta.setSerie("B001");
+        boleta.setNumero(4912);
+        boleta.setTipoComprobante("03");
+        boleta.setReceptor(new ReceptorDocumento(
+                "1", "45128734", "María Elena Castillo Rodríguez",
+                new Direccion(null, null, null, null, null, null, "Calle Las Begonias 178", "PE"), null));
+
+        LineaDetalle linea = new LineaDetalle();
+        linea.setDescripcion("Polo algodón pima Premium");
+        linea.setCantidad(new BigDecimal("2"));
+        linea.setUnidadMedida("NIU");
+        linea.setPrecio(new BigDecimal("65.00"));
+        boleta.setDetalles(List.of(linea));
+        return boleta;
+    }
+
+    private BorradorGuiaRemision crearGuiaTransportista() {
+        BorradorGuiaRemision guia = crearGuia();
+        guia.setSerie("V001");
+        guia.setNumero(128);
+        guia.setTipoComprobante("31");
+        // En GRE-31 el emisor (remitente del documento) es la empresa de transporte
+        // y el remitente real de la carga viaja como tercero.
+        guia.setRemitente(new EmisorDocumento(
+                "20600456789", "Transportes Mantaro", "Transportes Mantaro E.I.R.L.",
+                null, null));
+        guia.setTercero(new TerceroGuia("6", "20512345678", "Manufacturas Andina Textil S.A.C."));
+        guia.setSubcontratado(new TerceroGuia("6", "20222222222", "Subcontratista Andino S.A.C."));
+        return guia;
     }
 
     private BorradorNotaCredito crearNotaCredito() {

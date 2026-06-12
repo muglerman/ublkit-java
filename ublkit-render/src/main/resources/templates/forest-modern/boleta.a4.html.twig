@@ -12,12 +12,12 @@
   {{ fontStyle | raw }}
   * { box-sizing: border-box; }
   html, body { margin: 0; }
-  :root { --ink: #1a2720; --ink-2: #48554e; --ink-3: #7b8882; --accent: #1d6b4f; --accent-2: #d1e7dc; --accent-soft: #f2f8f5; --line: #d9e0dc; --paper: #fdfdfb; --warn: #a8412f; --warn-soft: #f8ede9; }
+  :root { --ink: #1a2720; --ink-2: #48554e; --ink-3: #7b8882; --accent: #1d6b4f; --accent-2: #d1e7dc; --accent-soft: #f2f8f5; --line: #d9e0dc; --paper: #fdfdfb; }
   body { font-family: 'Space Grotesk', sans-serif; font-size: 10.5px; line-height: 1.5; color: var(--ink); background: var(--paper); width: 794px; min-height: 1123px; padding: 40px 44px; }
   .mono { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
   p, h1, h2, h3 { margin: 0; }
 
-  .hero { display: grid; grid-template-columns: 1fr auto; align-items: start; gap: 32px; margin-bottom: 18px; }
+  .hero { display: grid; grid-template-columns: 1fr auto; align-items: start; gap: 32px; margin-bottom: 20px; }
   .brand .mark { display: flex; align-items: center; gap: 14px; }
   .brand .logo { width: 50px; height: 50px; background: var(--accent); color: #fff; border-radius: 14px; display: flex; align-items: center; justify-content: center; }
   .brand .logo svg { width: 32px; height: 32px; }
@@ -28,29 +28,23 @@
 
   .doc-id { text-align: right; border-left: 3px solid var(--accent); padding-left: 18px; min-width: 240px; }
   .doc-id .tag { font-size: 9.5px; color: var(--accent); font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; }
-  .doc-id .kind { font-size: 19px; font-weight: 700; line-height: 1.1; margin-top: 4px; }
+  .doc-id .kind { font-size: 20px; font-weight: 700; line-height: 1.1; margin-top: 4px; }
   .doc-id .num { font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 500; color: var(--accent); margin-top: 2px; }
   .doc-id .ruc { margin-top: 10px; font-size: 10px; color: var(--ink-2); }
   .doc-id .ruc b { color: var(--ink); font-family: 'JetBrains Mono', monospace; }
   .doc-id .issued { font-size: 10px; color: var(--ink-2); }
 
-  .ref-band { background: var(--warn-soft); border: 1px solid #ecd6cf; border-radius: 12px; padding: 14px 18px; display: grid; grid-template-columns: auto 1fr auto; gap: 18px; align-items: center; margin-bottom: 18px; }
-  .ref-band .tag { background: var(--warn); color: #fff; padding: 4px 10px; border-radius: 999px; font-size: 9.5px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; }
-  .ref-band .text { font-size: 11px; }
-  .ref-band .text b { font-family: 'JetBrains Mono', monospace; }
-  .ref-band .amount { font-family: 'JetBrains Mono', monospace; font-size: 17px; font-weight: 700; color: var(--warn); }
+  .meta-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 18px; }
+  .meta-row .chip { background: var(--accent-soft); border-radius: 10px; padding: 10px 12px; }
+  .meta-row .chip .k { font-size: 9px; color: var(--accent); letter-spacing: 0.14em; text-transform: uppercase; font-weight: 600; display: block; margin-bottom: 4px; }
+  .meta-row .chip .v { font-size: 11px; font-weight: 500; }
 
-  .parties { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 18px; }
+  .parties { display: grid; grid-template-columns: 1fr; gap: 16px; margin-bottom: 20px; }
   .party { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
   .party .label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--ink-3); margin-bottom: 4px; }
   .party .name { font-size: 13px; font-weight: 700; margin-bottom: 6px; }
-  .party .row { display: grid; grid-template-columns: 84px 1fr; font-size: 10px; padding: 1px 0; }
+  .party .row { display: grid; grid-template-columns: 78px 1fr; font-size: 10px; padding: 1px 0; }
   .party .row .k { color: var(--ink-3); }
-
-  .reason { background: var(--accent-soft); border-radius: 12px; padding: 14px 18px; margin-bottom: 18px; }
-  .reason .head { font-size: 9px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--accent); font-weight: 600; margin-bottom: 4px; }
-  .reason .v { font-size: 13px; font-weight: 700; }
-  .reason .desc { font-size: 10px; color: var(--ink-2); margin-top: 4px; }
 
   .section-title { font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--ink-3); font-weight: 600; margin: 0 0 10px; }
 
@@ -74,6 +68,8 @@
   .notes .block .body { font-size: 10px; color: var(--ink); }
   .notes .block .body p + p { margin-top: 2px; }
   .notes .small { font-size: 9.5px; color: var(--ink-2); }
+  .notes .pay { display: grid; grid-template-columns: 1fr auto; font-size: 10px; padding: 1px 0; }
+  .notes .pay .k { color: var(--ink-3); }
 
   .totals { background: #fff; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
   .totals .inner { padding: 14px 18px; }
@@ -81,7 +77,7 @@
   .totals .line .k { color: var(--ink-2); }
   .totals .line .v { font-family: 'JetBrains Mono', monospace; white-space: nowrap; }
   .totals .rule { border-top: 1px dashed var(--line); margin: 6px 0; }
-  .totals .grand-wrap { background: var(--warn); color: #fff; padding: 14px 18px; }
+  .totals .grand-wrap { background: var(--accent); color: #fff; padding: 14px 18px; }
   .totals .grand { display: flex; justify-content: space-between; align-items: baseline; }
   .totals .grand .k { font-size: 10px; text-transform: uppercase; letter-spacing: 0.14em; font-weight: 600; opacity: 0.85; }
   .totals .grand .v { font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 700; white-space: nowrap; }
@@ -94,8 +90,8 @@
   .foot .meta strong { color: var(--ink); }
   .foot .meta .hash { font-family: 'JetBrains Mono', monospace; word-break: break-all; font-size: 8.5px; margin-top: 4px; color: var(--ink-3); }
   .foot .stamp { text-align: right; min-width: 180px; }
-  .foot .stamp .badge { display: inline-flex; align-items: center; gap: 5px; background: var(--warn-soft); color: var(--warn); padding: 6px 12px; border-radius: 999px; font-size: 9.5px; font-weight: 600; }
-  .foot .stamp .badge::before { content: ""; width: 6px; height: 6px; background: var(--warn); border-radius: 50%; }
+  .foot .stamp .badge { display: inline-flex; align-items: center; gap: 5px; background: var(--accent-2); color: var(--accent); padding: 6px 12px; border-radius: 999px; font-size: 9.5px; font-weight: 600; }
+  .foot .stamp .badge::before { content: ""; width: 6px; height: 6px; background: var(--accent); border-radius: 50%; }
   .foot .stamp .line { font-size: 9.5px; color: var(--ink-2); margin-top: 8px; max-width: 180px; }
 </style>
 </head>
@@ -107,15 +103,16 @@
       <div class="logo">{% if params.logo is not empty %}<img src="{{ params.logo }}" alt="logo"/>{% else %}<svg viewBox="0 0 40 40" fill="none" stroke="#fff" stroke-width="2.4"><rect x="6" y="6" width="28" height="28" rx="3"/><path d="M12 20h16M12 14h10M12 26h14"/></svg>{% endif %}</div>
       <div>
         <div class="co-name">{{ doc.emisor.razonSocial }}</div>
-        <div class="co-tagline">{% if cp is not null and cp.nombreComercial is not null %}{{ cp.nombreComercial }}{% endif %}</div>
+        <div class="co-tagline">{% if params.establishmentName is not empty %}{{ params.establishmentName }}{% elseif cp is not null and cp.nombreComercial is not null %}{{ cp.nombreComercial }}{% endif %}</div>
       </div>
     </div>
     <div class="meta">
-      <p>{% if cp is not null and cp.direccion is not null %}{{ cp.direccion.direccion }}{% endif %}{% if cp is not null and cp.contacto is not null %} · {{ cp.contacto.email }} · {{ cp.contacto.telefono }}{% endif %}</p>
+      <p>{% if cp is not null and cp.direccion is not null %}{{ cp.direccion.direccion }}{% if cp.direccion.distrito is not empty %} · {{ cp.direccion.departamento }} — {{ cp.direccion.provincia }} — {{ cp.direccion.distrito }}{% endif %}{% if cp.direccion.ubigeo is not empty %} · Ubigeo {{ cp.direccion.ubigeo }}{% endif %}{% endif %}</p>
+      <p>{% if cp is not null and cp.contacto is not null %}{{ cp.contacto.email }} · {{ cp.contacto.telefono }}{% if cp.contacto.web %} · {{ cp.contacto.web }}{% endif %}{% endif %}</p>
     </div>
   </div>
   <div class="doc-id">
-    <div class="tag">Ajuste de comprobante</div>
+    <div class="tag">Comprobante</div>
     <div class="kind">{{ name }}</div>
     <div class="num">{{ doc.serie }}-{{ doc.numero|str_pad(8, '0', 'left') }}</div>
     <div class="ruc">RUC <b>{{ doc.emisor.ruc }}</b></div>
@@ -123,10 +120,13 @@
   </div>
 </div>
 
-<div class="ref-band">
-  <span class="tag">Modifica</span>
-  <div class="text">Aplica a <b>{{ doc.comprobanteAfectadoTipo|catalog('01') }} {{ doc.comprobanteAfectadoSerieNumero }}</b> — tipo de nota <b>{{ doc.tipoNota }} · {{ doc.tipoNota|catalog('09') }}</b>.</div>
-  <div class="amount">− {{ sym }} {{ doc.totalImporte.importeConImpuestos|n_format }}</div>
+<div class="meta-row">
+  <div class="chip"><span class="k">Moneda</span><span class="v">{{ mon }}</span></div>
+  <div class="chip"><span class="k">Pago</span><span class="v">{% if doc.formaDePago is not null %}{{ doc.formaDePago.tipo }}{% endif %}</span></div>
+  {% if doc.tipoCambio is not null %}
+  <div class="chip"><span class="k">T/C</span><span class="v mono">{{ doc.tipoCambio.venta }}</span></div>
+  {% endif %}
+  <div class="chip"><span class="k">Operación</span><span class="v">{% if doc.tipoOperacion is not empty %}{{ doc.tipoOperacion|catalog('51') }}{% endif %}</span></div>
 </div>
 
 <div class="parties">
@@ -138,21 +138,9 @@
     <div class="row"><span class="k">Dirección</span><span>{{ cl.direccion.direccion }}</span></div>
     {% endif %}
   </div>
-  <div class="party">
-    <div class="label">Documento referente</div>
-    <div class="name">{{ doc.comprobanteAfectadoTipo|catalog('01') }} {{ doc.comprobanteAfectadoSerieNumero }}</div>
-    <div class="row"><span class="k">Emitida</span><span>{{ doc.fechaEmision|date('dd/MM/yyyy') }}</span></div>
-    <div class="row"><span class="k">Moneda</span><span>{{ mon }}{% if doc.tipoCambio is not null %} · T/C {{ doc.tipoCambio.venta }}{% endif %}</span></div>
-  </div>
 </div>
 
-<div class="reason">
-  <div class="head">Motivo de la nota · Código SUNAT {{ doc.tipoNota }}</div>
-  <div class="v">{{ doc.tipoNota|catalog('09') }}</div>
-  {% if doc.sustentoDescripcion is not empty %}<div class="desc">{{ doc.sustentoDescripcion }}</div>{% endif %}
-</div>
-
-<p class="section-title">Detalle de la nota</p>
+<p class="section-title">Detalle de la compra</p>
 <div class="items-wrap">
 <table class="items">
   <thead>
@@ -176,9 +164,11 @@
 
 <div class="bottom">
   <div class="notes">
-    {% if doc.sustentoDescripcion is not empty %}
-    <div class="block"><div class="head">Sustento</div><div class="body">
-      <p>{{ doc.sustentoDescripcion }}</p>
+    {% if doc.formaDePago is not null and doc.formaDePago.cuotas is not empty %}
+    <div class="block"><div class="head">Cuotas</div><div class="body">
+      {% for cuota in doc.formaDePago.cuotas %}
+      <div class="pay"><span class="k">Cuota {{ loop.index + 1 }} · {{ cuota.fechaPago|date('dd/MM/yyyy') }}</span><span class="mono">{{ sym }} {{ cuota.monto|n_format }}</span></div>
+      {% endfor %}
     </div></div>
     {% endif %}
     {% if doc.observaciones is not empty %}
@@ -186,9 +176,11 @@
       {% for obs in doc.observaciones|split('\n') %}<p class="small">· {{ obs }}</p>{% endfor %}
     </div></div>
     {% endif %}
+    {% if doc.leyendas is not empty and (doc.leyendas|length > 1 or doc.leyendas['1000'] is null) %}
     <div class="block"><div class="head">Leyendas SUNAT</div><div class="body">
       {% for entry in doc.leyendas %}{% if entry.key != '1000' %}<p class="small">· {{ entry.value }}</p>{% endif %}{% endfor %}
     </div></div>
+    {% endif %}
   </div>
 
   <div class="totals">
@@ -202,13 +194,19 @@
       {% if doc.totalImpuestos is not null and doc.totalImpuestos.inafectoBaseImponible is not null %}
       <div class="line"><span class="k">Op. inafectas</span><span class="v">{{ sym }} {{ doc.totalImpuestos.inafectoBaseImponible|n_format }}</span></div>
       {% endif %}
+      {% if doc.totalImpuestos is not null and doc.totalImpuestos.gratuitoBaseImponible is not null %}
+      <div class="line"><span class="k">Op. gratuitas</span><span class="v">{{ sym }} {{ doc.totalImpuestos.gratuitoBaseImponible|n_format }}</span></div>
+      {% endif %}
       <div class="rule"></div>
       {% if doc.totalImpuestos is not null and doc.totalImpuestos.gravadoImporte is not null %}
       <div class="line"><span class="k">IGV (18%)</span><span class="v">{{ sym }} {{ doc.totalImpuestos.gravadoImporte|n_format }}</span></div>
       {% endif %}
+      {% if doc.totalImpuestos is not null and doc.totalImpuestos.icbImporte is not null %}
+      <div class="line"><span class="k">ICBPER</span><span class="v">{{ sym }} {{ doc.totalImpuestos.icbImporte|n_format }}</span></div>
+      {% endif %}
     </div>
     <div class="grand-wrap">
-      <div class="grand"><span class="k">Total nota</span><span class="v">{{ sym }} {{ doc.totalImporte.importeConImpuestos|n_format }}</span></div>
+      <div class="grand"><span class="k">Total a pagar</span><span class="v">{{ sym }} {{ doc.totalImporte.importeConImpuestos|n_format }}</span></div>
       <div class="words">{% if doc.leyendas['1000'] %}Son: {{ doc.leyendas['1000'] }}{% endif %}</div>
     </div>
   </div>
@@ -219,15 +217,15 @@
     {% if qrBase64 is not empty %}<img src="data:image/png;base64,{{ qrBase64 }}" alt="QR Code" />{% endif %}
   </div>
   <div class="meta">
-    <p><strong>Representación impresa</strong> de la {{ name }}.</p>
+    <p><strong>Representación impresa</strong> de la {{ name }} Electrónica.</p>
     <p>Consulte la validez en <strong>{{ params.consultaUrl|default('sunat.gob.pe') }}</strong> con el RUC del emisor y el número del documento.</p>
     <p style="margin-top:6px;">Firmante: {% if cp is not null %}{{ cp.ruc }} · {{ cp.razonSocial }}{% endif %}</p>
     <p class="hash">Hash: {{ hashDocumento }}</p>
     {% if params.footer is not null %}<p id="custom-footer-box" style="margin-top:10px; font-style:italic;">{{ params.footer }}</p>{% endif %}
   </div>
   <div class="stamp">
-    <span class="badge">Nota aceptada</span>
-    <div class="line">Documento electrónico que modifica el comprobante referenciado.</div>
+    <span class="badge">CPE autorizado</span>
+    <div class="line">Documento electrónico emitido conforme al RCP SUNAT.</div>
   </div>
 </div>
 

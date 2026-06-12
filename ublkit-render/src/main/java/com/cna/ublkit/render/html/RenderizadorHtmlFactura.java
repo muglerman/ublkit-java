@@ -38,9 +38,13 @@ public class RenderizadorHtmlFactura implements RenderizadorDocumento<BorradorFa
     }
 
     private String obtenerRutaPlantilla(ContextoRender<BorradorFactura> contexto) {
+        // La boleta (tipo 03) tiene plantilla propia solo en A4; A5 y tickets siguen
+        // resolviendo "invoice" (sus plantillas adaptan el rótulo vía doc.tipoComprobante).
+        boolean esBoleta = formato == FormatoImpresion.A4
+                && "03".equals(contexto.documento().getTipoComprobante());
         return PlantillaRutas.ruta(
-            "invoice", 
-            formato, 
+            esBoleta ? "boleta" : "invoice",
+            formato,
             PlantillaRutas.resolver(contexto.estiloPlantilla(), EstiloPlantilla.DEFAULT),
             contexto.extensionPlantilla()
         );

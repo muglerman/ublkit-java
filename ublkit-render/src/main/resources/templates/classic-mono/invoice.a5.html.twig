@@ -7,7 +7,7 @@
 {% set mon = doc.moneda|catalog('021') %}
 {% set sym = doc.moneda|catalogAttr('021','simbolo') %}
 {% set name = doc.tipoComprobante|catalog("01") %}
-<title>{{ doc.serie }}-{{ doc.numero }} · Factura Electrónica</title>
+<title>{{ doc.serie }}-{{ doc.numero|str_pad(8, '0', 'left') }} · Factura Electrónica</title>
 <style>
   {{ fontStyle | raw }}
   * { box-sizing: border-box; }
@@ -113,7 +113,7 @@
   <div class="doc-id">
     <div class="ruc">RUC <strong>{{ doc.emisor.ruc }}</strong></div>
     <div class="kind">FACTURA ELECTRÓNICA</div>
-    <div class="num">{{ doc.serie }} — {{ doc.numero }}</div>
+    <div class="num">{{ doc.serie }} — {{ doc.numero|str_pad(8, '0', 'left') }}</div>
     <div class="issued">Emitido {{ doc.fechaEmision|date('d/m/Y') }} · {{ doc.fechaEmision|date('H:i:s') }}</div>
   </div>
 </div>

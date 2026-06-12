@@ -18,28 +18,23 @@
   .serif { font-family: 'Newsreader', serif; }
   p { margin: 0; }
 
-  .hero { text-align: center; padding-bottom: 20px; border-bottom: 1px solid var(--rule); }
+  .hero { text-align: center; padding-bottom: 22px; border-bottom: 1px solid var(--rule); }
   .hero .co-name { font-family: 'Newsreader', serif; font-size: 22px; font-weight: 500; letter-spacing: 0.02em; }
   .hero .co-sub { font-size: 10px; color: var(--ink-2); margin-top: 3px; letter-spacing: 0.04em; }
-  .hero .doc-kind { margin-top: 16px; font-family: 'Newsreader', serif; font-style: italic; font-size: 14px; color: var(--accent); }
+  .hero .doc-kind { margin-top: 18px; font-family: 'Newsreader', serif; font-style: italic; font-size: 14px; color: var(--ink-2); }
   .hero .doc-num { margin-top: 4px; font-family: 'JetBrains Mono', monospace; font-size: 22px; font-weight: 500; letter-spacing: 0.03em; }
 
-  .ref { display: grid; grid-template-columns: 1fr auto; gap: 18px; align-items: center; padding: 16px 0; border-bottom: 1px solid var(--line); }
-  .ref .text { font-size: 11px; }
-  .ref .text .label { font-family: 'Newsreader', serif; font-style: italic; color: var(--accent); font-size: 13px; }
-  .ref .text b { font-family: 'JetBrains Mono', monospace; }
-  .ref .amount { font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 600; color: var(--accent); }
+  .meta-grid { display: grid; grid-template-columns: repeat(4, 1fr); padding: 18px 0; border-bottom: 1px solid var(--line); }
+  .meta-grid > div { padding: 0 14px; }
+  .meta-grid > div + div { border-left: 1px solid var(--line); }
+  .meta-grid .k { font-size: 9px; text-transform: uppercase; letter-spacing: 0.16em; color: var(--ink-3); margin-bottom: 3px; }
+  .meta-grid .v { font-size: 11px; font-weight: 500; }
 
-  .parties { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; padding: 20px 0; border-bottom: 1px solid var(--line); }
+  .parties { display: grid; grid-template-columns: 1fr; gap: 48px; padding: 22px 0; border-bottom: 1px solid var(--line); }
   .party .label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.16em; color: var(--ink-3); margin-bottom: 6px; }
   .party .name { font-family: 'Newsreader', serif; font-size: 15px; font-weight: 500; margin-bottom: 6px; }
-  .party .row { display: grid; grid-template-columns: 84px 1fr; font-size: 10px; padding: 1px 0; }
+  .party .row { display: grid; grid-template-columns: 72px 1fr; font-size: 10px; padding: 1px 0; }
   .party .row .k { color: var(--ink-3); }
-
-  .reason { padding: 20px 0; border-bottom: 1px solid var(--line); }
-  .reason .head { font-size: 9px; text-transform: uppercase; letter-spacing: 0.16em; color: var(--ink-3); margin-bottom: 4px; }
-  .reason .v { font-family: 'Newsreader', serif; font-size: 15px; font-weight: 500; }
-  .reason .desc { font-size: 10px; color: var(--ink-2); margin-top: 4px; max-width: 600px; }
 
   .section { padding-top: 20px; }
   .section-title { font-family: 'Newsreader', serif; font-style: italic; font-size: 13px; color: var(--ink-2); margin-bottom: 10px; }
@@ -62,7 +57,8 @@
   .notes .block .head { font-size: 9px; text-transform: uppercase; letter-spacing: 0.16em; color: var(--ink-3); margin-bottom: 3px; }
   .notes .block .body { font-size: 10px; }
   .notes .small { font-size: 9.5px; color: var(--ink-2); }
-  .notes .block .body p + p { margin-top: 2px; }
+  .notes .pay { display: grid; grid-template-columns: 1fr auto; font-size: 10px; padding: 1px 0; }
+  .notes .pay .k { color: var(--ink-3); }
 
   .totals .line { display: flex; justify-content: space-between; padding: 4px 0; font-size: 10.5px; }
   .totals .line .k { color: var(--ink-2); }
@@ -88,14 +84,21 @@
 
 <div class="hero">
   <div class="co-name">{{ doc.emisor.razonSocial }}</div>
-  <div class="co-sub">{% if cp is not null and cp.direccion is not null %}{{ cp.direccion.direccion }} · {% endif %}RUC {{ doc.emisor.ruc }}{% if cp is not null and cp.contacto is not null %} · {{ cp.contacto.email }}{% endif %}</div>
+  <div class="co-sub">{% if params.establishmentName is not empty %}{{ params.establishmentName }} · {% endif %}{% if cp is not null and cp.direccion is not null %}{{ cp.direccion.direccion }}{% if cp.direccion.distrito is not empty %} · {{ cp.direccion.departamento }} — {{ cp.direccion.provincia }} — {{ cp.direccion.distrito }}{% endif %}{% if cp.direccion.ubigeo is not empty %} · Ubigeo {{ cp.direccion.ubigeo }}{% endif %} · {% endif %}RUC {{ doc.emisor.ruc }}</div>
+  <div class="co-sub">{% if cp is not null and cp.contacto is not null %}{{ cp.contacto.email }} · {{ cp.contacto.telefono }}{% endif %}</div>
   <div class="doc-kind">{{ name }}</div>
   <div class="doc-num">{{ doc.serie }} · {{ doc.numero|str_pad(8, '0', 'left') }}</div>
 </div>
 
-<div class="ref">
-  <div class="text"><span class="label">Incrementa el comprobante</span> — aplica a <b>{{ doc.comprobanteAfectadoTipo|catalog('01') }} {{ doc.comprobanteAfectadoSerieNumero }}</b>, tipo de nota <b>{{ doc.tipoNota }} · {{ doc.tipoNota|catalog('10') }}</b>.</div>
-  <div class="amount">+ {{ sym }} {{ doc.totalImporte.importeConImpuestos|n_format }}</div>
+<div class="meta-grid">
+  <div><div class="k">Emitido</div><div class="v">{{ doc.fechaEmision|date('dd/MM/yyyy') }} · {{ doc.fechaEmision|date('HH:mm') }}</div></div>
+  <div><div class="k">Moneda</div><div class="v">{{ mon }}</div></div>
+  <div><div class="k">Pago</div><div class="v">{% if doc.formaDePago is not null %}{{ doc.formaDePago.tipo }}{% endif %}</div></div>
+  {% if doc.tipoCambio is not null %}
+  <div><div class="k">T/C</div><div class="v mono">{{ doc.tipoCambio.venta }}</div></div>
+  {% else %}
+  <div><div class="k">Operación</div><div class="v">{% if doc.tipoOperacion is not empty %}{{ doc.tipoOperacion|catalog('51') }}{% endif %}</div></div>
+  {% endif %}
 </div>
 
 <div class="parties">
@@ -107,22 +110,10 @@
     <div class="row"><span class="k">Dirección</span><span>{{ cl.direccion.direccion }}</span></div>
     {% endif %}
   </div>
-  <div class="party">
-    <div class="label">Documento referente</div>
-    <div class="name serif">{{ doc.comprobanteAfectadoTipo|catalog('01') }} {{ doc.comprobanteAfectadoSerieNumero }}</div>
-    <div class="row"><span class="k">Emitida</span><span>{{ doc.fechaEmision|date('dd/MM/yyyy') }}</span></div>
-    <div class="row"><span class="k">Moneda</span><span>{{ mon }}{% if doc.tipoCambio is not null %} · T/C {{ doc.tipoCambio.venta }}{% endif %}</span></div>
-  </div>
-</div>
-
-<div class="reason">
-  <div class="head">Motivo de la nota · Código SUNAT {{ doc.tipoNota }}</div>
-  <div class="v">{{ doc.tipoNota|catalog('10') }}</div>
-  {% if doc.sustentoDescripcion is not empty %}<div class="desc">{{ doc.sustentoDescripcion }}</div>{% endif %}
 </div>
 
 <div class="section">
-  <div class="section-title">Detalle de la nota</div>
+  <div class="section-title">Detalle de la compra</div>
   <table class="items">
     <thead>
       <tr><th class="c-idx">#</th><th class="c-code">Código</th><th>Descripción</th><th class="c-unit">Und</th><th class="c-qty">Cant.</th><th class="c-price">P. Unit.</th><th class="c-amt">Importe</th></tr>
@@ -145,9 +136,11 @@
 
 <div class="bottom">
   <div class="notes">
-    {% if doc.sustentoDescripcion is not empty %}
-    <div class="block"><div class="head">Sustento</div><div class="body">
-      <p>{{ doc.sustentoDescripcion }}</p>
+    {% if doc.formaDePago is not null and doc.formaDePago.cuotas is not empty %}
+    <div class="block"><div class="head">Cuotas</div><div class="body">
+      {% for cuota in doc.formaDePago.cuotas %}
+      <div class="pay"><span class="k">Cuota {{ loop.index + 1 }} · {{ cuota.fechaPago|date('dd/MM/yyyy') }}</span><span class="mono">{{ sym }} {{ cuota.monto|n_format }}</span></div>
+      {% endfor %}
     </div></div>
     {% endif %}
     {% if doc.observaciones is not empty %}
@@ -155,9 +148,11 @@
       {% for obs in doc.observaciones|split('\n') %}<p class="small">· {{ obs }}</p>{% endfor %}
     </div></div>
     {% endif %}
+    {% if doc.leyendas is not empty and (doc.leyendas|length > 1 or doc.leyendas['1000'] is null) %}
     <div class="block"><div class="head">Leyendas SUNAT</div><div class="body">
       {% for entry in doc.leyendas %}{% if entry.key != '1000' %}<p class="small">· {{ entry.value }}</p>{% endif %}{% endfor %}
     </div></div>
+    {% endif %}
   </div>
 
   <div class="totals">
@@ -170,11 +165,17 @@
     {% if doc.totalImpuestos is not null and doc.totalImpuestos.inafectoBaseImponible is not null %}
     <div class="line"><span class="k">Op. inafectas</span><span class="v">{{ sym }} {{ doc.totalImpuestos.inafectoBaseImponible|n_format }}</span></div>
     {% endif %}
+    {% if doc.totalImpuestos is not null and doc.totalImpuestos.gratuitoBaseImponible is not null %}
+    <div class="line"><span class="k">Op. gratuitas</span><span class="v">{{ sym }} {{ doc.totalImpuestos.gratuitoBaseImponible|n_format }}</span></div>
+    {% endif %}
     <div class="rule"></div>
     {% if doc.totalImpuestos is not null and doc.totalImpuestos.gravadoImporte is not null %}
     <div class="line"><span class="k">IGV (18%)</span><span class="v">{{ sym }} {{ doc.totalImpuestos.gravadoImporte|n_format }}</span></div>
     {% endif %}
-    <div class="grand"><span class="k">Total nota</span><span class="v">{{ sym }} {{ doc.totalImporte.importeConImpuestos|n_format }}</span></div>
+    {% if doc.totalImpuestos is not null and doc.totalImpuestos.icbImporte is not null %}
+    <div class="line"><span class="k">ICBPER</span><span class="v">{{ sym }} {{ doc.totalImpuestos.icbImporte|n_format }}</span></div>
+    {% endif %}
+    <div class="grand"><span class="k">Total</span><span class="v">{{ sym }} {{ doc.totalImporte.importeConImpuestos|n_format }}</span></div>
     <div class="in-words">{% if doc.leyendas['1000'] %}Son: {{ doc.leyendas['1000'] }}{% endif %}</div>
   </div>
 </div>
@@ -184,15 +185,15 @@
     {% if qrBase64 is not empty %}<img src="data:image/png;base64,{{ qrBase64 }}" alt="QR Code" />{% endif %}
   </div>
   <div class="meta">
-    <p><strong>Representación impresa</strong> de la {{ name }}.</p>
+    <p><strong>Representación impresa</strong> de la {{ name }} Electrónica.</p>
     <p>Verifique este documento en <strong>{{ params.consultaUrl|default('sunat.gob.pe') }}</strong> con el RUC del emisor y el número del comprobante.</p>
     <p style="margin-top:6px;">Firmante: {% if cp is not null %}{{ cp.ruc }} · {{ cp.razonSocial }}{% endif %}</p>
     <p class="hash">Hash: {{ hashDocumento }}</p>
     {% if params.footer is not null %}<p id="custom-footer-box" style="margin-top:10px; font-style:italic;">{{ params.footer }}</p>{% endif %}
   </div>
   <div class="stamp">
-    <span class="badge">Nota aceptada</span>
-    <div class="line">Documento electrónico que incrementa el importe del comprobante referenciado.</div>
+    <span class="badge">Documento válido</span>
+    <div class="line">Documento electrónico emitido conforme al RCP SUNAT.</div>
   </div>
 </div>
 

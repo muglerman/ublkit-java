@@ -110,7 +110,7 @@
   <div class="doc-id">
     <div class="ruc">RUC <strong>{% if cp is not null %}{{ cp.ruc }}{% endif %}</strong></div>
     <div class="kind">{% if doc.tipoComprobante is not empty %}{{ name }}{% else %}GUÍA DE REMISIÓN ELECTRÓNICA{% endif %}</div>
-    <div class="num">{{ doc.serie }} — {{ doc.numero }}</div>
+    <div class="num">{{ doc.serie }} — {{ doc.numero|str_pad(8, '0', 'left') }}</div>
     <div class="issued">Emitido {{ doc.fechaEmision|date('d/m/Y') }}{% if doc.horaEmision is not null %} · {{ doc.horaEmision }}{% endif %}</div>
   </div>
 </div>
@@ -129,7 +129,9 @@
     <div class="label">Envío</div>
     {% if doc.envio is not null %}
     {% if doc.envio.partida is not null %}<div class="row"><span>Partida</span><span>{{ doc.envio.partida.direccion }}</span></div>{% endif %}
-    {% if doc.envio.transportista is not null %}<div class="row"><span>Transporte</span><span>{{ doc.envio.transportista.nombre }}</span></div>{% endif %}
+    {% if doc.envio.transportista is not null %}<div class="row"><span>Transporte</span><span>{{ doc.envio.transportista.nombre }}{% if doc.envio.transportista.numeroDocumentoIdentidad is not empty %} · {{ doc.envio.transportista.numeroDocumentoIdentidad }}{% endif %}</span></div>{% endif %}
+    {% if doc.envio.transportista is not null and doc.envio.transportista.numeroRegistroMTC is not empty %}<div class="row"><span>Registro MTC</span><span class="mono">{{ doc.envio.transportista.numeroRegistroMTC }}</span></div>{% endif %}
+    {% if doc.subcontratado is not null %}<div class="row"><span>Transp. subcontratado</span><span>{{ doc.subcontratado.nombre }}{% if doc.subcontratado.numeroDocumentoIdentidad is not empty %} · {{ doc.subcontratado.numeroDocumentoIdentidad }}{% endif %}</span></div>{% endif %}
     {% if doc.envio.vehiculo is not null %}<div class="row"><span>Vehículo</span><span class="mono">{{ doc.envio.vehiculo.placa }}</span></div>{% endif %}
     {% endif %}
   </div>

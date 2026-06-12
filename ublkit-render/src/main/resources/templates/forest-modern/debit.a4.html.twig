@@ -12,72 +12,59 @@
   {{ fontStyle | raw }}
   * { box-sizing: border-box; }
   html, body { margin: 0; }
-  :root {
-    --ink: #1a2720;
-    --ink-2: #48554e;
-    --ink-3: #7b8882;
-    --accent: #1d6b4f;
-    --accent-2: #d1e7dc;
-    --accent-soft: #f2f8f5;
-    --line: #d9e0dc;
-    --paper: #fdfdfb;
-  }
-  body {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 10.5px;
-    line-height: 1.5;
-    color: var(--ink);
-    background: var(--paper);
-    width: 794px;
-    min-height: 1123px;
-    padding: 40px 44px;
-  }
+  :root { --ink: #1a2720; --ink-2: #48554e; --ink-3: #7b8882; --accent: #1d6b4f; --accent-2: #d1e7dc; --accent-soft: #f2f8f5; --line: #d9e0dc; --paper: #fdfdfb; --warn: #a8412f; --warn-soft: #f8ede9; }
+  body { font-family: 'Space Grotesk', sans-serif; font-size: 10.5px; line-height: 1.5; color: var(--ink); background: var(--paper); width: 794px; min-height: 1123px; padding: 40px 44px; }
   .mono { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
-  p, h1, h2, h3, h4 { margin: 0; }
+  p, h1, h2, h3 { margin: 0; }
 
-  .hero { display: grid; grid-template-columns: 1fr auto; align-items: start; gap: 32px; margin-bottom: 20px; }
+  .hero { display: grid; grid-template-columns: 1fr auto; align-items: start; gap: 32px; margin-bottom: 18px; }
   .brand .mark { display: flex; align-items: center; gap: 14px; }
   .brand .logo { width: 50px; height: 50px; background: var(--accent); color: #fff; border-radius: 14px; display: flex; align-items: center; justify-content: center; }
   .brand .logo svg { width: 32px; height: 32px; }
   .brand .logo img { width: 100%; height: 100%; object-fit: contain; border-radius: 14px; }
-  .brand .co-name { font-size: 16px; font-weight: 700; letter-spacing: -0.01em; }
+  .brand .co-name { font-size: 16px; font-weight: 700; }
   .brand .co-tagline { font-size: 10.5px; color: var(--ink-3); margin-top: 1px; }
-  .brand .meta { margin-top: 14px; font-size: 10.5px; color: var(--ink-2); }
-  .brand .meta p { padding: 1px 0; }
+  .brand .meta { margin-top: 12px; font-size: 10.5px; color: var(--ink-2); }
 
   .doc-id { text-align: right; border-left: 3px solid var(--accent); padding-left: 18px; min-width: 240px; }
   .doc-id .tag { font-size: 9.5px; color: var(--accent); font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; }
-  .doc-id .kind { font-size: 22px; font-weight: 700; letter-spacing: -0.01em; line-height: 1.1; margin-top: 4px; }
+  .doc-id .kind { font-size: 19px; font-weight: 700; line-height: 1.1; margin-top: 4px; }
   .doc-id .num { font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 500; color: var(--accent); margin-top: 2px; }
   .doc-id .ruc { margin-top: 10px; font-size: 10px; color: var(--ink-2); }
   .doc-id .ruc b { color: var(--ink); font-family: 'JetBrains Mono', monospace; }
   .doc-id .issued { font-size: 10px; color: var(--ink-2); }
 
-  .meta-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 18px; }
-  .meta-row .chip { background: var(--accent-soft); border-radius: 10px; padding: 10px 12px; }
-  .meta-row .chip .k { font-size: 9px; color: var(--accent); letter-spacing: 0.14em; text-transform: uppercase; font-weight: 600; display: block; margin-bottom: 4px; }
-  .meta-row .chip .v { font-size: 11px; font-weight: 500; }
+  .ref-band { background: var(--warn-soft); border: 1px solid #ecd6cf; border-radius: 12px; padding: 14px 18px; display: grid; grid-template-columns: auto 1fr auto; gap: 18px; align-items: center; margin-bottom: 18px; }
+  .ref-band .tag { background: var(--warn); color: #fff; padding: 4px 10px; border-radius: 999px; font-size: 9.5px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; }
+  .ref-band .text { font-size: 11px; }
+  .ref-band .text b { font-family: 'JetBrains Mono', monospace; }
+  .ref-band .amount { font-family: 'JetBrains Mono', monospace; font-size: 17px; font-weight: 700; color: var(--warn); }
 
-  .parties { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
-  .party { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; }
-  .party .label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--ink-3); margin-bottom: 6px; }
+  .parties { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 18px; }
+  .party { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+  .party .label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--ink-3); margin-bottom: 4px; }
   .party .name { font-size: 13px; font-weight: 700; margin-bottom: 6px; }
-  .party .row { display: grid; grid-template-columns: 78px 1fr; font-size: 10px; padding: 2px 0; }
+  .party .row { display: grid; grid-template-columns: 84px 1fr; font-size: 10px; padding: 1px 0; }
   .party .row .k { color: var(--ink-3); }
+
+  .reason { background: var(--accent-soft); border-radius: 12px; padding: 14px 18px; margin-bottom: 18px; }
+  .reason .head { font-size: 9px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--accent); font-weight: 600; margin-bottom: 4px; }
+  .reason .v { font-size: 13px; font-weight: 700; }
+  .reason .desc { font-size: 10px; color: var(--ink-2); margin-top: 4px; }
 
   .section-title { font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--ink-3); font-weight: 600; margin: 0 0 10px; }
 
   .items-wrap { background: #fff; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
   .items { width: 100%; border-collapse: collapse; }
-  .items thead th { font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-2); font-weight: 600; text-align: left; padding: 12px 12px; background: var(--accent-soft); border-bottom: 1px solid var(--line); }
+  .items thead th { font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-2); font-weight: 600; text-align: left; padding: 12px; background: var(--accent-soft); border-bottom: 1px solid var(--line); }
   .items tbody td { padding: 11px 12px; border-top: 1px solid var(--line); vertical-align: top; font-size: 10.5px; }
   .items .c-idx { width: 26px; color: var(--ink-3); text-align: center; }
   .items .c-code { width: 90px; }
-  .items .c-qty, .items .c-price, .items .c-tax { text-align: right; }
+  .items .c-qty, .items .c-price, .items .c-amt { text-align: right; }
   .items .c-qty { width: 60px; }
   .items .c-unit { width: 48px; text-align: center; color: var(--ink-3); }
   .items .c-price { width: 84px; }
-  .items .c-tax { width: 86px; }
+  .items .c-amt { width: 86px; }
   .items .desc .main { font-weight: 500; }
   .items .desc .sub { font-size: 9.5px; color: var(--ink-3); margin-top: 2px; }
 
@@ -94,7 +81,7 @@
   .totals .line .k { color: var(--ink-2); }
   .totals .line .v { font-family: 'JetBrains Mono', monospace; white-space: nowrap; }
   .totals .rule { border-top: 1px dashed var(--line); margin: 6px 0; }
-  .totals .grand-wrap { background: var(--accent); color: #fff; padding: 14px 18px; }
+  .totals .grand-wrap { background: var(--warn); color: #fff; padding: 14px 18px; }
   .totals .grand { display: flex; justify-content: space-between; align-items: baseline; }
   .totals .grand .k { font-size: 10px; text-transform: uppercase; letter-spacing: 0.14em; font-weight: 600; opacity: 0.85; }
   .totals .grand .v { font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 700; white-space: nowrap; }
@@ -107,8 +94,8 @@
   .foot .meta strong { color: var(--ink); }
   .foot .meta .hash { font-family: 'JetBrains Mono', monospace; word-break: break-all; font-size: 8.5px; margin-top: 4px; color: var(--ink-3); }
   .foot .stamp { text-align: right; min-width: 180px; }
-  .foot .stamp .badge { display: inline-flex; align-items: center; gap: 5px; background: var(--accent-2); color: var(--accent); padding: 6px 12px; border-radius: 999px; font-size: 9.5px; font-weight: 600; letter-spacing: 0.04em; }
-  .foot .stamp .badge::before { content: ""; width: 6px; height: 6px; background: var(--accent); border-radius: 50%; }
+  .foot .stamp .badge { display: inline-flex; align-items: center; gap: 5px; background: var(--warn-soft); color: var(--warn); padding: 6px 12px; border-radius: 999px; font-size: 9.5px; font-weight: 600; }
+  .foot .stamp .badge::before { content: ""; width: 6px; height: 6px; background: var(--warn); border-radius: 50%; }
   .foot .stamp .line { font-size: 9.5px; color: var(--ink-2); margin-top: 8px; max-width: 180px; }
 </style>
 </head>
@@ -117,36 +104,29 @@
 <div class="hero">
   <div class="brand">
     <div class="mark">
-      <div class="logo">
-        {% if params.logo is not empty %}<img src="{{ params.logo }}" alt="logo"/>{% else %}<svg viewBox="0 0 40 40" fill="none" stroke="#fff" stroke-width="2.4">
-          <rect x="6" y="6" width="28" height="28" rx="3"/>
-          <path d="M12 20h16M12 14h10M12 26h14"/>
-        </svg>{% endif %}
-      </div>
+      <div class="logo">{% if params.logo is not empty %}<img src="{{ params.logo }}" alt="logo"/>{% else %}<svg viewBox="0 0 40 40" fill="none" stroke="#fff" stroke-width="2.4"><rect x="6" y="6" width="28" height="28" rx="3"/><path d="M12 20h16M12 14h10M12 26h14"/></svg>{% endif %}</div>
       <div>
         <div class="co-name">{{ doc.emisor.razonSocial }}</div>
         <div class="co-tagline">{% if cp is not null and cp.nombreComercial is not null %}{{ cp.nombreComercial }}{% endif %}</div>
       </div>
     </div>
     <div class="meta">
-      <p>{{ doc.emisor.direccion.direccion }}</p>
-      <p>{% if cp is not null and cp.contacto is not null %}{{ cp.contacto.email }} · {{ cp.contacto.telefono }}{% endif %}</p>
+      <p>{% if cp is not null and cp.direccion is not null %}{{ cp.direccion.direccion }}{% endif %}{% if cp is not null and cp.contacto is not null %} · {{ cp.contacto.email }} · {{ cp.contacto.telefono }}{% endif %}</p>
     </div>
   </div>
   <div class="doc-id">
-    <div class="tag">Comprobante</div>
+    <div class="tag">Ajuste de comprobante</div>
     <div class="kind">{{ name }}</div>
-    <div class="num">{{ doc.serie }}-{{ doc.numero }}</div>
+    <div class="num">{{ doc.serie }}-{{ doc.numero|str_pad(8, '0', 'left') }}</div>
     <div class="ruc">RUC <b>{{ doc.emisor.ruc }}</b></div>
-    <div class="issued">Emitido {{ doc.fechaEmision|date('d/m/Y') }} · {{ doc.fechaEmision|date('H:i:s') }}</div>
+    <div class="issued">Emitido {{ doc.fechaEmision|date('dd/MM/yyyy') }} · {{ doc.fechaEmision|date('HH:mm') }}</div>
   </div>
 </div>
 
-<div class="meta-row">
-  <div class="chip"><span class="k">Moneda</span><span class="v">{{ mon }}</span></div>
-  <div class="chip"><span class="k">Doc. afectado</span><span class="v mono">{{ doc.comprobanteAfectadoSerieNumero }}</span></div>
-  <div class="chip"><span class="k">Tipo doc.</span><span class="v">{{ doc.comprobanteAfectadoTipo|catalog('01') }}</span></div>
-  <div class="chip"><span class="k">Motivo</span><span class="v">{{ doc.tipoNota|catalog('10') }}</span></div>
+<div class="ref-band">
+  <span class="tag">Incrementa</span>
+  <div class="text">Aplica a <b>{{ doc.comprobanteAfectadoTipo|catalog('01') }} {{ doc.comprobanteAfectadoSerieNumero }}</b> — tipo de nota <b>{{ doc.tipoNota }} · {{ doc.tipoNota|catalog('10') }}</b>.</div>
+  <div class="amount">+ {{ sym }} {{ doc.totalImporte.importeConImpuestos|n_format }}</div>
 </div>
 
 <div class="parties">
@@ -154,42 +134,40 @@
     <div class="label">Cliente</div>
     <div class="name">{{ doc.receptor.nombre }}</div>
     <div class="row"><span class="k">{{ doc.receptor.tipoDocIdentidad|catalogAttr('06','abreviatura') }}</span><span class="mono">{{ doc.receptor.numDocIdentidad }}</span></div>
-    <div class="row"><span class="k">Dirección</span><span>{{ doc.receptor.direccion.direccion }}</span></div>
-    <div class="row"><span class="k">Ubicación</span><span>{% if cl is not null and cl.direccion is not null %}{{ cl.direccion.departamento }} — {{ cl.direccion.provincia }} — {{ cl.direccion.distrito }}{% endif %}</span></div>
+    {% if cl is not null and cl.direccion is not null %}
+    <div class="row"><span class="k">Dirección</span><span>{{ cl.direccion.direccion }}</span></div>
+    {% endif %}
   </div>
   <div class="party">
-    <div class="label">Motivo de emisión</div>
-    <div class="name">{{ doc.tipoNota|catalog('10') }}</div>
-    <div class="row"><span class="k">Afecta</span><span class="mono">{{ doc.comprobanteAfectadoTipo|catalog('01') }} {{ doc.comprobanteAfectadoSerieNumero }}</span></div>
-    <div class="row"><span class="k">Sustento</span><span>{{ doc.sustentoDescripcion }}</span></div>
+    <div class="label">Documento referente</div>
+    <div class="name">{{ doc.comprobanteAfectadoTipo|catalog('01') }} {{ doc.comprobanteAfectadoSerieNumero }}</div>
+    <div class="row"><span class="k">Emitida</span><span>{{ doc.fechaEmision|date('dd/MM/yyyy') }}</span></div>
+    <div class="row"><span class="k">Moneda</span><span>{{ mon }}{% if doc.tipoCambio is not null %} · T/C {{ doc.tipoCambio.venta }}{% endif %}</span></div>
   </div>
 </div>
 
-<p class="section-title">Detalle del comprobante</p>
+<div class="reason">
+  <div class="head">Motivo de la nota · Código SUNAT {{ doc.tipoNota }}</div>
+  <div class="v">{{ doc.tipoNota|catalog('10') }}</div>
+  {% if doc.sustentoDescripcion is not empty %}<div class="desc">{{ doc.sustentoDescripcion }}</div>{% endif %}
+</div>
+
+<p class="section-title">Detalle de la nota</p>
 <div class="items-wrap">
 <table class="items">
   <thead>
-    <tr>
-      <th class="c-idx">#</th>
-      <th class="c-code">Código</th>
-      <th>Descripción</th>
-      <th class="c-unit">Und</th>
-      <th class="c-qty">Cant.</th>
-      <th class="c-price">P. Unit.</th>
-      <th class="c-tax">Importe</th>
-    </tr>
+    <tr><th class="c-idx">#</th><th class="c-code">Código</th><th>Descripción</th><th class="c-unit">Und</th><th class="c-qty">Cant.</th><th class="c-price">P. Unit.</th><th class="c-amt">Importe</th></tr>
   </thead>
   <tbody>
-
     {% for det in doc.detalles %}
     <tr>
       <td class="c-idx mono">{{ (loop.index + 1)|str_pad(2, '0', 'left') }}</td>
       <td class="c-code mono">{{ det.codigoProducto }}</td>
-      <td class="desc"><div class="main">{{ det.descripcion }}</div><div class="sub">{% if det.codProductoSUNAT %}SUNAT {{ det.codigoProductoSunat }}{% endif %}</div><div class="sub">{% if det.igvTipo %}{{ det.igvTipo|catalog('07') }}{% endif %}</div></td>
+      <td class="desc"><div class="main">{{ det.descripcion }}</div><div class="sub">{% if det.igvTipo %}{{ det.igvTipo|catalog('07') }}{% endif %}</div></td>
       <td class="c-unit">{{ det.unidadMedida }}</td>
       <td class="c-qty mono">{{ det.cantidad|n_format }}</td>
       <td class="c-price mono">{{ det.precio|n_format }}</td>
-      <td class="c-tax mono">{{ (det.precio * det.cantidad)|n_format }}</td>
+      <td class="c-amt mono">{{ (det.precio * det.cantidad)|n_format }}</td>
     </tr>
     {% endfor %}
   </tbody>
@@ -198,26 +176,31 @@
 
 <div class="bottom">
   <div class="notes">
-    {% if doc.observaciones %}
-    <div class="block"><div class="head">Observaciones</div><div class="body">
-      <p>{{ doc.observaciones }}</p>
-    </div></div>
-    {% endif %}
+    {% if doc.sustentoDescripcion is not empty %}
     <div class="block"><div class="head">Sustento</div><div class="body">
       <p>{{ doc.sustentoDescripcion }}</p>
     </div></div>
+    {% endif %}
+    {% if doc.observaciones is not empty %}
+    <div class="block"><div class="head">Observaciones</div><div class="body">
+      {% for obs in doc.observaciones|split('\n') %}<p class="small">· {{ obs }}</p>{% endfor %}
+    </div></div>
+    {% endif %}
     <div class="block"><div class="head">Leyendas SUNAT</div><div class="body">
-      {% if doc.leyendas is not empty %}{% for entry in doc.leyendas %}<p class="small">· {{ entry.value }}</p>{% endfor %}{% endif %}
+      {% for entry in doc.leyendas %}{% if entry.key != '1000' %}<p class="small">· {{ entry.value }}</p>{% endif %}{% endfor %}
     </div></div>
   </div>
 
   <div class="totals">
     <div class="inner">
-      {% if doc.totalImporte is not null and doc.totalImporte.importeSinImpuestos is not null %}
-      <div class="line"><span class="k">Subtotal</span><span class="v">{{ sym }} {{ doc.totalImporte.importeSinImpuestos|n_format }}</span></div>
-      {% endif %}
       {% if doc.totalImpuestos is not null and doc.totalImpuestos.gravadoBaseImponible is not null %}
       <div class="line"><span class="k">Op. gravadas</span><span class="v">{{ sym }} {{ doc.totalImpuestos.gravadoBaseImponible|n_format }}</span></div>
+      {% endif %}
+      {% if doc.totalImpuestos is not null and doc.totalImpuestos.exoneradoBaseImponible is not null %}
+      <div class="line"><span class="k">Op. exoneradas</span><span class="v">{{ sym }} {{ doc.totalImpuestos.exoneradoBaseImponible|n_format }}</span></div>
+      {% endif %}
+      {% if doc.totalImpuestos is not null and doc.totalImpuestos.inafectoBaseImponible is not null %}
+      <div class="line"><span class="k">Op. inafectas</span><span class="v">{{ sym }} {{ doc.totalImpuestos.inafectoBaseImponible|n_format }}</span></div>
       {% endif %}
       <div class="rule"></div>
       {% if doc.totalImpuestos is not null and doc.totalImpuestos.gravadoImporte is not null %}
@@ -237,14 +220,14 @@
   </div>
   <div class="meta">
     <p><strong>Representación impresa</strong> de la {{ name }}.</p>
-    <p>Consulte la validez de este documento en <strong>{{ params.consultaUrl|default('sunat.gob.pe') }}</strong> con el RUC del emisor y el número del comprobante.</p>
+    <p>Consulte la validez en <strong>{{ params.consultaUrl|default('sunat.gob.pe') }}</strong> con el RUC del emisor y el número del documento.</p>
     <p style="margin-top:6px;">Firmante: {% if cp is not null %}{{ cp.ruc }} · {{ cp.razonSocial }}{% endif %}</p>
-    <p class="hash">Hash SHA1: {{ hashDocumento }}</p>
+    <p class="hash">Hash: {{ hashDocumento }}</p>
     {% if params.footer is not null %}<p id="custom-footer-box" style="margin-top:10px; font-style:italic;">{{ params.footer }}</p>{% endif %}
   </div>
   <div class="stamp">
-    <span class="badge">CPE autorizado</span>
-    <div class="line">Documento electrónico que modifica el comprobante referenciado.</div>
+    <span class="badge">Nota aceptada</span>
+    <div class="line">Documento electrónico que incrementa el importe del comprobante referenciado.</div>
   </div>
 </div>
 

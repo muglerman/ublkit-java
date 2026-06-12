@@ -70,7 +70,8 @@
   <hr class="sep" />
   <div class="block">
     <div class="t">TRANSPORTE</div>
-    {% if doc.envio.transportista is not null %}<div>{{ doc.envio.transportista.nombre }}</div>{% endif %}
+    {% if doc.envio.transportista is not null %}<div>{{ doc.envio.transportista.nombre }}{% if doc.envio.transportista.numeroRegistroMTC %} · MTC {{ doc.envio.transportista.numeroRegistroMTC }}{% endif %}</div>{% endif %}
+    {% if doc.subcontratado is not null %}<div class="muted">Subcontratado: {{ doc.subcontratado.nombre }}</div>{% endif %}
     {% if doc.envio.vehiculo is not null and doc.envio.vehiculo.placa %}<div class="muted">Placa: {{ doc.envio.vehiculo.placa }}</div>{% endif %}
     {% for ch in doc.envio.choferes %}
     <div class="muted">Conductor: {{ ch.nombres }} {{ ch.apellidos }}</div>

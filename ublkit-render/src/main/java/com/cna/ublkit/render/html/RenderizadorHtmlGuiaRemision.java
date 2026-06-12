@@ -38,9 +38,13 @@ public class RenderizadorHtmlGuiaRemision implements RenderizadorDocumento<Borra
     }
 
     private String obtenerRutaPlantilla(ContextoRender<BorradorGuiaRemision> contexto) {
+        // La GRE transportista (tipo 31) tiene plantilla propia solo en A4; A5 y tickets
+        // siguen resolviendo "despatch" (sus plantillas adaptan el contenido vía datos).
+        boolean esTransportista = formato == FormatoImpresion.A4
+                && contexto.documento().isGRETransportista();
         return PlantillaRutas.ruta(
-            "despatch", 
-            formato, 
+            esTransportista ? "despatch-carrier" : "despatch",
+            formato,
             PlantillaRutas.resolver(contexto.estiloPlantilla(), EstiloPlantilla.DEFAULT),
             contexto.extensionPlantilla()
         );

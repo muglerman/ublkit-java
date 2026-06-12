@@ -123,11 +123,17 @@
 
   <div class="party">
     <div class="label">Traslado / Transporte</div>
-    <div class="row"><span class="k">Partida</span><span>{{ doc.envio.puntoPartida.direccion }}</span></div>
-    <div class="row"><span class="k">Llegada</span><span>{{ doc.envio.puntoLlegada.direccion }}</span></div>
+    {% if doc.envio.partida is not null %}<div class="row"><span class="k">Partida</span><span>{{ doc.envio.partida.direccion }}</span></div>{% endif %}
+    {% if doc.envio.destino is not null %}<div class="row"><span class="k">Llegada</span><span>{{ doc.envio.destino.direccion }}</span></div>{% endif %}
     {% if doc.envio.transportista is not null %}
     <div class="row"><span class="k">Transporte</span><span>{{ doc.envio.transportista.nombre }}</span></div>
     <div class="row"><span class="k">RUC</span><span class="mono">{{ doc.envio.transportista.numeroDocumentoIdentidad }}</span></div>
+    {% if doc.envio.transportista.numeroRegistroMTC is not empty %}
+    <div class="row"><span class="k">Registro MTC</span><span class="mono">{{ doc.envio.transportista.numeroRegistroMTC }}</span></div>
+    {% endif %}
+    {% endif %}
+    {% if doc.subcontratado is not null %}
+    <div class="row"><span class="k">Transp. subcontratado</span><span>{{ doc.subcontratado.nombre }}{% if doc.subcontratado.numeroDocumentoIdentidad is not empty %} · {{ doc.subcontratado.numeroDocumentoIdentidad }}{% endif %}</span></div>
     {% endif %}
   </div>
 </div>

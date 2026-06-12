@@ -37,6 +37,7 @@ import com.cna.ublkit.ubl.modelo.guia.Conductor;
 import com.cna.ublkit.ubl.modelo.guia.DatosEnvio;
 import com.cna.ublkit.ubl.modelo.guia.DestinatarioGuia;
 import com.cna.ublkit.ubl.modelo.guia.LineaGuia;
+import com.cna.ublkit.ubl.modelo.guia.TerceroGuia;
 import com.cna.ublkit.ubl.modelo.guia.TransportistaGuia;
 import com.cna.ublkit.ubl.modelo.guia.Vehiculo;
 import com.cna.ublkit.ubl.modelo.linea.LineaDetalle;
@@ -53,11 +54,11 @@ import com.cna.ublkit.ubl.modelo.total.TotalImpuestos;
  * vivas (cada estilo × tipo de documento × formato) y las guarda en {@code target/diagnostico/}
  * para inspección visual.
  *
- * <p>Cubre A4/A5 de invoice/note/debit/despatch + summary/voided (A4) para los 5 estilos
- * → 50 plantillas con estilo; y los tickets térmicos genéricos (invoice/note/debit/despatch en
- * ticket80mm/ticket58mm, sin estilo) → 8 plantillas en {@code templates/generico/}. Total 58
- * plantillas {@code .html.twig}. Sirve además como red de seguridad de que toda plantilla
- * compila/renderiza con las fuentes embebidas (sin CDN).</p>
+ * <p>Cubre A4/A5 de invoice/note/debit/despatch + summary/voided (A4) + boleta/despatch-carrier
+ * (solo A4) para los 5 estilos → 60 plantillas con estilo; y los tickets térmicos genéricos
+ * (invoice/note/debit/despatch en ticket80mm/ticket58mm, sin estilo) → 8 plantillas en
+ * {@code templates/generico/}. Total 68 plantillas {@code .html.twig}. Sirve además como red de
+ * seguridad de que toda plantilla compila/renderiza con las fuentes embebidas (sin CDN).</p>
  */
 @DisplayName("🧪 DIAGNÓSTICO INTEGRAL - HTML + PDF de todas las plantillas")
 class RenderizadorDiagnosticoCompletoTest {
@@ -76,7 +77,7 @@ class RenderizadorDiagnosticoCompletoTest {
     private int pdfGenerados = 0;
 
     @Test
-    @DisplayName("📦 Generar HTML + PDF de cada plantilla viva (50 con estilo + 8 tickets genéricos)")
+    @DisplayName("📦 Generar HTML + PDF de cada plantilla viva (60 con estilo + 8 tickets genéricos)")
     void generarTodasLasPlantillas() throws IOException {
         // Plantillas con estilo: A4/A5 por estilo + documentos solo-A4 (summary, voided)
         for (EstiloPlantilla estilo : EstiloPlantilla.values()) {
@@ -90,6 +91,12 @@ class RenderizadorDiagnosticoCompletoTest {
                 render("despatch", estilo, estilo.carpeta(), formato,
                         new RenderizadorHtmlGuiaRemision(formato), new RenderizadorPdfGuiaRemision(formato), crearGuia());
             }
+            // Boleta (tipo 03) y GRE transportista (tipo 31) tienen plantilla propia solo en A4;
+            // el routing del renderizador resuelve boleta.a4 / despatch-carrier.a4 por tipo.
+            render("boleta", estilo, estilo.carpeta(), FormatoImpresion.A4,
+                    new RenderizadorHtmlFactura(FormatoImpresion.A4), new RenderizadorPdfFactura(FormatoImpresion.A4), crearBoleta());
+            render("despatch-carrier", estilo, estilo.carpeta(), FormatoImpresion.A4,
+                    new RenderizadorHtmlGuiaRemision(FormatoImpresion.A4), new RenderizadorPdfGuiaRemision(FormatoImpresion.A4), crearGuia31());
             render("summary", estilo, estilo.carpeta(), FormatoImpresion.A4,
                     new RenderizadorHtmlResumenDiario(), new RenderizadorPdfResumenDiario(), crearResumen());
             render("voided", estilo, estilo.carpeta(), FormatoImpresion.A4,
@@ -115,9 +122,9 @@ class RenderizadorDiagnosticoCompletoTest {
         System.out.println("   Salida: " + BASE.toAbsolutePath());
         System.out.println("=".repeat(80) + "\n");
 
-        // 5 estilos × (2 formatos × 4 tipos + 2 tipos A4) = 50  +  8 tickets genéricos (2 × 4 tipos) = 58
-        assertEquals(58, htmlGenerados, "Deben generarse 58 HTML (todas las plantillas vivas)");
-        assertEquals(58, pdfGenerados, "Deben generarse 58 PDF (todas las plantillas vivas)");
+        // 5 estilos × (2 formatos × 4 tipos + 4 tipos A4) = 60  +  8 tickets genéricos (2 × 4 tipos) = 68
+        assertEquals(68, htmlGenerados, "Deben generarse 68 HTML (todas las plantillas vivas)");
+        assertEquals(68, pdfGenerados, "Deben generarse 68 PDF (todas las plantillas vivas)");
     }
 
     private <T> void render(String tipo, EstiloPlantilla estilo, String carpetaSalida, FormatoImpresion formato,
@@ -257,13 +264,23 @@ class RenderizadorDiagnosticoCompletoTest {
         return nota;
     }
 
+    private BorradorFactura crearBoleta() {
+        BorradorFactura boleta = crearFactura();
+        boleta.setSerie("B001");
+        boleta.setNumero(4912);
+        boleta.setTipoComprobante("03");
+        boleta.setReceptor(new ReceptorDocumento("1", "45128734", "María Elena Castillo Rodríguez",
+                new Direccion(null, null, null, null, null, null, "Calle Las Begonias 178", "PE"), null));
+        return boleta;
+    }
+
     private BorradorGuiaRemision crearGuia() {
         BorradorGuiaRemision guia = new BorradorGuiaRemision();
-        guia.setSerie("V001");
+        guia.setSerie("T001");
         guia.setNumero(4912);
         guia.setFechaEmision(LocalDate.of(2026, 3, 31));
         guia.setHoraEmision(LocalTime.of(7, 22));
-        guia.setTipoComprobante("31");
+        guia.setTipoComprobante("09");
 
         Direccion direccionRemitente = new Direccion("150101", "0000", null, "Lima", "Lima", "Lima",
                 "Calle Principal 100", "PE");
@@ -285,6 +302,19 @@ class RenderizadorDiagnosticoCompletoTest {
 
         guia.setDetalles(List.of(new LineaGuia("KGM", new BigDecimal("2"), "Producto A", "PROD-001", "85101000", null)));
         guia.setObservaciones("Entrega asegurada");
+        return guia;
+    }
+
+    private BorradorGuiaRemision crearGuia31() {
+        BorradorGuiaRemision guia = crearGuia();
+        guia.setSerie("V001");
+        guia.setNumero(128);
+        guia.setTipoComprobante("31");
+        // En GRE-31 el emisor es la empresa de transporte; el remitente real viaja como tercero.
+        guia.setRemitente(new EmisorDocumento("20600456789", "Transportes Mantaro",
+                "Transportes Mantaro E.I.R.L.", null, null));
+        guia.setTercero(new TerceroGuia("6", "20512345678", "Manufacturas Andina Textil S.A.C."));
+        guia.setSubcontratado(new TerceroGuia("6", "20222222222", "Subcontratista Andino S.A.C."));
         return guia;
     }
 

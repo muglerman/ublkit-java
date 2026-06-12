@@ -112,7 +112,7 @@
   <div class="doc-id">
     <div class="tag">Traslado de bienes</div>
     <div class="kind">{% if doc.tipoComprobante is not empty %}{{ name }}{% else %}Guía de Remisión{% endif %}</div>
-    <div class="num">{{ doc.serie }}-{{ doc.numero }}</div>
+    <div class="num">{{ doc.serie }}-{{ doc.numero|str_pad(8, '0', 'left') }}</div>
     <div class="ruc">RUC <b>{% if cp is not null %}{{ cp.ruc }}{% endif %}</b></div>
     <div class="issued">Emitido {{ doc.fechaEmision|date('d/m/Y') }}</div>
   </div>
