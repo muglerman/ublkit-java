@@ -37,10 +37,10 @@
 
   .hero { display: grid; grid-template-columns: 1fr auto; align-items: start; gap: 32px; margin-bottom: 20px; }
   .brand .mark { display: flex; align-items: center; gap: 14px; }
-  .brand .logo { width: 50px; height: 50px; background: var(--accent); color: #fff; border-radius: 14px; display: flex; align-items: center; justify-content: center; }
+  .brand .logo { width: 56px; height: 56px; color: var(--accent); display: flex; align-items: center; justify-content: center; overflow: hidden; }
   .brand .logo svg { width: 32px; height: 32px; }
-  .brand .logo img { width: 100%; height: 100%; object-fit: contain; border-radius: 14px; }
-  .brand .co-name { font-size: 16px; font-weight: 700; letter-spacing: -0.01em; }
+  .brand .logo img { max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; }
+  .brand .co-name { font-size: 15px; font-weight: 700; letter-spacing: -0.01em; }
   .brand .co-tagline { font-size: 9px; color: var(--ink-3); margin-top: 1px; }
   .brand .meta { margin-top: 14px; font-size: 9px; color: var(--ink-2); }
   .brand .meta p { padding: 1px 0; }
@@ -118,7 +118,7 @@
   <div class="brand">
     <div class="mark">
       <div class="logo">
-        {% if params.logo is not empty %}<img src="{{ params.logo }}" alt="logo"/>{% else %}<svg viewBox="0 0 40 40" fill="none" stroke="#fff" stroke-width="2.4">
+        {% if params.logo is not empty %}<img src="{{ params.logo }}" alt="logo"/>{% else %}<svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.4">
           <rect x="6" y="6" width="28" height="28" rx="3"/>
           <path d="M12 20h16M12 14h10M12 26h14"/>
         </svg>{% endif %}
@@ -153,7 +153,7 @@
   <div class="party">
     <div class="label">Cliente</div>
     <div class="name">{{ doc.receptor.nombre }}</div>
-    <div class="row"><span class="k">{{ doc.receptor.tipoDocIdentidad|catalogAttr('06','abreviatura') }}</span><span class="mono">{{ doc.receptor.numDocIdentidad }}</span></div>
+    <div class="row"><span class="k">Documento</span><span class="mono">{{ doc.receptor.tipoDocIdentidad|catalogAttr('06','abreviatura') }} {{ doc.receptor.numDocIdentidad }}</span></div>
     <div class="row"><span class="k">Dirección</span><span>{{ doc.receptor.direccion.direccion }}</span></div>
     <div class="row"><span class="k">Ubicación</span><span>{% if cl is not null and cl.direccion is not null %}{{ cl.direccion.departamento }} — {{ cl.direccion.provincia }} — {{ cl.direccion.distrito }}{% endif %}</span></div>
   </div>
@@ -187,7 +187,7 @@
       <td class="c-code mono">{{ det.codigoProducto }}</td>
       <td class="desc"><div class="main">{{ det.descripcion }}</div><div class="sub">{% if det.codProductoSUNAT %}SUNAT {{ det.codigoProductoSunat }}{% endif %}</div><div class="sub">{% if det.igvTipo %}{{ det.igvTipo|catalog('07') }}{% endif %}</div></td>
       <td class="c-unit">{{ det.unidadMedida }}</td>
-      <td class="c-qty mono">{{ det.cantidad|n_format }}</td>
+      <td class="c-qty mono">{{ det.cantidad|q_format }}</td>
       <td class="c-price mono">{{ det.precio|n_format }}</td>
       <td class="c-tax mono">{{ (det.precio * det.cantidad)|n_format }}</td>
     </tr>

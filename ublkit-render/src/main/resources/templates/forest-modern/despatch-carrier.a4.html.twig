@@ -18,10 +18,10 @@
 
   .hero { display: grid; grid-template-columns: 1fr auto; align-items: start; gap: 32px; margin-bottom: 20px; }
   .brand .mark { display: flex; align-items: center; gap: 14px; }
-  .brand .logo { width: 50px; height: 50px; background: var(--accent); color: #fff; border-radius: 14px; display: flex; align-items: center; justify-content: center; }
+  .brand .logo { width: 56px; height: 56px; color: var(--accent); display: flex; align-items: center; justify-content: center; overflow: hidden; }
   .brand .logo svg { width: 30px; height: 30px; }
-  .brand .logo img { width: 100%; height: 100%; object-fit: contain; border-radius: 14px; }
-  .brand .co-name { font-size: 16px; font-weight: 700; }
+  .brand .logo img { max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; }
+  .brand .co-name { font-size: 15px; font-weight: 700; }
   .brand .co-tagline { font-size: 10.5px; color: var(--ink-3); margin-top: 1px; }
   .brand .meta { margin-top: 12px; font-size: 10.5px; color: var(--ink-2); }
 
@@ -94,7 +94,7 @@
 <div class="hero">
   <div class="brand">
     <div class="mark">
-      <div class="logo">{% if params.logo is not empty %}<img src="{{ params.logo }}" alt="logo"/>{% else %}<svg viewBox="0 0 40 40" fill="none" stroke="#fff" stroke-width="2.4"><circle cx="20" cy="20" r="14"/><path d="M9 23l5-9 6 4 6-7"/></svg>{% endif %}</div>
+      <div class="logo">{% if params.logo is not empty %}<img src="{{ params.logo }}" alt="logo"/>{% else %}<svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="20" cy="20" r="14"/><path d="M9 23l5-9 6 4 6-7"/></svg>{% endif %}</div>
       <div>
         <div class="co-name">{% if cp is not null %}{{ cp.razonSocial }}{% endif %}</div>
         <div class="co-tagline">{% if cp is not null and cp.nombreComercial is not null and cp.nombreComercial != cp.razonSocial %}{{ cp.nombreComercial }}{% endif %}</div>
@@ -165,7 +165,7 @@
       <td class="c-code mono">{{ det.codigo }}</td>
       <td class="desc"><div class="main">{{ det.descripcion }}</div></td>
       <td class="c-unit">{{ det.unidadMedida }}</td>
-      <td class="c-qty mono">{{ det.cantidad|n_format }}</td>
+      <td class="c-qty mono">{{ det.cantidad|q_format }}</td>
     </tr>
     {% endfor %}
   </tbody>

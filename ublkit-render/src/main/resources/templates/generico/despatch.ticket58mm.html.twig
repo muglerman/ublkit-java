@@ -76,7 +76,7 @@
     {% for ch in doc.envio.choferes %}
     <div class="muted">Conductor: {{ ch.nombres }} {{ ch.apellidos }}</div>
     {% endfor %}
-    {% if doc.envio.pesoTotal is not null %}<div class="muted">Peso: {{ doc.envio.pesoTotal|n_format }} {{ doc.envio.pesoTotalUnidadMedida }}{% if doc.envio.numeroDeBultos is not null %} · Bultos: {{ doc.envio.numeroDeBultos }}{% endif %}</div>{% endif %}
+    {% if doc.envio.pesoTotal is not null %}<div class="muted">Peso: {{ doc.envio.pesoTotal|q_format }} {{ doc.envio.pesoTotalUnidadMedida }}{% if doc.envio.numeroDeBultos is not null %} · Bultos: {{ doc.envio.numeroDeBultos }}{% endif %}</div>{% endif %}
   </div>
   {% endif %}
 
@@ -89,7 +89,7 @@
       <div class="desc">{{ det.descripcion }}</div>
       <div class="ln muted">
         <span>{% if det.codigo %}{{ det.codigo }}{% endif %}</span>
-        <span class="b" style="color:#000;">{{ det.cantidad|n_format }} {{ det.unidadMedida }}</span>
+        <span class="b" style="color:#000;">{{ det.cantidad|q_format }} {{ det.unidadMedida }}</span>
       </div>
     </div>
     {% endfor %}

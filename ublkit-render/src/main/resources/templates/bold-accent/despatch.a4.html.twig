@@ -18,10 +18,11 @@
   .hero { display: grid; grid-template-columns: 1fr 290px; gap: 24px; align-items: stretch; margin-bottom: 16px; }
   .hero .left { padding: 22px 24px; border: 1.5px solid var(--ink); border-radius: 4px; background: #fff; }
   .hero .left .mark { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
-  .hero .left .logo { width: 44px; height: 44px; background: var(--ink); color: var(--accent); border-radius: 2px; display: flex; align-items: center; justify-content: center; }
-  .hero .left .logo svg { width: 26px; height: 26px; }
+  .hero .left .logo { width: 56px; height: 56px; color: var(--accent); display: flex; align-items: center; justify-content: center; overflow: hidden; }
+  .hero .left .logo img { max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; }
+  .hero .left .logo svg { width: 34px; height: 34px; }
   .hero .left .logo img { width: 100%; height: 100%; object-fit: contain; border-radius: 2px; }
-  .hero .left .co-name { font-size: 18px; font-weight: 900; letter-spacing: -0.01em; line-height: 1.1; }
+  .hero .left .co-name { font-size: 16px; font-weight: 900; letter-spacing: -0.01em; line-height: 1.1; }
   .hero .left .co-tag { font-size: 10px; color: var(--ink-2); margin-top: 2px; font-weight: 500; }
   .hero .left .info { font-size: 10px; color: var(--ink-2); }
   .hero .left .info p { padding: 1px 0; }
@@ -178,7 +179,7 @@
       <td class="c-code mono">{{ det.codigo }}</td>
       <td class="desc"><div class="main">{{ det.descripcion }}</div></td>
       <td class="c-unit">{{ det.unidadMedida }}</td>
-      <td class="c-qty mono">{{ det.cantidad|n_format }}</td>
+      <td class="c-qty mono">{{ det.cantidad|q_format }}</td>
     </tr>
     {% endfor %}
   </tbody>

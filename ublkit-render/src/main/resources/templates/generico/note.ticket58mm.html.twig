@@ -81,7 +81,7 @@
       <div class="desc">{{ det.descripcion }}</div>
       <div class="muted" style="font-size:8px;">{% if det.igvTipo %}{{ det.igvTipo|catalog('07') }}{% endif %}</div>
       <div class="ln muted">
-        <span>{{ det.cantidad|n_format }} {{ det.unidadMedida }} × {{ det.precio|n_format }}</span>
+        <span>{{ det.cantidad|q_format }} {{ det.unidadMedida }} × {{ det.precio|n_format }}</span>
         <span class="b" style="color:#000;">{{ (det.precio * det.cantidad)|n_format }}</span>
       </div>
     </div>

@@ -36,10 +36,10 @@
 
   .band { background: var(--accent); color: #fff; padding: 22px 36px 24px; display: grid; grid-template-columns: 1fr auto; gap: 24px; align-items: center; }
   .band .logo-block { display: flex; align-items: center; gap: 14px; }
-  .band .logo { width: 52px; height: 52px; background: rgba(255,255,255,.14); border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+  .band .logo { width: 58px; height: 58px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
   .band .logo svg { width: 32px; height: 32px; }
-  .band .logo img { width: 100%; height: 100%; object-fit: contain; border-radius: 10px; }
-  .band .co-name { font-size: 16px; font-weight: 700; letter-spacing: 0.01em; }
+  .band .logo img { max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; }
+  .band .co-name { font-size: 15px; font-weight: 700; letter-spacing: 0.01em; }
   .band .co-sub { font-size: 10.5px; opacity: 0.8; margin-top: 2px; }
   .band .docbox { background: #fff; color: var(--ink); border-radius: 10px; padding: 14px 18px; min-width: 250px; text-align: right; box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
   .band .docbox .ruc { font-size: 10px; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.14em; }
@@ -137,7 +137,7 @@
   <div class="party">
     <div class="label">Cliente / Adquirente</div>
     <div class="name">{{ doc.receptor.nombre }}</div>
-    <div class="row"><span class="k">{{ doc.receptor.tipoDocIdentidad|catalogAttr('06','abreviatura') }}</span><span class="mono">{{ doc.receptor.numDocIdentidad }}</span></div>
+    <div class="row"><span class="k">Documento</span><span class="mono">{{ doc.receptor.tipoDocIdentidad|catalogAttr('06','abreviatura') }} {{ doc.receptor.numDocIdentidad }}</span></div>
     <div class="row"><span class="k">Dirección</span><span>{{ doc.receptor.direccion.direccion }}</span></div>
     <div class="row"><span class="k">Ubicación</span><span>{% if cl is not null and cl.direccion is not null %}{{ cl.direccion.departamento }} — {{ cl.direccion.provincia }} — {{ cl.direccion.distrito }}{% endif %}</span></div>
     <div class="row"><span class="k">Orden compra</span><span class="mono">{{ doc.ordenDeCompra }}</span></div>
@@ -171,7 +171,7 @@
       <td class="c-code mono">{{ det.codigoProducto }}</td>
       <td class="desc"><div class="main">{{ det.descripcion }}</div><div class="sub">{% if det.codProductoSUNAT %}SUNAT {{ det.codigoProductoSunat }}{% endif %}</div><div class="sub">{% if det.igvTipo %}{{ det.igvTipo|catalog('07') }}{% endif %}</div></td>
       <td class="c-unit">{{ det.unidadMedida }}</td>
-      <td class="c-qty mono">{{ det.cantidad|n_format }}</td>
+      <td class="c-qty mono">{{ det.cantidad|q_format }}</td>
       <td class="c-price mono">{{ det.precio|n_format }}</td>
       <td class="c-tax mono">{{ (det.precio * det.cantidad)|n_format }}</td>
     </tr>

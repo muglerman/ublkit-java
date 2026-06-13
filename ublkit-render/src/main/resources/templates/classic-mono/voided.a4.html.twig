@@ -28,8 +28,8 @@
 
   .masthead { display: grid; grid-template-columns: 1fr auto; align-items: start; gap: 24px; padding-bottom: 18px; border-bottom: 2px solid #0a0a0a; }
   .brand .mark { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
-  .brand .mark .logo { width: 44px; height: 44px; color: #0a0a0a; }
-  .brand .mark .name { font-size: 14px; font-weight: 700; letter-spacing: 0.02em; }
+  .brand .mark .logo { width: 56px; height: 56px; color: #0a0a0a; }
+  .brand .mark .name { font-size: 13px; font-weight: 700; letter-spacing: 0.02em; }
   .brand .meta { display: grid; grid-template-columns: 72px 1fr; column-gap: 16px; row-gap: 2px; font-size: 10px; margin: 0; }
   .brand .meta dt { text-transform: uppercase; letter-spacing: 0.08em; font-size: 9px; color: #737373; }
   .brand .meta dd { margin: 0; color: #0a0a0a; }
@@ -122,7 +122,7 @@
   <div class="party">
     <div class="label">Cliente</div>
     <div class="name">{{ doc.receptor.nombre }}</div>
-    <div class="row"><span>{{ doc.receptor.tipoDocIdentidad|catalogAttr('06','abreviatura') }}</span><span class="mono">{{ doc.receptor.numDocIdentidad }}</span></div>
+    <div class="row"><span>Documento</span><span class="mono">{{ doc.receptor.tipoDocIdentidad|catalogAttr('06','abreviatura') }} {{ doc.receptor.numDocIdentidad }}</span></div>
     <div class="row"><span>Dirección</span><span>{{ doc.receptor.direccion.direccion }}</span></div>
     <div class="row"><span>Ubicación</span><span>LIMA — LIMA — MIRAFLORES</span></div>
   </div>

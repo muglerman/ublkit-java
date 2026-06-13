@@ -87,7 +87,7 @@
     <div class="muted">Conductor: {{ ch.nombres }} {{ ch.apellidos }}{% if ch.licencia %} · Lic. {{ ch.licencia }}{% endif %}</div>
     {% endfor %}
     <div class="row" style="margin-top:2px;">
-      {% if doc.envio.pesoTotal is not null %}<span class="muted">Peso: {{ doc.envio.pesoTotal|n_format }} {{ doc.envio.pesoTotalUnidadMedida }}</span>{% endif %}
+      {% if doc.envio.pesoTotal is not null %}<span class="muted">Peso: {{ doc.envio.pesoTotal|q_format }} {{ doc.envio.pesoTotalUnidadMedida }}</span>{% endif %}
       {% if doc.envio.numeroDeBultos is not null %}<span class="muted">Bultos: {{ doc.envio.numeroDeBultos }}</span>{% endif %}
     </div>
   </div>
@@ -102,7 +102,7 @@
       <div class="desc">{{ det.descripcion }}</div>
       <div class="ln muted">
         <span>{% if det.codigo %}{{ det.codigo }}{% endif %}</span>
-        <span class="b" style="color:#000;">{{ det.cantidad|n_format }} {{ det.unidadMedida }}</span>
+        <span class="b" style="color:#000;">{{ det.cantidad|q_format }} {{ det.unidadMedida }}</span>
       </div>
     </div>
     {% endfor %}

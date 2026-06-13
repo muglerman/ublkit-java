@@ -144,7 +144,7 @@
         <td class="c-code mono">{{ det.codigo }}</td>
         <td class="desc"><div class="main">{{ det.descripcion }}</div></td>
         <td class="c-unit">{{ det.unidadMedida }}</td>
-        <td class="c-qty mono">{{ det.cantidad|n_format }}</td>
+        <td class="c-qty mono">{{ det.cantidad|q_format }}</td>
       </tr>
       {% endfor %}
     </tbody>

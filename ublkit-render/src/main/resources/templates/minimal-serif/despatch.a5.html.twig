@@ -34,9 +34,9 @@
   p { margin: 0; }
 
   .hero { text-align: center; padding-bottom: 22px; border-bottom: 1px solid var(--rule); }
-  .hero .logo { width: 46px; height: 46px; margin: 0 auto 10px; color: var(--ink); }
-  .hero .logo img { max-width: 46px; max-height: 46px; object-fit: contain; }
-  .hero .co-name { font-family: 'Newsreader', serif; font-size: 22px; font-weight: 500; letter-spacing: 0.02em; }
+  .hero .logo { width: 56px; height: 56px; margin: 0 auto 10px; color: var(--ink); }
+  .hero .logo img { max-width: 56px; max-height: 56px; object-fit: contain; }
+  .hero .co-name { font-family: 'Newsreader', serif; font-size: 19px; font-weight: 500; letter-spacing: 0.02em; }
   .hero .co-sub { font-size: 10px; color: var(--ink-2); margin-top: 3px; letter-spacing: 0.04em; }
   .hero .doc-kind { margin-top: 18px; font-family: 'Newsreader', serif; font-style: italic; font-size: 14px; color: var(--ink-2); }
   .hero .doc-num { margin-top: 4px; font-family: 'JetBrains Mono', monospace; font-size: 22px; font-weight: 500; letter-spacing: 0.03em; }
@@ -136,7 +136,7 @@
       <td class="c-code mono">{{ det.codigo }}</td>
       <td class="desc"><div class="main">{{ det.descripcion }}</div></td>
       <td class="c-unit">{{ det.unidadMedida }}</td>
-      <td class="c-qty mono">{{ det.cantidad|n_format }}</td>
+      <td class="c-qty mono">{{ det.cantidad|q_format }}</td>
     </tr>
     {% endfor %}
   </tbody>

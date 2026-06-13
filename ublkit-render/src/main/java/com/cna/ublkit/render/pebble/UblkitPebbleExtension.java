@@ -10,6 +10,7 @@ import io.pebbletemplates.pebble.template.EvaluationContext;
 import io.pebbletemplates.pebble.template.PebbleTemplate;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -42,6 +43,7 @@ public final class UblkitPebbleExtension extends AbstractExtension {
         Map<String, Filter> filters = new LinkedHashMap<>();
         filters.put("date", new TwigDateFilter());
         filters.put("n_format", new NumberFormatFilter());
+        filters.put("q_format", new QuantityFormatFilter());
         filters.put("str_pad", new StringPadFilter());
         filters.put("catalog", new CatalogFilter());
         filters.put("catalogAttr", new CatalogAttrFilter());
@@ -113,6 +115,24 @@ public final class UblkitPebbleExtension extends AbstractExtension {
         }
     }
 
+    /**
+     * Parsea la entrada del filtro a {@link BigDecimal}. Devuelve {@code null} si la entrada es
+     * {@code null}; lanza {@link NumberFormatException} si no es numérica (el filtro decide el fallback).
+     */
+    private static BigDecimal parseNumber(Object input) {
+        if (input == null) {
+            return null;
+        }
+        if (input instanceof BigDecimal bigDecimal) {
+            return bigDecimal;
+        }
+        if (input instanceof Number number) {
+            return BigDecimal.valueOf(number.doubleValue());
+        }
+        return new BigDecimal(input.toString().trim());
+    }
+
+    /** Formatea importes monetarios con exactamente 2 decimales (sin separador de miles). */
     private static final class NumberFormatFilter implements Filter {
         @Override
         public List<String> getArgumentNames() {
@@ -124,19 +144,31 @@ public final class UblkitPebbleExtension extends AbstractExtension {
             if (input == null) {
                 return "";
             }
-            BigDecimal value;
-            if (input instanceof BigDecimal bigDecimal) {
-                value = bigDecimal;
-            } else if (input instanceof Number number) {
-                value = BigDecimal.valueOf(number.doubleValue());
-            } else {
-                try {
-                    value = new BigDecimal(input.toString().trim());
-                } catch (NumberFormatException ex) {
-                    return input.toString();
-                }
+            try {
+                return parseNumber(input).setScale(2, RoundingMode.HALF_UP).toPlainString();
+            } catch (NumberFormatException ex) {
+                return input.toString();
             }
-            return value.stripTrailingZeros().toPlainString();
+        }
+    }
+
+    /** Formatea cantidades/peso conservando los decimales significativos (sin ceros finales). */
+    private static final class QuantityFormatFilter implements Filter {
+        @Override
+        public List<String> getArgumentNames() {
+            return NUMBER_ARGUMENTS;
+        }
+
+        @Override
+        public Object apply(Object input, Map<String, Object> args, PebbleTemplate self, EvaluationContext context, int lineNumber) {
+            if (input == null) {
+                return "";
+            }
+            try {
+                return parseNumber(input).stripTrailingZeros().toPlainString();
+            } catch (NumberFormatException ex) {
+                return input.toString();
+            }
         }
     }
 
