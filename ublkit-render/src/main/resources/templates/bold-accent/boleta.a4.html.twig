@@ -103,7 +103,7 @@
       </div>
     </div>
     <div class="info">
-      {% if cp is not null and cp.direccion is not null %}<p>{{ cp.direccion.direccion }}{% if cp.direccion.distrito is not empty %} · {{ cp.direccion.departamento }} — {{ cp.direccion.provincia }} — {{ cp.direccion.distrito }}{% endif %}{% if cp.direccion.ubigeo is not empty %} · Ubigeo {{ cp.direccion.ubigeo }}{% endif %}</p>{% endif %}
+      {% if cp is not null and cp.direccion is not null %}<p>{{ cp.direccion.direccion }}{% if cp.direccion.distrito is not empty %} · {{ cp.direccion.departamento }} — {{ cp.direccion.provincia }} — {{ cp.direccion.distrito }}{% endif %}{% if cp.direccion.ubigeo is not empty %} · {{ cp.direccion.ubigeo }}{% endif %}</p>{% endif %}
       {% if cp is not null and cp.contacto is not null %}<p>{{ cp.contacto.email }} · {{ cp.contacto.telefono }}{% if cp.contacto.web %} · {{ cp.contacto.web }}{% endif %}</p>{% endif %}
       <p>RUC <b>{{ doc.emisor.ruc }}</b></p>
     </div>

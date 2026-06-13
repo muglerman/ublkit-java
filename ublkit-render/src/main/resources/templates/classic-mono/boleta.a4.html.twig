@@ -89,7 +89,7 @@
     <dl class="meta">
       <dt>Dirección</dt><dd>{{ doc.emisor.direccion.direccion }}</dd>
       {% if cp is not null and cp.direccion is not null and cp.direccion.distrito is not empty %}
-      <dt>Ubicación</dt><dd>{{ cp.direccion.departamento }} — {{ cp.direccion.provincia }} — {{ cp.direccion.distrito }}{% if cp.direccion.ubigeo is not empty %} · Ubigeo {{ cp.direccion.ubigeo }}{% endif %}</dd>
+      <dt>Ubicación</dt><dd>{{ cp.direccion.departamento }} — {{ cp.direccion.provincia }} — {{ cp.direccion.distrito }}{% if cp.direccion.ubigeo is not empty %} · {{ cp.direccion.ubigeo }}{% endif %}</dd>
       {% endif %}
       {% if params.establishmentName is not empty %}
       <dt>Establecimiento</dt><dd>{{ params.establishmentName }}</dd>

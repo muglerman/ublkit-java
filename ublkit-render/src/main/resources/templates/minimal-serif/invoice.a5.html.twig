@@ -110,7 +110,6 @@
 
 <div class="meta-grid">
   <div><div class="k">Emitido</div><div class="v">{{ doc.fechaEmision|date('d/m/Y') }}</div></div>
-  <div><div class="k">Vencimiento</div><div class="v">{% if doc.fechaVencimiento is not null %}{{ doc.fechaVencimiento|date('d/m/Y') }}{% endif %}</div></div>
   <div><div class="k">Moneda</div><div class="v">{{ mon }}{% if doc.tipoCambio is not null %} · T/C {{ doc.tipoCambio.venta }}{% endif %}</div></div>
   <div><div class="k">Condición</div><div class="v">{% if doc.formaDePago is not null %}{{ doc.formaDePago.tipo }}{% if doc.formaDePago.cuotas is not empty %} · {{ doc.formaDePago.cuotas|length }} cuotas{% endif %}{% endif %}</div></div>
 </div>

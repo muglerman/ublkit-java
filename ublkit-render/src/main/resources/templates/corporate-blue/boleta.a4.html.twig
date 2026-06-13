@@ -93,7 +93,7 @@
     <div class="logo">{% if params.logo is not empty %}<img src="{{ params.logo }}" alt="logo"/>{% else %}<svg viewBox="0 0 40 40" fill="none" stroke="#fff" stroke-width="2.4"><rect x="6" y="6" width="28" height="28" rx="3"/><path d="M12 20h16M12 14h10M12 26h14"/></svg>{% endif %}</div>
     <div>
       <div class="co-name">{{ doc.emisor.razonSocial }}</div>
-      <div class="co-sub">{% if params.establishmentName is not empty %}{{ params.establishmentName }} · {% endif %}{% if cp is not null and cp.direccion is not null %}{{ cp.direccion.direccion }}{% if cp.direccion.distrito is not empty %} · {{ cp.direccion.departamento }} — {{ cp.direccion.provincia }} — {{ cp.direccion.distrito }}{% endif %}{% if cp.direccion.ubigeo is not empty %} · Ubigeo {{ cp.direccion.ubigeo }}{% endif %}{% endif %}</div>
+      <div class="co-sub">{% if params.establishmentName is not empty %}{{ params.establishmentName }} · {% endif %}{% if cp is not null and cp.direccion is not null %}{{ cp.direccion.direccion }}{% if cp.direccion.distrito is not empty %} · {{ cp.direccion.departamento }} — {{ cp.direccion.provincia }} — {{ cp.direccion.distrito }}{% endif %}{% if cp.direccion.ubigeo is not empty %} · {{ cp.direccion.ubigeo }}{% endif %}{% endif %}</div>
       <div class="co-sub">{% if cp is not null and cp.contacto is not null %}{{ cp.contacto.email }} · {{ cp.contacto.telefono }}{% endif %}</div>
     </div>
   </div>

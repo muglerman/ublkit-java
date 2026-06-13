@@ -126,7 +126,6 @@
 
 <div class="sub-band">
   <div><span class="k">Fecha de emisión</span><span class="v">{{ doc.fechaEmision|date('d/m/Y') }} · {{ doc.fechaEmision|date('H:i:s') }}</span></div>
-  <div><span class="k">Vencimiento</span><span class="v">{% if doc.fechaVencimiento is not null %}{{ doc.fechaVencimiento|date('d/m/Y') }}{% endif %}</span></div>
   <div><span class="k">Moneda</span><span class="v">{{ mon }}{% if doc.tipoCambio is not null %} · T/C {{ doc.tipoCambio.venta }}{% endif %}</span></div>
   <div><span class="k">Condición</span><span class="v">{% if doc.formaDePago is not null %}{{ doc.formaDePago.tipo }}{% if doc.formaDePago.cuotas is not empty %} · {{ doc.formaDePago.cuotas|length }} cuotas{% endif %}{% endif %}</span></div>
 </div>
@@ -148,7 +147,6 @@
     <div class="row"><span class="k">Entrega</span><span>{% if doc.direccionEntrega is defined and doc.direccionEntrega is not null %}{{ doc.direccionEntrega.direccion }}{% endif %}</span></div>
     {% if doc.guias is not empty %}<div class="row"><span class="k">Guía ref.</span><span class="mono">{% for guia in doc.guias %}{{ guia.serieNumero }}{% if not loop.last %}, {% endif %}{% endfor %}</span></div>{% endif %}
     {% if doc.documentosRelacionados is not empty %}<div class="row"><span class="k">Doc. relacionado</span><span class="mono">{% for rel in doc.documentosRelacionados %}{{ rel.serieNumero }}{% if not loop.last %}, {% endif %}{% endfor %}</span></div>{% endif %}
-    <div class="row"><span class="k">Vencimiento</span><span>{% if doc.fechaVencimiento is not null %}{{ doc.fechaVencimiento|date('d/m/Y') }}{% endif %}</span></div>
   </div>
 </div>
 

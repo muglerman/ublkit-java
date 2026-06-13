@@ -122,7 +122,7 @@
       </div>
     </div>
     <div class="info">
-      <p>{{ cp.direccion.direccion }}{% if cp.direccion.distrito is not empty %} — {{ cp.direccion.distrito }}{% endif %}{% if cp.direccion.ubigeo is not empty %} · Ubigeo {{ cp.direccion.ubigeo }}{% endif %}</p>
+      <p>{{ cp.direccion.direccion }}{% if cp.direccion.distrito is not empty %} — {{ cp.direccion.distrito }}{% endif %}{% if cp.direccion.ubigeo is not empty %} · {{ cp.direccion.ubigeo }}{% endif %}</p>
       <p>
         {% if cp.contacto.email %}{{ cp.contacto.email }}{% endif %}
         {% if cp.contacto.telefono %} · {{ cp.contacto.telefono }}{% endif %}
@@ -138,9 +138,6 @@
     <div>
       <div class="rule"></div>
       <div class="row"><span class="k">Emitido</span><span class="v">{{ doc.fechaEmision|date('d/m/Y') }}{% if doc.horaEmision is not null %} · {{ doc.horaEmision }}{% endif %}</span></div>
-      {% if doc.fechaVencimiento %}
-      <div class="row"><span class="k">Vence</span><span class="v">{{ doc.fechaVencimiento|date('d/m/Y') }}</span></div>
-      {% endif %}
       <div class="row"><span class="k">Moneda</span><span class="v">{{ doc.moneda|catalog('021') }}{% if doc.tipoCambio %} · T/C {{ doc.tipoCambio.venta }}{% endif %}</span></div>
       {% if doc.formaDePago is not null %}
       <div class="row"><span class="k">Condición</span><span class="v">{{ doc.formaDePago.tipo }}</span></div>

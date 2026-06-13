@@ -112,7 +112,7 @@
       </div>
     </div>
     <div class="info">
-      {% if cp is not null and cp.direccion is not null %}<p>{{ cp.direccion.direccion }}{% if cp.direccion.distrito is not empty %} · {{ cp.direccion.departamento }} — {{ cp.direccion.provincia }} — {{ cp.direccion.distrito }}{% endif %}{% if cp.direccion.ubigeo is not empty %} · Ubigeo {{ cp.direccion.ubigeo }}{% endif %}</p>{% if cp.contacto is not null and (cp.contacto.email is not empty or cp.contacto.telefono is not empty) %}<p>{% if cp.contacto.email is not empty %}{{ cp.contacto.email }}{% endif %}{% if cp.contacto.telefono is not empty %} · {{ cp.contacto.telefono }}{% endif %}</p>{% endif %}{% endif %}
+      {% if cp is not null and cp.direccion is not null %}<p>{{ cp.direccion.direccion }}{% if cp.direccion.distrito is not empty %} · {{ cp.direccion.departamento }} — {{ cp.direccion.provincia }} — {{ cp.direccion.distrito }}{% endif %}{% if cp.direccion.ubigeo is not empty %} · {{ cp.direccion.ubigeo }}{% endif %}</p>{% if cp.contacto is not null and (cp.contacto.email is not empty or cp.contacto.telefono is not empty) %}<p>{% if cp.contacto.email is not empty %}{{ cp.contacto.email }}{% endif %}{% if cp.contacto.telefono is not empty %} · {{ cp.contacto.telefono }}{% endif %}</p>{% endif %}{% endif %}
       {% if cp is not null and cp.contacto is not null %}<p>{{ cp.contacto.email }} · {{ cp.contacto.telefono }}</p>{% endif %}
       <p>RUC <b>{{ doc.emisor.ruc }}</b></p>
     </div>

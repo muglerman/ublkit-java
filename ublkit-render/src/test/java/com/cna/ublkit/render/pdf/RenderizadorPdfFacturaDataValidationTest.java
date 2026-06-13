@@ -193,7 +193,7 @@ class RenderizadorPdfFacturaDataValidationTest {
         void nombreDocumentoCorrecta() {
             BorradorFactura factura = crearFacturaCompleta();
             // Tipo "01" = Factura
-            String nombreEsperado = "FACTURA ELECTRONICA";
+            String nombreEsperado = "FACTURA ELECTRÓNICA";
 
             String html = renderizarHtml(factura);
 

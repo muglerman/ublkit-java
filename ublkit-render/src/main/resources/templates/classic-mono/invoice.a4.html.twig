@@ -114,7 +114,7 @@
     <dl class="meta">
       <dt>Dirección</dt><dd>{{ doc.emisor.direccion.direccion }}</dd>
       {% if cp is not null and cp.direccion is not null and cp.direccion.distrito is not empty %}
-      <dt>Ubicación</dt><dd>{{ cp.direccion.departamento }} — {{ cp.direccion.provincia }} — {{ cp.direccion.distrito }}{% if cp.direccion.ubigeo is not empty %} · Ubigeo {{ cp.direccion.ubigeo }}{% endif %}</dd>
+      <dt>Ubicación</dt><dd>{{ cp.direccion.departamento }} — {{ cp.direccion.provincia }} — {{ cp.direccion.distrito }}{% if cp.direccion.ubigeo is not empty %} · {{ cp.direccion.ubigeo }}{% endif %}</dd>
       {% endif %}
       {% if params.establishmentName is not empty %}
       <dt>Establecimiento</dt><dd>{{ params.establishmentName }}</dd>
@@ -156,7 +156,6 @@
 <div class="strip">
   <div><span class="k">Moneda</span><span class="v">{{ mon }}</span></div>
   {% if doc.tipoCambio is not null %}<div><span class="k">T/C</span><span class="v mono">{{ doc.tipoCambio.venta }}</span></div>{% endif %}
-  <div><span class="k">Vencimiento</span><span class="v">{% if doc.fechaVencimiento is not null %}{{ doc.fechaVencimiento|date('dd/MM/yyyy') }}{% endif %}</span></div>
   <div><span class="k">Forma de pago</span><span class="v">{% if doc.formaDePago is not null %}{{ doc.formaDePago.tipo }}{% if doc.formaDePago.cuotas is not empty %} · {{ doc.formaDePago.cuotas|length }} cuotas{% endif %}{% endif %}</span></div>
 </div>
 

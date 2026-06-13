@@ -119,7 +119,7 @@
       </div>
     </div>
     <div class="info">
-      <p>{% if cp is not null %}{{ cp.direccion.direccion }}{% if cp.direccion.distrito is not empty %} — {{ cp.direccion.distrito }}{% endif %}{% if cp.direccion.ubigeo is not empty %} · Ubigeo {{ cp.direccion.ubigeo }}{% endif %}{% endif %}</p>
+      <p>{% if cp is not null %}{{ cp.direccion.direccion }}{% if cp.direccion.distrito is not empty %} — {{ cp.direccion.distrito }}{% endif %}{% if cp.direccion.ubigeo is not empty %} · {{ cp.direccion.ubigeo }}{% endif %}{% endif %}</p>
       <p>
         {% if cp is not null and cp.contacto.email %}{{ cp.contacto.email }}{% endif %}
         {% if cp is not null and cp.contacto.telefono %} · {{ cp.contacto.telefono }}{% endif %}

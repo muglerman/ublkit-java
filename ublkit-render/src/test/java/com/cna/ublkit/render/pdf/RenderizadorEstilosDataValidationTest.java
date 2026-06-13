@@ -131,7 +131,7 @@ class RenderizadorEstilosDataValidationTest {
         assertContiene(html, "MTC-123456", estilo, "registro MTC del transportista");
         assertContiene(html, guia.getSubcontratado().nombre(), estilo, "transportista subcontratado");
         assertContiene(html, "Producto A", estilo, "descripción del bien transportado");
-        assertContiene(html, "Tipo 31", estilo, "rótulo de GRE transportista");
+        assertContiene(html, "GUÍA DE REMISIÓN TRANSPORTISTA", estilo, "rótulo de GRE transportista");
         assertSinPlaceholders(html, estilo);
     }
 
