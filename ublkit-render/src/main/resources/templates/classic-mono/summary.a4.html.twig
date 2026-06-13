@@ -114,7 +114,7 @@
     <div class="ruc">RUC <strong>{{ doc.emisor.ruc }}</strong></div>
     <div class="kind">RESUMEN DIARIO ELECTRÓNICA</div>
     <div class="num">RC — 0001287</div>
-    <div class="issued">Emitido {{ doc.fechaEmision|date('d/m/Y') }} · {{ doc.horaEmision }}</div>
+    <div class="issued">Emitido {{ doc.fechaEmision|date('d/m/Y') }}{% if doc.horaEmision is not null %} · {{ doc.horaEmision }}{% endif %}</div>
   </div>
 </div>
 
@@ -122,7 +122,7 @@
   <div class="party">
     <div class="label">Cliente</div>
     <div class="name">{{ doc.receptor.nombre }}</div>
-    <div class="row"><span>Documento</span><span class="mono">{{ doc.receptor.tipoDocIdentidad|catalogAttr('06','abreviatura') }} {{ doc.receptor.numDocIdentidad }}</span></div>
+    <div class="row"><span>{{ doc.receptor.tipoDocIdentidad|catalogAttr('06','abreviatura') }}</span><span class="mono">{{ doc.receptor.numDocIdentidad }}</span></div>
     <div class="row"><span>Dirección</span><span>{{ doc.receptor.direccion.direccion }}</span></div>
     <div class="row"><span>Ubicación</span><span>LIMA — LIMA — MIRAFLORES</span></div>
   </div>

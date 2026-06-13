@@ -125,7 +125,7 @@
 </div>
 
 <div class="sub-band">
-  <div><span class="k">Fecha de emisión</span><span class="v">{{ doc.fechaEmision|date('d/m/Y') }} · {{ doc.horaEmision }}</span></div>
+  <div><span class="k">Fecha de emisión</span><span class="v">{{ doc.fechaEmision|date('d/m/Y') }}{% if doc.horaEmision is not null %} · {{ doc.horaEmision }}{% endif %}</span></div>
   <div><span class="k">Moneda</span><span class="v">{{ mon }}{% if doc.tipoCambio is not null %} · T/C {{ doc.tipoCambio.venta }}{% endif %}</span></div>
   <div><span class="k">Condición</span><span class="v">{% if doc.formaDePago is not null %}{{ doc.formaDePago.tipo }}{% if doc.formaDePago.cuotas is not empty %} · {{ doc.formaDePago.cuotas|length }} cuotas{% endif %}{% endif %}</span></div>
 </div>
@@ -136,7 +136,7 @@
   <div class="party">
     <div class="label">Cliente / Adquirente</div>
     <div class="name">{{ doc.receptor.nombre }}</div>
-    <div class="row"><span class="k">Documento</span><span class="mono">{{ doc.receptor.tipoDocIdentidad|catalogAttr('06','abreviatura') }} {{ doc.receptor.numDocIdentidad }}</span></div>
+    <div class="row"><span class="k">{{ doc.receptor.tipoDocIdentidad|catalogAttr('06','abreviatura') }}</span><span class="mono">{{ doc.receptor.numDocIdentidad }}</span></div>
     <div class="row"><span class="k">Dirección</span><span>{{ doc.receptor.direccion.direccion }}</span></div>
     <div class="row"><span class="k">Ubicación</span><span>{% if cl is not null and cl.direccion is not null %}{{ cl.direccion.departamento }} — {{ cl.direccion.provincia }} — {{ cl.direccion.distrito }}{% endif %}</span></div>
     <div class="row"><span class="k">Orden compra</span><span class="mono">{{ doc.ordenDeCompra }}</span></div>

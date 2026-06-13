@@ -106,7 +106,7 @@
     <div class="ruc">RUC <strong>{{ doc.emisor.ruc }}</strong></div>
     <div class="kind">{{ name|upper }} ELECTRÓNICA</div>
     <div class="num">{{ doc.serie }} — {{ doc.numero|str_pad(8, '0', 'left') }}</div>
-    <div class="issued">Emitido {{ doc.fechaEmision|date('dd/MM/yyyy') }} · {{ doc.horaEmision }}</div>
+    <div class="issued">Emitido {{ doc.fechaEmision|date('dd/MM/yyyy') }}{% if doc.horaEmision is not null %} · {{ doc.horaEmision }}{% endif %}</div>
   </div>
 </div>
 
@@ -114,7 +114,7 @@
   <div class="party">
     <div class="label">Cliente</div>
     <div class="name">{{ doc.receptor.nombre }}</div>
-    <div class="row"><span>Documento</span><span class="mono">{{ doc.receptor.tipoDocIdentidad|catalogAttr('06','abreviatura') }} {{ doc.receptor.numDocIdentidad }}</span></div>
+    <div class="row"><span>{{ doc.receptor.tipoDocIdentidad|catalogAttr('06','abreviatura') }}</span><span class="mono">{{ doc.receptor.numDocIdentidad }}</span></div>
     {% if cl is not null and cl.direccion is not null %}
     <div class="row"><span>Dirección</span><span>{{ cl.direccion.direccion }}</span></div>
     {% endif %}

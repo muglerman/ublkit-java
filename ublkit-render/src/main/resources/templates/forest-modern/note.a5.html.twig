@@ -138,7 +138,7 @@
     <div class="kind">{{ name|upper }} ELECTRÓNICA</div>
     <div class="num">{{ doc.serie }}-{{ doc.numero|str_pad(8, '0', 'left') }}</div>
     <div class="ruc">RUC <b>{{ doc.emisor.ruc }}</b></div>
-    <div class="issued">Emitido {{ doc.fechaEmision|date('d/m/Y') }} · {{ doc.horaEmision }}</div>
+    <div class="issued">Emitido {{ doc.fechaEmision|date('d/m/Y') }}{% if doc.horaEmision is not null %} · {{ doc.horaEmision }}{% endif %}</div>
   </div>
 </div>
 
@@ -153,7 +153,7 @@
   <div class="party">
     <div class="label">Cliente</div>
     <div class="name">{{ doc.receptor.nombre }}</div>
-    <div class="row"><span class="k">Documento</span><span class="mono">{{ doc.receptor.tipoDocIdentidad|catalogAttr('06','abreviatura') }} {{ doc.receptor.numDocIdentidad }}</span></div>
+    <div class="row"><span class="k">{{ doc.receptor.tipoDocIdentidad|catalogAttr('06','abreviatura') }}</span><span class="mono">{{ doc.receptor.numDocIdentidad }}</span></div>
     <div class="row"><span class="k">Dirección</span><span>{{ doc.receptor.direccion.direccion }}</span></div>
     <div class="row"><span class="k">Ubicación</span><span>{% if cl is not null and cl.direccion is not null %}{{ cl.direccion.departamento }} — {{ cl.direccion.provincia }} — {{ cl.direccion.distrito }}{% endif %}</span></div>
   </div>

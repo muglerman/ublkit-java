@@ -118,7 +118,7 @@
   <div class="party">
     <div class="label">Facturado a</div>
     <div class="name">{{ doc.receptor.nombre }}</div>
-    <div class="row"><span class="k">Documento</span><span class="mono">{{ doc.receptor.tipoDocIdentidad|catalogAttr('06','abreviatura') }} {{ doc.receptor.numDocIdentidad }}</span></div>
+    <div class="row"><span class="k">{{ doc.receptor.tipoDocIdentidad|catalogAttr('06','abreviatura') }}</span><span class="mono">{{ doc.receptor.numDocIdentidad }}</span></div>
     <div class="row"><span class="k">Dirección</span><span>{{ doc.receptor.direccion.direccion }}</span></div>
     <div class="row"><span class="k">Ubicación</span><span>{% if cl is not null and cl.direccion is not null %}{{ cl.direccion.departamento }} · {{ cl.direccion.distrito }}{% endif %}</span></div>
     <div class="row"><span class="k">O/C</span><span class="mono">{{ doc.ordenDeCompra }}</span></div>
