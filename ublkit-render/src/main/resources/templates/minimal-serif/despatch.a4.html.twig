@@ -87,8 +87,7 @@
 <div class="hero">
   <div class="co-name">{% if cp is not null %}{{ cp.razonSocial }}{% endif %}</div>
   <div class="co-sub">{% if cp is not null and cp.direccion is not null %}{{ cp.direccion.direccion }} · {% endif %}{% if cp is not null %}RUC {{ cp.ruc }}{% endif %}{% if cp is not null and cp.contacto is not null %} · {{ cp.contacto.email }}{% endif %}</div>
-  <div class="doc-kind">Guía de Remisión</div>
-  <div class="doc-sub">Remitente · Tipo 09</div>
+  <div class="doc-kind">{{ name|upper }} ELECTRÓNICA</div>
   <div class="doc-num">{{ doc.serie }} · {{ doc.numero|str_pad(8, '0', 'left') }}</div>
 </div>
 
@@ -96,13 +95,13 @@
   <div class="leg">
     <div class="k">Partida</div>
     <div class="v">{% if doc.envio is not null and doc.envio.partida is not null %}{{ doc.envio.partida.direccion }}{% endif %}</div>
-    <div class="a">{% if doc.envio is not null and doc.envio.partida is not null %}Ubigeo {{ doc.envio.partida.ubigeo }}{% endif %}</div>
+    <div class="a">{% if doc.envio is not null and doc.envio.partida is not null %}{% if params.partidaDistrito is not empty %}{{ params.partidaDistrito }} · {% endif %}Ubigeo {{ doc.envio.partida.ubigeo }}{% endif %}</div>
   </div>
   <div class="arrow">hacia →</div>
   <div class="leg right">
     <div class="k">Llegada</div>
     <div class="v">{% if doc.envio is not null and doc.envio.destino is not null %}{{ doc.envio.destino.direccion }}{% endif %}</div>
-    <div class="a">{% if doc.envio is not null and doc.envio.destino is not null %}Ubigeo {{ doc.envio.destino.ubigeo }}{% endif %}</div>
+    <div class="a">{% if doc.envio is not null and doc.envio.destino is not null %}{% if params.destinoDistrito is not empty %}{{ params.destinoDistrito }} · {% endif %}Ubigeo {{ doc.envio.destino.ubigeo }}{% endif %}</div>
   </div>
 </div>
 
@@ -129,6 +128,7 @@
   <div><div class="k">Motivo</div><div class="v">{% if doc.envio is not null %}{{ doc.envio.tipoTraslado }} {{ doc.envio.tipoTraslado|catalog('20') }}{% endif %}</div></div>
   <div><div class="k">Modalidad</div><div class="v">{% if doc.envio is not null %}{{ doc.envio.tipoModalidadTraslado }} {{ doc.envio.tipoModalidadTraslado|catalog('18') }}{% endif %}</div></div>
   <div><div class="k">Peso · bultos</div><div class="v">{% if doc.envio is not null %}{{ doc.envio.pesoTotal }} {{ doc.envio.pesoTotalUnidadMedida }}{% if doc.envio.numeroDeBultos is not null %} · {{ doc.envio.numeroDeBultos }}{% endif %}{% endif %}</div></div>
+  <div><div class="k">Estado de pago</div><div class="v">{% if params.estadoPago is not empty %}{{ params.estadoPago }}{% endif %}</div></div><div><div class="k">Nro. taquito</div><div class="v">{% if params.trackingNumber is not empty %}{{ params.trackingNumber }}{% endif %}</div></div><div><div class="k">Total</div><div class="v">{% if params.totalGuia is not empty %}{{ params.totalGuia|n_format }}{% endif %}</div></div>
 </div>
 
 <div class="section">
@@ -148,6 +148,7 @@
       </tr>
       {% endfor %}
     </tbody>
+  {% if params.totalGuia is not empty and params.totalGuia > 0 %}<tfoot><tr><td colspan="99" style="text-align:right;padding:10px 12px;font-weight:700;">Monto total: S/ {{ params.totalGuia|n_format }}</td></tr></tfoot>{% endif %}
   </table>
 </div>
 
@@ -166,7 +167,7 @@
     {% if doc.envio is not null and doc.envio.vehiculo is not null %}
     <div class="row"><span class="k">Placa</span><span class="mono">{{ doc.envio.vehiculo.placa }}</span></div>
     {% if doc.envio.vehiculo.numeroCirculacion is not empty %}
-    <div class="row"><span class="k">Cert. inscripción</span><span class="mono">{{ doc.envio.vehiculo.numeroCirculacion }}</span></div>
+    <div class="row"><span class="k">TUC/CHV</span><span class="mono">{{ doc.envio.vehiculo.numeroCirculacion }}</span></div>
     {% endif %}
     {% endif %}
   </div>

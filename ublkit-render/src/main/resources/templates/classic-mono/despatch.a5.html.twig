@@ -109,7 +109,7 @@
   </div>
   <div class="doc-id">
     <div class="ruc">RUC <strong>{% if cp is not null %}{{ cp.ruc }}{% endif %}</strong></div>
-    <div class="kind">{% if doc.tipoComprobante is not empty %}{{ name }}{% else %}GUÍA DE REMISIÓN ELECTRÓNICA{% endif %}</div>
+    <div class="kind">{% if doc.tipoComprobante is not empty %}{{ name|upper }} ELECTRÓNICA{% else %}GUÍA DE REMISIÓN ELECTRÓNICA{% endif %}</div>
     <div class="num">{{ doc.serie }} — {{ doc.numero|str_pad(8, '0', 'left') }}</div>
     <div class="issued">Emitido {{ doc.fechaEmision|date('d/m/Y') }}{% if doc.horaEmision is not null %} · {{ doc.horaEmision }}{% endif %}</div>
   </div>
@@ -165,6 +165,7 @@
     </tr>
     {% endfor %}
   </tbody>
+  {% if params.totalGuia is not empty and params.totalGuia > 0 %}<tfoot><tr><td colspan="99" style="text-align:right;padding:10px 12px;font-weight:700;">Monto total: S/ {{ params.totalGuia|n_format }}</td></tr></tfoot>{% endif %}
 </table>
 
 <div class="foot">

@@ -68,10 +68,16 @@ public class BorradorGuiaRemision {
     private TerceroGuia tercero;
 
     /**
-     * Transportista subcontratado (aplica en GRE-31 cuando el emisor subcontrata el traslado).
-     * Solo presentación PDF; no se serializa a UBL.
+     * Empresa que subcontrató el traslado (GRE-31): el emisor es el transportista subcontratado y aquí va
+     * quien lo contrató. Se serializa como {@code cac:Shipment/cac:Consignment/cac:LogisticsOperatorParty}.
      */
     private TerceroGuia subcontratado;
+
+    /**
+     * Pagador del flete cuando es un TERCERO (GRE-31). Se serializa como
+     * {@code cac:Shipment/cac:Consignment/cac:OriginatorCustomerParty}.
+     */
+    private TerceroGuia pagadorFleteTercero;
 
     /** Datos del comprador/adquiriente. */
     private CompradorGuia comprador;
@@ -115,6 +121,7 @@ public class BorradorGuiaRemision {
     public DestinatarioGuia getDestinatario() { return destinatario; }
     public TerceroGuia getTercero() { return tercero; }
     public TerceroGuia getSubcontratado() { return subcontratado; }
+    public TerceroGuia getPagadorFleteTercero() { return pagadorFleteTercero; }
     public CompradorGuia getComprador() { return comprador; }
     public DatosEnvio getEnvio() { return envio; }
     public List<LineaGuia> getDetalles() { return detalles; }
@@ -137,6 +144,7 @@ public class BorradorGuiaRemision {
     public void setDestinatario(DestinatarioGuia destinatario) { this.destinatario = destinatario; }
     public void setTercero(TerceroGuia tercero) { this.tercero = tercero; }
     public void setSubcontratado(TerceroGuia subcontratado) { this.subcontratado = subcontratado; }
+    public void setPagadorFleteTercero(TerceroGuia pagadorFleteTercero) { this.pagadorFleteTercero = pagadorFleteTercero; }
     public void setComprador(CompradorGuia comprador) { this.comprador = comprador; }
     public void setEnvio(DatosEnvio envio) { this.envio = envio; }
     public void setDetalles(List<LineaGuia> detalles) { this.detalles = detalles; }

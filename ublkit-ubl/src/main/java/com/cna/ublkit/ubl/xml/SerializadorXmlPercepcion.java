@@ -29,7 +29,7 @@ public final class SerializadorXmlPercepcion implements SerializadorXml<Comproba
         FragmentosXml.agregarExtensiones(doc, raiz);
         raiz.appendChild(cbc(doc, "UBLVersionID", UBL_VERSION_SUNAT));
         raiz.appendChild(cbc(doc, "CustomizationID", CUSTOMIZATION_ID_VOIDED));
-        raiz.appendChild(cbc(doc, "ID", percepcion.getSerie() + "-" + percepcion.getNumero()));
+        raiz.appendChild(cbc(doc, "ID", percepcion.getSerie() + "-" + FragmentosXml.correlativoFormateado(percepcion.getNumero())));
         raiz.appendChild(cbc(doc, "IssueDate", percepcion.getFechaEmision()));
         raiz.appendChild(cbc(doc, "DocumentCurrencyCode", moneda(percepcion.getMoneda())));
 

@@ -95,16 +95,16 @@
         </svg>{% endif %}
       </div>
       <div>
-        <div class="co-name">{{ cp.razonSocial }}</div>
+        <div class="co-name">{{ cp.razonSocial }}</div>{% if params.establishmentName is not empty %}<div class="co-tag">{{ params.establishmentName }}</div>{% endif %}
       </div>
     </div>
     <div class="info">
-      <p>{{ cp.direccion.direccion }} — {{ cp.direccion.distrito }}</p>
+      <p>{{ cp.direccion.direccion }}{% if cp.direccion.distrito is not empty %} — {{ cp.direccion.distrito }}{% endif %}{% if cp.direccion.ubigeo is not empty %} · Ubigeo {{ cp.direccion.ubigeo }}{% endif %}</p>
       <p>RUC <b>{{ cp.ruc }}</b></p>
     </div>
   </div>
   <div class="right">
-    <div class="kind">{{ name }}</div>
+    <div class="kind">{{ name|upper }} ELECTRÓNICA</div>
     <div class="num">{{ doc.serie }}-{{ doc.numero|str_pad(8, '0', 'left') }}</div>
     <div class="rule"></div>
     <div class="row"><span class="k">F. Emisión</span><span class="v">{{ doc.fechaEmision|date('d/m/Y') }}</span></div>
@@ -159,6 +159,7 @@
     </tr>
     {% endfor %}
   </tbody>
+  {% if params.totalGuia is not empty and params.totalGuia > 0 %}<tfoot><tr><td colspan="99" style="text-align:right;padding:10px 12px;font-weight:700;">Monto total: S/ {{ params.totalGuia|n_format }}</td></tr></tfoot>{% endif %}
 </table>
 </div>
 

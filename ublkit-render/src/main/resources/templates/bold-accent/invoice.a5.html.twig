@@ -118,11 +118,11 @@
       </div>
       <div>
         <div class="co-name">{{ cp.razonSocial }}</div>
-        <div class="co-tag">{% if params.header is not empty %}{{ params.header }}{% else %}{{ cp.nombreComercial }}{% endif %}</div>
+        <div class="co-tag">{% if cp.nombreComercial is not empty %}{{ cp.nombreComercial }}{% endif %}{% if params.establishmentName is not empty %}{% if cp.nombreComercial is not empty %} · {% endif %}{{ params.establishmentName }}{% endif %}</div>
       </div>
     </div>
     <div class="info">
-      <p>{{ cp.direccion.direccion }} — {{ cp.direccion.distrito }}</p>
+      <p>{{ cp.direccion.direccion }}{% if cp.direccion.distrito is not empty %} — {{ cp.direccion.distrito }}{% endif %}{% if cp.direccion.ubigeo is not empty %} · Ubigeo {{ cp.direccion.ubigeo }}{% endif %}</p>
       <p>
         {% if cp.contacto.email %}{{ cp.contacto.email }}{% endif %}
         {% if cp.contacto.telefono %} · {{ cp.contacto.telefono }}{% endif %}
@@ -132,7 +132,7 @@
   </div>
   <div class="right">
     <div>
-      <div class="kind">{{ name }}</div>
+      <div class="kind">{{ name|upper }} ELECTRÓNICA</div>
       <div class="num">{{ doc.serie }}-{{ doc.numero|str_pad(8, '0', 'left') }}</div>
     </div>
     <div>

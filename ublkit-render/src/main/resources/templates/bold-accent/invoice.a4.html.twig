@@ -138,7 +138,7 @@
   </div>
   <div class="right">
     <div>
-      <div class="kind">{% if doc.tipoComprobante is not empty %}{{ name|upper }} ELECTRONICA{% else %}FACTURA ELECTRONICA{% endif %}</div>
+      <div class="kind">{% if doc.tipoComprobante is not empty %}{{ name|upper }} ELECTRÓNICA{% else %}FACTURA ELECTRÓNICA{% endif %}</div>
       <div class="num">{{ doc.serie }}-{{ doc.numero|str_pad(8, '0', 'left') }}</div>
     </div>
     <div>
@@ -283,7 +283,7 @@
     {% endif %}
   </div>
   <div class="meta">
-    <p><strong>Representación impresa</strong> de la {% if doc.tipoComprobante is not empty %}{{ name }}{% else %}Factura{% endif %} Electrónica.</p>
+    <p><strong>Representación impresa</strong> de la {% if doc.tipoComprobante is not empty %}{{ name|upper }} ELECTRÓNICA{% else %}Factura{% endif %} Electrónica.</p>
     <p>Consulte la validez en <strong>{{ params.consultaUrl|default('sunat.gob.pe') }}</strong> con el RUC del emisor y el número del comprobante.</p>
     <p style="margin-top:6px;">Firmante: {% if cp is not null %}{{ cp.ruc }} · {{ cp.razonSocial }}{% endif %}</p>
     <p class="hash">Hash: {{ hashDocumento }}</p>

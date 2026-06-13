@@ -86,7 +86,7 @@
   <div class="co-name">{{ doc.emisor.razonSocial }}</div>
   <div class="co-sub">{% if params.establishmentName is not empty %}{{ params.establishmentName }} · {% endif %}{% if cp is not null and cp.direccion is not null %}{{ cp.direccion.direccion }}{% if cp.direccion.distrito is not empty %} · {{ cp.direccion.departamento }} — {{ cp.direccion.provincia }} — {{ cp.direccion.distrito }}{% endif %}{% if cp.direccion.ubigeo is not empty %} · Ubigeo {{ cp.direccion.ubigeo }}{% endif %} · {% endif %}RUC {{ doc.emisor.ruc }}</div>
   <div class="co-sub">{% if cp is not null and cp.contacto is not null %}{{ cp.contacto.email }} · {{ cp.contacto.telefono }}{% endif %}</div>
-  <div class="doc-kind">{{ name }}</div>
+  <div class="doc-kind">{{ name|upper }} ELECTRÓNICA</div>
   <div class="doc-num">{{ doc.serie }} · {{ doc.numero|str_pad(8, '0', 'left') }}</div>
 </div>
 

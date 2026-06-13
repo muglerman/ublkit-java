@@ -104,7 +104,7 @@
   {% if params.logo is not empty %}<div class="logo"><img src="{{ params.logo }}" alt="logo"/></div>{% endif %}
   <div class="co-name">{{ doc.emisor.razonSocial }}</div>
   <div class="co-sub">{{ doc.emisor.direccion.direccion }} · RUC {{ doc.emisor.ruc }}{% if cp is not null and cp.contacto is not null %} · {{ cp.contacto.email }}{% endif %}</div>
-  <div class="doc-kind">{{ name }}</div>
+  <div class="doc-kind">{{ name|upper }} ELECTRÓNICA</div>
   <div class="doc-num">{{ doc.serie }} · {{ doc.numero|str_pad(8, '0', 'left') }}</div>
 </div>
 

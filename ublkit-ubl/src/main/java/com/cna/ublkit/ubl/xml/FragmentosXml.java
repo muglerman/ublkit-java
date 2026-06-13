@@ -63,13 +63,21 @@ final class FragmentosXml {
 
     // ── Datos generales ──────────────────────────────────────────
 
+    /**
+     * Formatea el correlativo de un comprobante con la convención SUNAT de 8 dígitos rellenados con ceros
+     * (p.ej. 9 -> "00000009"). Centraliza el padding para que TODOS los serializadores que construyen el
+     * {@code cbc:ID} con formato serie-correlativo (factura, nota, guía de remisión, retención, percepción)
+     * produzcan el mismo formato. No aplica a resumen diario (RC) ni comunicación de baja (RA), cuyo ID usa
+     * el correlativo diario sin padding.
+     */
+    static String correlativoFormateado(Integer numero) {
+        return numero != null ? String.format("%08d", numero) : "00000001";
+    }
+
     static void agregarDatosGenerales(Document doc, Element raiz, DocumentoBase documento) {
         raiz.appendChild(cbc(doc, "UBLVersionID", ConstantesUbl.UBL_VERSION));
         raiz.appendChild(cbc(doc, "CustomizationID", ConstantesUbl.CUSTOMIZATION_ID));
-        String correlativo = documento.getNumero() != null
-                ? String.format("%08d", documento.getNumero())
-                : "00000001";
-        raiz.appendChild(cbc(doc, "ID", documento.getSerie() + "-" + correlativo));
+        raiz.appendChild(cbc(doc, "ID", documento.getSerie() + "-" + correlativoFormateado(documento.getNumero())));
         raiz.appendChild(cbc(doc, "IssueDate", documento.getFechaEmision()));
         if (documento.getHoraEmision() != null) {
             raiz.appendChild(cbc(doc, "IssueTime", documento.getHoraEmision()));

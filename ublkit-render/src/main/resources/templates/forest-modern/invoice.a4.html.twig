@@ -135,7 +135,7 @@
   </div>
   <div class="doc-id">
     <div class="tag">Comprobante</div>
-    <div class="kind">{{ name }}</div>
+    <div class="kind">{{ name|upper }} ELECTRÓNICA</div>
     <div class="num">{{ doc.serie }}-{{ doc.numero|str_pad(8, '0', 'left') }}</div>
     <div class="ruc">RUC <b>{{ doc.emisor.ruc }}</b></div>
     <div class="issued">Emitido {{ doc.fechaEmision|date('d/m/Y') }} · {{ doc.fechaEmision|date('H:i:s') }}</div>

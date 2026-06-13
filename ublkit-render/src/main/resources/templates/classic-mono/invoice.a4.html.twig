@@ -129,7 +129,7 @@
   </div>
   <div class="doc-id">
     <div class="ruc">RUC <strong>{{ doc.emisor.ruc }}</strong></div>
-    <div class="kind">{{ name }}</div>
+    <div class="kind">{{ name|upper }} ELECTRÓNICA</div>
     <div class="num">{{ doc.serie }} — {{ doc.numero|str_pad(8, '0', 'left') }}</div>
     <div class="issued">Emitido {{ doc.fechaEmision|date('dd/MM/yyyy') }} · {{ doc.fechaEmision|date('HH:mm:ss') }}</div>
   </div>

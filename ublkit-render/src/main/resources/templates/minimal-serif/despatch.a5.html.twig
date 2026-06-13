@@ -83,7 +83,7 @@
   {% if params.logo is not empty %}<div class="logo"><img src="{{ params.logo }}" alt="logo"/></div>{% endif %}
   <div class="co-name">{% if cp is not null %}{{ cp.razonSocial }}{% endif %}</div>
   <div class="co-sub">{% if cp is not null and cp.direccion is not null %}{{ cp.direccion.direccion }}{% endif %} · RUC {% if cp is not null %}{{ cp.ruc }}{% endif %}</div>
-  <div class="doc-kind">{% if doc.tipoComprobante is not empty %}{{ name }}{% else %}Guía de Remisión Electrónica{% endif %}</div>
+  <div class="doc-kind">{% if doc.tipoComprobante is not empty %}{{ name|upper }} ELECTRÓNICA{% else %}Guía de Remisión Electrónica{% endif %}</div>
   <div class="doc-num">{{ doc.serie }} · {{ doc.numero|str_pad(8, '0', 'left') }}</div>
 </div>
 
@@ -140,6 +140,7 @@
     </tr>
     {% endfor %}
   </tbody>
+  {% if params.totalGuia is not empty and params.totalGuia > 0 %}<tfoot><tr><td colspan="99" style="text-align:right;padding:10px 12px;font-weight:700;">Monto total: S/ {{ params.totalGuia|n_format }}</td></tr></tfoot>{% endif %}
   </table>
 </div>
 
@@ -148,7 +149,7 @@
     {% if qrBase64 is not empty %}<img src="data:image/png;base64,{{ qrBase64 }}" alt="QR Code" />{% endif %}
   </div>
   <div class="meta">
-    <p><strong>Representación impresa</strong> de la {% if doc.tipoComprobante is not empty %}{{ name }}{% else %}Guía de Remisión{% endif %} Electrónica.</p>
+    <p><strong>Representación impresa</strong> de la {% if doc.tipoComprobante is not empty %}{{ name|upper }} ELECTRÓNICA{% else %}Guía de Remisión{% endif %} Electrónica.</p>
     <p>Verifique este documento en <strong>{{ params.consultaUrl|default('sunat.gob.pe') }}</strong> con el RUC del remitente y el número del documento.</p>
     <p style="margin-top:6px;">Firmante: {% if cp is not null %}{{ cp.ruc }} · {{ cp.razonSocial }}{% endif %}</p>
     {% if params.footer is not null %}<p id="custom-footer-box" style="margin-top:10px; font-style:italic;">{{ params.footer }}</p>{% endif %}

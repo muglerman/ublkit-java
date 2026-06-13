@@ -108,18 +108,18 @@
       <div class="logo">{% if params.logo is not empty %}<img src="{{ params.logo }}" alt="logo"/>{% else %}<svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="3"><rect x="6" y="6" width="28" height="28" rx="2"/><path d="M12 20h16M12 14h10M12 26h14"/></svg>{% endif %}</div>
       <div>
         <div class="co-name">{{ doc.emisor.razonSocial }}</div>
-        <div class="co-tag">{% if cp is not null and cp.nombreComercial is not null %}{{ cp.nombreComercial }}{% endif %}</div>
+        <div class="co-tag">{% if cp is not null and cp.nombreComercial is not empty %}{{ cp.nombreComercial }}{% endif %}{% if params.establishmentName is not empty %}{% if cp is not null and cp.nombreComercial is not empty %} · {% endif %}{{ params.establishmentName }}{% endif %}</div>
       </div>
     </div>
     <div class="info">
-      {% if cp is not null and cp.direccion is not null %}<p>{{ cp.direccion.direccion }}</p>{% endif %}
+      {% if cp is not null and cp.direccion is not null %}<p>{{ cp.direccion.direccion }}{% if cp.direccion.distrito is not empty %} · {{ cp.direccion.departamento }} — {{ cp.direccion.provincia }} — {{ cp.direccion.distrito }}{% endif %}{% if cp.direccion.ubigeo is not empty %} · Ubigeo {{ cp.direccion.ubigeo }}{% endif %}</p>{% if cp.contacto is not null and (cp.contacto.email is not empty or cp.contacto.telefono is not empty) %}<p>{% if cp.contacto.email is not empty %}{{ cp.contacto.email }}{% endif %}{% if cp.contacto.telefono is not empty %} · {{ cp.contacto.telefono }}{% endif %}</p>{% endif %}{% endif %}
       {% if cp is not null and cp.contacto is not null %}<p>{{ cp.contacto.email }} · {{ cp.contacto.telefono }}</p>{% endif %}
       <p>RUC <b>{{ doc.emisor.ruc }}</b></p>
     </div>
   </div>
   <div class="right">
     <div>
-      <div class="kind">{{ name }}</div>
+      <div class="kind">{{ name|upper }} ELECTRÓNICA</div>
       <div class="num">{{ doc.serie }}-{{ doc.numero|str_pad(8, '0', 'left') }}</div>
     </div>
     <div>

@@ -30,7 +30,7 @@ public final class SerializadorXmlRetencion implements SerializadorXml<Comproban
         FragmentosXml.agregarExtensiones(doc, raiz);
         raiz.appendChild(cbc(doc, "UBLVersionID", UBL_VERSION_SUNAT));
         raiz.appendChild(cbc(doc, "CustomizationID", CUSTOMIZATION_ID_VOIDED));
-        raiz.appendChild(cbc(doc, "ID", retencion.getSerie() + "-" + retencion.getNumero()));
+        raiz.appendChild(cbc(doc, "ID", retencion.getSerie() + "-" + FragmentosXml.correlativoFormateado(retencion.getNumero())));
         raiz.appendChild(cbc(doc, "IssueDate", retencion.getFechaEmision()));
         raiz.appendChild(cbc(doc, "DocumentCurrencyCode", moneda(retencion.getMoneda())));
 

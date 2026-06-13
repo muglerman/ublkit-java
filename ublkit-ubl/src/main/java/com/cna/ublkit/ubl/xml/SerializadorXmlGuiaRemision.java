@@ -35,7 +35,7 @@ public final class SerializadorXmlGuiaRemision implements SerializadorXml<Borrad
         // 2. General data
         raiz.appendChild(cbc(doc, "UBLVersionID", ConstantesUbl.UBL_VERSION));
         raiz.appendChild(cbc(doc, "CustomizationID", guia.getVersion() != null ? guia.getVersion() : ConstantesUbl.CUSTOMIZATION_ID));
-        raiz.appendChild(cbc(doc, "ID", guia.getSerie() + "-" + guia.getNumero()));
+        raiz.appendChild(cbc(doc, "ID", guia.getSerie() + "-" + FragmentosXml.correlativoFormateado(guia.getNumero())));
         raiz.appendChild(cbc(doc, "IssueDate", guia.getFechaEmision()));
         if (guia.getHoraEmision() != null) {
             raiz.appendChild(cbc(doc, "IssueTime", guia.getHoraEmision()));
@@ -275,6 +275,10 @@ public final class SerializadorXmlGuiaRemision implements SerializadorXml<Borrad
             }
         }
 
+        // Consignment: empresa que subcontrata (LogisticsOperatorParty) y pagador del flete tercero
+        // (OriginatorCustomerParty) en la GRE-Transportista subcontratada.
+        agregarConsignment(doc, shipment, guia);
+
         // ShipmentStage
         agregarShipmentStage(doc, shipment, envio);
 
@@ -400,6 +404,42 @@ public final class SerializadorXmlGuiaRemision implements SerializadorXml<Borrad
         }
 
         shipment.appendChild(delivery);
+    }
+
+    /**
+     * cac:Consignment de la GRE-Transportista subcontratada: la empresa que subcontrata el traslado
+     * (cac:LogisticsOperatorParty) y, si el flete lo paga un tercero, el pagador (cac:OriginatorCustomerParty).
+     */
+    private void agregarConsignment(Document doc, Element shipment, BorradorGuiaRemision guia) {
+        if (guia.getSubcontratado() == null && guia.getPagadorFleteTercero() == null) {
+            return;
+        }
+        Element consignment = cac(doc, "Consignment");
+        consignment.appendChild(cbc(doc, "ID", "SUNAT_Envio"));
+        if (guia.getSubcontratado() != null) {
+            consignment.appendChild(parteOperadora(doc, "LogisticsOperatorParty", guia.getSubcontratado()));
+        }
+        if (guia.getPagadorFleteTercero() != null) {
+            consignment.appendChild(parteOperadora(doc, "OriginatorCustomerParty", guia.getPagadorFleteTercero()));
+        }
+        shipment.appendChild(consignment);
+    }
+
+    /** Bloque de parte (RUC + razón social) usado por LogisticsOperatorParty / OriginatorCustomerParty. */
+    private Element parteOperadora(Document doc, String tag, TerceroGuia parte) {
+        Element party = cac(doc, tag);
+        party.appendChild(cbcConAtributos(doc, "CustomerAssignedAccountID",
+                parte.numeroDocumentoIdentidad(),
+                "schemeID", parte.tipoDocumentoIdentidad() != null ? parte.tipoDocumentoIdentidad() : "6",
+                "schemeName", "Documento de Identidad",
+                "schemeAgencyName", "PE:SUNAT",
+                "schemeURI", "urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo06"));
+        Element p = cac(doc, "Party");
+        Element legal = cac(doc, "PartyLegalEntity");
+        legal.appendChild(cbcCdata(doc, "RegistrationName", parte.nombre()));
+        p.appendChild(legal);
+        party.appendChild(p);
+        return party;
     }
 
     private void agregarContenedores(Document doc, Element shipment, DatosEnvio envio) {
