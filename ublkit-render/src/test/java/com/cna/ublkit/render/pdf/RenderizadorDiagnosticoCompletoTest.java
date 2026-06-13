@@ -296,7 +296,7 @@ class RenderizadorDiagnosticoCompletoTest {
         datosEnvio.setNumeroDeBultos(5);
         datosEnvio.setFechaTraslado(LocalDate.of(2026, 3, 31));
         datosEnvio.setTransportista(new TransportistaGuia("6", "20111111111", "Transportes XYZ", "MTC-123456"));
-        datosEnvio.setVehiculo(new Vehiculo("ABC-123", "TUC-001", "HAB-2024-001", "MTC", null));
+        datosEnvio.setVehiculo(new Vehiculo("ABC-123", "TUC-001", "HAB-2024-001", "MTC", "VOLVO", "FH16", null));
         datosEnvio.setChoferes(List.of(new Conductor("Principal", "1", "12345678", "Carlos", "López", "DL123456")));
         guia.setEnvio(datosEnvio);
 

@@ -45,7 +45,7 @@ public final class GuiasRemisionEjemplo {
 
         Conductor chofer = new Conductor("Principal", "1", "12345678", "JUAN", "PEREZ GOMEZ", "Q12345678");
         envio.setChoferes(List.of(chofer));
-        envio.setVehiculo(new Vehiculo("ABC-123", null, null, null, null));
+        envio.setVehiculo(new Vehiculo("ABC-123", null, null, null, "VOLVO", "FH16", null));
 
         guia.setEnvio(envio);
 

@@ -41,7 +41,7 @@
 
   .parties { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; padding: 18px 0; border-bottom: 1px solid #0a0a0a; }
   .party .label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.14em; color: #737373; margin-bottom: 6px; }
-  .party .name { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+  .party .name { font-size: 11.5px; font-weight: 600; margin-bottom: 4px; }
   .party .row { display: flex; gap: 10px; font-size: 10px; margin-top: 2px; }
   .party .row span:first-child { color: #737373; min-width: 68px; text-transform: uppercase; letter-spacing: 0.06em; font-size: 9px; }
   .party .row span:last-child { color: #0a0a0a; }
@@ -122,13 +122,13 @@
     <div class="row"><span>{% if cl is not null %}{{ cl.tipoDocumentoIdentidad|catalogAttr('06','abreviatura') }}{% endif %}</span><span class="mono">{% if cl is not null %}{{ cl.numeroDocumentoIdentidad }}{% endif %}</span></div>
     {% if doc.envio is not null and doc.envio.destino is not null %}
     <div class="row"><span>Llegada</span><span>{{ doc.envio.destino.direccion }}</span></div>
-    <div class="row"><span>Ubigeo</span><span>{{ doc.envio.destino.ubigeo }}</span></div>
+    <div class="row"><span>Ubicación</span><span>{% if params.destinoDistrito is not empty %}{% if params.destinoDepartamento is not empty %}{{ params.destinoDepartamento }} — {{ params.destinoProvincia }} — {% endif %}{{ params.destinoDistrito }}{% endif %}{% if doc.envio.destino.ubigeo is not empty %} · {{ doc.envio.destino.ubigeo }}{% endif %}</span></div>
     {% endif %}
   </div>
   <div class="party">
     <div class="label">Envío</div>
     {% if doc.envio is not null %}
-    {% if doc.envio.partida is not null %}<div class="row"><span>Partida</span><span>{{ doc.envio.partida.direccion }}</span></div>{% endif %}
+    {% if doc.envio.partida is not null %}<div class="row"><span>Partida</span><span>{{ doc.envio.partida.direccion }}{% if params.partidaDistrito is not empty %} · {% if params.partidaDepartamento is not empty %}{{ params.partidaDepartamento }} — {{ params.partidaProvincia }} — {% endif %}{{ params.partidaDistrito }}{% endif %}{% if doc.envio.partida.ubigeo is not empty %} ({{ doc.envio.partida.ubigeo }}){% endif %}</span></div>{% endif %}
     {% if doc.envio.transportista is not null %}<div class="row"><span>Transporte</span><span>{{ doc.envio.transportista.nombre }}{% if doc.envio.transportista.numeroDocumentoIdentidad is not empty %} · {{ doc.envio.transportista.numeroDocumentoIdentidad }}{% endif %}</span></div>{% endif %}
     {% if doc.envio.transportista is not null and doc.envio.transportista.numeroRegistroMTC is not empty %}<div class="row"><span>Registro MTC</span><span class="mono">{{ doc.envio.transportista.numeroRegistroMTC }}</span></div>{% endif %}
     {% if doc.subcontratado is not null %}<div class="row"><span>Transp. subcontratado</span><span>{{ doc.subcontratado.nombre }}{% if doc.subcontratado.numeroDocumentoIdentidad is not empty %} · {{ doc.subcontratado.numeroDocumentoIdentidad }}{% endif %}</span></div>{% endif %}

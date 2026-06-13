@@ -42,7 +42,7 @@
   .parties { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
   .party { border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; }
   .party .label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--accent); font-weight: 600; margin-bottom: 6px; }
-  .party .name { font-size: 12.5px; font-weight: 600; margin-bottom: 6px; }
+  .party .name { font-size: 11px; font-weight: 600; margin-bottom: 6px; }
   .party .row { display: grid; grid-template-columns: 80px 1fr; font-size: 10px; padding: 1px 0; }
   .party .row .k { color: var(--ink-3); }
 
@@ -94,7 +94,8 @@
     <div class="logo">{% if params.logo is not empty %}<img src="{{ params.logo }}" alt="logo"/>{% else %}<svg viewBox="0 0 40 40" fill="none" stroke="#fff" stroke-width="2.4"><circle cx="20" cy="20" r="14"/><path d="M9 23l5-9 6 4 6-7"/></svg>{% endif %}</div>
     <div>
       <div class="co-name">{% if cp is not null %}{{ cp.razonSocial }}{% endif %}</div>
-      <div class="co-sub">{% if cp is not null and cp.direccion is not null %}{{ cp.direccion.direccion }}{% endif %}{% if doc.envio is not null and doc.envio.transportista is not null and doc.envio.transportista.numeroRegistroMTC is not empty %}{% if cp is not null and cp.direccion is not null %} · {% endif %}Reg. MTC {{ doc.envio.transportista.numeroRegistroMTC }}{% endif %}{% if doc.subcontratado is not null %} · Subcontratado: {{ doc.subcontratado.nombre }}{% endif %}{% if cp is not null and cp.contacto is not null %} · {{ cp.contacto.telefono }}{% endif %}</div>
+      <div class="co-sub">{% if cp is not null and cp.direccion is not null %}{{ cp.direccion.direccion }}{% endif %}{% if doc.subcontratado is not null %} · Subcontratado: {{ doc.subcontratado.nombre }}{% endif %}{% if cp is not null and cp.contacto is not null %} · {{ cp.contacto.telefono }}{% endif %}</div>
+      {% if doc.envio is not null and doc.envio.transportista is not null and doc.envio.transportista.numeroRegistroMTC is not empty %}<div class="co-sub">Reg. MTC {{ doc.envio.transportista.numeroRegistroMTC }}</div>{% endif %}
     </div>
   </div>
   <div class="docbox">
@@ -110,13 +111,13 @@
   <div class="leg">
     <div class="k">Punto de partida</div>
     <div class="v">{% if doc.envio is not null and doc.envio.partida is not null %}{{ doc.envio.partida.direccion }}{% endif %}</div>
-    <div class="a">{% if doc.envio is not null and doc.envio.partida is not null %}{% if params.partidaDistrito is not empty %}{{ params.partidaDistrito }} · {% endif %}Ubigeo {{ doc.envio.partida.ubigeo }}{% endif %}</div>
+    <div class="a">{% if params.partidaDistrito is not empty %}{% if params.partidaDepartamento is not empty %}{{ params.partidaDepartamento }} — {{ params.partidaProvincia }} — {% endif %}{{ params.partidaDistrito }}{% endif %}{% if doc.envio is not null and doc.envio.partida is not null and doc.envio.partida.ubigeo is not empty %} · Ubigeo {{ doc.envio.partida.ubigeo }}{% endif %}</div>
   </div>
   <div class="arrow">→</div>
   <div class="leg right">
     <div class="k">Punto de llegada</div>
     <div class="v">{% if doc.envio is not null and doc.envio.destino is not null %}{{ doc.envio.destino.direccion }}{% endif %}</div>
-    <div class="a">{% if doc.envio is not null and doc.envio.destino is not null %}{% if params.destinoDistrito is not empty %}{{ params.destinoDistrito }} · {% endif %}Ubigeo {{ doc.envio.destino.ubigeo }}{% endif %}</div>
+    <div class="a">{% if params.destinoDistrito is not empty %}{% if params.destinoDepartamento is not empty %}{{ params.destinoDepartamento }} — {{ params.destinoProvincia }} — {% endif %}{{ params.destinoDistrito }}{% endif %}{% if doc.envio is not null and doc.envio.destino is not null and doc.envio.destino.ubigeo is not empty %} · Ubigeo {{ doc.envio.destino.ubigeo }}{% endif %}</div>
   </div>
 </div>
 
@@ -171,6 +172,12 @@
     {% if doc.envio.vehiculo.numeroCirculacion is not empty %}
     <div class="row"><span class="k">TUC/CHV</span><span class="mono">{{ doc.envio.vehiculo.numeroCirculacion }}</span></div>
     {% endif %}
+    {% if doc.envio.vehiculo.marca is not empty %}
+    <div class="row"><span class="k">Marca</span><span>{{ doc.envio.vehiculo.marca }}</span></div>
+    {% endif %}
+    {% if doc.envio.vehiculo.modelo is not empty %}
+    <div class="row"><span class="k">Modelo</span><span>{{ doc.envio.vehiculo.modelo }}</span></div>
+    {% endif %}
     {% if doc.envio.vehiculo.numeroAutorizacion is not empty %}
     <div class="row"><span class="k">Autorización</span><span class="mono">{{ doc.envio.vehiculo.numeroAutorizacion }}</span></div>
     {% endif %}
@@ -188,6 +195,7 @@
 
 {% if doc.documentosRelacionados is not empty or doc.observaciones is not empty %}
 <div class="related">
+  {% if doc.documentosRelacionados is not empty %}
   <div class="block">
     <div class="head">Documentos relacionados</div>
     <div class="body">
@@ -196,12 +204,15 @@
       {% endfor %}
     </div>
   </div>
+  {% endif %}
+  {% if doc.observaciones is not empty %}
   <div class="block">
     <div class="head">Observaciones</div>
     <div class="body">
-      {% if doc.observaciones is not empty %}{% for obs in doc.observaciones|split('\n') %}<p class="small">· {{ obs }}</p>{% endfor %}{% endif %}
+      {% for obs in doc.observaciones|split('\n') %}<p class="small">· {{ obs }}</p>{% endfor %}
     </div>
   </div>
+  {% endif %}
 </div>
 {% endif %}
 

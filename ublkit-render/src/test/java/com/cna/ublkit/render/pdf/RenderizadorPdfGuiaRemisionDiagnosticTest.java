@@ -114,7 +114,7 @@ class RenderizadorPdfGuiaRemisionDiagnosticTest {
 		datosEnvio.setTransportista(new TransportistaGuia("6", "20111111111", "Transportes XYZ", "MTC-123456"));
 
 		// Vehículo
-		datosEnvio.setVehiculo(new Vehiculo("ABC-123", "TUC-001", "HAB-2024-001", "MTC", null));
+		datosEnvio.setVehiculo(new Vehiculo("ABC-123", "TUC-001", "HAB-2024-001", "MTC", "VOLVO", "FH16", null));
 
 		// Conductor
 		datosEnvio.setChoferes(List.of(

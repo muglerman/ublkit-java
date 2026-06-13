@@ -10,6 +10,8 @@ import java.util.List;
  * @param numeroCirculacion  Número de tarjeta única de circulación (TUC).
  * @param numeroAutorizacion Número de autorización o certificado de habilitación vehicular.
  * @param codigoEmisor       Código de la entidad emisora de la autorización.
+ * @param marca              Marca del vehículo (presentación; no forma parte del UBL).
+ * @param modelo             Modelo del vehículo (presentación; no forma parte del UBL).
  * @param secundarios        Lista de vehículos secundarios adjuntos.
  *
  * @since 0.1.0
@@ -19,6 +21,8 @@ public record Vehiculo(
         String numeroCirculacion,
         String numeroAutorizacion,
         String codigoEmisor,
+        String marca,
+        String modelo,
         List<Vehiculo> secundarios
 ) {
 }

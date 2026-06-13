@@ -47,7 +47,7 @@
   .parties { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 18px; }
   .party { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
   .party .label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--ink-3); margin-bottom: 4px; }
-  .party .name { font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+  .party .name { font-size: 11.5px; font-weight: 700; margin-bottom: 6px; }
   .party .row { display: grid; grid-template-columns: 78px 1fr; font-size: 10px; padding: 1px 0; }
   .party .row .k { color: var(--ink-3); }
 
@@ -117,13 +117,13 @@
   <div class="leg">
     <div class="k">Partida</div>
     <div class="v">{% if doc.envio is not null and doc.envio.partida is not null %}{{ doc.envio.partida.direccion }}{% endif %}</div>
-    <div class="addr">{% if doc.envio is not null and doc.envio.partida is not null %}{{ doc.envio.partida.ubigeo }}{% endif %}</div>
+    <div class="addr">{% if params.partidaDistrito is not empty %}{% if params.partidaDepartamento is not empty %}{{ params.partidaDepartamento }} — {{ params.partidaProvincia }} — {% endif %}{{ params.partidaDistrito }}{% endif %}{% if doc.envio is not null and doc.envio.partida is not null and doc.envio.partida.ubigeo is not empty %} · Ubigeo {{ doc.envio.partida.ubigeo }}{% endif %}</div>
   </div>
   <div class="arrow">→</div>
   <div class="leg right">
     <div class="k">Llegada</div>
     <div class="v">{% if doc.envio is not null and doc.envio.destino is not null %}{{ doc.envio.destino.direccion }}{% endif %}</div>
-    <div class="addr">{% if doc.envio is not null and doc.envio.destino is not null %}{{ doc.envio.destino.ubigeo }}{% endif %}</div>
+    <div class="addr">{% if params.destinoDistrito is not empty %}{% if params.destinoDepartamento is not empty %}{{ params.destinoDepartamento }} — {{ params.destinoProvincia }} — {% endif %}{{ params.destinoDistrito }}{% endif %}{% if doc.envio is not null and doc.envio.destino is not null and doc.envio.destino.ubigeo is not empty %} · Ubigeo {{ doc.envio.destino.ubigeo }}{% endif %}</div>
   </div>
 </div>
 
@@ -153,6 +153,9 @@
     {% endif %}
     {% if doc.envio is not null and doc.envio.vehiculo is not null %}
     <div class="row"><span class="k">Vehículo</span><span class="mono">{{ doc.envio.vehiculo.placa }}</span></div>
+    {% if doc.envio.vehiculo.marca is not empty or doc.envio.vehiculo.modelo is not empty %}
+    <div class="row"><span class="k">Marca / Modelo</span><span>{% if doc.envio.vehiculo.marca is not empty %}{{ doc.envio.vehiculo.marca }}{% endif %}{% if doc.envio.vehiculo.marca is not empty and doc.envio.vehiculo.modelo is not empty %} · {% endif %}{% if doc.envio.vehiculo.modelo is not empty %}{{ doc.envio.vehiculo.modelo }}{% endif %}</span></div>
+    {% endif %}
     {% endif %}
     {% if doc.envio is not null and doc.envio.choferes is not empty %}
     <div class="row"><span class="k">Conductor</span><span>{{ doc.envio.choferes[0].nombres }} {{ doc.envio.choferes[0].apellidos }}</span></div>

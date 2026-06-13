@@ -9,6 +9,8 @@ public class VehiculoBuilder {
     private String numeroCirculacion = "TUC12345";
     private String numeroAutorizacion = "AUTH67890";
     private String codigoEmisor = "01";
+    private String marca = "VOLVO";
+    private String modelo = "FH16";
     private List<Vehiculo> secundarios = new ArrayList<>();
 
     public VehiculoBuilder withPlaca(String placa) {
@@ -36,8 +38,18 @@ public class VehiculoBuilder {
         return this;
     }
 
+    public VehiculoBuilder withMarca(String marca) {
+        this.marca = marca;
+        return this;
+    }
+
+    public VehiculoBuilder withModelo(String modelo) {
+        this.modelo = modelo;
+        return this;
+    }
+
     public Vehiculo build() {
-        return new Vehiculo(placa, numeroCirculacion, numeroAutorizacion, codigoEmisor, secundarios);
+        return new Vehiculo(placa, numeroCirculacion, numeroAutorizacion, codigoEmisor, marca, modelo, secundarios);
     }
 
     public static VehiculoBuilder aVehiculo() {

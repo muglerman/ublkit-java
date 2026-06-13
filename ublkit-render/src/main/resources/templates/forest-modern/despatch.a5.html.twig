@@ -59,7 +59,7 @@
   .parties { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
   .party { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; }
   .party .label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--ink-3); margin-bottom: 6px; }
-  .party .name { font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+  .party .name { font-size: 11.5px; font-weight: 700; margin-bottom: 6px; }
   .party .row { display: grid; grid-template-columns: 78px 1fr; font-size: 10px; padding: 2px 0; }
   .party .row .k { color: var(--ink-3); }
 
@@ -132,7 +132,7 @@
     <div class="row"><span class="k">{% if cl is not null %}{{ cl.tipoDocumentoIdentidad|catalogAttr('06','abreviatura') }}{% endif %}</span><span class="mono">{% if cl is not null %}{{ cl.numeroDocumentoIdentidad }}{% endif %}</span></div>
     {% if doc.envio is not null and doc.envio.destino is not null %}
     <div class="row"><span class="k">Llegada</span><span>{{ doc.envio.destino.direccion }}</span></div>
-    <div class="row"><span class="k">Ubigeo</span><span>{{ doc.envio.destino.ubigeo }}</span></div>
+    <div class="row"><span class="k">Ubicación</span><span>{% if params.destinoDistrito is not empty %}{% if params.destinoDepartamento is not empty %}{{ params.destinoDepartamento }} — {{ params.destinoProvincia }} — {% endif %}{{ params.destinoDistrito }}{% endif %}{% if doc.envio.destino.ubigeo is not empty %} · {{ doc.envio.destino.ubigeo }}{% endif %}</span></div>
     {% endif %}
   </div>
   <div class="party">
@@ -145,7 +145,7 @@
     <div class="row"><span class="k">Vehículo</span><span class="mono">{{ doc.envio.vehiculo.placa }}</span></div>
     {% endif %}
     {% if doc.envio is not null and doc.envio.partida is not null %}
-    <div class="row"><span class="k">Partida</span><span>{{ doc.envio.partida.direccion }}</span></div>
+    <div class="row"><span class="k">Partida</span><span>{{ doc.envio.partida.direccion }}{% if params.partidaDistrito is not empty %} · {% if params.partidaDepartamento is not empty %}{{ params.partidaDepartamento }} — {{ params.partidaProvincia }} — {% endif %}{{ params.partidaDistrito }}{% endif %}{% if doc.envio.partida.ubigeo is not empty %} ({{ doc.envio.partida.ubigeo }}){% endif %}</span></div>
     {% endif %}
   </div>
 </div>

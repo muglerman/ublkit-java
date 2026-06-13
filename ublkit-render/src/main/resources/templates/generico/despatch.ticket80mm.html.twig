@@ -71,8 +71,8 @@
   {% if doc.envio is not null and (doc.envio.partida is not null or doc.envio.destino is not null) %}
   <hr class="sep" />
   <div class="block">
-    {% if doc.envio.partida is not null and doc.envio.partida.direccion %}<div><span class="muted">Partida:</span> {{ doc.envio.partida.direccion }}</div>{% endif %}
-    {% if doc.envio.destino is not null and doc.envio.destino.direccion %}<div><span class="muted">Llegada:</span> {{ doc.envio.destino.direccion }}</div>{% endif %}
+    {% if doc.envio.partida is not null and doc.envio.partida.direccion %}<div><span class="muted">Partida:</span> {{ doc.envio.partida.direccion }}{% if params.partidaDistrito is not empty %} · {% if params.partidaDepartamento is not empty %}{{ params.partidaDepartamento }} — {{ params.partidaProvincia }} — {% endif %}{{ params.partidaDistrito }}{% endif %}{% if doc.envio.partida.ubigeo is not empty %} ({{ doc.envio.partida.ubigeo }}){% endif %}</div>{% endif %}
+    {% if doc.envio.destino is not null and doc.envio.destino.direccion %}<div><span class="muted">Llegada:</span> {{ doc.envio.destino.direccion }}{% if params.destinoDistrito is not empty %} · {% if params.destinoDepartamento is not empty %}{{ params.destinoDepartamento }} — {{ params.destinoProvincia }} — {% endif %}{{ params.destinoDistrito }}{% endif %}{% if doc.envio.destino.ubigeo is not empty %} ({{ doc.envio.destino.ubigeo }}){% endif %}</div>{% endif %}
   </div>
   {% endif %}
 
@@ -82,7 +82,7 @@
     <div class="t">TRANSPORTE</div>
     {% if doc.envio.transportista is not null %}<div>{{ doc.envio.transportista.nombre }}{% if doc.envio.transportista.numeroDocumentoIdentidad %} · {{ doc.envio.transportista.numeroDocumentoIdentidad }}{% endif %}{% if doc.envio.transportista.numeroRegistroMTC %} · MTC {{ doc.envio.transportista.numeroRegistroMTC }}{% endif %}</div>{% endif %}
     {% if doc.subcontratado is not null %}<div class="muted">Subcontratado: {{ doc.subcontratado.nombre }}{% if doc.subcontratado.numeroDocumentoIdentidad %} · {{ doc.subcontratado.numeroDocumentoIdentidad }}{% endif %}</div>{% endif %}
-    {% if doc.envio.vehiculo is not null and doc.envio.vehiculo.placa %}<div class="muted">Placa: {{ doc.envio.vehiculo.placa }}</div>{% endif %}
+    {% if doc.envio.vehiculo is not null and doc.envio.vehiculo.placa %}<div class="muted">Placa: {{ doc.envio.vehiculo.placa }}{% if doc.envio.vehiculo.marca is not empty or doc.envio.vehiculo.modelo is not empty %} · {% if doc.envio.vehiculo.marca is not empty %}{{ doc.envio.vehiculo.marca }}{% endif %}{% if doc.envio.vehiculo.marca is not empty and doc.envio.vehiculo.modelo is not empty %} {% endif %}{% if doc.envio.vehiculo.modelo is not empty %}{{ doc.envio.vehiculo.modelo }}{% endif %}{% endif %}</div>{% endif %}
     {% for ch in doc.envio.choferes %}
     <div class="muted">Conductor: {{ ch.nombres }} {{ ch.apellidos }}{% if ch.licencia %} · Lic. {{ ch.licencia }}{% endif %}</div>
     {% endfor %}

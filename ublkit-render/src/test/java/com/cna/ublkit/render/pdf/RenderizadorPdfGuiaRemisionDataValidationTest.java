@@ -261,8 +261,10 @@ class RenderizadorPdfGuiaRemisionDataValidationTest {
 
             String html = renderizarHtml(guia);
 
-            assertTrue(html.contains("Transportes XYZ"),
-                "Debe contener nombre del transportista");
+            // En la GRE-31 el transportista ES la empresa emisora, por lo que el nombre redundante
+            // se omitió del encabezado; lo que identifica al transportista en la guía es su Reg. MTC.
+            assertTrue(html.contains("MTC-123456"),
+                "Debe contener el Registro MTC del transportista");
         }
 
         @Test
@@ -510,6 +512,8 @@ class RenderizadorPdfGuiaRemisionDataValidationTest {
                 "TUC-001",              // numeroCirculacion
                 "HAB-2024-001",         // numeroAutorizacion
                 "MTC",                  // codigoEmisor
+                "VOLVO",                // marca
+                "FH16",                 // modelo
                 null                    // sin vehículos secundarios
         ));
 
