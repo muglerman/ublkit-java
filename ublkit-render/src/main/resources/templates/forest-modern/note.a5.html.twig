@@ -130,7 +130,7 @@
     </div>
     <div class="meta">
       <p>{{ doc.emisor.direccion.direccion }}</p>
-      <p>{% if cp is not null and cp.contacto is not null %}{{ cp.contacto.email }} · {{ cp.contacto.telefono }}{% endif %}</p>
+      <p>{% if cp is not null and cp.contacto is not null %}{% if cp.contacto.email is not empty %}{{ cp.contacto.email }}{% endif %}{% if cp.contacto.email is not empty and cp.contacto.telefono is not empty %} · {% endif %}{{ cp.contacto.telefono }}{% endif %}</p>
     </div>
   </div>
   <div class="doc-id">
@@ -138,7 +138,7 @@
     <div class="kind">{{ name|upper }} ELECTRÓNICA</div>
     <div class="num">{{ doc.serie }}-{{ doc.numero|str_pad(8, '0', 'left') }}</div>
     <div class="ruc">RUC <b>{{ doc.emisor.ruc }}</b></div>
-    <div class="issued">Emitido {{ doc.fechaEmision|date('d/m/Y') }} · {{ doc.fechaEmision|date('H:i:s') }}</div>
+    <div class="issued">Emitido {{ doc.fechaEmision|date('d/m/Y') }} · {{ doc.horaEmision }}</div>
   </div>
 </div>
 

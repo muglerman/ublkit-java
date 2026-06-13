@@ -106,7 +106,7 @@
     </div>
     <div class="meta">
       <p>{% if cp is not null and cp.direccion is not null %}{{ cp.direccion.direccion }}{% endif %}</p>
-      <p>{% if cp is not null and cp.contacto is not null %}{{ cp.contacto.email }} · {{ cp.contacto.telefono }}{% endif %}</p>
+      <p>{% if cp is not null and cp.contacto is not null %}{% if cp.contacto.email is not empty %}{{ cp.contacto.email }}{% endif %}{% if cp.contacto.email is not empty and cp.contacto.telefono is not empty %} · {% endif %}{{ cp.contacto.telefono }}{% endif %}</p>
     </div>
   </div>
   <div class="doc-id">

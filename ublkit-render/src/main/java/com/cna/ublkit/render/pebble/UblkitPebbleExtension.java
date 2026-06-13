@@ -107,7 +107,12 @@ public final class UblkitPebbleExtension extends AbstractExtension {
         }
 
         private boolean wantsDate(String format) {
-            return format != null && (format.contains("d") || format.contains("m") || format.contains("Y") || format.contains("y"));
+            // OJO: no usar la 'm' minúscula como indicador de fecha: en los formatos de hora Java
+            // (HH:mm, HH:mm:ss) la 'm' son los minutos, y al confundirla con "mes" el filtro
+            // devolvía fecha+hora completa → fecha duplicada en el PDF. La fecha se detecta por
+            // día (d/D), mes Java (M) o año (Y/y); los formatos de fecha del proyecto siempre los incluyen.
+            return format != null && (format.contains("d") || format.contains("D")
+                    || format.contains("M") || format.contains("Y") || format.contains("y"));
         }
 
         private boolean wantsTime(String format) {

@@ -85,7 +85,7 @@
     </div>
     <div>
       <div class="co-name">{{ doc.emisor.razonSocial }}</div>
-      <div class="co-sub">{{ doc.emisor.direccion.direccion }}{% if cp is not null and cp.contacto is not null %} · {{ cp.contacto.email }} · {{ cp.contacto.telefono }}{% endif %}</div>
+      <div class="co-sub">{{ doc.emisor.direccion.direccion }}{% if cp is not null and cp.contacto is not null %} · {% if cp.contacto.email is not empty %}{{ cp.contacto.email }}{% endif %}{% if cp.contacto.email is not empty and cp.contacto.telefono is not empty %} · {% endif %}{{ cp.contacto.telefono }}{% endif %}</div>
     </div>
   </div>
   <div class="docbox">

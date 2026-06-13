@@ -98,7 +98,7 @@
       <dt>Comercial</dt><dd>{{ cp.nombreComercial }}</dd>
       {% endif %}
       {% if cp is not null and cp.contacto is not null %}
-      <dt>Contacto</dt><dd>{{ cp.contacto.email }} · {{ cp.contacto.telefono }}{% if cp.contacto.web %} · {{ cp.contacto.web }}{% endif %}</dd>
+      <dt>Contacto</dt><dd>{% if cp.contacto.email is not empty %}{{ cp.contacto.email }}{% endif %}{% if cp.contacto.email is not empty and cp.contacto.telefono is not empty %} · {% endif %}{{ cp.contacto.telefono }}{% if cp.contacto.web %} · {{ cp.contacto.web }}{% endif %}</dd>
       {% endif %}
     </dl>
   </div>
@@ -106,7 +106,7 @@
     <div class="ruc">RUC <strong>{{ doc.emisor.ruc }}</strong></div>
     <div class="kind">{{ name|upper }} ELECTRÓNICA</div>
     <div class="num">{{ doc.serie }} — {{ doc.numero|str_pad(8, '0', 'left') }}</div>
-    <div class="issued">Emitido {{ doc.fechaEmision|date('dd/MM/yyyy') }} · {{ doc.fechaEmision|date('HH:mm:ss') }}</div>
+    <div class="issued">Emitido {{ doc.fechaEmision|date('dd/MM/yyyy') }} · {{ doc.horaEmision }}</div>
   </div>
 </div>
 

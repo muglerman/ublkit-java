@@ -87,7 +87,7 @@
 
 <div class="hero">
   <div class="co-name">{% if cp is not null %}{{ cp.razonSocial }}{% endif %}</div>
-  <div class="co-sub">{% if cp is not null and cp.direccion is not null %}{{ cp.direccion.direccion }} · {% endif %}{% if cp is not null %}RUC {{ cp.ruc }}{% endif %}{% if doc.envio is not null and doc.envio.transportista is not null and doc.envio.transportista.numeroRegistroMTC is not empty %} · Reg. MTC {{ doc.envio.transportista.numeroRegistroMTC }}{% endif %}{% if doc.subcontratado is not null %} · Subcontratado: {{ doc.subcontratado.nombre }}{% endif %}</div>
+  <div class="co-sub">{% if cp is not null and cp.direccion is not null %}{{ cp.direccion.direccion }} · {% endif %}{% if cp is not null %}RUC {{ cp.ruc }}{% endif %}{% if doc.envio is not null and doc.envio.transportista is not null and doc.envio.transportista.numeroRegistroMTC is not empty %}{% if cp is not null and cp.direccion is not null %} · {% endif %}Reg. MTC {{ doc.envio.transportista.numeroRegistroMTC }}{% endif %}{% if doc.subcontratado is not null %} · Subcontratado: {{ doc.subcontratado.nombre }}{% endif %}</div>
   <div class="doc-kind">{{ name|upper }} ELECTRÓNICA</div>
   <div class="doc-num">{{ doc.serie }} · {{ doc.numero|str_pad(8, '0', 'left') }}</div>
 </div>

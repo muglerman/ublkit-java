@@ -101,8 +101,8 @@
       </div>
     </div>
     <div class="meta">
-      <p>{% if cp is not null and cp.direccion is not null %}{{ cp.direccion.direccion }}{% endif %}{% if doc.envio is not null and doc.envio.transportista is not null and doc.envio.transportista.numeroRegistroMTC is not empty %} · Reg. MTC {{ doc.envio.transportista.numeroRegistroMTC }}{% endif %}{% if doc.subcontratado is not null %} · Subcontratado: {{ doc.subcontratado.nombre }}{% endif %}</p>
-      <p>{% if cp is not null and cp.contacto is not null %}{{ cp.contacto.email }} · {{ cp.contacto.telefono }}{% endif %}</p>
+      <p>{% if cp is not null and cp.direccion is not null %}{{ cp.direccion.direccion }}{% endif %}{% if doc.envio is not null and doc.envio.transportista is not null and doc.envio.transportista.numeroRegistroMTC is not empty %}{% if cp is not null and cp.direccion is not null %} · {% endif %}Reg. MTC {{ doc.envio.transportista.numeroRegistroMTC }}{% endif %}{% if doc.subcontratado is not null %} · Subcontratado: {{ doc.subcontratado.nombre }}{% endif %}</p>
+      <p>{% if cp is not null and cp.contacto is not null %}{% if cp.contacto.email is not empty %}{{ cp.contacto.email }}{% endif %}{% if cp.contacto.email is not empty and cp.contacto.telefono is not empty %} · {% endif %}{{ cp.contacto.telefono }}{% endif %}</p>
     </div>
   </div>
   <div class="doc-id">

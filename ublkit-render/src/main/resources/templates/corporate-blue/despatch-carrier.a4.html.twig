@@ -94,7 +94,7 @@
     <div class="logo">{% if params.logo is not empty %}<img src="{{ params.logo }}" alt="logo"/>{% else %}<svg viewBox="0 0 40 40" fill="none" stroke="#fff" stroke-width="2.4"><circle cx="20" cy="20" r="14"/><path d="M9 23l5-9 6 4 6-7"/></svg>{% endif %}</div>
     <div>
       <div class="co-name">{% if cp is not null %}{{ cp.razonSocial }}{% endif %}</div>
-      <div class="co-sub">{% if cp is not null and cp.direccion is not null %}{{ cp.direccion.direccion }}{% endif %}{% if doc.envio is not null and doc.envio.transportista is not null and doc.envio.transportista.numeroRegistroMTC is not empty %} · Reg. MTC {{ doc.envio.transportista.numeroRegistroMTC }}{% endif %}{% if doc.subcontratado is not null %} · Subcontratado: {{ doc.subcontratado.nombre }}{% endif %}{% if cp is not null and cp.contacto is not null %} · {{ cp.contacto.telefono }}{% endif %}</div>
+      <div class="co-sub">{% if cp is not null and cp.direccion is not null %}{{ cp.direccion.direccion }}{% endif %}{% if doc.envio is not null and doc.envio.transportista is not null and doc.envio.transportista.numeroRegistroMTC is not empty %}{% if cp is not null and cp.direccion is not null %} · {% endif %}Reg. MTC {{ doc.envio.transportista.numeroRegistroMTC }}{% endif %}{% if doc.subcontratado is not null %} · Subcontratado: {{ doc.subcontratado.nombre }}{% endif %}{% if cp is not null and cp.contacto is not null %} · {{ cp.contacto.telefono }}{% endif %}</div>
     </div>
   </div>
   <div class="docbox">

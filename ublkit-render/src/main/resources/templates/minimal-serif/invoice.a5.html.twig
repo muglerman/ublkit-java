@@ -103,7 +103,7 @@
 <div class="hero">
   {% if params.logo is not empty %}<div class="logo"><img src="{{ params.logo }}" alt="logo"/></div>{% endif %}
   <div class="co-name">{{ doc.emisor.razonSocial }}</div>
-  <div class="co-sub">{{ doc.emisor.direccion.direccion }} · RUC {{ doc.emisor.ruc }}{% if cp is not null and cp.contacto is not null %} · {{ cp.contacto.email }}{% endif %}</div>
+  <div class="co-sub">{% if doc.emisor.direccion.direccion is not empty %}{{ doc.emisor.direccion.direccion }} · {% endif %}RUC {{ doc.emisor.ruc }}{% if cp is not null and cp.contacto is not null %} · {{ cp.contacto.email }}{% endif %}</div>
   <div class="doc-kind">{{ name|upper }} ELECTRÓNICA</div>
   <div class="doc-num">{{ doc.serie }} · {{ doc.numero|str_pad(8, '0', 'left') }}</div>
 </div>
@@ -159,7 +159,7 @@
 <div class="bottom">
   <div class="notes">
     <div class="block"><div class="head">Condiciones de pago</div><div class="body">
-      <p class="small">{% if doc.formaDePago is not null %}{{ doc.formaDePago.tipo }}{% endif %} · {{ sym }} {{ doc.totalImporte.importeConImpuestos|n_format }}</p>
+      <p class="small">{% if doc.formaDePago is not null %}{{ doc.formaDePago.tipo }} · {% endif %}{{ sym }} {{ doc.totalImporte.importeConImpuestos|n_format }}</p>
       {% if doc.formaDePago is not null and doc.formaDePago.cuotas is not empty %}
         {% for cuota in doc.formaDePago.cuotas %}
           <p class="small">Cuota {{ loop.index + 1 }} · {{ cuota.fechaPago|date('d/m/Y') }} · {{ sym }} {{ cuota.monto|n_format }}</p>

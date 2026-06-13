@@ -23,7 +23,6 @@
   .hero .left .logo { width: 56px; height: 56px; color: var(--accent); display: flex; align-items: center; justify-content: center; overflow: hidden; }
   .hero .left .logo img { max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; }
   .hero .left .logo svg { width: 34px; height: 34px; }
-  .hero .left .logo img { width: 100%; height: 100%; object-fit: contain; border-radius: 2px; }
   .hero .left .co-name { font-size: 16px; font-weight: 900; letter-spacing: -0.01em; line-height: 1.1; }
   .hero .left .co-tag { font-size: 10px; color: var(--ink-2); margin-top: 2px; font-weight: 500; }
   .hero .left .info { font-size: 10px; color: var(--ink-2); }
@@ -113,8 +112,8 @@
       </div>
     </div>
     <div class="info">
-      {% if cp is not null and cp.direccion is not null %}<p>{{ cp.direccion.direccion }}{% if cp.direccion.distrito is not empty %} · {{ cp.direccion.departamento }} — {{ cp.direccion.provincia }} — {{ cp.direccion.distrito }}{% endif %}{% if cp.direccion.ubigeo is not empty %} · {{ cp.direccion.ubigeo }}{% endif %}</p>{% if cp.contacto is not null and (cp.contacto.email is not empty or cp.contacto.telefono is not empty) %}<p>{% if cp.contacto.email is not empty %}{{ cp.contacto.email }}{% endif %}{% if cp.contacto.telefono is not empty %} · {{ cp.contacto.telefono }}{% endif %}</p>{% endif %}{% endif %}
-      {% if cp is not null and cp.contacto is not null %}<p>{{ cp.contacto.email }} · {{ cp.contacto.telefono }}</p>{% endif %}
+      {% if cp is not null and cp.direccion is not null %}<p>{{ cp.direccion.direccion }}{% if cp.direccion.distrito is not empty %} · {{ cp.direccion.departamento }} — {{ cp.direccion.provincia }} — {{ cp.direccion.distrito }}{% endif %}{% if cp.direccion.ubigeo is not empty %} · {{ cp.direccion.ubigeo }}{% endif %}</p>{% if cp.contacto is not null and (cp.contacto.email is not empty or cp.contacto.telefono is not empty) %}<p>{% if cp.contacto.email is not empty %}{{ cp.contacto.email }}{% endif %}{% if cp.contacto.email is not empty and cp.contacto.telefono is not empty %} · {% endif %}{% if cp.contacto.telefono is not empty %}{{ cp.contacto.telefono }}{% endif %}</p>{% endif %}{% endif %}
+      {% if cp is not null and cp.contacto is not null %}<p>{% if cp.contacto.email is not empty %}{{ cp.contacto.email }}{% endif %}{% if cp.contacto.email is not empty and cp.contacto.telefono is not empty %} · {% endif %}{{ cp.contacto.telefono }}</p>{% endif %}
       <p>RUC <b>{{ doc.emisor.ruc }}</b></p>
     </div>
   </div>
@@ -125,7 +124,7 @@
     </div>
     <div>
       <div class="rule"></div>
-      <div class="row"><span class="k">Emitido</span><span class="v">{{ doc.fechaEmision|date('dd/MM/yyyy') }} · {{ doc.fechaEmision|date('HH:mm') }}</span></div>
+      <div class="row"><span class="k">Emitido</span><span class="v">{{ doc.fechaEmision|date('dd/MM/yyyy') }} · {{ doc.horaEmision }}</span></div>
       <div class="row"><span class="k">Tipo nota</span><span class="v">{{ doc.tipoNota }} · {{ doc.tipoNota|catalog('10') }}</span></div>
       <div class="row"><span class="k">Moneda</span><span class="v">{{ mon }}</span></div>
       <div class="row"><span class="k">T/C</span><span class="v mono">{% if doc.tipoCambio is not null %}{{ doc.tipoCambio.venta }}{% endif %}</span></div>
