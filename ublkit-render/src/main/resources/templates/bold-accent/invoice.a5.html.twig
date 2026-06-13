@@ -118,7 +118,7 @@
       </div>
       <div>
         <div class="co-name">{{ cp.razonSocial }}</div>
-        <div class="co-tag">{% if cp.nombreComercial is not empty %}{{ cp.nombreComercial }}{% endif %}{% if params.establishmentName is not empty %}{% if cp.nombreComercial is not empty %} · {% endif %}{{ params.establishmentName }}{% endif %}</div>
+        <div class="co-tag">{% if cp.nombreComercial is not empty and cp.nombreComercial != cp.razonSocial %}{{ cp.nombreComercial }}{% endif %}{% if params.establishmentName is not empty %}{% if cp.nombreComercial is not empty and cp.nombreComercial != cp.razonSocial %} · {% endif %}{{ params.establishmentName }}{% endif %}</div>
       </div>
     </div>
     <div class="info">

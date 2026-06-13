@@ -101,7 +101,7 @@
       <div class="logo">{% if params.logo is not empty %}<img src="{{ params.logo }}" alt="logo"/>{% else %}<svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="3"><circle cx="20" cy="20" r="14"/><path d="M9 23l5-9 6 4 6-7"/></svg>{% endif %}</div>
       <div>
         <div class="co-name">{% if cp is not null %}{{ cp.razonSocial }}{% endif %}</div>
-        <div class="co-tag">{% if cp is not null and cp.nombreComercial is not empty %}{{ cp.nombreComercial }}{% endif %}{% if params.establishmentName is not empty %}{% if cp is not null and cp.nombreComercial is not empty %} · {% endif %}{{ params.establishmentName }}{% endif %}</div>
+        <div class="co-tag">{% if cp is not null and cp.nombreComercial is not empty and cp.nombreComercial != cp.razonSocial %}{{ cp.nombreComercial }}{% endif %}{% if params.establishmentName is not empty %}{% if cp is not null and cp.nombreComercial is not empty and cp.nombreComercial != cp.razonSocial %} · {% endif %}{{ params.establishmentName }}{% endif %}</div>
       </div>
     </div>
     <div class="info">
@@ -150,20 +150,12 @@
     <div class="name">{{ tercero.nombre }}</div>
     <div class="row"><span class="k">{{ tercero.tipoDocumentoIdentidad|catalogAttr('06','abreviatura') }}</span><span class="mono">{{ tercero.numeroDocumentoIdentidad }}</span></div>
     {% endif %}
-    {% if doc.envio is not null and doc.envio.partida is not null %}
-    <div class="row"><span class="k">Dirección</span><span>{{ doc.envio.partida.direccion }}</span></div>
-    <div class="row"><span class="k">Distrito</span><span>{% if params.partidaDistrito is not empty %}{{ params.partidaDistrito }} - {% endif %}{{ doc.envio.partida.ubigeo }}</span></div>
-    {% endif %}
   </div>
   <div class="party">
     <div class="label">Destinatario</div>
     {% if cl is not null %}
     <div class="name">{{ cl.nombre }}</div>
     <div class="row"><span class="k">{{ cl.tipoDocumentoIdentidad|catalogAttr('06','abreviatura') }}</span><span class="mono">{{ cl.numeroDocumentoIdentidad }}</span></div>
-    {% endif %}
-    {% if doc.envio is not null and doc.envio.destino is not null %}
-    <div class="row"><span class="k">Dirección</span><span>{{ doc.envio.destino.direccion }}</span></div>
-    <div class="row"><span class="k">Distrito</span><span>{% if params.destinoDistrito is not empty %}{{ params.destinoDistrito }} - {% endif %}{{ doc.envio.destino.ubigeo }}</span></div>
     {% endif %}
   </div>
 </div>

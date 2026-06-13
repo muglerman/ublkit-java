@@ -119,7 +119,7 @@
       {% if params.establishmentName is not empty %}
       <dt>Establecimiento</dt><dd>{{ params.establishmentName }}</dd>
       {% endif %}
-      {% if cp is not null and cp.nombreComercial is not null %}
+      {% if cp is not null and cp.nombreComercial is not null and cp.nombreComercial != cp.razonSocial %}
       <dt>Comercial</dt><dd>{{ cp.nombreComercial }}</dd>
       {% endif %}
       {% if cp is not null and cp.contacto is not null %}

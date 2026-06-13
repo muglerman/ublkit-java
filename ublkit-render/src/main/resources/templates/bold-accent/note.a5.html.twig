@@ -114,8 +114,8 @@
         </svg>{% endif %}
       </div>
       <div>
-        <div class="co-name">{% if cp is not null %}{% if cp.nombreComercial %}{{ cp.nombreComercial }}{% else %}{{ cp.razonSocial }}{% endif %}{% endif %}</div>
-        <div class="co-tag">{% if cp is not null %}{{ cp.razonSocial }}{% endif %}{% if params.establishmentName is not empty %} · {{ params.establishmentName }}{% endif %}</div>
+        <div class="co-name">{% if cp is not null %}{{ cp.razonSocial }}{% endif %}</div>
+        <div class="co-tag">{% if cp is not null and cp.nombreComercial is not empty and cp.nombreComercial != cp.razonSocial %}{{ cp.nombreComercial }}{% endif %}{% if params.establishmentName is not empty %}{% if cp is not null and cp.nombreComercial is not empty and cp.nombreComercial != cp.razonSocial %} · {% endif %}{{ params.establishmentName }}{% endif %}</div>
       </div>
     </div>
     <div class="info">

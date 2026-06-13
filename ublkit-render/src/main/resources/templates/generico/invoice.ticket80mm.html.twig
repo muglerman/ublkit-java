@@ -45,7 +45,7 @@
 <body>
   <div class="head c">
     <div class="name">{{ doc.emisor.razonSocial }}</div>
-    {% if doc.emisor.nombreComercial %}<div class="sub">{{ doc.emisor.nombreComercial }}</div>{% endif %}
+    {% if doc.emisor.nombreComercial and doc.emisor.nombreComercial != doc.emisor.razonSocial %}<div class="sub">{{ doc.emisor.nombreComercial }}</div>{% endif %}
     <div class="sub b">RUC {{ doc.emisor.ruc }}</div>
     {% if doc.emisor.direccion is not null and doc.emisor.direccion.direccion %}<div class="sub muted">{{ doc.emisor.direccion.direccion }}</div>{% endif %}
     {% if doc.emisor.contacto is not null %}<div class="sub muted">{{ doc.emisor.contacto.telefono }}{% if doc.emisor.contacto.web %} · {{ doc.emisor.contacto.web }}{% endif %}</div>{% endif %}

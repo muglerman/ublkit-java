@@ -101,7 +101,7 @@
       </div>
       <div>
         <div class="co-name">{% if cp is not null %}{{ cp.razonSocial }}{% endif %}</div>
-        <div class="co-tagline">{% if cp is not null and cp.nombreComercial is not null %}{{ cp.nombreComercial }}{% endif %}</div>
+        <div class="co-tagline">{% if cp is not null and cp.nombreComercial is not null and cp.nombreComercial != cp.razonSocial %}{{ cp.nombreComercial }}{% endif %}</div>
       </div>
     </div>
     <div class="meta">

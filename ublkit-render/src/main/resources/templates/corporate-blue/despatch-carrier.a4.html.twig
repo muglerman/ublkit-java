@@ -127,7 +127,6 @@
     <div class="name">{{ tercero.nombre }}</div>
     <div class="row"><span class="k">{{ tercero.tipoDocumentoIdentidad|catalogAttr('06','abreviatura') }}</span><span class="mono">{{ tercero.numeroDocumentoIdentidad }}</span></div>
     {% endif %}
-    {% if doc.envio is not null and doc.envio.partida is not null %}<div class="row"><span class="k">Dirección</span><span>{{ doc.envio.partida.direccion }}</span></div><div class="row"><span class="k">Distrito</span><span>{% if params.partidaDistrito is not empty %}{{ params.partidaDistrito }} - {% endif %}{{ doc.envio.partida.ubigeo }}</span></div>{% endif %}
   </div>
   <div class="party">
     <div class="label">Destinatario</div>
@@ -135,7 +134,6 @@
     <div class="name">{{ cl.nombre }}</div>
     <div class="row"><span class="k">{{ cl.tipoDocumentoIdentidad|catalogAttr('06','abreviatura') }}</span><span class="mono">{{ cl.numeroDocumentoIdentidad }}</span></div>
     {% endif %}
-    {% if doc.envio is not null and doc.envio.destino is not null %}<div class="row"><span class="k">Dirección</span><span>{{ doc.envio.destino.direccion }}</span></div><div class="row"><span class="k">Distrito</span><span>{% if params.destinoDistrito is not empty %}{{ params.destinoDistrito }} - {% endif %}{{ doc.envio.destino.ubigeo }}</span></div>{% endif %}
   </div>
 </div>
 

@@ -44,7 +44,7 @@
 <body>
   <div class="head c">
     <div class="name">{{ doc.remitente.razonSocial }}</div>
-    {% if doc.remitente.nombreComercial %}<div class="sub">{{ doc.remitente.nombreComercial }}</div>{% endif %}
+    {% if doc.remitente.nombreComercial and doc.remitente.nombreComercial != doc.remitente.razonSocial %}<div class="sub">{{ doc.remitente.nombreComercial }}</div>{% endif %}
     <div class="sub b">RUC {{ doc.remitente.ruc }}</div>
     {% if doc.remitente.direccion is not null and doc.remitente.direccion.direccion %}<div class="sub muted">{{ doc.remitente.direccion.direccion }}</div>{% endif %}
   </div>
