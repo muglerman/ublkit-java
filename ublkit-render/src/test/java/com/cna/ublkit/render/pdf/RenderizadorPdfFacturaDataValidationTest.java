@@ -234,11 +234,12 @@ class RenderizadorPdfFacturaDataValidationTest {
         @DisplayName("✓ Moneda correcta en HTML")
         void monedaCorrectaEnHtml() {
             BorradorFactura factura = crearFacturaCompleta();
-            String moneda = factura.getMoneda(); // "PEN"
 
             String html = renderizarHtml(factura);
 
-            assertTrue(html.contains(moneda), "HTML debe contener moneda: " + moneda);
+            // PEN se muestra como nombre (Soles) en la etiqueta y símbolo (S/) en importes,
+            // no como el código ISO "PEN" (catálogo 021). Ver monedaNombreYSimbolo.
+            assertTrue(html.contains("Soles"), "HTML debe contener el nombre de la moneda: Soles");
         }
     }
 
