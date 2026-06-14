@@ -105,7 +105,7 @@
 </div>
 
 <div class="sub-band">
-  <div><span class="k">Fecha de emisión</span><span class="v">{{ doc.fechaEmision|date('dd/MM/yyyy') }}{% if doc.horaEmision is not null %} · {{ doc.horaEmision }}{% endif %}</span></div>
+  <div><span class="k">Fecha de emisión</span><span class="v">{{ doc.fechaEmision|date('dd/MM/yyyy') }}{% if doc.horaEmision is not null %} · {{ doc.horaEmision|date('HH:mm:ss') }}{% endif %}</span></div>
   <div><span class="k">Moneda</span><span class="v">{{ mon }}</span></div>
   <div><span class="k">Forma de pago</span><span class="v">{% if doc.formaDePago is not null %}{{ doc.formaDePago.tipo }}{% endif %}</span></div>
   {% if doc.tipoCambio is not null %}

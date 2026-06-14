@@ -261,7 +261,12 @@ final class FragmentosXml {
         for (DocumentoRelacionado rel : docs) {
             Element additional = cac(doc, "AdditionalDocumentReference");
             additional.appendChild(cbc(doc, "ID", rel.serieNumero()));
-            additional.appendChild(cbc(doc, "DocumentTypeCode", rel.tipoDocumento()));
+            // DocumentTypeCode pertenece al Catálogo 12 (no al 01): debe llevar sus
+            // atributos de lista, igual que la referencia de anticipos (evita 4009).
+            additional.appendChild(cbcConAtributos(doc, "DocumentTypeCode", rel.tipoDocumento(),
+                    ATTR_LIST_AGENCY_NAME, VALUE_PE_SUNAT,
+                    ATTR_LIST_NAME, "Documento Relacionado",
+                    "listURI", "urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo12"));
             raiz.appendChild(additional);
         }
     }

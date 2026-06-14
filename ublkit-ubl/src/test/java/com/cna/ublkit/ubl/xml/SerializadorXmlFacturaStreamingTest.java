@@ -4,10 +4,13 @@ import com.cna.ublkit.ubl.ensamblador.EnsambladorFactura;
 import com.cna.ublkit.ubl.modelo.BorradorFactura;
 import com.cna.ublkit.ubl.modelo.actor.EmisorDocumento;
 import com.cna.ublkit.ubl.modelo.actor.ReceptorDocumento;
+import com.cna.ublkit.ubl.modelo.complemento.DocumentoRelacionado;
 import com.cna.ublkit.ubl.modelo.linea.LineaDetalle;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.ByteArrayInputStream;
@@ -35,6 +38,25 @@ class SerializadorXmlFacturaStreamingTest {
 
         assertTrue(xml.contains("<Invoice"));
         assertEquals(3000, doc.getElementsByTagNameNS("*", "InvoiceLine").getLength());
+    }
+
+    @Test
+    @DisplayName("AdditionalDocumentReference debe llevar el DocumentTypeCode con atributos del Catálogo 12")
+    void serializar_documentoRelacionado_emiteDocumentTypeCodeConAtributosCatalogo12() {
+        BorradorFactura factura = crearFactura(1);
+        factura.setDocumentosRelacionados(List.of(new DocumentoRelacionado("99", "F445-1524")));
+
+        String xml = new SerializadorXmlFactura().serializar(EnsambladorFactura.ensamblar(factura));
+        Document doc = parseXml(xml);
+
+        NodeList refs = doc.getElementsByTagNameNS("*", "AdditionalDocumentReference");
+        assertEquals(1, refs.getLength());
+        Element ref = (Element) refs.item(0);
+        Element typeCode = (Element) ref.getElementsByTagNameNS("*", "DocumentTypeCode").item(0);
+        assertEquals("99", typeCode.getTextContent());
+        assertEquals("PE:SUNAT", typeCode.getAttribute("listAgencyName"));
+        assertEquals("urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo12",
+                typeCode.getAttribute("listURI"));
     }
 
     @Test

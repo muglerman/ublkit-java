@@ -125,7 +125,7 @@
 </div>
 
 <div class="sub-band">
-  <div><span class="k">Fecha de emisión</span><span class="v">{{ doc.fechaEmision|date('d/m/Y') }}{% if doc.horaEmision is not null %} · {{ doc.horaEmision }}{% endif %}</span></div>
+  <div><span class="k">Fecha de emisión</span><span class="v">{{ doc.fechaEmision|date('dd/MM/yyyy') }}{% if doc.horaEmision is not null %} · {{ doc.horaEmision|date('HH:mm:ss') }}{% endif %}</span></div>
   <div><span class="k">Doc. afectado</span><span class="v">{{ doc.comprobanteAfectadoSerieNumero }}</span></div>
   <div><span class="k">Moneda</span><span class="v">{{ mon }}{% if doc.tipoCambio is not null %} · T/C {{ doc.tipoCambio.venta }}{% endif %}</span></div>
   <div><span class="k">Motivo</span><span class="v">{{ doc.tipoNota|catalog('09') }}</span></div>
@@ -139,7 +139,7 @@
     <div class="name">{{ doc.receptor.nombre }}</div>
     <div class="row"><span class="k">{{ doc.receptor.tipoDocIdentidad|catalogAttr('06','abreviatura') }}</span><span class="mono">{{ doc.receptor.numDocIdentidad }}</span></div>
     <div class="row"><span class="k">Dirección</span><span>{{ doc.receptor.direccion.direccion }}</span></div>
-    <div class="row"><span class="k">Ubicación</span><span>{% if cl is not null and cl.direccion is not null %}{{ cl.direccion.departamento }} — {{ cl.direccion.provincia }} — {{ cl.direccion.distrito }}{% endif %}</span></div>
+    <div class="row"><span class="k">Ubicación</span><span>{% if cl is not null and cl.direccion is not null %}{{ cl.direccion.departamento }} — {{ cl.direccion.provincia }} — {{ cl.direccion.distrito }}{% if cl.direccion.ubigeo is not empty %} · {{ cl.direccion.ubigeo }}{% endif %}{% endif %}</span></div>
   </div>
   <div class="party">
     <div class="label">Documento referente</div>

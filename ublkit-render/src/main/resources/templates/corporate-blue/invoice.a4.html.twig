@@ -126,7 +126,7 @@
 </div>
 
 <div class="sub-band">
-  <div><span class="k">Fecha de emisión</span><span class="v">{{ doc.fechaEmision|date('d/m/Y') }}{% if doc.horaEmision is not null %} · {{ doc.horaEmision }}{% endif %}</span></div>
+  <div><span class="k">Fecha de emisión</span><span class="v">{{ doc.fechaEmision|date('dd/MM/yyyy') }}{% if doc.horaEmision is not null %} · {{ doc.horaEmision|date('HH:mm:ss') }}{% endif %}</span></div>
   <div><span class="k">Moneda</span><span class="v">{{ mon }}{% if doc.tipoCambio is not null %} · T/C {{ doc.tipoCambio.venta }}{% endif %}</span></div>
   <div><span class="k">Condición</span><span class="v">{% if doc.formaDePago is not null %}{{ doc.formaDePago.tipo }}{% if doc.formaDePago.cuotas is not empty %} · {{ doc.formaDePago.cuotas|length }} cuotas{% endif %}{% endif %}</span></div>
 </div>
@@ -139,13 +139,17 @@
     <div class="name">{{ doc.receptor.nombre }}</div>
     <div class="row"><span class="k">{{ doc.receptor.tipoDocIdentidad|catalogAttr('06','abreviatura') }}</span><span class="mono">{{ doc.receptor.numDocIdentidad }}</span></div>
     <div class="row"><span class="k">Dirección</span><span>{{ doc.receptor.direccion.direccion }}</span></div>
-    <div class="row"><span class="k">Ubicación</span><span>{% if cl is not null and cl.direccion is not null %}{{ cl.direccion.departamento }} — {{ cl.direccion.provincia }} — {{ cl.direccion.distrito }}{% endif %}</span></div>
+    <div class="row"><span class="k">Ubicación</span><span>{% if cl is not null and cl.direccion is not null %}{{ cl.direccion.departamento }} — {{ cl.direccion.provincia }} — {{ cl.direccion.distrito }}{% if cl.direccion.ubigeo is not empty %} · {{ cl.direccion.ubigeo }}{% endif %}{% endif %}</span></div>
+    {% if doc.ordenDeCompra is not empty %}
     <div class="row"><span class="k">Orden compra</span><span class="mono">{{ doc.ordenDeCompra }}</span></div>
+    {% endif %}
   </div>
   <div class="party">
     <div class="label">Datos de la operación</div>
     <div class="name">{{ doc.tipoOperacion }}{% if doc.tipoOperacion is not null %} — {{ doc.tipoOperacion | catalog('51') }}{% endif %}</div>
-    <div class="row"><span class="k">Entrega</span><span>{% if doc.direccionEntrega is defined and doc.direccionEntrega is not null %}{{ doc.direccionEntrega.direccion }}{% endif %}</span></div>
+    {% if doc.direccionEntrega is defined and doc.direccionEntrega is not null and doc.direccionEntrega.direccion is not empty %}
+    <div class="row"><span class="k">Entrega</span><span>{{ doc.direccionEntrega.direccion }}</span></div>
+    {% endif %}
     {% if doc.guias is not empty %}<div class="row"><span class="k">Guía ref.</span><span class="mono">{% for guia in doc.guias %}{{ guia.serieNumero }}{% if not loop.last %}, {% endif %}{% endfor %}</span></div>{% endif %}
     {% if doc.documentosRelacionados is not empty %}<div class="row"><span class="k">Doc. relacionado</span><span class="mono">{% for rel in doc.documentosRelacionados %}{{ rel.serieNumero }}{% if not loop.last %}, {% endif %}{% endfor %}</span></div>{% endif %}
   </div>
@@ -181,26 +185,26 @@
 
 <div class="bottom">
   <div class="notes">
+    {% if doc.formaDePago is not null and doc.formaDePago.cuotas is not empty %}
     <div class="block">
       <div class="head">Cuotas de pago</div>
       <div class="body">
-        <p class="small">{% if doc.formaDePago is not null %}{{ doc.formaDePago.tipo }}{% endif %} — {{ sym }} {{ doc.totalImporte.importeConImpuestos|n_format }}</p>
-        {% if doc.formaDePago is not null and doc.formaDePago.cuotas is not empty %}
-          {% for cuota in doc.formaDePago.cuotas %}
-            <p class="small">Cuota {{ loop.index + 1 }} · vence {{ cuota.fechaPago|date('d/m/Y') }} · <b>{{ sym }} {{ cuota.monto|n_format }}</b></p>
-          {% endfor %}
-        {% endif %}
+        <p class="small">{{ doc.formaDePago.tipo }} — {{ sym }} {{ doc.totalImporte.importeConImpuestos|n_format }}</p>
+        {% for cuota in doc.formaDePago.cuotas %}
+          <p class="small">Cuota {{ loop.index + 1 }} · vence {{ cuota.fechaPago|date('dd/MM/yyyy') }} · <b>{{ sym }} {{ cuota.monto|n_format }}</b></p>
+        {% endfor %}
       </div>
     </div>
+    {% endif %}
+    {% if doc.detraccion is not null %}
     <div class="block">
       <div class="head">Detracción SPOT</div>
       <div class="body">
-        {% if doc.detraccion is not null %}
         <p><b>{{ sym }} {{ doc.detraccion.monto|n_format }}</b> · {{ doc.detraccion.codigoBien }} - {{ doc.detraccion.codigoBien|catalog('54') }}</p>
         <p class="small">Medio: {{ doc.detraccion.medioPago|catalog('59') }} · Cta. BN {{ doc.detraccion.cuentaBanco }}</p>
-        {% endif %}
       </div>
     </div>
+    {% endif %}
     {% if doc.observaciones is not empty %}
     <div class="block">
       <div class="head">Observaciones</div>

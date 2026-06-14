@@ -104,7 +104,7 @@
 </div>
 
 <div class="sub-band">
-  <div><span class="k">Fecha de emisión</span><span class="v">{{ doc.fechaEmision|date('d/m/Y') }}{% if doc.horaEmision is not null %} · {{ doc.horaEmision }}{% endif %}</span></div>
+  <div><span class="k">Fecha de emisión</span><span class="v">{{ doc.fechaEmision|date('dd/MM/yyyy') }}{% if doc.horaEmision is not null %} · {{ doc.horaEmision|date('HH:mm:ss') }}{% endif %}</span></div>
   <div><span class="k">Inicio traslado</span><span class="v">{% if doc.envio is not null and doc.envio.fechaTraslado is not null %}{{ doc.envio.fechaTraslado|date('d/m/Y') }}{% endif %}</span></div>
   <div><span class="k">Modalidad</span><span class="v">{% if doc.envio is not null %}{{ doc.envio.tipoModalidadTraslado|catalog('18') }}{% endif %}</span></div>
   <div><span class="k">Motivo</span><span class="v">{% if doc.envio is not null %}{{ doc.envio.tipoTraslado|catalog('20') }}{% endif %}</span></div>
