@@ -10,5 +10,7 @@ public enum FormatoImpresion {
     A4,
     A5,
     TICKET_80MM,
-    TICKET_58MM
+    TICKET_58MM,
+    /** A4 apaisado (horizontal, 297×210 mm). Para documentos anchos como el Manifiesto de Carga. */
+    A4_LANDSCAPE
 }

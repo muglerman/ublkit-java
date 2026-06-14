@@ -42,6 +42,7 @@ public final class PlantillaRutas {
     public static String sufijo(FormatoImpresion formato, ExtensionPlantilla extension) {
         String ext = extension != null ? extension.sufijo() : ExtensionPlantilla.DEFAULT.sufijo();
         return switch (formato) {
+            case A4_LANDSCAPE -> ".a4-landscape" + ext;
             case A5 -> ".a5" + ext;
             case TICKET_80MM -> ".ticket80mm" + ext;
             case TICKET_58MM -> ".ticket58mm" + ext;

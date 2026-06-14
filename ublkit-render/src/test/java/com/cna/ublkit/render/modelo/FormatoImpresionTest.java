@@ -55,11 +55,11 @@ class FormatoImpresionTest {
     class EnumValuesTests {
 
         @Test
-        @DisplayName("Should have exactly 4 formats")
-        void shouldHaveExactly4Formats() {
+        @DisplayName("Should have exactly 5 formats")
+        void shouldHaveExactly5Formats() {
             FormatoImpresion[] formats = FormatoImpresion.values();
 
-            assertEquals(4, formats.length, "Should have exactly 4 formats");
+            assertEquals(5, formats.length, "Should have exactly 5 formats");
         }
 
         @Test
@@ -68,6 +68,7 @@ class FormatoImpresionTest {
             FormatoImpresion[] formats = FormatoImpresion.values();
 
             assertTrue(contains(formats, FormatoImpresion.A4));
+            assertTrue(contains(formats, FormatoImpresion.A4_LANDSCAPE));
             assertTrue(contains(formats, FormatoImpresion.A5));
             assertTrue(contains(formats, FormatoImpresion.TICKET_80MM));
             assertTrue(contains(formats, FormatoImpresion.TICKET_58MM));
@@ -207,7 +208,7 @@ class FormatoImpresionTest {
                 count++;
             }
 
-            assertEquals(4, count);
+            assertEquals(5, count);
         }
 
         @Test
@@ -264,6 +265,7 @@ class FormatoImpresionTest {
 
             String result = switch (formato) {
                 case A4 -> "Standard A4";
+                case A4_LANDSCAPE -> "Landscape A4";
                 case A5 -> "Standard A5";
                 case TICKET_80MM -> "Thermal 80mm";
                 case TICKET_58MM -> "Thermal 58mm";

@@ -63,8 +63,10 @@ class RenderizadorPdfCompletesTest {
             assertEquals("%PDF-", new String(resultado.contenidoPdf(), 0, 5), "Debe tener cabecera PDF válida");
         }
 
+        // A4_LANDSCAPE es un formato exclusivo del Manifiesto de Carga (documento interno ancho);
+        // la factura no tiene plantilla apaisada por diseño, así que se excluye de esta cobertura.
         @ParameterizedTest
-        @EnumSource(FormatoImpresion.class)
+        @EnumSource(value = FormatoImpresion.class, names = "A4_LANDSCAPE", mode = EnumSource.Mode.EXCLUDE)
         @DisplayName("✓ Debe soportar todos los formatos de impresión")
         void debeSoportarTodosLosFormatos(FormatoImpresion formato) throws IOException {
             BorradorFactura factura = crearFacturaCompleta();

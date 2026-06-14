@@ -8,13 +8,13 @@
   * { box-sizing: border-box; }
   html, body { margin: 0; }
   :root { --ink: #161411; --ink-2: #57524b; --ink-3: #8c857c; --paper: #fbfaf6; --rule: #161411; --line: #e6e2d9; --accent: #2f5a4a; }
-  body { font-family: 'Inter', sans-serif; font-size: 10px; line-height: 1.45; color: var(--ink); background: var(--paper); width: 794px; min-height: 1123px; padding: 34px 40px; }
+  body { font-family: 'Inter', sans-serif; font-size: 10px; line-height: 1.45; color: var(--ink); background: var(--paper); width: 1123px; min-height: 794px; padding: 32px 44px; }
   .mono { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
   p { margin: 0; }
 
   .hero { display: grid; grid-template-columns: 1fr auto; align-items: end; padding-bottom: 14px; border-bottom: 1px solid var(--rule); margin-bottom: 16px; }
   .hero .co .co-name { font-family: 'Newsreader', serif; font-size: 19px; font-weight: 500; }
-  .hero .co .co-sub { font-size: 9px; color: var(--ink-2); margin-top: 2px; max-width: 320px; }
+  .hero .co .co-sub { font-size: 9px; color: var(--ink-2); margin-top: 2px; max-width: 560px; }
   .hero .mid { text-align: right; }
   .hero .mid .doc-kind { font-family: 'Newsreader', serif; font-style: italic; font-size: 16px; }
   .hero .mid .doc-sub { font-size: 8px; color: var(--ink-3); letter-spacing: 0.12em; text-transform: uppercase; margin-top: 2px; }
@@ -28,24 +28,22 @@
   .section-title .c { font-family: 'Inter', sans-serif; font-style: normal; font-size: 8.5px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--ink-3); }
 
   .items { width: 100%; border-collapse: collapse; table-layout: fixed; }
-  .items thead th { font-size: 8px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ink-3); font-weight: 500; text-align: left; padding: 8px 8px 8px 0; border-bottom: 1px solid var(--rule); }
-  .items tbody td { padding: 9px 8px 9px 0; border-bottom: 1px solid var(--line); vertical-align: top; font-size: 9px; }
-  .items .c-fecha { width: 54px; white-space: nowrap; }
-  .items .c-guia { width: 84px; }
-  .items .c-placa { width: 52px; white-space: nowrap; }
+  .items thead th { font-size: 8.5px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ink-3); font-weight: 500; text-align: left; padding: 9px 10px 9px 0; border-bottom: 1px solid var(--rule); }
+  .items tbody td { padding: 10px 10px 10px 0; border-bottom: 1px solid var(--line); vertical-align: top; font-size: 9.5px; }
+  .items .c-fecha { width: 72px; white-space: nowrap; }
+  .items .c-serie { width: 96px; }
+  .items .c-taquito { width: 104px; white-space: nowrap; }
+  .items .c-placa { width: 70px; white-space: nowrap; }
   .items .c-bul, .items .c-weight, .items .c-flete { text-align: right; }
-  .items .c-bul { width: 36px; }
-  .items .c-weight { width: 56px; color: var(--ink-2); }
-  .items .c-flete { width: 60px; }
-  .items .c-pago { width: 74px; padding-right: 0; }
-  .items .guia .l { display: flex; gap: 4px; align-items: baseline; }
-  .items .guia .tag { font-size: 7px; font-weight: 600; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.02em; width: 22px; flex: none; }
-  .items .guia .num { font-weight: 500; font-family: 'JetBrains Mono', monospace; font-size: 8.5px; white-space: nowrap; }
+  .items .c-bul { width: 52px; }
+  .items .c-weight { width: 78px; color: var(--ink-2); }
+  .items .c-flete { width: 84px; }
+  .items .c-pago { width: 96px; padding-right: 0; }
   .items .party { font-family: 'Newsreader', serif; font-size: 11px; font-weight: 500; word-break: break-word; }
-  .items .pago .t { font-size: 8px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; white-space: nowrap; }
+  .items .pago .t { font-size: 8.5px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; white-space: nowrap; }
   .items .pago .t.cancelado { color: var(--accent); }
   .items .pago .t.cobrar, .items .pago .t.pce { color: var(--ink-3); }
-  .items tfoot td { padding: 11px 8px 0 0; border-top: 1px solid var(--rule); font-weight: 600; font-size: 10px; }
+  .items tfoot td { padding: 11px 10px 0 0; border-top: 1px solid var(--rule); font-weight: 600; font-size: 10px; }
   .items tfoot .lbl { font-family: 'Newsreader', serif; font-style: italic; font-weight: 500; font-size: 12px; }
   .items tfoot .c-bul, .items tfoot .c-weight, .items tfoot .c-flete { text-align: right; }
   .items tfoot .c-flete { padding-left: 6px; }
@@ -62,7 +60,7 @@
 <div class="hero">
   <div class="co">
     <div class="co-name">{{ doc.emisorRazonSocial }}</div>
-    <div class="co-sub">{% if doc.emisorDireccion is not empty %}{{ doc.emisorDireccion }} · {% endif %}RUC {{ doc.emisorRuc }}{% if doc.emisorRegistroMtc is not empty %} · Reg. MTC {{ doc.emisorRegistroMtc }}{% endif %}</div>
+    <div class="co-sub">{% if doc.emisorDireccion is not empty %}{{ doc.emisorDireccion }} · {% endif %}{% if doc.emisorUbicacion is not empty %}{{ doc.emisorUbicacion }} · {% endif %}RUC {{ doc.emisorRuc }}{% if doc.emisorRegistroMtc is not empty %} · Reg. MTC {{ doc.emisorRegistroMtc }}{% endif %}</div>
   </div>
   <div class="mid">
     <div class="doc-kind">Manifiesto de Carga</div>
@@ -83,12 +81,13 @@
   <thead>
     <tr>
       <th class="c-fecha">F. Emisión</th>
-      <th class="c-guia">Guía</th>
+      <th class="c-serie">Serie · N°</th>
+      <th class="c-taquito">N° Tracking</th>
       <th>Remitente</th>
-      <th>Destinatario</th>
+      <th>Destino</th>
       <th class="c-placa">Placa</th>
-      <th class="c-bul">Bultos</th>
       <th class="c-weight">Peso kg</th>
+      <th class="c-bul">Bultos</th>
       <th class="c-flete">Flete S/</th>
       <th class="c-pago">Pago</th>
     </tr>
@@ -97,12 +96,13 @@
     {% for l in doc.lineas %}
     <tr>
       <td class="c-fecha mono">{% if l.fechaEmision is not null %}{{ l.fechaEmision|date('d/m/Y') }}{% endif %}</td>
-      <td class="guia"><div class="l"><span class="tag">Guía</span><span class="num">{{ l.guiaSerieNumero }}</span></div>{% if l.taquito is not empty %}<div class="l"><span class="tag">Taq.</span><span class="num">{{ l.taquito }}</span></div>{% endif %}</td>
+      <td class="c-serie mono">{{ l.guiaSerieNumero }}</td>
+      <td class="c-taquito mono">{{ l.taquito }}</td>
       <td class="party">{{ l.remitente }}</td>
-      <td class="party">{{ l.destinatario }}</td>
+      <td class="party">{{ l.destinoDistrito }}</td>
       <td class="c-placa mono">{{ l.placa }}</td>
-      <td class="c-bul mono">{{ l.bultos }}</td>
       <td class="c-weight mono">{{ l.peso|n_format }}</td>
+      <td class="c-bul mono">{{ l.bultos }}</td>
       <td class="c-flete mono">{{ l.flete|n_format }}</td>
       <td class="pago">{% if l.condicionPago is not empty %}<span class="t {{ l.pagoClase }}">{{ l.condicionPago }}</span>{% endif %}</td>
     </tr>
@@ -110,9 +110,9 @@
   </tbody>
   <tfoot>
     <tr>
-      <td class="lbl" colspan="5">Total · {{ doc.totalGuias }} guías consolidadas</td>
-      <td class="c-bul mono">{{ doc.totalBultos }}</td>
+      <td class="lbl" colspan="6">Total · {{ doc.totalGuias }} guías consolidadas</td>
       <td class="c-weight mono">{{ doc.totalPeso|n_format }}</td>
+      <td class="c-bul mono">{{ doc.totalBultos }}</td>
       <td class="c-flete mono">{{ doc.totalFlete|n_format }}</td>
       <td class="c-pago"></td>
     </tr>

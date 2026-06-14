@@ -74,6 +74,11 @@ public class PlaywrightBrowserManager {
                 .setLeft("0"));
 
         switch (formato) {
+            case A4_LANDSCAPE:
+                // A4 apaisado (297 x 210 mm): para documentos anchos como el Manifiesto de Carga.
+                options.setFormat("A4");
+                options.setLandscape(true);
+                break;
             case A5:
                 // A5 apaisado: una A4 partida a la mitad y girada (210 x 148 mm).
                 options.setFormat("A5");

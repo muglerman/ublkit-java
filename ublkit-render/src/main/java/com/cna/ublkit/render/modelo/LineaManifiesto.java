@@ -12,6 +12,7 @@ import java.time.LocalDate;
  * @param taquito          Número de taquito/tracking físico de la guía (segunda línea).
  * @param remitente        Razón social / nombre del remitente.
  * @param destinatario     Razón social / nombre del destinatario.
+ * @param destinoDistrito  Distrito de llegada (destino) de la guía.
  * @param placa            Placa del vehículo de la guía.
  * @param bultos           Número de bultos.
  * @param peso             Peso en kilogramos.
@@ -28,6 +29,7 @@ public record LineaManifiesto(
         String taquito,
         String remitente,
         String destinatario,
+        String destinoDistrito,
         String placa,
         Integer bultos,
         BigDecimal peso,

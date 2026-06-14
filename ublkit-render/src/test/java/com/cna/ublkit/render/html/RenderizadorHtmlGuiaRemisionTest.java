@@ -76,8 +76,9 @@ class RenderizadorHtmlGuiaRemisionTest {
     @DisplayName("Format Support Tests")
     class FormatSupportTests {
 
+        // A4_LANDSCAPE es exclusivo del Manifiesto de Carga; la guía no tiene plantilla apaisada.
         @ParameterizedTest
-        @EnumSource(FormatoImpresion.class)
+        @EnumSource(value = FormatoImpresion.class, names = "A4_LANDSCAPE", mode = EnumSource.Mode.EXCLUDE)
         @DisplayName("Should support all print formats")
         void shouldSupportAllPrintFormats(FormatoImpresion formato) {
             BorradorGuiaRemision guia = crearGuiaCompleta();

@@ -14,6 +14,7 @@ import java.util.List;
  * @param emisorDireccion       Dirección del emisor.
  * @param emisorEmail           Correo de contacto (opcional).
  * @param emisorTelefono        Teléfono de contacto (opcional).
+ * @param emisorUbicacion       Ubicación del emisor en formato {@code DEPARTAMENTO - PROVINCIA - DISTRITO · ubigeo}.
  * @param emisorRuc             RUC del emisor.
  * @param emisorRegistroMtc     Registro MTC del emisor (opcional).
  * @param numero                Número del manifiesto (ej. {@code MF0002-18052025}).
@@ -33,6 +34,7 @@ public record BorradorManifiesto(
         String emisorDireccion,
         String emisorEmail,
         String emisorTelefono,
+        String emisorUbicacion,
         String emisorRuc,
         String emisorRegistroMtc,
         String numero,

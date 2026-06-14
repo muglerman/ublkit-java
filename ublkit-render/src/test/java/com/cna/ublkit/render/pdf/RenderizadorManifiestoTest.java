@@ -20,9 +20,10 @@ import com.cna.ublkit.render.modelo.LineaManifiesto;
 import com.cna.ublkit.render.modelo.ResultadoRender;
 
 /**
- * Gate del Manifiesto de Carga: verifica que las 5 plantillas {@code manifiesto.a4.html.twig}
- * compilan y cablean los datos reales (cabecera, tabla de guías, condición de pago → pill).
- * Renderiza HTML (sin Playwright) para validar la sintaxis Pebble y los filtros en cada estilo.
+ * Gate del Manifiesto de Carga: verifica que las 5 plantillas {@code manifiesto.a4-landscape.html.twig}
+ * compilan y cablean los datos reales (cabecera con ubicación del emisor, tabla de guías con distrito
+ * de destino, condición de pago → pill). Renderiza HTML (sin Playwright) para validar la sintaxis
+ * Pebble y los filtros en cada estilo.
  *
  * @since 0.4.0
  */
@@ -32,18 +33,19 @@ class RenderizadorManifiestoTest {
     private static BorradorManifiesto sample() {
         List<LineaManifiesto> lineas = List.of(
                 new LineaManifiesto(LocalDate.of(2025, 5, 22), "T001-02139", "0002-026708",
-                        "Zoilo Espinoza Castillo", "Comercial San Juan E.I.R.L.", "AHP-842",
+                        "Zoilo Espinoza Castillo", "Comercial San Juan E.I.R.L.", "PUCALLPA", "AHP-842",
                         4, new BigDecimal("80.00"), new BigDecimal("80.00"), "Cancelado", "cancelado"),
                 new LineaManifiesto(LocalDate.of(2025, 5, 20), "E07-0933", null,
-                        "Importaciones Young People S.A.C.", "Tiendas Selva S.A.C.", "AHP-842",
+                        "Importaciones Young People S.A.C.", "Tiendas Selva S.A.C.", "TARAPOTO", "AHP-842",
                         10, new BigDecimal("150.00"), new BigDecimal("150.00"), "Por cobrar", "cobrar"),
                 new LineaManifiesto(LocalDate.of(2025, 5, 21), "T002-0334", "0002-026715",
-                        "Macedo Ríos del Águila Elva", "Multiservicios Jen E.I.R.L.", "AEK-946",
+                        "Macedo Ríos del Águila Elva", "Multiservicios Jen E.I.R.L.", "YARINACOCHA", "AEK-946",
                         1, new BigDecimal("10.00"), new BigDecimal("10.00"), null, ""));
 
         return new BorradorManifiesto(
                 "TRANSPORTES MANTARO E.I.R.L.", "Mantaro", "Av. Los Transportistas 1180 — Ate, Lima",
-                "operaciones@mantaro.pe", "(01) 555-7788", "20600456789", "LMA-123-4567",
+                "operaciones@mantaro.pe", "(01) 555-7788", "LIMA - LIMA - ATE · 150103",
+                "20600456789", "LMA-123-4567",
                 "MF0002-18052025", null, LocalDate.of(2025, 5, 23),
                 3, 15, new BigDecimal("240.00"), new BigDecimal("240.00"), lineas);
     }
@@ -62,11 +64,13 @@ class RenderizadorManifiestoTest {
         assertTrue(html.contains("TRANSPORTES MANTARO E.I.R.L."), "Falta emisor en " + estilo);
         assertTrue(html.contains("20600456789"), "Falta RUC en " + estilo);
         assertTrue(html.contains("LMA-123-4567"), "Falta Reg. MTC en " + estilo);
+        // Ubicación del emisor en el header (dep - prov - dist · ubigeo)
+        assertTrue(html.contains("LIMA - LIMA - ATE · 150103"), "Falta ubicación del emisor en " + estilo);
         // Tabla de guías
         assertTrue(html.contains("T001-02139"), "Falta serie-número de guía en " + estilo);
         assertTrue(html.contains("0002-026708"), "Falta taquito en " + estilo);
         assertTrue(html.contains("Zoilo Espinoza Castillo"), "Falta remitente en " + estilo);
-        assertTrue(html.contains("Comercial San Juan E.I.R.L."), "Falta destinatario en " + estilo);
+        assertTrue(html.contains("PUCALLPA"), "Falta distrito de destino en " + estilo);
         assertTrue(html.contains("AHP-842"), "Falta placa en " + estilo);
         // Pills de condición de pago (clase derivada vía matches)
         assertTrue(html.contains("cancelado"), "Falta clase pill 'cancelado' en " + estilo);
