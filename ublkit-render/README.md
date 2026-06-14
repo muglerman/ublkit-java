@@ -1,69 +1,78 @@
+<!-- prettier-ignore -->
+<div align="center">
+
 # ublkit-render
 
-## Nombre y Descripción del Proyecto
-**ublkit-render** es un módulo que pertenece a la librería comunitaria UBLKit.
-Módulo responsable de la representación visual humana (PDF y HTML) y generación de tickets térmicos (58mm y 80mm) a partir de los documentos electrónicos UBLKit. Transforma el documento en un comprobante listo para entregar al cliente.
+**Render HTML, PDF y tickets térmicos**
 
-## Stack Tecnológico
-- Java 21+
-- `io.pebbletemplates` para procesamiento de plantillas HTML y lógica visual de manera ágil.
-- `io.github.openhtmltopdf` para la conversión precisa y programática de HTML a PDF/A.
-- `openhtmltopdf-svg-support` para renderizar gráficos vectoriales (como códigos QR).
-- Fuentes tipográficas embebidas (`Roboto`) y perfil de color (`sRGB.icc`) para cumplimiento PDF/A-3b.
+[![Java](https://img.shields.io/badge/Java-21-f89820?style=flat-square&logo=openjdk&logoColor=white)](https://openjdk.org/projects/jdk/21/)
+[![Maven](https://img.shields.io/badge/Maven-module-c71a36?style=flat-square&logo=apachemaven&logoColor=white)](https://maven.apache.org)
+[![Pebble](https://img.shields.io/badge/Pebble-templates-455a64?style=flat-square)](https://pebbletemplates.io)
+[![OpenHTMLtoPDF](https://img.shields.io/badge/OpenHTMLtoPDF-PDF-8b0000?style=flat-square)](https://github.com/danfickle/openhtmltopdf)
+[![HTML](https://img.shields.io/badge/HTML-templates-e34f26?style=flat-square&logo=html5&logoColor=white)](https://developer.mozilla.org/docs/Web/HTML)
 
-## Arquitectura del Proyecto
-Módulo de Infraestructura que implementa puertos `RenderizadorDocumento<T>`. Depende estrechamente de los modelos ensamblados en el dominio y de los fragmentos de firma/QR (`ublkit-qr`). El enfoque de `HTML to PDF` evita la dependencia de motores pesados como JasperReports (JRXML).
+Plantillas Pebble + OpenHTMLtoPDF para representaciones visuales de documentos UBLKit.
 
-## Empezando
-### Requisitos Previos
-- Java 21+
-- Maven 3.8+
+[Uso](#uso) |
+[Estructura](#estructura) |
+[Características](#características) |
+[Reglas](#reglas) |
+[Pruebas](#pruebas)
 
-### Instalación
-Para utilizar este módulo, agrégalo como dependencia en tu archivo `pom.xml`:
+</div>
+
+---
+
+## Descripción General
+
+`ublkit-render` convierte documentos ensamblados a HTML y PDF. Soporta A4/A5 con temas visuales y tickets térmicos 58/80mm con plantillas genéricas.
+
+## Uso
 
 ```xml
 <dependency>
-    <groupId>com.cna</groupId>
-    <artifactId>ublkit-render</artifactId>
-    <version>0.1.0</version>
+  <groupId>com.cna</groupId>
+  <artifactId>ublkit-render</artifactId>
+  <version>1.0.0</version>
 </dependency>
 ```
 
-## Estructura del Proyecto
-La estructura del módulo abarca:
-- `src/main/java/com/cna/ublkit/render/`: Clases renderizadoras HTML y PDF separadas por tipo de comprobante.
-- `src/main/java/com/cna/ublkit/render/context/`: El `ContextoRender` donde se inyectan variables externas (logos, parámetros de sistema, variables de marca).
-- `src/main/resources/templates/`: Archivos `.html.twig`. Los formatos **A4/A5** se organizan por tema visual: una carpeta por estilo (`bold-accent/`, `classic-mono/`, `corporate-blue/`, `forest-modern/`, `minimal-serif/`), cada una con `invoice/note/debit/despatch` (A4 y A5) + `summary/voided` (A4). Los **tickets térmicos** (`ticket58mm`/`ticket80mm`) **no** tienen variante por diseño: viven en una única plantilla genérica por tipo/ancho bajo `templates/generico/` (resuelta por `PlantillaRutas` ignorando el estilo).
-- `src/main/resources/fonts/`: Fuentes requeridas para el motor PDF.
+## Estructura
 
-## Características Principales
-- Soporte para visualización `HTML` directa o exportación a `PDF`.
-- Variedad de Formatos: A4 y A5 con tema visual por estilo; Rollos Térmicos (Ticket 58mm, Ticket 80mm) con plantilla genérica única (sin diseño), monoespaciada.
-- Renderizadores con multitenencia integrada inyectando configuraciones visuales dinámicas al `ContextoRender`.
-- **In-Memory**: Funciona 100% en memoria en la JVM, ideal para ambientes serverless, requiriendo que los logos e imágenes se envíen como `Data URIs` (Base64).
-- Paginación robusta de tablas gestionada por CSS tradicional (`page-break-inside`).
+| Ruta | Contenido |
+| --- | --- |
+| `src/main/java/com/cna/ublkit/render/` | Renderizadores HTML/PDF |
+| `src/main/java/com/cna/ublkit/render/context/` | `ContextoRender` y parámetros externos |
+| `src/main/resources/templates/` | Plantillas `.html.twig` por estilo/formato |
+| `src/main/resources/fonts/` | Fuentes embebidas |
 
-## Flujo de Desarrollo
-- Cualquier modificación visual requiere ajustar los archivos Pebble (`.twig`) en la carpeta de recursos.
-- Para cambios CSS usar estilos estrictamente pre-CSS3/Flexbox para maximizar la compatibilidad con el motor de OpenHTMLtoPDF.
-- Al testear tickets térmicos, asegurarse de que el PDF generado tenga una altura dinámica para evitar papel sobrante.
+## Características
 
-## Estándares de Código
-- Las fuentes y plantillas deben cargarse exclusivamente desde el Classpath (`ClasspathLoader`) para asegurar portabilidad en Docker.
-- Usar fuentes monoespaciadas para los templates de tickets (ej. `Consolas`, `Courier New`) para mantener alineación matemática de importes.
-- El objeto `doc` en los templates Pebble contiene el modelo Java, y el objeto `params` contiene la inyección de ambiente/branding.
+- HTML directo y PDF.
+- A4/A5 por estilo visual.
+- Tickets 58mm/80mm genéricos.
+- Logos e imágenes como Data URI.
+- Operación 100% en memoria.
+
+## Reglas
+
+- Plantillas desde classpath.
+- CSS compatible con OpenHTMLtoPDF.
+- Tickets con fuentes monoespaciadas.
+- `doc` contiene el modelo; `params` contiene branding/ambiente.
 
 ## Pruebas
-- Comprobar la generación de PDF desde facturas complejas (muchos ítems) para probar el salto de página automático en las tablas HTML.
-- Verificación de la compilación Pebble en tiempos de inicio para detectar errores de sintaxis tempranos.
 
-## Contribución
-Las contribuciones son bienvenidas. Por favor, lee el archivo `CONTRIBUTING.md` en la raíz del repositorio para obtener detalles sobre nuestro código de conducta y el proceso para enviarnos pull requests.
-1. Haz un fork del repositorio.
-2. Crea una rama para tu feature (`git checkout -b feature/nueva-caracteristica`).
-3. Haz tus cambios siguiendo los estándares de código.
-4. Envía un Pull Request.
+```bash
+mvn test -pl ublkit-render
+```
 
-## Licencia
-Este proyecto está bajo la Licencia MIT. Consulta el archivo `LICENSE` en la raíz del repositorio para más detalles.
+Validar compilación Pebble, PDF con muchos ítems y cambios visuales relevantes.
+
+---
+
+<div align="center">
+
+Desarrollado por **Crea Nexus Atreus**
+
+</div>

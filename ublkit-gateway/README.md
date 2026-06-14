@@ -1,67 +1,71 @@
+<!-- prettier-ignore -->
+<div align="center">
+
 # ublkit-gateway
 
-## Nombre y Descripción del Proyecto
-**ublkit-gateway** es un módulo que pertenece a la librería comunitaria UBLKit.
-Módulo que maneja las comunicaciones externas enviando los documentos y consultas de estado a los servicios web de la SUNAT (o una OSE).
+**Clientes SUNAT/OSE para envío y consulta**
 
-## Stack Tecnológico
-- Java 21+
-- `java.net.http.HttpClient` nativo (introducido en Java 11) para peticiones sincrónicas y asincrónicas.
-- Sin dependencias de terceros para SOAP (no Apache CXF ni Spring WebServices).
+[![Java](https://img.shields.io/badge/Java-21-f89820?style=flat-square&logo=openjdk&logoColor=white)](https://openjdk.org/projects/jdk/21/)
+[![Maven](https://img.shields.io/badge/Maven-module-c71a36?style=flat-square&logo=apachemaven&logoColor=white)](https://maven.apache.org)
+[![SUNAT](https://img.shields.io/badge/SUNAT-gateway-1f4e79?style=flat-square)](https://cpe.sunat.gob.pe)
+[![SOAP](https://img.shields.io/badge/SOAP-services-795548?style=flat-square)](https://www.w3.org/TR/soap/)
+[![REST](https://img.shields.io/badge/REST-GRE-009688?style=flat-square)](https://restfulapi.net)
 
-## Arquitectura del Proyecto
-Módulo de Infraestructura que implementa el puerto `PasarelaSunat` del core. Centraliza toda la lógica de transporte de red, compresión, descompresión (ZIP) requerida por el estándar de facturación de SUNAT.
+Infraestructura HTTP/SOAP/REST para comprobantes, tickets, CDR y GRE.
 
-## Empezando
-### Requisitos Previos
-- Java 21+
-- Maven 3.8+
+[Uso](#uso) |
+[Estructura](#estructura) |
+[Características](#características) |
+[Pruebas](#pruebas)
 
-### Instalación
-Para utilizar este módulo, agrégalo como dependencia en tu archivo `pom.xml`:
+</div>
+
+---
+
+## Descripción General
+
+`ublkit-gateway` implementa el puerto de pasarela SUNAT/OSE. Maneja transporte, empaquetado ZIP, Base64, parseo de CDR, tickets y autenticación REST cuando aplica.
+
+## Uso
 
 ```xml
 <dependency>
-    <groupId>com.cna</groupId>
-    <artifactId>ublkit-gateway</artifactId>
-    <version>0.1.0</version>
+  <groupId>com.cna</groupId>
+  <artifactId>ublkit-gateway</artifactId>
+  <version>1.0.0</version>
 </dependency>
 ```
 
-## Estructura del Proyecto
-La estructura del paquete es:
-- `src/main/java/com/cna/ublkit/gateway/`: Contrato `PasarelaSunat` y modelos de respuesta (`ResultadoEnvio`, `ArchivoCdr`).
-- `src/main/java/com/cna/ublkit/gateway/client/`: Clientes subyacentes SOAP (`ClienteSoap`) y REST (`ClienteRest`).
-- `src/main/java/com/cna/ublkit/gateway/auth/`: Proveedores de tokens OAuth2 (`ProveedorToken`) usados en la API REST (GRE).
-- `src/main/java/com/cna/ublkit/gateway/config/`: `ResolvedorEndpoints` y `ConfiguracionGateway`.
+## Estructura
 
-## Características Principales
-- Envío SOAP síncrono (tradicional para Facturas y Boletas a SUNAT/OSE).
-- Envío SOAP asíncrono (con ticket) para Resúmenes y Comunicaciones de Baja.
-- Envío REST nativo mediante OAuth2 para Guías de Remisión Electrónicas (GRE).
-- Empaquetado automático del XML firmado en un `.zip` y codificación Base64 en un paso.
-- Parseo automático y desempaquetado del archivo de Constancia de Recepción (CDR) determinando el `EstadoEnvio` (Aceptado, Rechazado, Observado).
-- Configuración explícita de *timeouts* y políticas de reintentos en caso de caídas transitorias del servicio.
+| Paquete | Contenido |
+| --- | --- |
+| `gateway/` | `PasarelaSunat`, `ResultadoEnvio`, `ArchivoCdr` |
+| `gateway/client/` | Clientes SOAP y REST |
+| `gateway/auth/` | Proveedores OAuth2 |
+| `gateway/config/` | Endpoints y configuración |
 
-## Flujo de Desarrollo
-- Cualquier comunicación HTTP debe ser tramitada a través del `HttpClient` pre-configurado para soportar reactividad (ej. con `CompletableFuture`) cuando la consulta es por un ticket asíncrono.
-- Nuevos endpoints o cambios en URLs deben reflejarse en `ConstantesEndpoint`.
+## Características
 
-## Estándares de Código
-- **No bloquear hilos eternamente**: Usar `ConfiguracionGateway` para controlar tiempos de lectura/conexión.
-- **Backoff Exponencial**: Recomendado para reintentos de consulta de tickets y evitar baneos de IPs.
-- **Tipado seguro**: Usar `ExcepcionTransporte` para errores de red o HTTP (5xx) delegando la decisión de reintento a las capas superiores.
+- Envío SOAP síncrono para comprobantes.
+- Envío con ticket para resúmenes y bajas.
+- REST OAuth2 para GRE.
+- Empaquetado ZIP y codificación Base64.
+- Parseo de CDR y estados.
+- Timeouts configurables.
 
 ## Pruebas
-- Uso de `MockWebServer` (o similar ligero) en test para simular latencia de red y respuestas erróneas (500, 502).
-- Validar el correcto parseo de un ZIP simulando la respuesta en bytes de la SUNAT.
 
-## Contribución
-Las contribuciones son bienvenidas. Por favor, lee el archivo `CONTRIBUTING.md` en la raíz del repositorio para obtener detalles sobre nuestro código de conducta y el proceso para enviarnos pull requests.
-1. Haz un fork del repositorio.
-2. Crea una rama para tu feature (`git checkout -b feature/nueva-caracteristica`).
-3. Haz tus cambios siguiendo los estándares de código.
-4. Envía un Pull Request.
+```bash
+mvn test -pl ublkit-gateway
+```
 
-## Licencia
-Este proyecto está bajo la Licencia MIT. Consulta el archivo `LICENSE` en la raíz del repositorio para más detalles.
+Usar mocks de transporte para 2xx, 4xx, 5xx, tickets y CDR ZIP.
+
+---
+
+<div align="center">
+
+Desarrollado por **Crea Nexus Atreus**
+
+</div>

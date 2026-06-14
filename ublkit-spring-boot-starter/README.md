@@ -1,61 +1,66 @@
+<!-- prettier-ignore -->
+<div align="center">
+
 # ublkit-spring-boot-starter
 
-## Nombre y Descripción del Proyecto
-**ublkit-spring-boot-starter** es un módulo que pertenece a la librería comunitaria UBLKit.
-Starter oficial para integrar UBLKit dentro del ecosistema Spring Boot de forma automática (Auto-Configuration). Facilita el uso de la librería a través del contenedor de Inversión de Control de Spring.
+**Auto-configuración Spring Boot para UBLKit**
 
-## Stack Tecnológico
-- Java 21+
-- Spring Boot 3.x
-- Spring Context (`@AutoConfiguration`, `@Bean`, `@ConditionalOnMissingBean`)
+[![Java](https://img.shields.io/badge/Java-21-f89820?style=flat-square&logo=openjdk&logoColor=white)](https://openjdk.org/projects/jdk/21/)
+[![Maven](https://img.shields.io/badge/Maven-module-c71a36?style=flat-square&logo=apachemaven&logoColor=white)](https://maven.apache.org)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-starter-6db33f?style=flat-square&logo=springboot&logoColor=white)](https://spring.io/projects/spring-boot)
+[![AutoConfiguration](https://img.shields.io/badge/Spring-AutoConfiguration-2f855a?style=flat-square)](https://docs.spring.io/spring-boot/reference/features/developing-auto-configuration.html)
 
-## Arquitectura del Proyecto
-Módulo Adaptador de Framework. Siguiendo la arquitectura hexagonal, esta capa orquesta la creación y entrega de los puertos y adaptadores definidos en el core y la infraestructura, adaptándolos como `Beans` en el ApplicationContext de Spring. No expone controladores HTTP propios, solo provee los ladrillos de negocio.
+Registra beans UBLKit por defecto y permite reemplazos con `@ConditionalOnMissingBean`.
 
-## Empezando
-### Requisitos Previos
-- Java 21+
-- Maven 3.8+
+[Uso](#uso) |
+[Características](#características) |
+[Reglas](#reglas) |
+[Pruebas](#pruebas)
 
-### Instalación
-Para utilizar este módulo, agrégalo como dependencia en tu archivo `pom.xml`:
+</div>
+
+---
+
+## Descripción General
+
+`ublkit-spring-boot-starter` adapta UBLKit al contenedor Spring. No expone controllers; solo wiring de servicios, renderizadores, firma, serializadores, gateway y propiedades.
+
+## Uso
 
 ```xml
 <dependency>
-    <groupId>com.cna</groupId>
-    <artifactId>ublkit-spring-boot-starter</artifactId>
-    <version>0.1.0</version>
+  <groupId>com.cna</groupId>
+  <artifactId>ublkit-spring-boot-starter</artifactId>
+  <version>1.0.0</version>
 </dependency>
 ```
 
-## Estructura del Proyecto
-La estructura del módulo es compacta:
-- `src/main/java/com/cna/ublkit/spring/`: `UblKitAutoConfiguration` (que instancia los beans), `UblKitProperties` (para inyectar configuración desde el `application.yml`) y sus subpropiedades como `UblKitStorageProperties`.
+## Características
 
-## Características Principales
-- **Autoconfiguración**: Registra beans por defecto (Renderizadores, Firmador, Serializadores, Pasarela SUNAT) si el desarrollador no provee implementaciones propias (`@ConditionalOnMissingBean`).
-- Integración con el entorno de configuración (`application.yml` / `application.properties`) para ajustar parámetros globales de UBLKit, como credenciales de Gateway o rutas de storage.
-- Fuerte desacople de dependencias ajenas, solo depende de las APIs estándar de Spring AutoConfigure.
+- `UblKitAutoConfiguration`.
+- `UblKitProperties` y subpropiedades.
+- Beans por defecto reemplazables.
+- Integración vía `application.yml`.
 
-## Flujo de Desarrollo
-- Instalar la dependencia en el POM del proyecto Spring Boot cliente.
-- Agregar las propiedades `ublkit.*` correspondientes en el archivo de configuración si se requiere sobrescribir comportamientos por defecto.
-- Inyectar los Beans listos en los `@Service` del aplicativo cliente para orquestar los flujos de emisión.
+## Reglas
 
-## Estándares de Código
-- Declaración clara de propiedades expuestas a través de `@ConfigurationProperties`.
-- Proveer siempre fallbacks de Beans en caso de que ciertas propiedades no existan, manteniendo un 'arranque seguro' del aplicativo.
+- Solo auto-configuración y wiring.
+- Mantener fallbacks seguros.
+- No agregar lógica HTTP ni reglas de negocio.
+- Exponer propiedades explícitas y documentables.
 
 ## Pruebas
-- Validar que el contexto de Spring cargue en un entorno de test (`@SpringBootTest`).
-- Asegurar que al definir un bean propio del cliente, se reemplace el provisto por la autoconfiguración.
 
-## Contribución
-Las contribuciones son bienvenidas. Por favor, lee el archivo `CONTRIBUTING.md` en la raíz del repositorio para obtener detalles sobre nuestro código de conducta y el proceso para enviarnos pull requests.
-1. Haz un fork del repositorio.
-2. Crea una rama para tu feature (`git checkout -b feature/nueva-caracteristica`).
-3. Haz tus cambios siguiendo los estándares de código.
-4. Envía un Pull Request.
+```bash
+mvn test -pl ublkit-spring-boot-starter
+```
 
-## Licencia
-Este proyecto está bajo la Licencia MIT. Consulta el archivo `LICENSE` en la raíz del repositorio para más detalles.
+Validar carga de contexto y reemplazo de beans por el consumidor.
+
+---
+
+<div align="center">
+
+Desarrollado por **Crea Nexus Atreus**
+
+</div>

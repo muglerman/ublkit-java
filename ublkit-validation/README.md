@@ -1,64 +1,76 @@
+<!-- prettier-ignore -->
+<div align="center">
+
 # ublkit-validation
 
-## Nombre y Descripción del Proyecto
-**ublkit-validation** es un módulo que pertenece a la librería comunitaria UBLKit.
-Módulo encargado de la validación estructural, funcional y normativa de los documentos UBL antes de proceder con su firma o envío a SUNAT. Garantiza que el documento cumple con las reglas del dominio y, opcionalmente, con las directrices oficiales XSLT.
+**Validación funcional y normativa de documentos UBL**
 
-## Stack Tecnológico
-- Java 21+
-- Procesamiento XSLT nativo (`javax.xml.transform`) pre-compilado en objetos `Templates` para alto rendimiento.
-- Diseño de validación acumulativa sin excepciones de corto circuito.
+[![Java](https://img.shields.io/badge/Java-21-f89820?style=flat-square&logo=openjdk&logoColor=white)](https://openjdk.org/projects/jdk/21/)
+[![Maven](https://img.shields.io/badge/Maven-module-c71a36?style=flat-square&logo=apachemaven&logoColor=white)](https://maven.apache.org)
+[![XSLT](https://img.shields.io/badge/XSLT-SUNAT-9c27b0?style=flat-square)](https://www.w3.org/TR/xslt-30/)
+[![UBL](https://img.shields.io/badge/UBL-validation-2f855a?style=flat-square)](https://docs.oasis-open.org/ubl/UBL-2.1.html)
+[![SUNAT](https://img.shields.io/badge/SUNAT-rules-1f4e79?style=flat-square)](https://cpe.sunat.gob.pe)
 
-## Arquitectura del Proyecto
-Parte de la capa de Aplicación de la Arquitectura Hexagonal. Define implementaciones de la interfaz `Validador<T>` definida en core. No depende de bases de datos y funciona en memoria.
+Reglas Java y validación SUNAT XSLT con acumulación de incidencias.
 
-## Empezando
-### Requisitos Previos
-- Java 21+
-- Maven 3.8+
+[Uso](#uso) |
+[Estructura](#estructura) |
+[Características](#características) |
+[Reglas](#reglas) |
+[Pruebas](#pruebas)
 
-### Instalación
-Para utilizar este módulo, agrégalo como dependencia en tu archivo `pom.xml`:
+</div>
+
+---
+
+## Descripción General
+
+`ublkit-validation` valida documentos antes de firma/envío. Acumula errores y advertencias en `ResultadoValidacion` y puede ejecutar reglas XSLT oficiales SUNAT.
+
+## Uso
 
 ```xml
 <dependency>
-    <groupId>com.cna</groupId>
-    <artifactId>ublkit-validation</artifactId>
-    <version>0.1.0</version>
+  <groupId>com.cna</groupId>
+  <artifactId>ublkit-validation</artifactId>
+  <version>1.0.0</version>
 </dependency>
 ```
 
-## Estructura del Proyecto
-La estructura del módulo se divide en:
-- `src/main/java/com/cna/ublkit/validation/api/`: Interfaces de validación, `ResultadoValidacion`, `IncidenciaValidacion`.
-- `src/main/java/com/cna/ublkit/validation/document/`: Clases concretas de validadores funcionales por cada tipo de comprobante.
-- `src/main/java/com/cna/ublkit/validation/sunat/`: Lógica de validación XSL (`ValidadorSunatXsl`, `ReglaSunatXsl`).
-- `src/main/resources/sunat/`: Archivos XSL originales extraídos del SFS de SUNAT para homologación.
+## Estructura
 
-## Características Principales
-- API de validación genérica que acumula errores sin interrumpir el flujo en el primer fallo.
-- Diferenciación de `SeveridadValidacion` (Errores críticos vs Advertencias).
-- **Validación Funcional**: Reglas Java que verifican coherencia de importes, ruc, series, etc.
-- **Validación SUNAT XSLT (Homologación)**: Ejecución de las reglas oficiales SUNAT de sus archivos XSL (`ValidaExprRegFactura-2.0.1.xsl`, etc.), cacheando el motor XSLT para evitar bloqueos de CPU en concurrencia.
+| Paquete | Contenido |
+| --- | --- |
+| `validation/api/` | `Validador`, `ResultadoValidacion`, incidencias |
+| `validation/document/` | Validadores funcionales por documento |
+| `validation/sunat/` | Validación XSLT SUNAT |
+| `src/main/resources/sunat/` | XSL oficiales |
 
-## Flujo de Desarrollo
-- Si SUNAT publica nuevas validaciones, se agregan a las clases Java o se actualiza el `.xsl` oficial en recursos.
-- La validación XSL SUNAT es opcional y se activa mediante la propiedad `-Dublkit.validation.sunat.enabled=true`.
+## Características
 
-## Estándares de Código
-- **No lanzar excepciones durante la validación** para representar errores de negocio; siempre usar `ResultadoValidacion` para acumular todas las `Incidencias`.
-- **Rendimiento**: Nunca instanciar el motor XSL (`Transformer`) desde disco en cada validación. Usar el caché de `Templates` implementado.
+- Validación acumulativa.
+- Severidad de errores y advertencias.
+- Reglas funcionales Java.
+- XSLT SUNAT cacheado con `Templates`.
+
+## Reglas
+
+- No usar excepciones para errores de negocio de validación.
+- No recompilar XSL desde disco por cada request.
+- Nuevas reglas deben ser testeables y trazables.
 
 ## Pruebas
-- Evaluaciones de comprobantes mal formados para confirmar que las aserciones acumulen los códigos de error SUNAT correctos.
-- Tests que validan tanto la ruta rápida (solo validación local) como la ruta exhaustiva (con XSL).
 
-## Contribución
-Las contribuciones son bienvenidas. Por favor, lee el archivo `CONTRIBUTING.md` en la raíz del repositorio para obtener detalles sobre nuestro código de conducta y el proceso para enviarnos pull requests.
-1. Haz un fork del repositorio.
-2. Crea una rama para tu feature (`git checkout -b feature/nueva-caracteristica`).
-3. Haz tus cambios siguiendo los estándares de código.
-4. Envía un Pull Request.
+```bash
+mvn test -pl ublkit-validation
+```
 
-## Licencia
-Este proyecto está bajo la Licencia MIT. Consulta el archivo `LICENSE` en la raíz del repositorio para más detalles.
+Cubrir ruta local y ruta XSLT, incluyendo documentos mal formados.
+
+---
+
+<div align="center">
+
+Desarrollado por **Crea Nexus Atreus**
+
+</div>

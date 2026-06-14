@@ -1,62 +1,66 @@
+<!-- prettier-ignore -->
+<div align="center">
+
 # ublkit-storage
 
-## Nombre y Descripción del Proyecto
-**ublkit-storage** es un módulo que pertenece a la librería comunitaria UBLKit.
-Módulo que proporciona una abstracción y múltiples implementaciones para el almacenamiento persistente de los artefactos de emisión electrónica, tales como archivos XML, Constancias de Recepción (CDR) y representaciones visuales (PDF, ZIP).
+**Abstracción de almacenamiento documental**
 
-## Stack Tecnológico
-- Java 21+
-- SDKs Cloud (Opcionales, como AWS S3 SDK o Google Cloud Storage SDK)
-- Java NIO (para la implementación en disco local)
+[![Java](https://img.shields.io/badge/Java-21-f89820?style=flat-square&logo=openjdk&logoColor=white)](https://openjdk.org/projects/jdk/21/)
+[![Maven](https://img.shields.io/badge/Maven-module-c71a36?style=flat-square&logo=apachemaven&logoColor=white)](https://maven.apache.org)
+[![Amazon S3](https://img.shields.io/badge/S3-storage-569a31?style=flat-square&logo=amazons3&logoColor=white)](https://aws.amazon.com/s3/)
+[![Google Cloud](https://img.shields.io/badge/GCS-storage-4285f4?style=flat-square&logo=googlecloud&logoColor=white)](https://cloud.google.com/storage)
+[![Java NIO](https://img.shields.io/badge/Java-NIO-455a64?style=flat-square)](https://docs.oracle.com/javase/8/docs/api/java/nio/file/package-summary.html)
 
-## Arquitectura del Proyecto
-Módulo de Infraestructura que implementa el patrón de adaptador. Expone la interfaz `AlmacenDocumentos` de la cual derivan los adaptadores específicos para Local, AWS S3 y Google Cloud, manteniendo la capa de aplicación abstraída de dónde residen físicamente los archivos.
+Puerto y adaptadores para XML, CDR, PDF, ZIP y artefactos de emisión.
 
-## Empezando
-### Requisitos Previos
-- Java 21+
-- Maven 3.8+
+[Uso](#uso) |
+[Características](#características) |
+[Reglas](#reglas) |
+[Pruebas](#pruebas)
 
-### Instalación
-Para utilizar este módulo, agrégalo como dependencia en tu archivo `pom.xml`:
+</div>
+
+---
+
+## Descripción General
+
+`ublkit-storage` abstrae dónde viven los artefactos documentales. Implementa almacenamiento local y adaptadores cloud para aplicaciones stateless.
+
+## Uso
 
 ```xml
 <dependency>
-    <groupId>com.cna</groupId>
-    <artifactId>ublkit-storage</artifactId>
-    <version>0.1.0</version>
+  <groupId>com.cna</groupId>
+  <artifactId>ublkit-storage</artifactId>
+  <version>1.0.0</version>
 </dependency>
 ```
 
-## Estructura del Proyecto
-La estructura incluye:
-- `AlmacenDocumentos.java`: La interfaz/contrato principal.
-- `AlmacenLocalStorage.java`: Implementación para guardar archivos en el sistema de archivos del servidor (recomendado para pruebas).
-- `AlmacenS3.java` y `AlmacenGCS.java`: Implementaciones para servicios Cloud.
+## Características
 
-## Características Principales
-- Contrato unificado para guardar, recuperar (descargar) y eliminar archivos independientemente del proveedor.
-- Adaptador **Local** para entornos de desarrollo y pruebas.
-- Adaptadores **Cloud** (S3, GCS) para entornos escalables y de alta disponibilidad sin estado en los nodos web.
+- Contrato `AlmacenDocumentos`.
+- Adaptador local para desarrollo/pruebas.
+- Adaptadores cloud S3/GCS.
+- Operaciones de guardar, recuperar y eliminar.
 
-## Flujo de Desarrollo
-- Seleccionar el adaptador a instanciar en tiempo de arranque (usualmente mediante propiedades de Spring/Quarkus) dependiendo del entorno (DEV = Local, PROD = S3).
-- Implementar nuevos adaptadores extendiendo `AlmacenDocumentos` si el proyecto lo requiere (ej. Azure Blob Storage).
+## Reglas
 
-## Estándares de Código
-- Las implementaciones deben capturar excepciones del proveedor de la nube y devolver o lanzar excepciones comunes que entienda UBLKit.
-- Las claves/paths de almacenamiento deben seguir convenciones seguras y unificadas.
+- Paths seguros y normalizados.
+- Errores de proveedor se traducen a errores comunes.
+- Nuevos proveedores deben implementar el mismo contrato.
 
 ## Pruebas
-- Validar la correcta escritura y lectura utilizando el adaptador Local en directorios temporales de JUnit.
-- Tests de integración controlados (o usando Testcontainers/LocalStack) para adaptadores S3/GCS.
 
-## Contribución
-Las contribuciones son bienvenidas. Por favor, lee el archivo `CONTRIBUTING.md` en la raíz del repositorio para obtener detalles sobre nuestro código de conducta y el proceso para enviarnos pull requests.
-1. Haz un fork del repositorio.
-2. Crea una rama para tu feature (`git checkout -b feature/nueva-caracteristica`).
-3. Haz tus cambios siguiendo los estándares de código.
-4. Envía un Pull Request.
+```bash
+mvn test -pl ublkit-storage
+```
 
-## Licencia
-Este proyecto está bajo la Licencia MIT. Consulta el archivo `LICENSE` en la raíz del repositorio para más detalles.
+Validar escritura/lectura local y adaptadores cloud con mocks o entornos controlados.
+
+---
+
+<div align="center">
+
+Desarrollado por **Crea Nexus Atreus**
+
+</div>
