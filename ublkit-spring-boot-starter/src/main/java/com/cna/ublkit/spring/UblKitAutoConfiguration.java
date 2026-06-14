@@ -137,6 +137,12 @@ public class UblKitAutoConfiguration {
         return new RenderizadorTicketFactura();
     }
 
+    @Bean
+    @ConditionalOnMissingBean
+    public RenderizadorPdfManifiesto renderizadorPdfManifiesto() {
+        return new RenderizadorPdfManifiesto();
+    }
+
     // --- Renderizadores HTML ---
     @Bean
     @ConditionalOnMissingBean

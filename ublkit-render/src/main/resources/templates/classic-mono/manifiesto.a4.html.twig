@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>{{ doc.numero }} · Manifiesto de Carga</title>
+<style>
+  {{ fontStyle | raw }}
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body { font-family: 'Inter', sans-serif; font-size: 10px; line-height: 1.4; color: #0a0a0a; background: #fff; width: 794px; min-height: 1123px; padding: 32px 34px; }
+  .mono { font-family: 'IBM Plex Mono', monospace; font-variant-numeric: tabular-nums; }
+  p { margin: 0; }
+
+  .top { display: grid; grid-template-columns: 1fr 300px; align-items: start; gap: 22px; padding-bottom: 13px; border-bottom: 2px solid #0a0a0a; margin-bottom: 13px; }
+  .brand .mark { display: flex; align-items: center; gap: 11px; margin-bottom: 9px; }
+  .brand .logo { width: 38px; height: 38px; flex: none; color: #0a0a0a; }
+  .brand .name { font-size: 13px; font-weight: 700; letter-spacing: 0.02em; }
+  .brand .meta { display: grid; grid-template-columns: 78px 1fr; column-gap: 12px; row-gap: 2px; font-size: 9px; margin: 0; }
+  .brand .meta dt { text-transform: uppercase; letter-spacing: 0.08em; font-size: 8px; color: #737373; }
+  .brand .meta dd { margin: 0; }
+  .brand .meta dd b { font-family: 'IBM Plex Mono', monospace; }
+
+  .doc-id { text-align: right; }
+  .doc-id .kind { font-size: 15px; font-weight: 700; letter-spacing: 0.02em; }
+  .doc-id .sub { font-size: 8.5px; color: #525252; text-transform: uppercase; letter-spacing: 0.1em; }
+  .doc-id .num { font-family: 'IBM Plex Mono', monospace; font-size: 19px; font-weight: 600; margin: 5px 0 8px; letter-spacing: 0.03em; }
+  .doc-id .meta2 { display: grid; grid-template-columns: auto auto; gap: 2px 12px; font-size: 9.5px; justify-content: end; }
+  .doc-id .meta2 .k { color: #737373; text-transform: uppercase; letter-spacing: 0.06em; font-size: 8px; white-space: nowrap; text-align: left; }
+  .doc-id .meta2 .v { font-weight: 600; text-align: right; white-space: nowrap; }
+
+  .sec-title { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 7px; }
+  .sec-title .t { font-size: 11px; font-weight: 700; }
+  .sec-title .c { font-size: 9px; color: #737373; text-transform: uppercase; letter-spacing: 0.1em; }
+
+  .items { width: 100%; border-collapse: collapse; table-layout: fixed; }
+  .items thead th { font-size: 8px; text-transform: uppercase; letter-spacing: 0.06em; color: #737373; font-weight: 500; text-align: left; padding: 0 8px 7px 0; border-bottom: 1px solid #0a0a0a; }
+  .items tbody td { padding: 7px 8px 7px 0; border-bottom: 1px dashed #d4d4d4; vertical-align: top; font-size: 9px; }
+  .items .c-fecha { width: 50px; white-space: nowrap; }
+  .items .c-guia { width: 84px; }
+  .items .c-placa { width: 52px; white-space: nowrap; }
+  .items .c-bul, .items .c-weight, .items .c-flete { text-align: right; }
+  .items .c-bul { width: 36px; font-weight: 600; }
+  .items .c-weight { width: 56px; color: #525252; }
+  .items .c-flete { width: 60px; font-weight: 600; }
+  .items .c-pago { width: 74px; padding-right: 0; }
+  .items .guia .l { display: flex; gap: 4px; align-items: baseline; }
+  .items .guia .tag { font-size: 7px; font-weight: 700; color: #a3a3a3; text-transform: uppercase; letter-spacing: 0.02em; width: 22px; flex: none; }
+  .items .guia .num { font-weight: 600; font-family: 'IBM Plex Mono', monospace; font-size: 8.5px; white-space: nowrap; }
+  .items .party { font-weight: 500; word-break: break-word; }
+  .items .pago .t { font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap; }
+  .items .pago .t.cobrar, .items .pago .t.pce { color: #737373; }
+  .items tfoot td { padding: 9px 8px 0 0; border-top: 2px solid #0a0a0a; font-weight: 700; font-size: 10px; }
+  .items tfoot .lbl { text-transform: uppercase; letter-spacing: 0.06em; font-size: 9px; }
+  .items tfoot .c-bul, .items tfoot .c-weight, .items tfoot .c-flete { text-align: right; }
+  .items tfoot .c-flete { padding-left: 6px; }
+  .items tfoot .c-pago { padding-right: 0; }
+
+  .foot { margin-top: 18px; padding-top: 12px; border-top: 1px solid #0a0a0a; }
+  .foot .note { font-size: 9px; color: #525252; }
+  .foot .note strong { color: #0a0a0a; }
+  .foot .note .badge { display: inline-block; border: 1px solid #0a0a0a; padding: 3px 10px; font-size: 8.5px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 6px; white-space: nowrap; }
+</style>
+</head>
+<body>
+
+<div class="top">
+  <div class="brand">
+    <div class="mark">
+      {% if params.logo is not empty %}<img class="logo" src="{{ params.logo }}" alt="logo" style="object-fit:contain"/>{% else %}<svg class="logo" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="20" cy="20" r="14"/><path d="M9 23l5-9 6 4 6-7"/></svg>{% endif %}
+      <div class="name">{{ doc.emisorRazonSocial }}</div>
+    </div>
+    <dl class="meta">
+      {% if doc.emisorDireccion is not empty %}<dt>Dirección</dt><dd>{{ doc.emisorDireccion }}</dd>{% endif %}
+      <dt>RUC · MTC</dt><dd><b>{{ doc.emisorRuc }}</b>{% if doc.emisorRegistroMtc is not empty %} · Reg. MTC {{ doc.emisorRegistroMtc }}{% endif %}</dd>
+      {% if doc.emisorEmail is not empty or doc.emisorTelefono is not empty %}<dt>Contacto</dt><dd>{% if doc.emisorEmail is not empty %}{{ doc.emisorEmail }}{% endif %}{% if doc.emisorEmail is not empty and doc.emisorTelefono is not empty %} · {% endif %}{{ doc.emisorTelefono }}</dd>{% endif %}
+    </dl>
+  </div>
+  <div class="doc-id">
+    <div class="kind">MANIFIESTO DE CARGA</div>
+    <div class="sub">Documento interno de control</div>
+    <div class="num">{{ doc.numero }}</div>
+    <div class="meta2">
+      <span class="k">Fecha de salida</span><span class="v">{% if doc.fechaSalida is not null %}{{ doc.fechaSalida|date('d/m/Y') }}{% endif %}</span>
+      {% if doc.serie is not empty %}<span class="k">Serie · N°</span><span class="v">{{ doc.serie }} · {{ doc.numero }}</span>{% endif %}
+      <span class="k">Guías · bultos</span><span class="v">{{ doc.totalGuias }} · {{ doc.totalBultos }}</span>
+      <span class="k">Peso · flete</span><span class="v">{{ doc.totalPeso|n_format }} kg · S/ {{ doc.totalFlete|n_format }}</span>
+    </div>
+  </div>
+</div>
+
+<div class="sec-title"><span class="t">Carga consolidada — guías de remisión</span><span class="c">{{ doc.totalGuias }} guías</span></div>
+<table class="items">
+  <thead>
+    <tr>
+      <th class="c-fecha">F. Emisión</th>
+      <th class="c-guia">Guía</th>
+      <th>Remitente</th>
+      <th>Destinatario</th>
+      <th class="c-placa">Placa</th>
+      <th class="c-bul">Bultos</th>
+      <th class="c-weight">Peso kg</th>
+      <th class="c-flete">Flete S/</th>
+      <th class="c-pago">Pago</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for l in doc.lineas %}
+    <tr>
+      <td class="c-fecha mono">{% if l.fechaEmision is not null %}{{ l.fechaEmision|date('d/m/Y') }}{% endif %}</td>
+      <td class="guia"><div class="l"><span class="tag">Guía</span><span class="num">{{ l.guiaSerieNumero }}</span></div>{% if l.taquito is not empty %}<div class="l"><span class="tag">Taq.</span><span class="num">{{ l.taquito }}</span></div>{% endif %}</td>
+      <td class="party">{{ l.remitente }}</td>
+      <td class="party">{{ l.destinatario }}</td>
+      <td class="c-placa mono">{{ l.placa }}</td>
+      <td class="c-bul mono">{{ l.bultos }}</td>
+      <td class="c-weight mono">{{ l.peso|n_format }}</td>
+      <td class="c-flete mono">{{ l.flete|n_format }}</td>
+      <td class="pago">{% if l.condicionPago is not empty %}<span class="t {{ l.pagoClase }}">{{ l.condicionPago }}</span>{% endif %}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+  <tfoot>
+    <tr>
+      <td class="lbl" colspan="5">Total · {{ doc.totalGuias }} guías consolidadas</td>
+      <td class="c-bul mono">{{ doc.totalBultos }}</td>
+      <td class="c-weight mono">{{ doc.totalPeso|n_format }}</td>
+      <td class="c-flete mono">{{ doc.totalFlete|n_format }}</td>
+      <td class="c-pago"></td>
+    </tr>
+  </tfoot>
+</table>
+
+<div class="foot">
+  <div class="note">
+    <span class="badge">Uso interno</span>
+    <p>Documento de <strong>control de carga consolidada</strong> para el viaje. No constituye comprobante de pago ni guía de remisión electrónica; cada guía se sustenta de forma individual.</p>
+  </div>
+</div>
+
+</body>
+</html>
