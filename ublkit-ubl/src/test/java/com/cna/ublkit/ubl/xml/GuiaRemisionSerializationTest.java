@@ -175,6 +175,43 @@ class GuiaRemisionSerializationTest {
         assertFalse(xml.contains("<cac:DespatchParty>"));
     }
 
+    @Test
+    @DisplayName("GRE-T subcontratada: LogisticsOperatorParty usa PartyIdentification/ID sin envoltorio cac:Party")
+    void testConsignmentLogisticsOperatorParty() {
+        // SUNAT valida cac:Consignment/cac:LogisticsOperatorParty/cac:PartyIdentification/cbc:ID (schemeID '6'),
+        // sin envoltorio cac:Party ni CustomerAssignedAccountID (ExceptionXsd 0306 en caso contrario).
+        BorradorGuiaRemision guia = guiaConTercero("31");
+        guia.setSubcontratado(new TerceroGuia("6", "10200242390", "GLADYS HUAROC HIDALGO"));
+
+        String xml = new SerializadorXmlGuiaRemision().serializar(guia);
+        String compacto = xml.replaceAll(">\\s+<", "><");
+
+        assertTrue(compacto.contains("<cac:LogisticsOperatorParty><cac:PartyIdentification>"),
+                "El identificador debe colgar directamente del operador, sin envoltorio cac:Party");
+        assertTrue(xml.contains("schemeID=\"6\"") && xml.contains(">10200242390</cbc:ID>"),
+                "El RUC del operador va en cbc:ID con schemeID 6");
+        assertTrue(compacto.contains("<cac:PartyLegalEntity><cbc:RegistrationName>")
+                        && xml.contains("GLADYS HUAROC HIDALGO"),
+                "La razon social del operador va en cac:PartyLegalEntity/cbc:RegistrationName");
+        assertFalse(xml.contains("CustomerAssignedAccountID"),
+                "No debe usar CustomerAssignedAccountID (estructura invalida)");
+    }
+
+    @Test
+    @DisplayName("GRE-T pagador tercero: OriginatorCustomerParty usa envoltorio cac:Party/PartyIdentification")
+    void testConsignmentOriginatorCustomerParty() {
+        BorradorGuiaRemision guia = guiaConTercero("31");
+        guia.setPagadorFleteTercero(new TerceroGuia("6", "20606514540", "PAGADOR S.A.C."));
+
+        String xml = new SerializadorXmlGuiaRemision().serializar(guia);
+        String compacto = xml.replaceAll(">\\s+<", "><");
+
+        assertTrue(compacto.contains("<cac:OriginatorCustomerParty><cac:Party><cac:PartyIdentification>"),
+                "El pagador tercero lleva envoltorio cac:Party");
+        assertTrue(xml.contains(">20606514540</cbc:ID>"), "El documento del pagador va en cbc:ID");
+        assertTrue(xml.contains("PAGADOR S.A.C."), "Debe consignar la razon social del pagador");
+    }
+
     private BorradorGuiaRemision guiaConTercero(String tipoComprobante) {
         return BorradorGuiaRemisionBuilder.aBorradorGuiaRemision()
                 .withVersion("2.0")

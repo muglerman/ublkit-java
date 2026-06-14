@@ -417,29 +417,37 @@ public final class SerializadorXmlGuiaRemision implements SerializadorXml<Borrad
         Element consignment = cac(doc, "Consignment");
         consignment.appendChild(cbc(doc, "ID", "SUNAT_Envio"));
         if (guia.getSubcontratado() != null) {
-            consignment.appendChild(parteOperadora(doc, "LogisticsOperatorParty", guia.getSubcontratado()));
+            agregarOperadorLogistico(doc, consignment, guia.getSubcontratado());
         }
         if (guia.getPagadorFleteTercero() != null) {
-            consignment.appendChild(parteOperadora(doc, "OriginatorCustomerParty", guia.getPagadorFleteTercero()));
+            // cac:OriginatorCustomerParty lleva envoltorio cac:Party (PartyType), como el destinatario.
+            TerceroGuia pagador = guia.getPagadorFleteTercero();
+            agregarParteConIdentidad(doc, consignment, "OriginatorCustomerParty",
+                    pagador.tipoDocumentoIdentidad(),
+                    pagador.numeroDocumentoIdentidad(),
+                    pagador.nombre());
         }
         shipment.appendChild(consignment);
     }
 
-    /** Bloque de parte (RUC + razón social) usado por LogisticsOperatorParty / OriginatorCustomerParty. */
-    private Element parteOperadora(Document doc, String tag, TerceroGuia parte) {
-        Element party = cac(doc, tag);
-        party.appendChild(cbcConAtributos(doc, "CustomerAssignedAccountID",
-                parte.numeroDocumentoIdentidad(),
+    /**
+     * cac:LogisticsOperatorParty (empresa que subcontrata): a diferencia de las demás partes NO lleva envoltorio
+     * cac:Party — el identificador y la razón social cuelgan directamente del nodo. El operador es siempre un RUC
+     * (Catálogo 06 código 6; SUNAT exige schemeID '6' vía regexp ^(6)$).
+     */
+    private void agregarOperadorLogistico(Document doc, Element consignment, TerceroGuia parte) {
+        Element party = cac(doc, "LogisticsOperatorParty");
+        Element pid = cac(doc, "PartyIdentification");
+        pid.appendChild(cbcConAtributos(doc, "ID", parte.numeroDocumentoIdentidad(),
                 "schemeID", parte.tipoDocumentoIdentidad() != null ? parte.tipoDocumentoIdentidad() : "6",
                 "schemeName", "Documento de Identidad",
                 "schemeAgencyName", "PE:SUNAT",
                 "schemeURI", "urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo06"));
-        Element p = cac(doc, "Party");
+        party.appendChild(pid);
         Element legal = cac(doc, "PartyLegalEntity");
         legal.appendChild(cbcCdata(doc, "RegistrationName", parte.nombre()));
-        p.appendChild(legal);
-        party.appendChild(p);
-        return party;
+        party.appendChild(legal);
+        consignment.appendChild(party);
     }
 
     private void agregarContenedores(Document doc, Element shipment, DatosEnvio envio) {

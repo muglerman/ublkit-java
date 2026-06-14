@@ -33,7 +33,7 @@
 
   .route { background: var(--accent-soft); border: 1px solid #d3e0f3; border-radius: 8px; padding: 16px 20px; display: grid; grid-template-columns: 1fr auto 1fr; gap: 18px; align-items: center; margin-bottom: 18px; }
   .route .leg .k { font-size: 9px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--accent); font-weight: 600; }
-  .route .leg .v { font-size: 12.5px; font-weight: 700; margin-top: 2px; }
+  .route .leg .v { font-size: 11px; font-weight: 700; margin-top: 2px; }
   .route .leg .a { font-size: 10px; color: var(--ink-2); margin-top: 1px; }
   .route .arrow { font-size: 22px; color: var(--accent); }
   .route .leg.right { text-align: right; }
@@ -109,13 +109,13 @@
   <div class="leg">
     <div class="k">Punto de partida</div>
     <div class="v">{% if doc.envio is not null and doc.envio.partida is not null %}{{ doc.envio.partida.direccion }}{% endif %}</div>
-    <div class="a">{% if params.partidaDistrito is not empty %}{% if params.partidaDepartamento is not empty %}{{ params.partidaDepartamento }} — {{ params.partidaProvincia }} — {% endif %}{{ params.partidaDistrito }}{% endif %}{% if doc.envio is not null and doc.envio.partida is not null and doc.envio.partida.ubigeo is not empty %} · Ubigeo {{ doc.envio.partida.ubigeo }}{% endif %}</div>
+    <div class="a">{% if params.partidaDistrito is not empty %}{% if params.partidaDepartamento is not empty %}{{ params.partidaDepartamento }} — {{ params.partidaProvincia }} — {% endif %}{{ params.partidaDistrito }}{% endif %}{% if doc.envio is not null and doc.envio.partida is not null and doc.envio.partida.ubigeo is not empty %} · {{ doc.envio.partida.ubigeo }}{% endif %}</div>
   </div>
   <div class="arrow">→</div>
   <div class="leg right">
     <div class="k">Punto de llegada</div>
     <div class="v">{% if doc.envio is not null and doc.envio.destino is not null %}{{ doc.envio.destino.direccion }}{% endif %}</div>
-    <div class="a">{% if params.destinoDistrito is not empty %}{% if params.destinoDepartamento is not empty %}{{ params.destinoDepartamento }} — {{ params.destinoProvincia }} — {% endif %}{{ params.destinoDistrito }}{% endif %}{% if doc.envio is not null and doc.envio.destino is not null and doc.envio.destino.ubigeo is not empty %} · Ubigeo {{ doc.envio.destino.ubigeo }}{% endif %}</div>
+    <div class="a">{% if params.destinoDistrito is not empty %}{% if params.destinoDepartamento is not empty %}{{ params.destinoDepartamento }} — {{ params.destinoProvincia }} — {% endif %}{{ params.destinoDistrito }}{% endif %}{% if doc.envio is not null and doc.envio.destino is not null and doc.envio.destino.ubigeo is not empty %} · {{ doc.envio.destino.ubigeo }}{% endif %}</div>
   </div>
 </div>
 
