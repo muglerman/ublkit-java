@@ -32,5 +32,16 @@ build/
 ### VS Code ###
 .vscode/
 
+# OS
+.DS_Store
+**/.DS_Store
+
+# Logs
+*.log
+
+# Maven generated poms
+.flattened-pom.xml
+dependency-reduced-pom.xml
+
 ### Docs only for information
 docsx/
