@@ -1,6 +1,6 @@
-package com.cna.ublkit.validation.api;
+package com.creanexusatreus.ublkit.validation.api;
 
-import com.cna.ublkit.validation.modelo.ResultadoValidacion;
+import com.creanexusatreus.ublkit.validation.modelo.ResultadoValidacion;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

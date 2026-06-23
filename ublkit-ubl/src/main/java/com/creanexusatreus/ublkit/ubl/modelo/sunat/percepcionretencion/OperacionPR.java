@@ -1,6 +1,6 @@
-package com.cna.ublkit.ubl.modelo.sunat.percepcionretencion;
+package com.creanexusatreus.ublkit.ubl.modelo.sunat.percepcionretencion;
 
-import com.cna.ublkit.core.modelo.TipoCambio;
+import com.creanexusatreus.ublkit.core.modelo.TipoCambio;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

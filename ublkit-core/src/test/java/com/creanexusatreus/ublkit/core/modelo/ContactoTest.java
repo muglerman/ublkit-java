@@ -1,4 +1,4 @@
-package com.cna.ublkit.core.modelo;
+package com.creanexusatreus.ublkit.core.modelo;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;

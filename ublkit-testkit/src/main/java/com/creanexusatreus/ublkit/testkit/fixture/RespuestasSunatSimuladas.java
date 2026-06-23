@@ -1,4 +1,4 @@
-package com.cna.ublkit.testkit.fixture;
+package com.creanexusatreus.ublkit.testkit.fixture;
 
 /**
  * Respuestas SUNAT simuladas para pruebas unitarias/integración.

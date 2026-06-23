@@ -1,4 +1,4 @@
-package com.cna.ublkit.gateway.autenticacion;
+package com.creanexusatreus.ublkit.gateway.autenticacion;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;

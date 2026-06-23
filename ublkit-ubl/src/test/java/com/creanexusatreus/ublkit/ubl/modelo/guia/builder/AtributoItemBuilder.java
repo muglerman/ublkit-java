@@ -1,6 +1,6 @@
-package com.cna.ublkit.ubl.modelo.guia.builder;
+package com.creanexusatreus.ublkit.ubl.modelo.guia.builder;
 
-import com.cna.ublkit.ubl.modelo.guia.AtributoItem;
+import com.creanexusatreus.ublkit.ubl.modelo.guia.AtributoItem;
 
 /**
  * Builder para crear instancias de AtributoItem en tests.

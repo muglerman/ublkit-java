@@ -1,11 +1,11 @@
-package com.cna.ublkit.render.html;
+package com.creanexusatreus.ublkit.render.html;
 
-import com.cna.ublkit.render.modelo.ContextoRender;
-import com.cna.ublkit.render.modelo.ResultadoRender;
-import com.cna.ublkit.ubl.modelo.sunat.resumen.ComprobanteResumen;
-import com.cna.ublkit.ubl.modelo.sunat.resumen.ItemResumenDiario;
-import com.cna.ublkit.ubl.modelo.sunat.resumen.ResumenDiario;
-import com.cna.ublkit.ubl.modelo.actor.EmisorDocumento;
+import com.creanexusatreus.ublkit.render.modelo.ContextoRender;
+import com.creanexusatreus.ublkit.render.modelo.ResultadoRender;
+import com.creanexusatreus.ublkit.ubl.modelo.sunat.resumen.ComprobanteResumen;
+import com.creanexusatreus.ublkit.ubl.modelo.sunat.resumen.ItemResumenDiario;
+import com.creanexusatreus.ublkit.ubl.modelo.sunat.resumen.ResumenDiario;
+import com.creanexusatreus.ublkit.ubl.modelo.actor.EmisorDocumento;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -431,7 +431,7 @@ class RenderizadorHtmlResumenDiarioTest {
         );
         resumen.setEmisor(emisor);
 
-        com.cna.ublkit.ubl.modelo.actor.FirmanteDocumento firmante = new com.cna.ublkit.ubl.modelo.actor.FirmanteDocumento(
+        com.creanexusatreus.ublkit.ubl.modelo.actor.FirmanteDocumento firmante = new com.creanexusatreus.ublkit.ubl.modelo.actor.FirmanteDocumento(
                 "20123456789", "Empresa Test"
         );
         resumen.setFirmante(firmante);
@@ -440,7 +440,7 @@ class RenderizadorHtmlResumenDiarioTest {
         comprobante.setTipoComprobante("01");
         comprobante.setSerieNumero("F001-100");
         comprobante.setMoneda("PEN");
-        comprobante.setCliente(new com.cna.ublkit.ubl.modelo.actor.ReceptorDocumento(
+        comprobante.setCliente(new com.creanexusatreus.ublkit.ubl.modelo.actor.ReceptorDocumento(
                 "1", "10123456789", "Cliente Test", null, null
         ));
         ItemResumenDiario item = new ItemResumenDiario("01", comprobante);

@@ -1,10 +1,10 @@
-package com.cna.ublkit.gateway.api;
+package com.creanexusatreus.ublkit.gateway.api;
 
-import com.cna.ublkit.core.enumerado.TipoAmbiente;
-import com.cna.ublkit.gateway.autenticacion.CredencialesEmpresa;
-import com.cna.ublkit.gateway.respuesta.ArchivoCdr;
-import com.cna.ublkit.gateway.respuesta.ResultadoConsulta;
-import com.cna.ublkit.gateway.respuesta.ResultadoEnvio;
+import com.creanexusatreus.ublkit.core.enumerado.TipoAmbiente;
+import com.creanexusatreus.ublkit.gateway.autenticacion.CredencialesEmpresa;
+import com.creanexusatreus.ublkit.gateway.respuesta.ArchivoCdr;
+import com.creanexusatreus.ublkit.gateway.respuesta.ResultadoConsulta;
+import com.creanexusatreus.ublkit.gateway.respuesta.ResultadoEnvio;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.CompletableFuture;

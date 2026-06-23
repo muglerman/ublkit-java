@@ -1,11 +1,11 @@
-package com.cna.ublkit.ubl.xml;
+package com.creanexusatreus.ublkit.ubl.xml;
 
-import com.cna.ublkit.ubl.ensamblador.EnsambladorFactura;
-import com.cna.ublkit.ubl.modelo.BorradorFactura;
-import com.cna.ublkit.ubl.modelo.actor.EmisorDocumento;
-import com.cna.ublkit.ubl.modelo.actor.ReceptorDocumento;
-import com.cna.ublkit.ubl.modelo.complemento.DocumentoRelacionado;
-import com.cna.ublkit.ubl.modelo.linea.LineaDetalle;
+import com.creanexusatreus.ublkit.ubl.ensamblador.EnsambladorFactura;
+import com.creanexusatreus.ublkit.ubl.modelo.BorradorFactura;
+import com.creanexusatreus.ublkit.ubl.modelo.actor.EmisorDocumento;
+import com.creanexusatreus.ublkit.ubl.modelo.actor.ReceptorDocumento;
+import com.creanexusatreus.ublkit.ubl.modelo.complemento.DocumentoRelacionado;
+import com.creanexusatreus.ublkit.ubl.modelo.linea.LineaDetalle;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;

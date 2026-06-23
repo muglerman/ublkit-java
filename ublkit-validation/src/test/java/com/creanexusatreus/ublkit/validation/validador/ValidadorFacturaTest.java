@@ -1,13 +1,13 @@
-package com.cna.ublkit.validation.validador;
+package com.creanexusatreus.ublkit.validation.validador;
 
-import com.cna.ublkit.ubl.modelo.BorradorFactura;
-import com.cna.ublkit.ubl.modelo.actor.EmisorDocumento;
-import com.cna.ublkit.ubl.modelo.actor.ReceptorDocumento;
-import com.cna.ublkit.ubl.modelo.linea.LineaDetalle;
-import com.cna.ublkit.validation.builder.FacturaBuilder;
-import com.cna.ublkit.validation.builder.LineaDetalleBuilder;
-import com.cna.ublkit.validation.factory.ValidatorTestFactory;
-import com.cna.ublkit.validation.modelo.ResultadoValidacion;
+import com.creanexusatreus.ublkit.ubl.modelo.BorradorFactura;
+import com.creanexusatreus.ublkit.ubl.modelo.actor.EmisorDocumento;
+import com.creanexusatreus.ublkit.ubl.modelo.actor.ReceptorDocumento;
+import com.creanexusatreus.ublkit.ubl.modelo.linea.LineaDetalle;
+import com.creanexusatreus.ublkit.validation.builder.FacturaBuilder;
+import com.creanexusatreus.ublkit.validation.builder.LineaDetalleBuilder;
+import com.creanexusatreus.ublkit.validation.factory.ValidatorTestFactory;
+import com.creanexusatreus.ublkit.validation.modelo.ResultadoValidacion;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;

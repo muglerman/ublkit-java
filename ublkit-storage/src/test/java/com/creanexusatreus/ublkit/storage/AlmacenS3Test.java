@@ -1,6 +1,6 @@
-package com.cna.ublkit.storage;
+package com.creanexusatreus.ublkit.storage;
 
-import com.cna.ublkit.core.modelo.ResultadoOperacion;
+import com.creanexusatreus.ublkit.core.modelo.ResultadoOperacion;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;

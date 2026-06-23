@@ -1,4 +1,4 @@
-package com.cna.ublkit.ubl.modelo.complemento;
+package com.creanexusatreus.ublkit.ubl.modelo.complemento;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

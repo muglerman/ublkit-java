@@ -1,4 +1,4 @@
-package com.cna.ublkit.ubl.modelo.guia;
+package com.creanexusatreus.ublkit.ubl.modelo.guia;
 
 /**
  * Punto de destino del traslado.

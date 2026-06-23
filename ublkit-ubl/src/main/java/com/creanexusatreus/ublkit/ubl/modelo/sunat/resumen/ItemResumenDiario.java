@@ -1,4 +1,4 @@
-package com.cna.ublkit.ubl.modelo.sunat.resumen;
+package com.creanexusatreus.ublkit.ubl.modelo.sunat.resumen;
 
 /**
  * Ítem del Resumen Diario (operación + comprobante).

@@ -1,6 +1,6 @@
-package com.cna.ublkit.sign.certificado;
+package com.creanexusatreus.ublkit.sign.certificado;
 
-import com.cna.ublkit.core.error.ExcepcionUblKit;
+import com.creanexusatreus.ublkit.core.error.ExcepcionUblKit;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

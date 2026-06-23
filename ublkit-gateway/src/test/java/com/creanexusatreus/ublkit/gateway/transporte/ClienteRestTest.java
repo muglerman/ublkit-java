@@ -1,7 +1,7 @@
-package com.cna.ublkit.gateway.transporte;
+package com.creanexusatreus.ublkit.gateway.transporte;
 
-import com.cna.ublkit.gateway.respuesta.ResultadoConsulta;
-import com.cna.ublkit.gateway.respuesta.ResultadoEnvio;
+import com.creanexusatreus.ublkit.gateway.respuesta.ResultadoConsulta;
+import com.creanexusatreus.ublkit.gateway.respuesta.ResultadoEnvio;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

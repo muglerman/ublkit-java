@@ -1,6 +1,6 @@
-package com.cna.ublkit.ubl.modelo.guia.builder;
+package com.creanexusatreus.ublkit.ubl.modelo.guia.builder;
 
-import com.cna.ublkit.ubl.modelo.guia.Contenedor;
+import com.creanexusatreus.ublkit.ubl.modelo.guia.Contenedor;
 
 public class ContenedorBuilder {
     private String numero = "CONT001";

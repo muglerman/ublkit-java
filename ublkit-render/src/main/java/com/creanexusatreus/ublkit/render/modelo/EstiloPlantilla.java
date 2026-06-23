@@ -1,4 +1,4 @@
-package com.cna.ublkit.render.modelo;
+package com.creanexusatreus.ublkit.render.modelo;
 
 /**
  * Estilos visuales disponibles para las plantillas de render.

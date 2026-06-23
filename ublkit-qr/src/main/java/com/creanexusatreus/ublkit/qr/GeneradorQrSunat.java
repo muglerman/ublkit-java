@@ -1,10 +1,10 @@
-package com.cna.ublkit.qr;
+package com.creanexusatreus.ublkit.qr;
 
-import com.cna.ublkit.ubl.modelo.BorradorFactura;
-import com.cna.ublkit.ubl.modelo.BorradorNotaCredito;
-import com.cna.ublkit.ubl.modelo.BorradorNotaDebito;
-import com.cna.ublkit.ubl.modelo.DocumentoBase;
-import com.cna.ublkit.ubl.modelo.actor.ReceptorDocumento;
+import com.creanexusatreus.ublkit.ubl.modelo.BorradorFactura;
+import com.creanexusatreus.ublkit.ubl.modelo.BorradorNotaCredito;
+import com.creanexusatreus.ublkit.ubl.modelo.BorradorNotaDebito;
+import com.creanexusatreus.ublkit.ubl.modelo.DocumentoBase;
+import com.creanexusatreus.ublkit.ubl.modelo.actor.ReceptorDocumento;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.EncodeHintType;
 import com.google.zxing.client.j2se.MatrixToImageWriter;

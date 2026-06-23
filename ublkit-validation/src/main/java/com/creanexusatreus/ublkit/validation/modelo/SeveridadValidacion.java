@@ -1,4 +1,4 @@
-package com.cna.ublkit.validation.modelo;
+package com.creanexusatreus.ublkit.validation.modelo;
 
 /**
  * Define la severidad de una incidencia encontrada durante la validación.

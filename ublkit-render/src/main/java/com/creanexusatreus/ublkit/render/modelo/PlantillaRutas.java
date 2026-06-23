@@ -1,4 +1,4 @@
-package com.cna.ublkit.render.modelo;
+package com.creanexusatreus.ublkit.render.modelo;
 
 /**
  * Helper para resolver rutas de plantillas por estilo y formato.

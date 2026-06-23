@@ -1,4 +1,4 @@
-package com.cna.ublkit.ubl.modelo.complemento;
+package com.creanexusatreus.ublkit.ubl.modelo.complemento;
 
 /**
  * Referencia a una guía de remisión relacionada con el documento de venta.

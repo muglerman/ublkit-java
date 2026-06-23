@@ -1,4 +1,4 @@
-package com.cna.ublkit.validation.modelo;
+package com.creanexusatreus.ublkit.validation.modelo;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

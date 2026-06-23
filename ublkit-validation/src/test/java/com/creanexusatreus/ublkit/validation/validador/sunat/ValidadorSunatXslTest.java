@@ -1,7 +1,7 @@
-package com.cna.ublkit.validation.validador.sunat;
+package com.creanexusatreus.ublkit.validation.validador.sunat;
 
-import com.cna.ublkit.validation.modelo.ResultadoValidacion;
-import com.cna.ublkit.validation.modelo.SeveridadValidacion;
+import com.creanexusatreus.ublkit.validation.modelo.ResultadoValidacion;
+import com.creanexusatreus.ublkit.validation.modelo.SeveridadValidacion;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

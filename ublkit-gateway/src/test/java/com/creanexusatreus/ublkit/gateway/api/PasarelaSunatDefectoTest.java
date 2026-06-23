@@ -1,15 +1,15 @@
-package com.cna.ublkit.gateway.api;
+package com.creanexusatreus.ublkit.gateway.api;
 
-import com.cna.ublkit.core.enumerado.TipoAmbiente;
-import com.cna.ublkit.gateway.autenticacion.CredencialesEmpresa;
-import com.cna.ublkit.gateway.autenticacion.ProveedorToken;
-import com.cna.ublkit.gateway.config.ConfiguracionGateway;
-import com.cna.ublkit.gateway.respuesta.ArchivoCdr;
-import com.cna.ublkit.gateway.respuesta.EstadoEnvio;
-import com.cna.ublkit.gateway.respuesta.ResultadoConsulta;
-import com.cna.ublkit.gateway.respuesta.ResultadoEnvio;
-import com.cna.ublkit.gateway.transporte.ClienteRest;
-import com.cna.ublkit.gateway.transporte.ClienteSoap;
+import com.creanexusatreus.ublkit.core.enumerado.TipoAmbiente;
+import com.creanexusatreus.ublkit.gateway.autenticacion.CredencialesEmpresa;
+import com.creanexusatreus.ublkit.gateway.autenticacion.ProveedorToken;
+import com.creanexusatreus.ublkit.gateway.config.ConfiguracionGateway;
+import com.creanexusatreus.ublkit.gateway.respuesta.ArchivoCdr;
+import com.creanexusatreus.ublkit.gateway.respuesta.EstadoEnvio;
+import com.creanexusatreus.ublkit.gateway.respuesta.ResultadoConsulta;
+import com.creanexusatreus.ublkit.gateway.respuesta.ResultadoEnvio;
+import com.creanexusatreus.ublkit.gateway.transporte.ClienteRest;
+import com.creanexusatreus.ublkit.gateway.transporte.ClienteSoap;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -419,7 +419,7 @@ class PasarelaSunatDefectoTest {
     }
     @org.junit.jupiter.api.Test
     void conRetry_whenHttp5xx_retriesUpToMaxIntentos() {
-        var config = com.cna.ublkit.gateway.config.ConfiguracionGateway.porDefecto();
+        var config = com.creanexusatreus.ublkit.gateway.config.ConfiguracionGateway.porDefecto();
         var failingRest = new ClienteRest() {
             int count = 0;
             public ResultadoEnvio enviarGuia(String xml, String nombre, String url, String token) {
@@ -431,7 +431,7 @@ class PasarelaSunatDefectoTest {
             }
         };
         var gatewayRetry = new PasarelaSunatDefecto(mockClienteSoap, failingRest, mockProveedorToken, config);
-        var result = gatewayRetry.enviarGuiaRemision("xml", "file.xml", new com.cna.ublkit.gateway.autenticacion.CredencialesEmpresa("20000000000", "USER", "PASS", "clientId", "clientSecret"), TipoAmbiente.BETA);
+        var result = gatewayRetry.enviarGuiaRemision("xml", "file.xml", new com.creanexusatreus.ublkit.gateway.autenticacion.CredencialesEmpresa("20000000000", "USER", "PASS", "clientId", "clientSecret"), TipoAmbiente.BETA);
 
         org.assertj.core.api.Assertions.assertThat(result.estado()).isEqualTo(EstadoEnvio.EXCEPCION);
         org.assertj.core.api.Assertions.assertThat(result.codigoError()).isEqualTo("HTTP_5XX");

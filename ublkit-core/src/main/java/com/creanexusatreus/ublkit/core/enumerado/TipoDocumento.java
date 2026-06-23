@@ -1,4 +1,4 @@
-package com.cna.ublkit.core.enumerado;
+package com.creanexusatreus.ublkit.core.enumerado;
 
 /**
  * Enumera los tipos documentales principales soportados por UBLKit.

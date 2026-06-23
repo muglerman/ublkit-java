@@ -1,4 +1,4 @@
-package com.cna.ublkit.catalogs.modelo;
+package com.creanexusatreus.ublkit.catalogs.modelo;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

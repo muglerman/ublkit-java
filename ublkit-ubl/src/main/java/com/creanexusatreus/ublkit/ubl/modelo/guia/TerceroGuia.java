@@ -1,4 +1,4 @@
-package com.cna.ublkit.ubl.modelo.guia;
+package com.creanexusatreus.ublkit.ubl.modelo.guia;
 
 /**
  * Tercero (vendedor/remitente original) en la Guía de Remisión Transportista.

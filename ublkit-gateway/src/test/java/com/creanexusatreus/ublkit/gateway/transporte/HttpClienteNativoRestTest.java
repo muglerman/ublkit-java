@@ -1,8 +1,8 @@
-package com.cna.ublkit.gateway.transporte;
+package com.creanexusatreus.ublkit.gateway.transporte;
 
-import com.cna.ublkit.gateway.respuesta.EstadoEnvio;
-import com.cna.ublkit.gateway.respuesta.ResultadoConsulta;
-import com.cna.ublkit.gateway.respuesta.ResultadoEnvio;
+import com.creanexusatreus.ublkit.gateway.respuesta.EstadoEnvio;
+import com.creanexusatreus.ublkit.gateway.respuesta.ResultadoConsulta;
+import com.creanexusatreus.ublkit.gateway.respuesta.ResultadoEnvio;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;

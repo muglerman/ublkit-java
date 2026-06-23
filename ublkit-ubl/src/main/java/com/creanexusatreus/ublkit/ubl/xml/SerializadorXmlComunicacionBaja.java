@@ -1,20 +1,20 @@
-package com.cna.ublkit.ubl.xml;
+package com.creanexusatreus.ublkit.ubl.xml;
 
-import com.cna.ublkit.ubl.modelo.actor.EmisorDocumento;
-import com.cna.ublkit.ubl.modelo.actor.FirmanteDocumento;
-import com.cna.ublkit.ubl.modelo.sunat.baja.ComunicacionBaja;
-import com.cna.ublkit.ubl.modelo.sunat.baja.ItemBaja;
+import com.creanexusatreus.ublkit.ubl.modelo.actor.EmisorDocumento;
+import com.creanexusatreus.ublkit.ubl.modelo.actor.FirmanteDocumento;
+import com.creanexusatreus.ublkit.ubl.modelo.sunat.baja.ComunicacionBaja;
+import com.creanexusatreus.ublkit.ubl.modelo.sunat.baja.ItemBaja;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-import static com.cna.ublkit.ubl.xml.ConstantesUbl.*;
-import static com.cna.ublkit.ubl.xml.XmlUblHelper.*;
+import static com.creanexusatreus.ublkit.ubl.xml.ConstantesUbl.*;
+import static com.creanexusatreus.ublkit.ubl.xml.XmlUblHelper.*;
 
 /**
- * Serializa una {@link ComunicacionBaja} (o {@link com.cna.ublkit.ubl.modelo.sunat.baja.Reversion})
+ * Serializa una {@link ComunicacionBaja} (o {@link com.creanexusatreus.ublkit.ubl.modelo.sunat.baja.Reversion})
  * a XML VoidedDocuments 1.0 según la especificación SUNAT.
  * <p>
  * Formato: RA-{yyyyMMdd}-{numero} para Comunicación de Baja
@@ -65,7 +65,7 @@ public final class SerializadorXmlComunicacionBaja implements SerializadorXml<Co
     // ── Helpers ──────────────────────────────────────────────────
 
     private String esPrefijoBaja(ComunicacionBaja comunicacion) {
-        return comunicacion instanceof com.cna.ublkit.ubl.modelo.sunat.baja.Reversion ? "RR" : "RA";
+        return comunicacion instanceof com.creanexusatreus.ublkit.ubl.modelo.sunat.baja.Reversion ? "RR" : "RA";
     }
 
     private void agregarFirmaSunat(Document doc, Element raiz, ComunicacionBaja comunicacion) {

@@ -1,4 +1,4 @@
-package com.cna.ublkit.ubl.modelo.linea;
+package com.creanexusatreus.ublkit.ubl.modelo.linea;
 
 import java.math.BigDecimal;
 

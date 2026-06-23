@@ -1,8 +1,8 @@
-package com.cna.ublkit.sign.api;
+package com.creanexusatreus.ublkit.sign.api;
 
-import com.cna.ublkit.sign.certificado.CargadorCertificado;
-import com.cna.ublkit.sign.certificado.DetallesCertificado;
-import com.cna.ublkit.sign.certificado.OrigenCertificado;
+import com.creanexusatreus.ublkit.sign.certificado.CargadorCertificado;
+import com.creanexusatreus.ublkit.sign.certificado.DetallesCertificado;
+import com.creanexusatreus.ublkit.sign.certificado.OrigenCertificado;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;

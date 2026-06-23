@@ -1,4 +1,4 @@
-package com.cna.ublkit.ubl.xml;
+package com.creanexusatreus.ublkit.ubl.xml;
 
 /**
  * Mapea el código de afectación IGV (Catálogo 07 SUNAT) a la información requerida

@@ -1,12 +1,12 @@
-package com.cna.ublkit.gateway.transporte;
+package com.creanexusatreus.ublkit.gateway.transporte;
 
-import com.cna.ublkit.gateway.api.ZipHelper;
-import com.cna.ublkit.gateway.autenticacion.CredencialesEmpresa;
-import com.cna.ublkit.gateway.respuesta.ArchivoCdr;
-import com.cna.ublkit.gateway.respuesta.EstadoEnvio;
-import com.cna.ublkit.gateway.respuesta.LectorCdr;
-import com.cna.ublkit.gateway.respuesta.ResultadoConsulta;
-import com.cna.ublkit.gateway.respuesta.ResultadoEnvio;
+import com.creanexusatreus.ublkit.gateway.api.ZipHelper;
+import com.creanexusatreus.ublkit.gateway.autenticacion.CredencialesEmpresa;
+import com.creanexusatreus.ublkit.gateway.respuesta.ArchivoCdr;
+import com.creanexusatreus.ublkit.gateway.respuesta.EstadoEnvio;
+import com.creanexusatreus.ublkit.gateway.respuesta.LectorCdr;
+import com.creanexusatreus.ublkit.gateway.respuesta.ResultadoConsulta;
+import com.creanexusatreus.ublkit.gateway.respuesta.ResultadoEnvio;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -62,7 +62,7 @@ public class HttpClienteNativoSoap implements ClienteSoap {
 
             return ResultadoEnvio.sincronoProcesado(estado, cdr);
 
-        } catch (com.cna.ublkit.core.error.ExcepcionTransporte e) {
+        } catch (com.creanexusatreus.ublkit.core.error.ExcepcionTransporte e) {
             return ResultadoEnvio.error("HTTP_5XX", e.getMessage());
         } catch (Exception e) {
             return ResultadoEnvio.error("IO_ERROR", e.getMessage());
@@ -86,7 +86,7 @@ public class HttpClienteNativoSoap implements ClienteSoap {
 
             return ResultadoEnvio.asincrono(ticket);
 
-        } catch (com.cna.ublkit.core.error.ExcepcionTransporte e) {
+        } catch (com.creanexusatreus.ublkit.core.error.ExcepcionTransporte e) {
             return ResultadoEnvio.error("HTTP_5XX", e.getMessage());
         } catch (Exception e) {
             return ResultadoEnvio.error("IO_ERROR", e.getMessage());
@@ -120,7 +120,7 @@ public class HttpClienteNativoSoap implements ClienteSoap {
 
             return ResultadoConsulta.completado(estado, cdr);
 
-        } catch (com.cna.ublkit.core.error.ExcepcionTransporte e) {
+        } catch (com.creanexusatreus.ublkit.core.error.ExcepcionTransporte e) {
             return ResultadoConsulta.error("HTTP_5XX", e.getMessage());
         } catch (Exception e) {
             return ResultadoConsulta.error("IO_ERROR", e.getMessage());
@@ -140,7 +140,7 @@ public class HttpClienteNativoSoap implements ClienteSoap {
         if (response.statusCode() >= 500) {
             String fault = extractValue(response.body(), "faultstring");
             if (fault == null || fault.isBlank()) {
-                throw new com.cna.ublkit.core.error.ExcepcionTransporte("HTTP_" + response.statusCode() + " - " + response.body());
+                throw new com.creanexusatreus.ublkit.core.error.ExcepcionTransporte("HTTP_" + response.statusCode() + " - " + response.body());
             }
         }
 

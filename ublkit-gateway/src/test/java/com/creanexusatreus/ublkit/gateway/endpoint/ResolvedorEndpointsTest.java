@@ -1,7 +1,7 @@
-package com.cna.ublkit.gateway.endpoint;
+package com.creanexusatreus.ublkit.gateway.endpoint;
 
-import com.cna.ublkit.core.enumerado.TipoAmbiente;
-import com.cna.ublkit.core.error.ExcepcionUblKit;
+import com.creanexusatreus.ublkit.core.enumerado.TipoAmbiente;
+import com.creanexusatreus.ublkit.core.error.ExcepcionUblKit;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

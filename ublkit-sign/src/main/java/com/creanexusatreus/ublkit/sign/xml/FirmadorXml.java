@@ -1,7 +1,7 @@
-package com.cna.ublkit.sign.xml;
+package com.creanexusatreus.ublkit.sign.xml;
 
-import com.cna.ublkit.core.error.ExcepcionUblKit;
-import com.cna.ublkit.sign.certificado.DetallesCertificado;
+import com.creanexusatreus.ublkit.core.error.ExcepcionUblKit;
+import com.creanexusatreus.ublkit.sign.certificado.DetallesCertificado;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;

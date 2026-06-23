@@ -1,9 +1,9 @@
-package com.cna.ublkit.ubl.ensamblador;
+package com.creanexusatreus.ublkit.ubl.ensamblador;
 
-import com.cna.ublkit.ubl.modelo.guia.BorradorGuiaRemision;
-import com.cna.ublkit.ubl.modelo.guia.DatosEnvio;
-import com.cna.ublkit.ubl.modelo.guia.PuntoDestino;
-import com.cna.ublkit.ubl.modelo.guia.PuntoPartida;
+import com.creanexusatreus.ublkit.ubl.modelo.guia.BorradorGuiaRemision;
+import com.creanexusatreus.ublkit.ubl.modelo.guia.DatosEnvio;
+import com.creanexusatreus.ublkit.ubl.modelo.guia.PuntoDestino;
+import com.creanexusatreus.ublkit.ubl.modelo.guia.PuntoPartida;
 import java.util.ArrayList;
 import java.util.List;
 

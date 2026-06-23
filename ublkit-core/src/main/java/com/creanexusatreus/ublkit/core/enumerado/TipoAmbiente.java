@@ -1,4 +1,4 @@
-package com.cna.ublkit.core.enumerado;
+package com.creanexusatreus.ublkit.core.enumerado;
 
 /**
  * Representa el ambiente de operación hacia servicios externos.

@@ -1,9 +1,9 @@
-package com.cna.ublkit.validation.builder;
+package com.creanexusatreus.ublkit.validation.builder;
 
-import com.cna.ublkit.ubl.modelo.BorradorNotaDebito;
-import com.cna.ublkit.ubl.modelo.actor.EmisorDocumento;
-import com.cna.ublkit.ubl.modelo.actor.ReceptorDocumento;
-import com.cna.ublkit.ubl.modelo.linea.LineaDetalle;
+import com.creanexusatreus.ublkit.ubl.modelo.BorradorNotaDebito;
+import com.creanexusatreus.ublkit.ubl.modelo.actor.EmisorDocumento;
+import com.creanexusatreus.ublkit.ubl.modelo.actor.ReceptorDocumento;
+import com.creanexusatreus.ublkit.ubl.modelo.linea.LineaDetalle;
 
 import java.time.LocalDate;
 import java.util.ArrayList;

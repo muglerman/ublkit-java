@@ -1,4 +1,4 @@
-package com.cna.ublkit.ubl.modelo.actor;
+package com.creanexusatreus.ublkit.ubl.modelo.actor;
 
 /**
  * Persona que firma electrónicamente el documento.

@@ -1,6 +1,6 @@
-package com.cna.ublkit.ubl.xml;
+package com.creanexusatreus.ublkit.ubl.xml;
 
-import com.cna.ublkit.core.error.ExcepcionSerializacionXml;
+import com.creanexusatreus.ublkit.core.error.ExcepcionSerializacionXml;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -19,7 +19,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
-import static com.cna.ublkit.ubl.xml.ConstantesUbl.*;
+import static com.creanexusatreus.ublkit.ubl.xml.ConstantesUbl.*;
 
 /**
  * Utilidades para construir documentos XML UBL 2.1 usando javax.xml DOM.

@@ -1,4 +1,4 @@
-package com.cna.ublkit.ubl.modelo.sunat.baja;
+package com.creanexusatreus.ublkit.ubl.modelo.sunat.baja;
 
 /**
  * Reversión de un comprobante de percepción o retención.

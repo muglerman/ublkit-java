@@ -1,4 +1,4 @@
-package com.cna.ublkit.testkit.assertion;
+package com.creanexusatreus.ublkit.testkit.assertion;
 
 import org.junit.jupiter.api.Assertions;
 

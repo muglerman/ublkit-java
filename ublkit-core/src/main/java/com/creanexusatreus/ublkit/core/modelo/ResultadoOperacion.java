@@ -1,4 +1,4 @@
-package com.cna.ublkit.core.modelo;
+package com.creanexusatreus.ublkit.core.modelo;
 
 /**
  * Resultado genérico de operación (éxito/error) sin excepciones.

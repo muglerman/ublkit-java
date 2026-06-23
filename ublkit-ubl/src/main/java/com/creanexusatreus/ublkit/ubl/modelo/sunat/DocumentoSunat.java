@@ -1,7 +1,7 @@
-package com.cna.ublkit.ubl.modelo.sunat;
+package com.creanexusatreus.ublkit.ubl.modelo.sunat;
 
-import com.cna.ublkit.ubl.modelo.actor.EmisorDocumento;
-import com.cna.ublkit.ubl.modelo.actor.FirmanteDocumento;
+import com.creanexusatreus.ublkit.ubl.modelo.actor.EmisorDocumento;
+import com.creanexusatreus.ublkit.ubl.modelo.actor.FirmanteDocumento;
 
 import java.time.LocalDate;
 

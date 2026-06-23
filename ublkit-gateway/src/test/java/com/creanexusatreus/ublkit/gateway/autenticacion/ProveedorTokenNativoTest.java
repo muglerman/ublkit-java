@@ -1,4 +1,4 @@
-package com.cna.ublkit.gateway.autenticacion;
+package com.creanexusatreus.ublkit.gateway.autenticacion;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -6,7 +6,7 @@ import java.lang.reflect.Method;
 
 import org.junit.jupiter.api.Test;
 
-import com.cna.ublkit.core.enumerado.TipoAmbiente;
+import com.creanexusatreus.ublkit.core.enumerado.TipoAmbiente;
 
 class ProveedorTokenNativoTest {
 

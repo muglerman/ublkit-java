@@ -1,4 +1,4 @@
-package com.cna.ublkit.render.modelo;
+package com.creanexusatreus.ublkit.render.modelo;
 
 /**
  * Representa los diferentes formatos de impresión o visualización disponibles 

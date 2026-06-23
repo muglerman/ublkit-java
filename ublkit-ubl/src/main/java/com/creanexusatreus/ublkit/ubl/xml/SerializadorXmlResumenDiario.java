@@ -1,9 +1,9 @@
-package com.cna.ublkit.ubl.xml;
+package com.creanexusatreus.ublkit.ubl.xml;
 
-import com.cna.ublkit.ubl.modelo.actor.EmisorDocumento;
-import com.cna.ublkit.ubl.modelo.actor.FirmanteDocumento;
-import com.cna.ublkit.ubl.modelo.actor.ReceptorDocumento;
-import com.cna.ublkit.ubl.modelo.sunat.resumen.*;
+import com.creanexusatreus.ublkit.ubl.modelo.actor.EmisorDocumento;
+import com.creanexusatreus.ublkit.ubl.modelo.actor.FirmanteDocumento;
+import com.creanexusatreus.ublkit.ubl.modelo.actor.ReceptorDocumento;
+import com.creanexusatreus.ublkit.ubl.modelo.sunat.resumen.*;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -11,8 +11,8 @@ import java.math.BigDecimal;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-import static com.cna.ublkit.ubl.xml.ConstantesUbl.*;
-import static com.cna.ublkit.ubl.xml.XmlUblHelper.*;
+import static com.creanexusatreus.ublkit.ubl.xml.ConstantesUbl.*;
+import static com.creanexusatreus.ublkit.ubl.xml.XmlUblHelper.*;
 
 /**
  * Serializa un {@link ResumenDiario} a XML SummaryDocuments 1.1 según la especificación SUNAT.

@@ -1,8 +1,8 @@
-package com.cna.ublkit.ubl.xml;
+package com.creanexusatreus.ublkit.ubl.xml;
 
-import com.cna.ublkit.ubl.modelo.guia.*;
-import com.cna.ublkit.ubl.modelo.guia.builder.*;
-import com.cna.ublkit.ubl.modelo.guia.fixture.GuiaTestFactories;
+import com.creanexusatreus.ublkit.ubl.modelo.guia.*;
+import com.creanexusatreus.ublkit.ubl.modelo.guia.builder.*;
+import com.creanexusatreus.ublkit.ubl.modelo.guia.fixture.GuiaTestFactories;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;

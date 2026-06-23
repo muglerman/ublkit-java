@@ -1,7 +1,7 @@
-package com.cna.ublkit.ubl.xml;
+package com.creanexusatreus.ublkit.ubl.xml;
 
-import com.cna.ublkit.ubl.modelo.BorradorNotaDebito;
-import com.cna.ublkit.ubl.modelo.linea.LineaDetalle;
+import com.creanexusatreus.ublkit.ubl.modelo.BorradorNotaDebito;
+import com.creanexusatreus.ublkit.ubl.modelo.linea.LineaDetalle;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -9,9 +9,9 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
-import static com.cna.ublkit.ubl.xml.ConstantesUbl.*;
-import static com.cna.ublkit.ubl.xml.FragmentosXml.*;
-import static com.cna.ublkit.ubl.xml.XmlUblHelper.*;
+import static com.creanexusatreus.ublkit.ubl.xml.ConstantesUbl.*;
+import static com.creanexusatreus.ublkit.ubl.xml.FragmentosXml.*;
+import static com.creanexusatreus.ublkit.ubl.xml.XmlUblHelper.*;
 
 /**
  * Serializa un {@link BorradorNotaDebito} a XML UBL 2.1 DebitNote.

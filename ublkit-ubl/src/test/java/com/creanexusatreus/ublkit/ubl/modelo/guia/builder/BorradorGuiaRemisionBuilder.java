@@ -1,8 +1,8 @@
-package com.cna.ublkit.ubl.modelo.guia.builder;
+package com.creanexusatreus.ublkit.ubl.modelo.guia.builder;
 
-import com.cna.ublkit.ubl.modelo.guia.*;
-import com.cna.ublkit.ubl.modelo.actor.EmisorDocumento;
-import com.cna.ublkit.ubl.modelo.actor.FirmanteDocumento;
+import com.creanexusatreus.ublkit.ubl.modelo.guia.*;
+import com.creanexusatreus.ublkit.ubl.modelo.actor.EmisorDocumento;
+import com.creanexusatreus.ublkit.ubl.modelo.actor.FirmanteDocumento;
 
 import java.time.LocalDate;
 import java.time.LocalTime;

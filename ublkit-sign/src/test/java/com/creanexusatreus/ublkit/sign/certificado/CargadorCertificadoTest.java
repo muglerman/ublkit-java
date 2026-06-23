@@ -1,6 +1,6 @@
-package com.cna.ublkit.sign.certificado;
+package com.creanexusatreus.ublkit.sign.certificado;
 
-import com.cna.ublkit.core.error.ExcepcionUblKit;
+import com.creanexusatreus.ublkit.core.error.ExcepcionUblKit;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;

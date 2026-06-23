@@ -1,6 +1,6 @@
-package com.cna.ublkit.catalogs.api;
+package com.creanexusatreus.ublkit.catalogs.api;
 
-import com.cna.ublkit.catalogs.modelo.EntradaCatalogo;
+import com.creanexusatreus.ublkit.catalogs.modelo.EntradaCatalogo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

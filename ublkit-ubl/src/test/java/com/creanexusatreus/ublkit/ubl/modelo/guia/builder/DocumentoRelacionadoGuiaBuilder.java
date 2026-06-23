@@ -1,6 +1,6 @@
-package com.cna.ublkit.ubl.modelo.guia.builder;
+package com.creanexusatreus.ublkit.ubl.modelo.guia.builder;
 
-import com.cna.ublkit.ubl.modelo.guia.DocumentoRelacionadoGuia;
+import com.creanexusatreus.ublkit.ubl.modelo.guia.DocumentoRelacionadoGuia;
 
 /**
  * Builder para crear instancias de DocumentoRelacionadoGuia en tests.

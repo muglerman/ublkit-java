@@ -1,4 +1,4 @@
-package com.cna.ublkit.ubl.modelo.guia;
+package com.creanexusatreus.ublkit.ubl.modelo.guia;
 
 /**
  * Contenedor de transporte con número y precinto.

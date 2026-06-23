@@ -1,10 +1,10 @@
-package com.cna.ublkit.validation.validador;
+package com.creanexusatreus.ublkit.validation.validador;
 
-import com.cna.ublkit.ubl.modelo.sunat.percepcionretencion.ComprobanteRetencion;
-import com.cna.ublkit.validation.api.Validador;
-import com.cna.ublkit.validation.modelo.IncidenciaValidacion;
-import com.cna.ublkit.validation.modelo.ResultadoValidacion;
-import com.cna.ublkit.validation.modelo.SeveridadValidacion;
+import com.creanexusatreus.ublkit.ubl.modelo.sunat.percepcionretencion.ComprobanteRetencion;
+import com.creanexusatreus.ublkit.validation.api.Validador;
+import com.creanexusatreus.ublkit.validation.modelo.IncidenciaValidacion;
+import com.creanexusatreus.ublkit.validation.modelo.ResultadoValidacion;
+import com.creanexusatreus.ublkit.validation.modelo.SeveridadValidacion;
 
 /**
  * Validador funcional para comprobantes de retención (tipo 20).

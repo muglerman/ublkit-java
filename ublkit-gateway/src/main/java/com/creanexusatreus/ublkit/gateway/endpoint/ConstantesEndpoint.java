@@ -1,4 +1,4 @@
-package com.cna.ublkit.gateway.endpoint;
+package com.creanexusatreus.ublkit.gateway.endpoint;
 
 /**
  * Definición de URLs públicas oficiales de SUNAT para los distintos servicios.

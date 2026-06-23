@@ -1,13 +1,13 @@
-package com.cna.ublkit.ubl.xml;
+package com.creanexusatreus.ublkit.ubl.xml;
 
-import com.cna.ublkit.ubl.modelo.actor.FirmanteDocumento;
-import com.cna.ublkit.ubl.modelo.guia.*;
+import com.creanexusatreus.ublkit.ubl.modelo.actor.FirmanteDocumento;
+import com.creanexusatreus.ublkit.ubl.modelo.guia.*;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import java.math.RoundingMode;
 
-import static com.cna.ublkit.ubl.xml.XmlUblHelper.*;
+import static com.creanexusatreus.ublkit.ubl.xml.XmlUblHelper.*;
 
 /**
  * Serializa un {@link BorradorGuiaRemision} a XML UBL 2.1 DespatchAdvice.
@@ -24,7 +24,7 @@ public final class SerializadorXmlGuiaRemision implements SerializadorXml<Borrad
     @Override
     public String serializar(BorradorGuiaRemision guia) {
         if (guia == null) return null;
-        com.cna.ublkit.ubl.ensamblador.EnsambladorGuia.ensamblar(guia);
+        com.creanexusatreus.ublkit.ubl.ensamblador.EnsambladorGuia.ensamblar(guia);
 
         Document doc = crearDocumento(NS_DESPATCH, "DespatchAdvice");
         Element raiz = doc.getDocumentElement();

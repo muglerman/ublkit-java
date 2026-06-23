@@ -1,4 +1,4 @@
-package com.cna.ublkit.sign.certificado;
+package com.creanexusatreus.ublkit.sign.certificado;
 
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;

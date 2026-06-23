@@ -1,6 +1,6 @@
-package com.cna.ublkit.ubl.modelo;
+package com.creanexusatreus.ublkit.ubl.modelo;
 
-import com.cna.ublkit.ubl.modelo.total.TotalImporte;
+import com.creanexusatreus.ublkit.ubl.modelo.total.TotalImporte;
 
 /**
  * Borrador de Nota de Crédito Electrónica (07).

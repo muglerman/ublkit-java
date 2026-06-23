@@ -1,8 +1,8 @@
-package com.cna.ublkit.testkit.fixture;
+package com.creanexusatreus.ublkit.testkit.fixture;
 
-import com.cna.ublkit.ubl.modelo.actor.EmisorDocumento;
-import com.cna.ublkit.ubl.modelo.actor.ReceptorDocumento;
-import com.cna.ublkit.ubl.modelo.sunat.resumen.*;
+import com.creanexusatreus.ublkit.ubl.modelo.actor.EmisorDocumento;
+import com.creanexusatreus.ublkit.ubl.modelo.actor.ReceptorDocumento;
+import com.creanexusatreus.ublkit.ubl.modelo.sunat.resumen.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

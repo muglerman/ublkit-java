@@ -1,4 +1,4 @@
-package com.cna.ublkit.core.enumerado;
+package com.creanexusatreus.ublkit.core.enumerado;
 
 /**
  * Define el protocolo de transporte usado para la comunicación externa.

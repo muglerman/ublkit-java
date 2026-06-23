@@ -1,4 +1,4 @@
-package com.cna.ublkit.validation.validador.sunat;
+package com.creanexusatreus.ublkit.validation.validador.sunat;
 
 /**
  * Mapa de reglas XSL de validación de referencia SUNAT.

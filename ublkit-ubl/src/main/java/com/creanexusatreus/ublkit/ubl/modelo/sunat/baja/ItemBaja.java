@@ -1,4 +1,4 @@
-package com.cna.ublkit.ubl.modelo.sunat.baja;
+package com.creanexusatreus.ublkit.ubl.modelo.sunat.baja;
 
 /**
  * Ítem de una Comunicación de Baja.

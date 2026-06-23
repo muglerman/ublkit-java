@@ -1,6 +1,6 @@
-package com.cna.ublkit.ubl.ensamblador;
+package com.creanexusatreus.ublkit.ubl.ensamblador;
 
-import com.cna.ublkit.ubl.modelo.sunat.baja.ComunicacionBaja;
+import com.creanexusatreus.ublkit.ubl.modelo.sunat.baja.ComunicacionBaja;
 
 import java.time.LocalDate;
 

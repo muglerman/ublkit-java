@@ -1,18 +1,18 @@
-package com.cna.ublkit.ubl.xml;
+package com.creanexusatreus.ublkit.ubl.xml;
 
-import com.cna.ublkit.ubl.modelo.actor.EmisorDocumento;
-import com.cna.ublkit.ubl.modelo.actor.FirmanteDocumento;
-import com.cna.ublkit.ubl.modelo.actor.ReceptorDocumento;
-import com.cna.ublkit.ubl.modelo.sunat.percepcionretencion.ComprobanteAfectadoPR;
-import com.cna.ublkit.ubl.modelo.sunat.percepcionretencion.ComprobanteRetencion;
-import com.cna.ublkit.ubl.modelo.sunat.percepcionretencion.OperacionPR;
+import com.creanexusatreus.ublkit.ubl.modelo.actor.EmisorDocumento;
+import com.creanexusatreus.ublkit.ubl.modelo.actor.FirmanteDocumento;
+import com.creanexusatreus.ublkit.ubl.modelo.actor.ReceptorDocumento;
+import com.creanexusatreus.ublkit.ubl.modelo.sunat.percepcionretencion.ComprobanteAfectadoPR;
+import com.creanexusatreus.ublkit.ubl.modelo.sunat.percepcionretencion.ComprobanteRetencion;
+import com.creanexusatreus.ublkit.ubl.modelo.sunat.percepcionretencion.OperacionPR;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import java.math.BigDecimal;
 
-import static com.cna.ublkit.ubl.xml.ConstantesUbl.*;
-import static com.cna.ublkit.ubl.xml.XmlUblHelper.*;
+import static com.creanexusatreus.ublkit.ubl.xml.ConstantesUbl.*;
+import static com.creanexusatreus.ublkit.ubl.xml.XmlUblHelper.*;
 
 /**
  * Serializa un {@link ComprobanteRetencion} a XML SUNAT Retention-1.

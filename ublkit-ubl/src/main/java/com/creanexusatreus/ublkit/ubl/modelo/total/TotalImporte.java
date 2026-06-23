@@ -1,4 +1,4 @@
-package com.cna.ublkit.ubl.modelo.total;
+package com.creanexusatreus.ublkit.ubl.modelo.total;
 
 import java.math.BigDecimal;
 

@@ -1,6 +1,6 @@
-package com.cna.ublkit.ubl.modelo.guia.builder;
+package com.creanexusatreus.ublkit.ubl.modelo.guia.builder;
 
-import com.cna.ublkit.ubl.modelo.guia.TransportistaGuia;
+import com.creanexusatreus.ublkit.ubl.modelo.guia.TransportistaGuia;
 
 public class TransportistaGuiaBuilder {
     private String tipoDocumentoIdentidad = "06";

@@ -1,8 +1,8 @@
-package com.cna.ublkit.validation.validador.sunat;
+package com.creanexusatreus.ublkit.validation.validador.sunat;
 
-import com.cna.ublkit.validation.modelo.IncidenciaValidacion;
-import com.cna.ublkit.validation.modelo.ResultadoValidacion;
-import com.cna.ublkit.validation.modelo.SeveridadValidacion;
+import com.creanexusatreus.ublkit.validation.modelo.IncidenciaValidacion;
+import com.creanexusatreus.ublkit.validation.modelo.ResultadoValidacion;
+import com.creanexusatreus.ublkit.validation.modelo.SeveridadValidacion;
 
 import javax.xml.transform.ErrorListener;
 import javax.xml.transform.Source;

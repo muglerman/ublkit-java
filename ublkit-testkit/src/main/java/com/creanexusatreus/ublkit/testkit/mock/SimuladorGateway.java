@@ -1,11 +1,11 @@
-package com.cna.ublkit.testkit.mock;
+package com.creanexusatreus.ublkit.testkit.mock;
 
-import com.cna.ublkit.core.enumerado.TipoAmbiente;
-import com.cna.ublkit.gateway.api.PasarelaSunat;
-import com.cna.ublkit.gateway.autenticacion.CredencialesEmpresa;
-import com.cna.ublkit.gateway.respuesta.EstadoEnvio;
-import com.cna.ublkit.gateway.respuesta.ResultadoConsulta;
-import com.cna.ublkit.gateway.respuesta.ResultadoEnvio;
+import com.creanexusatreus.ublkit.core.enumerado.TipoAmbiente;
+import com.creanexusatreus.ublkit.gateway.api.PasarelaSunat;
+import com.creanexusatreus.ublkit.gateway.autenticacion.CredencialesEmpresa;
+import com.creanexusatreus.ublkit.gateway.respuesta.EstadoEnvio;
+import com.creanexusatreus.ublkit.gateway.respuesta.ResultadoConsulta;
+import com.creanexusatreus.ublkit.gateway.respuesta.ResultadoEnvio;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -64,9 +64,9 @@ public class SimuladorGateway implements PasarelaSunat {
     }
 
     @Override
-    public java.util.concurrent.CompletableFuture<com.cna.ublkit.gateway.respuesta.ArchivoCdr> enviarGuiaRemisionYEsperar(String xmlFirmado, String nombreArchivo, CredencialesEmpresa credenciales, TipoAmbiente ambiente) {
+    public java.util.concurrent.CompletableFuture<com.creanexusatreus.ublkit.gateway.respuesta.ArchivoCdr> enviarGuiaRemisionYEsperar(String xmlFirmado, String nombreArchivo, CredencialesEmpresa credenciales, TipoAmbiente ambiente) {
         return java.util.concurrent.CompletableFuture.completedFuture(
-                new com.cna.ublkit.gateway.respuesta.ArchivoCdr(new byte[0], "0", "Aceptado", java.util.List.of())
+                new com.creanexusatreus.ublkit.gateway.respuesta.ArchivoCdr(new byte[0], "0", "Aceptado", java.util.List.of())
         );
     }
 

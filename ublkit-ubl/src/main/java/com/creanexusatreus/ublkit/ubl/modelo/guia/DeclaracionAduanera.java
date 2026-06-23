@@ -1,4 +1,4 @@
-package com.cna.ublkit.ubl.modelo.guia;
+package com.creanexusatreus.ublkit.ubl.modelo.guia;
 
 /**
  * Referencia a una Declaración Aduanera de Mercancías (DAM) o Declaración Simplificada (DS).

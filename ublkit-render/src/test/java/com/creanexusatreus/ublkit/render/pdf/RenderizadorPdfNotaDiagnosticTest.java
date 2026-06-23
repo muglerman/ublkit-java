@@ -1,4 +1,4 @@
-package com.cna.ublkit.render.pdf;
+package com.creanexusatreus.ublkit.render.pdf;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -12,17 +12,17 @@ import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import com.cna.ublkit.core.modelo.Contacto;
-import com.cna.ublkit.core.modelo.Direccion;
-import com.cna.ublkit.render.html.RenderizadorHtmlNota;
-import com.cna.ublkit.render.modelo.ContextoRender;
-import com.cna.ublkit.render.modelo.FormatoImpresion;
-import com.cna.ublkit.render.modelo.ResultadoRender;
-import com.cna.ublkit.ubl.modelo.BorradorNotaCredito;
-import com.cna.ublkit.ubl.modelo.actor.EmisorDocumento;
-import com.cna.ublkit.ubl.modelo.actor.ReceptorDocumento;
-import com.cna.ublkit.ubl.modelo.linea.LineaDetalle;
-import com.cna.ublkit.ubl.modelo.total.TotalImporte;
+import com.creanexusatreus.ublkit.core.modelo.Contacto;
+import com.creanexusatreus.ublkit.core.modelo.Direccion;
+import com.creanexusatreus.ublkit.render.html.RenderizadorHtmlNota;
+import com.creanexusatreus.ublkit.render.modelo.ContextoRender;
+import com.creanexusatreus.ublkit.render.modelo.FormatoImpresion;
+import com.creanexusatreus.ublkit.render.modelo.ResultadoRender;
+import com.creanexusatreus.ublkit.ubl.modelo.BorradorNotaCredito;
+import com.creanexusatreus.ublkit.ubl.modelo.actor.EmisorDocumento;
+import com.creanexusatreus.ublkit.ubl.modelo.actor.ReceptorDocumento;
+import com.creanexusatreus.ublkit.ubl.modelo.linea.LineaDetalle;
+import com.creanexusatreus.ublkit.ubl.modelo.total.TotalImporte;
 
 /**
  * Test de DIAGNÓSTICO: Genera HTML de Nota de Crédito y lo guarda para inspección manual.

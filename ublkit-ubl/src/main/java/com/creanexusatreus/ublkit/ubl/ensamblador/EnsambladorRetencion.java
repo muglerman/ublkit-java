@@ -1,6 +1,6 @@
-package com.cna.ublkit.ubl.ensamblador;
+package com.creanexusatreus.ublkit.ubl.ensamblador;
 
-import com.cna.ublkit.ubl.modelo.sunat.percepcionretencion.ComprobanteRetencion;
+import com.creanexusatreus.ublkit.ubl.modelo.sunat.percepcionretencion.ComprobanteRetencion;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;

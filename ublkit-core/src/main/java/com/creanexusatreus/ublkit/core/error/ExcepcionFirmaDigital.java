@@ -1,4 +1,4 @@
-package com.cna.ublkit.core.error;
+package com.creanexusatreus.ublkit.core.error;
 
 /**
  * Excepción para errores durante la firma digital XML.

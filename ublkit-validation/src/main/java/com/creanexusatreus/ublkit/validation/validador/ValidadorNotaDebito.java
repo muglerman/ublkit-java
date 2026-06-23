@@ -1,13 +1,13 @@
-package com.cna.ublkit.validation.validador;
+package com.creanexusatreus.ublkit.validation.validador;
 
-import com.cna.ublkit.ubl.modelo.BorradorNotaDebito;
-import com.cna.ublkit.ubl.xml.SerializadorXmlNotaDebito;
-import com.cna.ublkit.validation.api.Validador;
-import com.cna.ublkit.validation.modelo.IncidenciaValidacion;
-import com.cna.ublkit.validation.modelo.ResultadoValidacion;
-import com.cna.ublkit.validation.modelo.SeveridadValidacion;
-import com.cna.ublkit.validation.validador.sunat.ReglaSunatXsl;
-import com.cna.ublkit.validation.validador.sunat.ValidadorSunatXsl;
+import com.creanexusatreus.ublkit.ubl.modelo.BorradorNotaDebito;
+import com.creanexusatreus.ublkit.ubl.xml.SerializadorXmlNotaDebito;
+import com.creanexusatreus.ublkit.validation.api.Validador;
+import com.creanexusatreus.ublkit.validation.modelo.IncidenciaValidacion;
+import com.creanexusatreus.ublkit.validation.modelo.ResultadoValidacion;
+import com.creanexusatreus.ublkit.validation.modelo.SeveridadValidacion;
+import com.creanexusatreus.ublkit.validation.validador.sunat.ReglaSunatXsl;
+import com.creanexusatreus.ublkit.validation.validador.sunat.ValidadorSunatXsl;
 
 public class ValidadorNotaDebito implements Validador<BorradorNotaDebito> {
     private final SerializadorXmlNotaDebito serializadorXml = new SerializadorXmlNotaDebito();

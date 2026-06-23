@@ -1,7 +1,7 @@
-package com.cna.ublkit.ubl.modelo.guia.builder;
+package com.creanexusatreus.ublkit.ubl.modelo.guia.builder;
 
-import com.cna.ublkit.ubl.modelo.guia.LineaGuia;
-import com.cna.ublkit.ubl.modelo.guia.AtributoItem;
+import com.creanexusatreus.ublkit.ubl.modelo.guia.LineaGuia;
+import com.creanexusatreus.ublkit.ubl.modelo.guia.AtributoItem;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;

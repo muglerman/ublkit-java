@@ -1,4 +1,4 @@
-package com.cna.ublkit.catalogs.modelo;
+package com.creanexusatreus.ublkit.catalogs.modelo;
 
 import java.util.Map;
 import java.util.Optional;

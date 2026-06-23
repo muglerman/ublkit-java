@@ -1,8 +1,8 @@
-package com.cna.ublkit.ubl.modelo.sunat.percepcionretencion;
+package com.creanexusatreus.ublkit.ubl.modelo.sunat.percepcionretencion;
 
-import com.cna.ublkit.ubl.modelo.actor.EmisorDocumento;
-import com.cna.ublkit.ubl.modelo.actor.FirmanteDocumento;
-import com.cna.ublkit.ubl.modelo.actor.ReceptorDocumento;
+import com.creanexusatreus.ublkit.ubl.modelo.actor.EmisorDocumento;
+import com.creanexusatreus.ublkit.ubl.modelo.actor.FirmanteDocumento;
+import com.creanexusatreus.ublkit.ubl.modelo.actor.ReceptorDocumento;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

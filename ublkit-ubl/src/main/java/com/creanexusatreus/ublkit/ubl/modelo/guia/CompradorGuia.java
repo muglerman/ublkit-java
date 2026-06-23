@@ -1,4 +1,4 @@
-package com.cna.ublkit.ubl.modelo.guia;
+package com.creanexusatreus.ublkit.ubl.modelo.guia;
 
 /**
  * Comprador/adquiriente de los bienes en la Guía de Remisión.

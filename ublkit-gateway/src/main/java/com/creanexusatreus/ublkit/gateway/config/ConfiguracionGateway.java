@@ -1,4 +1,4 @@
-package com.cna.ublkit.gateway.config;
+package com.creanexusatreus.ublkit.gateway.config;
 
 import java.time.Duration;
 

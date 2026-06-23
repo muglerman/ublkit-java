@@ -1,6 +1,6 @@
-package com.cna.ublkit.storage;
+package com.creanexusatreus.ublkit.storage;
 
-import com.cna.ublkit.core.modelo.ResultadoOperacion;
+import com.creanexusatreus.ublkit.core.modelo.ResultadoOperacion;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.BlobInfo;

@@ -1,13 +1,13 @@
-package com.cna.ublkit.ubl.ensamblador;
+package com.creanexusatreus.ublkit.ubl.ensamblador;
 
-import com.cna.ublkit.ubl.modelo.BorradorFactura;
-import com.cna.ublkit.ubl.modelo.DocumentoBase;
-import com.cna.ublkit.ubl.modelo.actor.ReceptorDocumento;
-import com.cna.ublkit.ubl.modelo.complemento.Detraccion;
-import com.cna.ublkit.ubl.modelo.complemento.FormaDePago;
-import com.cna.ublkit.ubl.modelo.linea.LineaDetalle;
-import com.cna.ublkit.ubl.modelo.total.TotalImporte;
-import com.cna.ublkit.ubl.modelo.total.TotalImpuestos;
+import com.creanexusatreus.ublkit.ubl.modelo.BorradorFactura;
+import com.creanexusatreus.ublkit.ubl.modelo.DocumentoBase;
+import com.creanexusatreus.ublkit.ubl.modelo.actor.ReceptorDocumento;
+import com.creanexusatreus.ublkit.ubl.modelo.complemento.Detraccion;
+import com.creanexusatreus.ublkit.ubl.modelo.complemento.FormaDePago;
+import com.creanexusatreus.ublkit.ubl.modelo.linea.LineaDetalle;
+import com.creanexusatreus.ublkit.ubl.modelo.total.TotalImporte;
+import com.creanexusatreus.ublkit.ubl.modelo.total.TotalImpuestos;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;

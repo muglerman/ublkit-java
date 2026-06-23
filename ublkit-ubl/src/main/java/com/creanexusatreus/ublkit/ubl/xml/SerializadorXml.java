@@ -1,4 +1,4 @@
-package com.cna.ublkit.ubl.xml;
+package com.creanexusatreus.ublkit.ubl.xml;
 
 /**
  * Contrato para serializar un modelo de dominio a XML UBL 2.1.

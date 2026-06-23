@@ -1,6 +1,6 @@
-package com.cna.ublkit.gateway.autenticacion;
+package com.creanexusatreus.ublkit.gateway.autenticacion;
 
-import com.cna.ublkit.core.enumerado.TipoAmbiente;
+import com.creanexusatreus.ublkit.core.enumerado.TipoAmbiente;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

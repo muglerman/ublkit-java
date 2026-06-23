@@ -1,7 +1,7 @@
-package com.cna.ublkit.ubl.modelo.complemento;
+package com.creanexusatreus.ublkit.ubl.modelo.complemento;
 
-import com.cna.ublkit.core.modelo.Direccion;
-import com.cna.ublkit.ubl.modelo.actor.ReceptorDocumento;
+import com.creanexusatreus.ublkit.core.modelo.Direccion;
+import com.creanexusatreus.ublkit.ubl.modelo.actor.ReceptorDocumento;
 
 import java.math.BigDecimal;
 

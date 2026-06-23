@@ -1,12 +1,12 @@
-package com.cna.ublkit.render.html;
+package com.creanexusatreus.ublkit.render.html;
 
-import com.cna.ublkit.render.modelo.ContextoRender;
-import com.cna.ublkit.render.modelo.EstiloPlantilla;
-import com.cna.ublkit.render.modelo.ExtensionPlantilla;
-import com.cna.ublkit.render.modelo.ResultadoRender;
-import com.cna.ublkit.ubl.modelo.sunat.baja.ComunicacionBaja;
-import com.cna.ublkit.ubl.modelo.sunat.baja.ItemBaja;
-import com.cna.ublkit.ubl.modelo.actor.EmisorDocumento;
+import com.creanexusatreus.ublkit.render.modelo.ContextoRender;
+import com.creanexusatreus.ublkit.render.modelo.EstiloPlantilla;
+import com.creanexusatreus.ublkit.render.modelo.ExtensionPlantilla;
+import com.creanexusatreus.ublkit.render.modelo.ResultadoRender;
+import com.creanexusatreus.ublkit.ubl.modelo.sunat.baja.ComunicacionBaja;
+import com.creanexusatreus.ublkit.ubl.modelo.sunat.baja.ItemBaja;
+import com.creanexusatreus.ublkit.ubl.modelo.actor.EmisorDocumento;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -355,7 +355,7 @@ class RenderizadorHtmlComunicacionBajaTest {
         );
         baja.setEmisor(emisor);
 
-        com.cna.ublkit.ubl.modelo.actor.FirmanteDocumento firmante = new com.cna.ublkit.ubl.modelo.actor.FirmanteDocumento(
+        com.creanexusatreus.ublkit.ubl.modelo.actor.FirmanteDocumento firmante = new com.creanexusatreus.ublkit.ubl.modelo.actor.FirmanteDocumento(
                 "20123456789", "Empresa Test"
         );
         baja.setFirmante(firmante);

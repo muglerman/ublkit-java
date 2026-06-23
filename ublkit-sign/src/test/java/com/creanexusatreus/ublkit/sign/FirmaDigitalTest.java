@@ -1,13 +1,13 @@
-package com.cna.ublkit.sign;
+package com.creanexusatreus.ublkit.sign;
 
-import com.cna.ublkit.core.error.ExcepcionUblKit;
-import com.cna.ublkit.sign.api.ResultadoFirma;
-import com.cna.ublkit.sign.api.ServicioFirma;
-import com.cna.ublkit.sign.certificado.CargadorCertificado;
-import com.cna.ublkit.sign.certificado.DetallesCertificado;
-import com.cna.ublkit.sign.certificado.OrigenCertificado;
-import com.cna.ublkit.sign.xml.FirmadorXml;
-import com.cna.ublkit.sign.xml.XmlHelper;
+import com.creanexusatreus.ublkit.core.error.ExcepcionUblKit;
+import com.creanexusatreus.ublkit.sign.api.ResultadoFirma;
+import com.creanexusatreus.ublkit.sign.api.ServicioFirma;
+import com.creanexusatreus.ublkit.sign.certificado.CargadorCertificado;
+import com.creanexusatreus.ublkit.sign.certificado.DetallesCertificado;
+import com.creanexusatreus.ublkit.sign.certificado.OrigenCertificado;
+import com.creanexusatreus.ublkit.sign.xml.FirmadorXml;
+import com.creanexusatreus.ublkit.sign.xml.XmlHelper;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.BeforeAll;

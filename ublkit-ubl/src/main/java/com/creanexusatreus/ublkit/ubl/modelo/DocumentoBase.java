@@ -1,14 +1,14 @@
-package com.cna.ublkit.ubl.modelo;
+package com.creanexusatreus.ublkit.ubl.modelo;
 
-import com.cna.ublkit.core.modelo.TipoCambio;
-import com.cna.ublkit.ubl.modelo.actor.EmisorDocumento;
-import com.cna.ublkit.ubl.modelo.actor.FirmanteDocumento;
-import com.cna.ublkit.ubl.modelo.actor.ReceptorDocumento;
-import com.cna.ublkit.ubl.modelo.complemento.DocumentoRelacionado;
-import com.cna.ublkit.ubl.modelo.complemento.GuiaRelacionada;
-import com.cna.ublkit.ubl.modelo.linea.CargoDescuento;
-import com.cna.ublkit.ubl.modelo.linea.LineaDetalle;
-import com.cna.ublkit.ubl.modelo.total.TotalImpuestos;
+import com.creanexusatreus.ublkit.core.modelo.TipoCambio;
+import com.creanexusatreus.ublkit.ubl.modelo.actor.EmisorDocumento;
+import com.creanexusatreus.ublkit.ubl.modelo.actor.FirmanteDocumento;
+import com.creanexusatreus.ublkit.ubl.modelo.actor.ReceptorDocumento;
+import com.creanexusatreus.ublkit.ubl.modelo.complemento.DocumentoRelacionado;
+import com.creanexusatreus.ublkit.ubl.modelo.complemento.GuiaRelacionada;
+import com.creanexusatreus.ublkit.ubl.modelo.linea.CargoDescuento;
+import com.creanexusatreus.ublkit.ubl.modelo.linea.LineaDetalle;
+import com.creanexusatreus.ublkit.ubl.modelo.total.TotalImpuestos;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

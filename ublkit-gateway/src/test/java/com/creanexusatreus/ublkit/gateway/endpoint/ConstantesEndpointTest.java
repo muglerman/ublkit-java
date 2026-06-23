@@ -1,4 +1,4 @@
-package com.cna.ublkit.gateway.endpoint;
+package com.creanexusatreus.ublkit.gateway.endpoint;
 
 import org.junit.jupiter.api.Test;
 

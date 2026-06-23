@@ -1,4 +1,4 @@
-package com.cna.ublkit.gateway.respuesta;
+package com.creanexusatreus.ublkit.gateway.respuesta;
 
 import java.util.Arrays;
 import java.util.List;

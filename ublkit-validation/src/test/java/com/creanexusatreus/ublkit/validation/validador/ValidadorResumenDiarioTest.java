@@ -1,9 +1,9 @@
-package com.cna.ublkit.validation.validador;
+package com.creanexusatreus.ublkit.validation.validador;
 
-import com.cna.ublkit.ubl.modelo.actor.EmisorDocumento;
-import com.cna.ublkit.ubl.modelo.actor.ReceptorDocumento;
-import com.cna.ublkit.ubl.modelo.sunat.resumen.*;
-import com.cna.ublkit.validation.modelo.ResultadoValidacion;
+import com.creanexusatreus.ublkit.ubl.modelo.actor.EmisorDocumento;
+import com.creanexusatreus.ublkit.ubl.modelo.actor.ReceptorDocumento;
+import com.creanexusatreus.ublkit.ubl.modelo.sunat.resumen.*;
+import com.creanexusatreus.ublkit.validation.modelo.ResultadoValidacion;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;

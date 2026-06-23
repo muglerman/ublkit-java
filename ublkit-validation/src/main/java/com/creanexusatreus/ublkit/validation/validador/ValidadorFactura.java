@@ -1,15 +1,15 @@
-package com.cna.ublkit.validation.validador;
+package com.creanexusatreus.ublkit.validation.validador;
 
-import com.cna.ublkit.ubl.modelo.BorradorFactura;
-import com.cna.ublkit.ubl.modelo.actor.ReceptorDocumento;
-import com.cna.ublkit.ubl.modelo.linea.LineaDetalle;
-import com.cna.ublkit.ubl.xml.SerializadorXmlFactura;
-import com.cna.ublkit.validation.api.Validador;
-import com.cna.ublkit.validation.modelo.IncidenciaValidacion;
-import com.cna.ublkit.validation.modelo.ResultadoValidacion;
-import com.cna.ublkit.validation.modelo.SeveridadValidacion;
-import com.cna.ublkit.validation.validador.sunat.ReglaSunatXsl;
-import com.cna.ublkit.validation.validador.sunat.ValidadorSunatXsl;
+import com.creanexusatreus.ublkit.ubl.modelo.BorradorFactura;
+import com.creanexusatreus.ublkit.ubl.modelo.actor.ReceptorDocumento;
+import com.creanexusatreus.ublkit.ubl.modelo.linea.LineaDetalle;
+import com.creanexusatreus.ublkit.ubl.xml.SerializadorXmlFactura;
+import com.creanexusatreus.ublkit.validation.api.Validador;
+import com.creanexusatreus.ublkit.validation.modelo.IncidenciaValidacion;
+import com.creanexusatreus.ublkit.validation.modelo.ResultadoValidacion;
+import com.creanexusatreus.ublkit.validation.modelo.SeveridadValidacion;
+import com.creanexusatreus.ublkit.validation.validador.sunat.ReglaSunatXsl;
+import com.creanexusatreus.ublkit.validation.validador.sunat.ValidadorSunatXsl;
 
 import java.math.BigDecimal;
 import java.util.List;

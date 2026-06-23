@@ -1,4 +1,4 @@
-package com.cna.ublkit.core.enumerado;
+package com.creanexusatreus.ublkit.core.enumerado;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;

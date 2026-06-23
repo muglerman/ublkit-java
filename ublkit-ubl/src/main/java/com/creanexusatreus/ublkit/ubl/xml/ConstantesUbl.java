@@ -1,4 +1,4 @@
-package com.cna.ublkit.ubl.xml;
+package com.creanexusatreus.ublkit.ubl.xml;
 
 /**
  * Constantes de namespaces UBL 2.1 y SUNAT.

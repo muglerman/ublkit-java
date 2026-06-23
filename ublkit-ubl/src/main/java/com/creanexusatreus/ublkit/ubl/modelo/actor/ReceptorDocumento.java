@@ -1,7 +1,7 @@
-package com.cna.ublkit.ubl.modelo.actor;
+package com.creanexusatreus.ublkit.ubl.modelo.actor;
 
-import com.cna.ublkit.core.modelo.Contacto;
-import com.cna.ublkit.core.modelo.Direccion;
+import com.creanexusatreus.ublkit.core.modelo.Contacto;
+import com.creanexusatreus.ublkit.core.modelo.Direccion;
 
 /**
  * Receptor del documento electrónico (cliente / adquiriente).

@@ -1,4 +1,4 @@
-package com.cna.ublkit.gateway.autenticacion;
+package com.creanexusatreus.ublkit.gateway.autenticacion;
 
 /**
  * Credenciales de la empresa emisora para autenticación ante servicios de SUNAT/OSE.

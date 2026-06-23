@@ -1,9 +1,9 @@
-package com.cna.ublkit.testkit.fixture;
+package com.creanexusatreus.ublkit.testkit.fixture;
 
-import com.cna.ublkit.ubl.modelo.actor.EmisorDocumento;
-import com.cna.ublkit.ubl.modelo.sunat.baja.ComunicacionBaja;
-import com.cna.ublkit.ubl.modelo.sunat.baja.ItemBaja;
-import com.cna.ublkit.ubl.modelo.sunat.baja.Reversion;
+import com.creanexusatreus.ublkit.ubl.modelo.actor.EmisorDocumento;
+import com.creanexusatreus.ublkit.ubl.modelo.sunat.baja.ComunicacionBaja;
+import com.creanexusatreus.ublkit.ubl.modelo.sunat.baja.ItemBaja;
+import com.creanexusatreus.ublkit.ubl.modelo.sunat.baja.Reversion;
 
 import java.time.LocalDate;
 import java.util.List;

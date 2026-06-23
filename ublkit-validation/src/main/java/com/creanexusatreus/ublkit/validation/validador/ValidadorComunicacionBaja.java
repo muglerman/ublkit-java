@@ -1,14 +1,14 @@
-package com.cna.ublkit.validation.validador;
+package com.creanexusatreus.ublkit.validation.validador;
 
-import com.cna.ublkit.ubl.modelo.sunat.baja.ComunicacionBaja;
-import com.cna.ublkit.ubl.modelo.sunat.baja.Reversion;
-import com.cna.ublkit.ubl.xml.SerializadorXmlComunicacionBaja;
-import com.cna.ublkit.validation.api.Validador;
-import com.cna.ublkit.validation.modelo.IncidenciaValidacion;
-import com.cna.ublkit.validation.modelo.ResultadoValidacion;
-import com.cna.ublkit.validation.modelo.SeveridadValidacion;
-import com.cna.ublkit.validation.validador.sunat.ReglaSunatXsl;
-import com.cna.ublkit.validation.validador.sunat.ValidadorSunatXsl;
+import com.creanexusatreus.ublkit.ubl.modelo.sunat.baja.ComunicacionBaja;
+import com.creanexusatreus.ublkit.ubl.modelo.sunat.baja.Reversion;
+import com.creanexusatreus.ublkit.ubl.xml.SerializadorXmlComunicacionBaja;
+import com.creanexusatreus.ublkit.validation.api.Validador;
+import com.creanexusatreus.ublkit.validation.modelo.IncidenciaValidacion;
+import com.creanexusatreus.ublkit.validation.modelo.ResultadoValidacion;
+import com.creanexusatreus.ublkit.validation.modelo.SeveridadValidacion;
+import com.creanexusatreus.ublkit.validation.validador.sunat.ReglaSunatXsl;
+import com.creanexusatreus.ublkit.validation.validador.sunat.ValidadorSunatXsl;
 
 import java.time.format.DateTimeFormatter;
 

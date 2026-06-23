@@ -1,13 +1,13 @@
-package com.cna.ublkit.validation.factory;
+package com.creanexusatreus.ublkit.validation.factory;
 
-import com.cna.ublkit.ubl.modelo.BorradorFactura;
-import com.cna.ublkit.ubl.modelo.BorradorNotaCredito;
-import com.cna.ublkit.ubl.modelo.BorradorNotaDebito;
-import com.cna.ublkit.ubl.modelo.linea.LineaDetalle;
-import com.cna.ublkit.validation.builder.FacturaBuilder;
-import com.cna.ublkit.validation.builder.LineaDetalleBuilder;
-import com.cna.ublkit.validation.builder.NotaCreditoBuilder;
-import com.cna.ublkit.validation.builder.NotaDebitoBuilder;
+import com.creanexusatreus.ublkit.ubl.modelo.BorradorFactura;
+import com.creanexusatreus.ublkit.ubl.modelo.BorradorNotaCredito;
+import com.creanexusatreus.ublkit.ubl.modelo.BorradorNotaDebito;
+import com.creanexusatreus.ublkit.ubl.modelo.linea.LineaDetalle;
+import com.creanexusatreus.ublkit.validation.builder.FacturaBuilder;
+import com.creanexusatreus.ublkit.validation.builder.LineaDetalleBuilder;
+import com.creanexusatreus.ublkit.validation.builder.NotaCreditoBuilder;
+import com.creanexusatreus.ublkit.validation.builder.NotaDebitoBuilder;
 
 import java.math.BigDecimal;
 import java.util.List;

@@ -1,4 +1,4 @@
-package com.cna.ublkit.gateway.autenticacion;
+package com.creanexusatreus.ublkit.gateway.autenticacion;
 
 import java.net.URI;
 import java.net.URLEncoder;
@@ -16,10 +16,10 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.cna.ublkit.core.enumerado.TipoAmbiente;
-import com.cna.ublkit.core.error.ExcepcionUblKit;
-import com.cna.ublkit.gateway.endpoint.ResolvedorEndpoints;
-import com.cna.ublkit.gateway.transporte.HttpClientNativoFactory;
+import com.creanexusatreus.ublkit.core.enumerado.TipoAmbiente;
+import com.creanexusatreus.ublkit.core.error.ExcepcionUblKit;
+import com.creanexusatreus.ublkit.gateway.endpoint.ResolvedorEndpoints;
+import com.creanexusatreus.ublkit.gateway.transporte.HttpClientNativoFactory;
 
 /**
  * Proveedor de Token por defecto que utiliza {@link HttpClient} nativo. Consume el endpoint OAuth2 resuelto por
@@ -115,7 +115,7 @@ public class ProveedorTokenNativo implements ProveedorToken {
             }
 
             if (response.statusCode() >= 500) {
-                throw new com.cna.ublkit.core.error.ExcepcionTransporte("HTTP_" + response.statusCode() + " - " + response.body());
+                throw new com.creanexusatreus.ublkit.core.error.ExcepcionTransporte("HTTP_" + response.statusCode() + " - " + response.body());
             }
 
             if (response.statusCode() != 200) {
@@ -139,11 +139,11 @@ public class ProveedorTokenNativo implements ProveedorToken {
 
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new com.cna.ublkit.core.error.ExcepcionTransporte("Solicitud de token interrumpida", e);
+            throw new com.creanexusatreus.ublkit.core.error.ExcepcionTransporte("Solicitud de token interrumpida", e);
         } catch (ExcepcionUblKit e) {
             throw e;
         } catch (java.io.IOException e) {
-            throw new com.cna.ublkit.core.error.ExcepcionTransporte("Error de I/O al solicitar token", e);
+            throw new com.creanexusatreus.ublkit.core.error.ExcepcionTransporte("Error de I/O al solicitar token", e);
         } catch (Exception e) {
             throw new ExcepcionUblKit("Error de red solicitando token a SUNAT: " + e.getMessage(), e);
         }

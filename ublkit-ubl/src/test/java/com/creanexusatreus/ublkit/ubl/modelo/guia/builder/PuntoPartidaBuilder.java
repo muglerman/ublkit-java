@@ -1,6 +1,6 @@
-package com.cna.ublkit.ubl.modelo.guia.builder;
+package com.creanexusatreus.ublkit.ubl.modelo.guia.builder;
 
-import com.cna.ublkit.ubl.modelo.guia.PuntoPartida;
+import com.creanexusatreus.ublkit.ubl.modelo.guia.PuntoPartida;
 
 /**
  * Builder para crear instancias de PuntoPartida en tests.

@@ -1,4 +1,4 @@
-package com.cna.ublkit.gateway.respuesta;
+package com.creanexusatreus.ublkit.gateway.respuesta;
 
 /**
  * Estado general del envío o consulta a los servicios de SUNAT/OSE.

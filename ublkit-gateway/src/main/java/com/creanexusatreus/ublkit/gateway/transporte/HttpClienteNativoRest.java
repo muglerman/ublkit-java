@@ -1,4 +1,4 @@
-package com.cna.ublkit.gateway.transporte;
+package com.creanexusatreus.ublkit.gateway.transporte;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -15,13 +15,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipInputStream;
 
-import com.cna.ublkit.gateway.api.HashHelper;
-import com.cna.ublkit.gateway.api.ZipHelper;
-import com.cna.ublkit.gateway.respuesta.ArchivoCdr;
-import com.cna.ublkit.gateway.respuesta.EstadoEnvio;
-import com.cna.ublkit.gateway.respuesta.LectorCdr;
-import com.cna.ublkit.gateway.respuesta.ResultadoConsulta;
-import com.cna.ublkit.gateway.respuesta.ResultadoEnvio;
+import com.creanexusatreus.ublkit.gateway.api.HashHelper;
+import com.creanexusatreus.ublkit.gateway.api.ZipHelper;
+import com.creanexusatreus.ublkit.gateway.respuesta.ArchivoCdr;
+import com.creanexusatreus.ublkit.gateway.respuesta.EstadoEnvio;
+import com.creanexusatreus.ublkit.gateway.respuesta.LectorCdr;
+import com.creanexusatreus.ublkit.gateway.respuesta.ResultadoConsulta;
+import com.creanexusatreus.ublkit.gateway.respuesta.ResultadoEnvio;
 
 /**
  * Implementación de {@link ClienteRest} utilizando {@link HttpClient} nativo.
@@ -112,7 +112,7 @@ public class HttpClienteNativoRest implements ClienteRest {
             if (response.statusCode() >= 500) {
                 String codError = extraerCampoJson(response.body(), "codError");
                 if (codError == null || codError.isBlank()) {
-                    throw new com.cna.ublkit.core.error.ExcepcionTransporte("HTTP_" + response.statusCode() + " - " + response.body());
+                    throw new com.creanexusatreus.ublkit.core.error.ExcepcionTransporte("HTTP_" + response.statusCode() + " - " + response.body());
                 }
             }
 
@@ -132,7 +132,7 @@ public class HttpClienteNativoRest implements ClienteRest {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             return ResultadoEnvio.error("IO_ERROR", e.getMessage());
-        } catch (com.cna.ublkit.core.error.ExcepcionTransporte e) {
+        } catch (com.creanexusatreus.ublkit.core.error.ExcepcionTransporte e) {
             return ResultadoEnvio.error("HTTP_5XX", e.getMessage());
         } catch (Exception e) {
             return ResultadoEnvio.error("IO_ERROR", e.getMessage());
@@ -164,7 +164,7 @@ public class HttpClienteNativoRest implements ClienteRest {
             if (response.statusCode() >= 500) {
                 String codRespuesta = extraerCampoJson(response.body(), "codRespuesta");
                 if (codRespuesta == null || codRespuesta.isBlank()) {
-                    throw new com.cna.ublkit.core.error.ExcepcionTransporte("HTTP_" + response.statusCode() + " - " + response.body());
+                    throw new com.creanexusatreus.ublkit.core.error.ExcepcionTransporte("HTTP_" + response.statusCode() + " - " + response.body());
                 }
             }
 
@@ -198,7 +198,7 @@ public class HttpClienteNativoRest implements ClienteRest {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             return ResultadoConsulta.error("IO_ERROR", e.getMessage());
-        } catch (com.cna.ublkit.core.error.ExcepcionTransporte e) {
+        } catch (com.creanexusatreus.ublkit.core.error.ExcepcionTransporte e) {
             return ResultadoConsulta.error("HTTP_5XX", e.getMessage());
         } catch (Exception e) {
             return ResultadoConsulta.error("IO_ERROR", e.getMessage());

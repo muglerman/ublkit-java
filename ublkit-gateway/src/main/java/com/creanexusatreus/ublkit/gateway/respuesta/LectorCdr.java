@@ -1,6 +1,6 @@
-package com.cna.ublkit.gateway.respuesta;
+package com.creanexusatreus.ublkit.gateway.respuesta;
 
-import com.cna.ublkit.core.error.ExcepcionUblKit;
+import com.creanexusatreus.ublkit.core.error.ExcepcionUblKit;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 

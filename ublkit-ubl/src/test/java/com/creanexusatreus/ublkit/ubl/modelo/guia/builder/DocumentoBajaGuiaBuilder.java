@@ -1,6 +1,6 @@
-package com.cna.ublkit.ubl.modelo.guia.builder;
+package com.creanexusatreus.ublkit.ubl.modelo.guia.builder;
 
-import com.cna.ublkit.ubl.modelo.guia.DocumentoBajaGuia;
+import com.creanexusatreus.ublkit.ubl.modelo.guia.DocumentoBajaGuia;
 
 public class DocumentoBajaGuiaBuilder {
     private String tipoDocumento = "01";

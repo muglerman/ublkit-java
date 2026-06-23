@@ -1,9 +1,9 @@
-package com.cna.ublkit.ubl.xml;
+package com.creanexusatreus.ublkit.ubl.xml;
 
-import com.cna.ublkit.core.error.ExcepcionSerializacionXml;
-import com.cna.ublkit.ubl.modelo.BorradorFactura;
-import com.cna.ublkit.ubl.modelo.complemento.*;
-import com.cna.ublkit.ubl.modelo.linea.LineaDetalle;
+import com.creanexusatreus.ublkit.core.error.ExcepcionSerializacionXml;
+import com.creanexusatreus.ublkit.ubl.modelo.BorradorFactura;
+import com.creanexusatreus.ublkit.ubl.modelo.complemento.*;
+import com.creanexusatreus.ublkit.ubl.modelo.linea.LineaDetalle;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -17,9 +17,9 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
-import static com.cna.ublkit.ubl.xml.ConstantesUbl.*;
-import static com.cna.ublkit.ubl.xml.FragmentosXml.*;
-import static com.cna.ublkit.ubl.xml.XmlUblHelper.*;
+import static com.creanexusatreus.ublkit.ubl.xml.ConstantesUbl.*;
+import static com.creanexusatreus.ublkit.ubl.xml.FragmentosXml.*;
+import static com.creanexusatreus.ublkit.ubl.xml.XmlUblHelper.*;
 
 /**
  * Serializa un {@link BorradorFactura} (Factura o Boleta) a XML UBL 2.1 Invoice.

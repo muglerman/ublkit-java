@@ -1,23 +1,23 @@
-package com.cna.ublkit.ubl.xml;
+package com.creanexusatreus.ublkit.ubl.xml;
 
-import com.cna.ublkit.core.modelo.Contacto;
-import com.cna.ublkit.core.modelo.Direccion;
-import com.cna.ublkit.ubl.modelo.DocumentoBase;
-import com.cna.ublkit.ubl.modelo.actor.EmisorDocumento;
-import com.cna.ublkit.ubl.modelo.actor.FirmanteDocumento;
-import com.cna.ublkit.ubl.modelo.actor.ReceptorDocumento;
-import com.cna.ublkit.ubl.modelo.complemento.DocumentoRelacionado;
-import com.cna.ublkit.ubl.modelo.complemento.GuiaRelacionada;
-import com.cna.ublkit.ubl.modelo.linea.CargoDescuento;
-import com.cna.ublkit.ubl.modelo.linea.LineaDetalle;
-import com.cna.ublkit.ubl.modelo.total.TotalImpuestos;
+import com.creanexusatreus.ublkit.core.modelo.Contacto;
+import com.creanexusatreus.ublkit.core.modelo.Direccion;
+import com.creanexusatreus.ublkit.ubl.modelo.DocumentoBase;
+import com.creanexusatreus.ublkit.ubl.modelo.actor.EmisorDocumento;
+import com.creanexusatreus.ublkit.ubl.modelo.actor.FirmanteDocumento;
+import com.creanexusatreus.ublkit.ubl.modelo.actor.ReceptorDocumento;
+import com.creanexusatreus.ublkit.ubl.modelo.complemento.DocumentoRelacionado;
+import com.creanexusatreus.ublkit.ubl.modelo.complemento.GuiaRelacionada;
+import com.creanexusatreus.ublkit.ubl.modelo.linea.CargoDescuento;
+import com.creanexusatreus.ublkit.ubl.modelo.linea.LineaDetalle;
+import com.creanexusatreus.ublkit.ubl.modelo.total.TotalImpuestos;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import java.math.BigDecimal;
 import java.util.List;
 
-import static com.cna.ublkit.ubl.xml.XmlUblHelper.*;
+import static com.creanexusatreus.ublkit.ubl.xml.XmlUblHelper.*;
 
 /**
  * Constructores de fragmentos XML UBL 2.1 compartidos entre todos los serializadores.

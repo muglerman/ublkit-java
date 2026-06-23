@@ -1,4 +1,4 @@
-package com.cna.ublkit.render.modelo;
+package com.creanexusatreus.ublkit.render.modelo;
 
 /**
  * Extensiones soportadas para las plantillas.

@@ -1,4 +1,4 @@
-package com.cna.ublkit.core.error;
+package com.creanexusatreus.ublkit.core.error;
 
 import java.io.IOException;
 

@@ -1,6 +1,6 @@
-package com.cna.ublkit.gateway.api;
+package com.creanexusatreus.ublkit.gateway.api;
 
-import com.cna.ublkit.core.error.ExcepcionUblKit;
+import com.creanexusatreus.ublkit.core.error.ExcepcionUblKit;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;

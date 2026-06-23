@@ -8,7 +8,7 @@
 		<version>4.0.5</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.cna</groupId>
+	<groupId>com.creanexusatreus</groupId>
 	<artifactId>ublkit-parent</artifactId>
 	<version>1.0.0</version>
     <packaging>pom</packaging>

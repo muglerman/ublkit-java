@@ -1,4 +1,4 @@
-package com.cna.ublkit.render.pdf;
+package com.creanexusatreus.ublkit.render.pdf;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -12,18 +12,18 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import com.cna.ublkit.core.modelo.Contacto;
-import com.cna.ublkit.core.modelo.Direccion;
-import com.cna.ublkit.render.html.RenderizadorHtmlNota;
-import com.cna.ublkit.render.modelo.ContextoRender;
-import com.cna.ublkit.render.modelo.FormatoImpresion;
-import com.cna.ublkit.render.modelo.ResultadoRender;
-import com.cna.ublkit.ubl.modelo.BorradorNotaCredito;
-import com.cna.ublkit.ubl.modelo.BorradorNotaDebito;
-import com.cna.ublkit.ubl.modelo.actor.EmisorDocumento;
-import com.cna.ublkit.ubl.modelo.actor.ReceptorDocumento;
-import com.cna.ublkit.ubl.modelo.linea.LineaDetalle;
-import com.cna.ublkit.ubl.modelo.total.TotalImporte;
+import com.creanexusatreus.ublkit.core.modelo.Contacto;
+import com.creanexusatreus.ublkit.core.modelo.Direccion;
+import com.creanexusatreus.ublkit.render.html.RenderizadorHtmlNota;
+import com.creanexusatreus.ublkit.render.modelo.ContextoRender;
+import com.creanexusatreus.ublkit.render.modelo.FormatoImpresion;
+import com.creanexusatreus.ublkit.render.modelo.ResultadoRender;
+import com.creanexusatreus.ublkit.ubl.modelo.BorradorNotaCredito;
+import com.creanexusatreus.ublkit.ubl.modelo.BorradorNotaDebito;
+import com.creanexusatreus.ublkit.ubl.modelo.actor.EmisorDocumento;
+import com.creanexusatreus.ublkit.ubl.modelo.actor.ReceptorDocumento;
+import com.creanexusatreus.ublkit.ubl.modelo.linea.LineaDetalle;
+import com.creanexusatreus.ublkit.ubl.modelo.total.TotalImporte;
 
 /**
  * Suite EXHAUSTIVA de pruebas para validar la generación de PDFs de NOTA DE CRÉDITO/DÉBITO.

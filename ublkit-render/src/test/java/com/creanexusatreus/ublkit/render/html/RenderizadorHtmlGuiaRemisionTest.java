@@ -1,12 +1,12 @@
-package com.cna.ublkit.render.html;
+package com.creanexusatreus.ublkit.render.html;
 
-import com.cna.ublkit.render.modelo.ContextoRender;
-import com.cna.ublkit.render.modelo.FormatoImpresion;
-import com.cna.ublkit.render.modelo.ResultadoRender;
-import com.cna.ublkit.ubl.modelo.guia.BorradorGuiaRemision;
-import com.cna.ublkit.ubl.modelo.guia.Conductor;
-import com.cna.ublkit.ubl.modelo.guia.Contenedor;
-import com.cna.ublkit.ubl.modelo.guia.LineaGuia;
+import com.creanexusatreus.ublkit.render.modelo.ContextoRender;
+import com.creanexusatreus.ublkit.render.modelo.FormatoImpresion;
+import com.creanexusatreus.ublkit.render.modelo.ResultadoRender;
+import com.creanexusatreus.ublkit.ubl.modelo.guia.BorradorGuiaRemision;
+import com.creanexusatreus.ublkit.ubl.modelo.guia.Conductor;
+import com.creanexusatreus.ublkit.ubl.modelo.guia.Contenedor;
+import com.creanexusatreus.ublkit.ubl.modelo.guia.LineaGuia;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -412,12 +412,12 @@ class RenderizadorHtmlGuiaRemisionTest {
         guia.setTipoComprobante("30");
 
         // Remitter
-        guia.setRemitente(new com.cna.ublkit.ubl.modelo.actor.EmisorDocumento(
+        guia.setRemitente(new com.creanexusatreus.ublkit.ubl.modelo.actor.EmisorDocumento(
                 "20123456789", "Empresa A SAC", null, null, null
         ));
 
         // Recipient
-        guia.setDestinatario(new com.cna.ublkit.ubl.modelo.guia.DestinatarioGuia(
+        guia.setDestinatario(new com.creanexusatreus.ublkit.ubl.modelo.guia.DestinatarioGuia(
                 "1", "10123456789", "Cliente B"
         ));
 

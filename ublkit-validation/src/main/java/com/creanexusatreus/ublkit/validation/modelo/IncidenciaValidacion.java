@@ -1,4 +1,4 @@
-package com.cna.ublkit.validation.modelo;
+package com.creanexusatreus.ublkit.validation.modelo;
 
 /**
  * Representa una incidencia detectada durante el proceso de validación.

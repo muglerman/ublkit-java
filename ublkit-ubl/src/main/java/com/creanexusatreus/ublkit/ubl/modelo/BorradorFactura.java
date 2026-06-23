@@ -1,8 +1,8 @@
-package com.cna.ublkit.ubl.modelo;
+package com.creanexusatreus.ublkit.ubl.modelo;
 
-import com.cna.ublkit.core.modelo.Direccion;
-import com.cna.ublkit.ubl.modelo.complemento.*;
-import com.cna.ublkit.ubl.modelo.total.TotalImporte;
+import com.creanexusatreus.ublkit.core.modelo.Direccion;
+import com.creanexusatreus.ublkit.ubl.modelo.complemento.*;
+import com.creanexusatreus.ublkit.ubl.modelo.total.TotalImporte;
 
 import java.time.LocalDate;
 import java.util.List;

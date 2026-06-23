@@ -1,4 +1,4 @@
-package com.cna.ublkit.ubl.modelo.sunat.percepcionretencion;
+package com.creanexusatreus.ublkit.ubl.modelo.sunat.percepcionretencion;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

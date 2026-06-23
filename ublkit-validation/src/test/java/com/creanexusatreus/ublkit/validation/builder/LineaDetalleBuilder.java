@@ -1,6 +1,6 @@
-package com.cna.ublkit.validation.builder;
+package com.creanexusatreus.ublkit.validation.builder;
 
-import com.cna.ublkit.ubl.modelo.linea.LineaDetalle;
+import com.creanexusatreus.ublkit.ubl.modelo.linea.LineaDetalle;
 
 import java.math.BigDecimal;
 

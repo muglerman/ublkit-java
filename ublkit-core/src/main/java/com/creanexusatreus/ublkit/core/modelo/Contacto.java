@@ -1,4 +1,4 @@
-package com.cna.ublkit.core.modelo;
+package com.creanexusatreus.ublkit.core.modelo;
 
 /**
  * Representa datos de contacto comerciales para emisores o receptores.

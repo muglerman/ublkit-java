@@ -1,4 +1,4 @@
-package com.cna.ublkit.spring;
+package com.creanexusatreus.ublkit.spring;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 

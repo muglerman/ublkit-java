@@ -1,7 +1,7 @@
-package com.cna.ublkit.ubl.modelo.guia.fixture;
+package com.creanexusatreus.ublkit.ubl.modelo.guia.fixture;
 
-import com.cna.ublkit.ubl.modelo.guia.*;
-import com.cna.ublkit.ubl.modelo.guia.builder.*;
+import com.creanexusatreus.ublkit.ubl.modelo.guia.*;
+import com.creanexusatreus.ublkit.ubl.modelo.guia.builder.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;

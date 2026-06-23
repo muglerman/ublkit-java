@@ -1,6 +1,6 @@
-package com.cna.ublkit.ubl.modelo.sunat.baja;
+package com.creanexusatreus.ublkit.ubl.modelo.sunat.baja;
 
-import com.cna.ublkit.ubl.modelo.sunat.DocumentoSunat;
+import com.creanexusatreus.ublkit.ubl.modelo.sunat.DocumentoSunat;
 import java.util.List;
 
 /**

@@ -1,6 +1,6 @@
-package com.cna.ublkit.storage;
+package com.creanexusatreus.ublkit.storage;
 
-import com.cna.ublkit.core.modelo.ResultadoOperacion;
+import com.creanexusatreus.ublkit.core.modelo.ResultadoOperacion;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.core.ResponseBytes;
 import software.amazon.awssdk.services.s3.S3Client;

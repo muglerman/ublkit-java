@@ -1,6 +1,6 @@
-package com.cna.ublkit.render.pdf.helper;
+package com.creanexusatreus.ublkit.render.pdf.helper;
 
-import com.cna.ublkit.render.modelo.FormatoImpresion;
+import com.creanexusatreus.ublkit.render.modelo.FormatoImpresion;
 import com.microsoft.playwright.Browser;
 import com.microsoft.playwright.BrowserType;
 import com.microsoft.playwright.Page;

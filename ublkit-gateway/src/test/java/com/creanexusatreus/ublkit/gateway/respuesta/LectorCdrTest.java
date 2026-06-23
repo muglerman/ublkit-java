@@ -1,6 +1,6 @@
-package com.cna.ublkit.gateway.respuesta;
+package com.creanexusatreus.ublkit.gateway.respuesta;
 
-import com.cna.ublkit.gateway.api.ZipHelper;
+import com.creanexusatreus.ublkit.gateway.api.ZipHelper;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

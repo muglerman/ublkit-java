@@ -1,4 +1,4 @@
-package com.cna.ublkit.render.modelo;
+package com.creanexusatreus.ublkit.render.modelo;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

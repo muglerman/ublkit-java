@@ -1,4 +1,4 @@
-package com.cna.ublkit.gateway.api;
+package com.creanexusatreus.ublkit.gateway.api;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

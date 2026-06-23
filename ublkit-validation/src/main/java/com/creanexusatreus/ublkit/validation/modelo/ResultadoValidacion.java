@@ -1,4 +1,4 @@
-package com.cna.ublkit.validation.modelo;
+package com.creanexusatreus.ublkit.validation.modelo;
 
 import java.util.ArrayList;
 import java.util.Collections;

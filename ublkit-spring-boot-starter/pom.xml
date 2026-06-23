@@ -3,7 +3,7 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>com.cna</groupId>
+		<groupId>com.creanexusatreus</groupId>
 		<artifactId>ublkit-parent</artifactId>
 		<version>1.0.0</version>
 	</parent>
@@ -27,47 +27,47 @@
 			<scope>test</scope>
 		</dependency>
         <dependency>
-            <groupId>com.cna</groupId>
+            <groupId>com.creanexusatreus</groupId>
             <artifactId>ublkit-core</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.cna</groupId>
+            <groupId>com.creanexusatreus</groupId>
             <artifactId>ublkit-ubl</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.cna</groupId>
+            <groupId>com.creanexusatreus</groupId>
             <artifactId>ublkit-sign</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.cna</groupId>
+            <groupId>com.creanexusatreus</groupId>
             <artifactId>ublkit-gateway</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.cna</groupId>
+            <groupId>com.creanexusatreus</groupId>
             <artifactId>ublkit-render</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.cna</groupId>
+            <groupId>com.creanexusatreus</groupId>
             <artifactId>ublkit-validation</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.cna</groupId>
+            <groupId>com.creanexusatreus</groupId>
             <artifactId>ublkit-catalogs</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.cna</groupId>
+            <groupId>com.creanexusatreus</groupId>
             <artifactId>ublkit-qr</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.cna</groupId>
+            <groupId>com.creanexusatreus</groupId>
             <artifactId>ublkit-storage</artifactId>
             <version>${project.version}</version>
         </dependency>

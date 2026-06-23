@@ -1,6 +1,6 @@
-package com.cna.ublkit.validation.api;
+package com.creanexusatreus.ublkit.validation.api;
 
-import com.cna.ublkit.validation.modelo.ResultadoValidacion;
+import com.creanexusatreus.ublkit.validation.modelo.ResultadoValidacion;
 
 /**
  * Contrato base para validadores del sistema.

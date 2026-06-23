@@ -1,8 +1,8 @@
-package com.cna.ublkit.ubl.ensamblador;
+package com.creanexusatreus.ublkit.ubl.ensamblador;
 
-import com.cna.ublkit.ubl.modelo.sunat.resumen.ComprobanteResumen;
-import com.cna.ublkit.ubl.modelo.sunat.resumen.ItemResumenDiario;
-import com.cna.ublkit.ubl.modelo.sunat.resumen.ResumenDiario;
+import com.creanexusatreus.ublkit.ubl.modelo.sunat.resumen.ComprobanteResumen;
+import com.creanexusatreus.ublkit.ubl.modelo.sunat.resumen.ItemResumenDiario;
+import com.creanexusatreus.ublkit.ubl.modelo.sunat.resumen.ResumenDiario;
 
 import java.time.LocalDate;
 
