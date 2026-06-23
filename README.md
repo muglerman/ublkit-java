@@ -1,6 +1,3 @@
-<!-- prettier-ignore -->
-<div align="center">
-
 # UBLKit Java
 
 **Librería Java para UBL 2.1, firma digital, SUNAT, QR, storage y PDF**
@@ -11,7 +8,7 @@
 [![Quarkus](https://img.shields.io/badge/Quarkus-extension-4695eb?style=flat-square&logo=quarkus&logoColor=white)](https://quarkus.io)
 [![UBL](https://img.shields.io/badge/UBL-2.1-2f855a?style=flat-square)](https://docs.oasis-open.org/ubl/UBL-2.1.html)
 
-Toolkit hexagonal para modelar, validar, firmar, enviar y renderizar documentos electrónicos.<br/>
+Toolkit hexagonal para modelar, validar, firmar, enviar y renderizar documentos electrónicos.
 Usado por Quantus Flow para XML UBL, firma X.509, SUNAT, QR y PDF corporativo.
 
 [Inicio Rápido](#inicio-rápido) |
@@ -20,8 +17,6 @@ Usado por Quantus Flow para XML UBL, firma X.509, SUNAT, QR y PDF corporativo.
 [Módulos](#módulos) |
 [Desarrollo](#desarrollo) |
 [Documentación](#documentación)
-
-</div>
 
 ---
 
@@ -52,7 +47,7 @@ El proyecto cubre modelado, ensamblado, serialización UBL, firma digital, enví
 ### Render y Storage
 
 - PDF A4/A5 y tickets POS 58/80mm.
-- Plantillas Pebble + OpenHTMLtoPDF.
+- Plantillas Pebble renderizadas a PDF con Playwright (Chromium).
 - Generación de QR SUNAT.
 - Abstracciones de storage local, S3 y GCS.
 
@@ -112,10 +107,11 @@ factura.setNumero(1);
 EnsambladorFactura.ensamblar(factura);
 
 String xml = new SerializadorXmlFactura().serializar(factura);
-ResultadoFirma firma = ServicioFirma.firmarXml(xml, "#UBLKIT-SIGN", certificado);
+ResultadoFirma firma = ServicioFirma.firmarXml(xml, certificado);
 
-PasarelaSunat pasarela = new PasarelaSunatDefecto(credenciales, TipoAmbiente.BETA);
-ResultadoEnvio envio = pasarela.enviarComprobante(firma.xmlFirmadoStr());
+PasarelaSunat pasarela = new PasarelaSunatDefecto();
+ResultadoEnvio envio = pasarela.enviarComprobante(
+    firma.xmlFirmadoStr(), nombreArchivo, credenciales, TipoAmbiente.BETA);
 ```
 
 ## Arquitectura
@@ -199,6 +195,8 @@ make ublkit-clean
 | `ublkit-gateway/README.md` | SUNAT/OSE |
 | `ublkit-render/README.md` | PDF, tickets y plantillas |
 | `ublkit-validation/README.md` | Validadores |
+| `ublkit-catalogs/README.md` | Catálogos SUNAT |
+| `ublkit-qr/README.md` | Trama y generación de QR |
 | `ublkit-storage/README.md` | Storage |
 | `ublkit-testkit/README.md` | Utilidades de prueba |
 | `ublkit-spring-boot-starter/README.md` | Integración Spring Boot |
@@ -206,8 +204,7 @@ make ublkit-clean
 
 ## Solución de Problemas
 
-<details>
-<summary><strong>Un módulo no resuelve dependencias internas</strong></summary>
+### Un módulo no resuelve dependencias internas
 
 Instala desde la raíz del multi-módulo:
 
@@ -220,24 +217,16 @@ O desde el workspace Perseo:
 ```bash
 make ublkit-install
 ```
-</details>
 
-<details>
-<summary><strong>El PDF no refleja cambios de plantilla</strong></summary>
+### El PDF no refleja cambios de plantilla
 
 Verifica que el cambio esté en `ublkit-render`, que la plantilla seleccionada sea la usada por el caller y que el build haya instalado el módulo actualizado.
-</details>
 
-<details>
-<summary><strong>La firma falla con certificado real</strong></summary>
+### La firma falla con certificado real
 
 Confirma contraseña, formato del certificado, alias esperado y que el XML contenga el nodo de firma configurado.
-</details>
 
 ---
 
-<div align="center">
-
 Desarrollado por **Crea Nexus Atreus**
 
-</div>

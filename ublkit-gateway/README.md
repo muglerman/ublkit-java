@@ -1,6 +1,3 @@
-<!-- prettier-ignore -->
-<div align="center">
-
 # ublkit-gateway
 
 **Clientes SUNAT/OSE para envío y consulta**
@@ -17,8 +14,6 @@ Infraestructura HTTP/SOAP/REST para comprobantes, tickets, CDR y GRE.
 [Estructura](#estructura) |
 [Características](#características) |
 [Pruebas](#pruebas)
-
-</div>
 
 ---
 
@@ -40,10 +35,12 @@ Infraestructura HTTP/SOAP/REST para comprobantes, tickets, CDR y GRE.
 
 | Paquete | Contenido |
 | --- | --- |
-| `gateway/` | `PasarelaSunat`, `ResultadoEnvio`, `ArchivoCdr` |
-| `gateway/client/` | Clientes SOAP y REST |
-| `gateway/auth/` | Proveedores OAuth2 |
-| `gateway/config/` | Endpoints y configuración |
+| `api/` | `PasarelaSunat`, `PasarelaSunatDefecto`, helpers ZIP/Hash |
+| `transporte/` | Clientes SOAP y REST con `HttpClient` nativo |
+| `autenticacion/` | Proveedores de token OAuth2 y credenciales |
+| `respuesta/` | `ResultadoEnvio`, `ArchivoCdr`, `LectorCdr`, consultas |
+| `endpoint/` | Resolución de endpoints SUNAT/OSE |
+| `config/` | Configuración del gateway |
 
 ## Características
 
@@ -64,8 +61,5 @@ Usar mocks de transporte para 2xx, 4xx, 5xx, tickets y CDR ZIP.
 
 ---
 
-<div align="center">
-
 Desarrollado por **Crea Nexus Atreus**
 
-</div>

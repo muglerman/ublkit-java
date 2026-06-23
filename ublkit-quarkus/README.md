@@ -1,6 +1,3 @@
-<!-- prettier-ignore -->
-<div align="center">
-
 # ublkit-quarkus
 
 **Integración CDI para Quarkus**
@@ -16,8 +13,6 @@ Adaptador framework que expone servicios UBLKit como beans CDI.
 [Características](#características) |
 [Reglas](#reglas) |
 [Pruebas](#pruebas)
-
-</div>
 
 ---
 
@@ -37,7 +32,7 @@ Adaptador framework que expone servicios UBLKit como beans CDI.
 
 ## Características
 
-- Productores CDI para serializadores, validadores, renderizadores y firma.
+- Productores CDI para serializadores, validadores y renderizadores (HTML/PDF).
 - Beans sin estado aptos para inyección.
 - Preparado para entornos AOT/GraalVM cuando el consumidor lo configure.
 
@@ -57,8 +52,5 @@ Validar carga de contexto CDI y ausencia de ciclos.
 
 ---
 
-<div align="center">
-
 Desarrollado por **Crea Nexus Atreus**
 
-</div>

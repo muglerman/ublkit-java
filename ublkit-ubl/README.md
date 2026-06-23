@@ -1,6 +1,3 @@
-<!-- prettier-ignore -->
-<div align="center">
-
 # ublkit-ubl
 
 **Modelado, ensamblado y serialización XML UBL 2.1**
@@ -18,8 +15,6 @@ Convierte borradores de dominio en XML UBL exigido por SUNAT.
 [Características](#características) |
 [Reglas](#reglas) |
 [Pruebas](#pruebas)
-
-</div>
 
 ---
 
@@ -41,10 +36,9 @@ Convierte borradores de dominio en XML UBL exigido por SUNAT.
 
 | Paquete | Contenido |
 | --- | --- |
-| `ubl/domain/` | Borradores y documentos base |
-| `ubl/assembler/` | Ensambladores y cálculo de totales |
-| `ubl/xml/` | Serializadores DOM y fragmentos XML |
-| `ubl/util/` | Utilidades como números a letras |
+| `modelo/` | Borradores y documentos base |
+| `ensamblador/` | Ensambladores, cálculo de totales y utilidades como números a letras (`NumeroALetras`) |
+| `xml/` | Serializadores DOM y fragmentos XML |
 
 ## Características
 
@@ -68,8 +62,5 @@ Validar XML estructural, golden XMLs y casos normativos.
 
 ---
 
-<div align="center">
-
 Desarrollado por **Crea Nexus Atreus**
 
-</div>

@@ -1,6 +1,3 @@
-<!-- prettier-ignore -->
-<div align="center">
-
 # ublkit-testkit
 
 **Fixtures, mocks y assertions para pruebas UBLKit**
@@ -16,8 +13,6 @@ Utilidades de test para validar XML, CDR y flujos sin depender de SUNAT real.
 [Uso](#uso) |
 [Características](#características) |
 [Reglas](#reglas)
-
-</div>
 
 ---
 
@@ -51,8 +46,5 @@ Utilidades de test para validar XML, CDR y flujos sin depender de SUNAT real.
 
 ---
 
-<div align="center">
-
 Desarrollado por **Crea Nexus Atreus**
 
-</div>

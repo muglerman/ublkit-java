@@ -1,6 +1,3 @@
-<!-- prettier-ignore -->
-<div align="center">
-
 # ublkit-sign
 
 **Firma digital XMLDSig para UBL**
@@ -16,8 +13,6 @@ Firma XML enveloped con certificados X.509 desde PKCS12/JKS.
 [Características](#características) |
 [Reglas](#reglas) |
 [Pruebas](#pruebas)
-
-</div>
 
 ---
 
@@ -58,8 +53,5 @@ Validar estructura XMLDSig, referencias y ruptura ante alteración del XML.
 
 ---
 
-<div align="center">
-
 Desarrollado por **Crea Nexus Atreus**
 
-</div>

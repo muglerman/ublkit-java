@@ -1,6 +1,3 @@
-<!-- prettier-ignore -->
-<div align="center">
-
 # ublkit-validation
 
 **Validación funcional y normativa de documentos UBL**
@@ -18,8 +15,6 @@ Reglas Java y validación SUNAT XSLT con acumulación de incidencias.
 [Características](#características) |
 [Reglas](#reglas) |
 [Pruebas](#pruebas)
-
-</div>
 
 ---
 
@@ -41,10 +36,11 @@ Reglas Java y validación SUNAT XSLT con acumulación de incidencias.
 
 | Paquete | Contenido |
 | --- | --- |
-| `validation/api/` | `Validador`, `ResultadoValidacion`, incidencias |
-| `validation/document/` | Validadores funcionales por documento |
-| `validation/sunat/` | Validación XSLT SUNAT |
-| `src/main/resources/sunat/` | XSL oficiales |
+| `api/` | `Validador` |
+| `modelo/` | `ResultadoValidacion`, `IncidenciaValidacion`, `SeveridadValidacion` |
+| `validador/` | Validadores funcionales por documento |
+| `validador/sunat/` | Validación XSLT SUNAT (`ValidadorSunatXsl`) |
+| `src/main/resources/sunat/validation/` | XSL oficiales, catálogos y errores |
 
 ## Características
 
@@ -69,8 +65,5 @@ Cubrir ruta local y ruta XSLT, incluyendo documentos mal formados.
 
 ---
 
-<div align="center">
-
 Desarrollado por **Crea Nexus Atreus**
 
-</div>

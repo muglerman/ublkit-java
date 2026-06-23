@@ -1,6 +1,3 @@
-<!-- prettier-ignore -->
-<div align="center">
-
 # ublkit-core
 
 **Dominio base y tipos transversales de UBLKit**
@@ -16,8 +13,6 @@ Núcleo sin dependencias externas para objetos de valor, enums, resultados y exc
 [Estructura](#estructura) |
 [Reglas](#reglas) |
 [Pruebas](#pruebas)
-
-</div>
 
 ---
 
@@ -39,10 +34,10 @@ Núcleo sin dependencias externas para objetos de valor, enums, resultados y exc
 
 | Paquete | Contenido |
 | --- | --- |
-| `domain/valueobject` | `Dinero`, `Moneda`, `NumeroSerie` y objetos inmutables |
-| `domain/enums` | Tipos de documento, ambiente y enums transversales |
-| `domain/exception` | Excepciones base |
-| `domain` | `ResultadoOperacion` y clases comunes |
+| `valor` | `Dinero`, `Moneda`, `NumeroSerie` y objetos inmutables |
+| `enumerado` | Tipos de documento, ambiente y enums transversales |
+| `error` | Excepciones base |
+| `modelo` | `ResultadoOperacion` y clases comunes |
 
 ## Reglas
 
@@ -61,8 +56,5 @@ Cubrir objetos de valor, invariantes, excepciones y `ResultadoOperacion`.
 
 ---
 
-<div align="center">
-
 Desarrollado por **Crea Nexus Atreus**
 
-</div>

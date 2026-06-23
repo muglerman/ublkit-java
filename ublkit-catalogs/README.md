@@ -1,6 +1,3 @@
-<!-- prettier-ignore -->
-<div align="center">
-
 # ublkit-catalogs
 
 **Catálogos normativos SUNAT en memoria**
@@ -16,8 +13,6 @@ Módulo de consulta de catálogos CSV versionados en el classpath.
 [Estructura](#estructura) |
 [Características](#características) |
 [Pruebas](#pruebas)
-
-</div>
 
 ---
 
@@ -39,8 +34,10 @@ Módulo de consulta de catálogos CSV versionados en el classpath.
 
 | Ruta | Contenido |
 | --- | --- |
-| `src/main/java/com/cna/ublkit/catalogs/` | `ProveedorCatalogos`, `EntradaCatalogo`, `LectorCsvCatalogos` |
-| `src/main/resources/catalogs/` | CSV de catálogos SUNAT |
+| `.../catalogs/api/` | `ProveedorCatalogos` |
+| `.../catalogs/modelo/` | `EntradaCatalogo` |
+| `.../catalogs/sunat/` | `LectorCsvCatalogos` |
+| `src/main/resources/sunat/catalogos/` | CSV de catálogos SUNAT |
 
 ## Características
 
@@ -59,8 +56,5 @@ Validar presencia de CSV, parseo correcto y búsquedas concurrentes.
 
 ---
 
-<div align="center">
-
 Desarrollado por **Crea Nexus Atreus**
 
-</div>

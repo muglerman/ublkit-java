@@ -1,6 +1,3 @@
-<!-- prettier-ignore -->
-<div align="center">
-
 # ublkit-qr
 
 **Generación de QR SUNAT**
@@ -15,8 +12,6 @@ Construye la trama oficial y genera imagen PNG/Base64 para representaciones impr
 [Uso](#uso) |
 [Características](#características) |
 [Pruebas](#pruebas)
-
-</div>
 
 ---
 
@@ -51,8 +46,5 @@ Validar composición exacta de trama y decodificación inversa del QR.
 
 ---
 
-<div align="center">
-
 Desarrollado por **Crea Nexus Atreus**
 
-</div>

@@ -1,6 +1,3 @@
-<!-- prettier-ignore -->
-<div align="center">
-
 # ublkit-storage
 
 **Abstracción de almacenamiento documental**
@@ -17,8 +14,6 @@ Puerto y adaptadores para XML, CDR, PDF, ZIP y artefactos de emisión.
 [Características](#características) |
 [Reglas](#reglas) |
 [Pruebas](#pruebas)
-
-</div>
 
 ---
 
@@ -59,8 +54,5 @@ Validar escritura/lectura local y adaptadores cloud con mocks o entornos control
 
 ---
 
-<div align="center">
-
 Desarrollado por **Crea Nexus Atreus**
 
-</div>

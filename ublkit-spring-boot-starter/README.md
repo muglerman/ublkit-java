@@ -1,6 +1,3 @@
-<!-- prettier-ignore -->
-<div align="center">
-
 # ublkit-spring-boot-starter
 
 **Auto-configuración Spring Boot para UBLKit**
@@ -17,13 +14,11 @@ Registra beans UBLKit por defecto y permite reemplazos con `@ConditionalOnMissin
 [Reglas](#reglas) |
 [Pruebas](#pruebas)
 
-</div>
-
 ---
 
 ## Descripción General
 
-`ublkit-spring-boot-starter` adapta UBLKit al contenedor Spring. No expone controllers; solo wiring de servicios, renderizadores, firma, serializadores, gateway y propiedades.
+`ublkit-spring-boot-starter` adapta UBLKit al contenedor Spring. No expone controllers; solo wiring de renderizadores, serializadores, validadores, gateway SUNAT, QR, storage y propiedades.
 
 ## Uso
 
@@ -59,8 +54,5 @@ Validar carga de contexto y reemplazo de beans por el consumidor.
 
 ---
 
-<div align="center">
-
 Desarrollado por **Crea Nexus Atreus**
 
-</div>
