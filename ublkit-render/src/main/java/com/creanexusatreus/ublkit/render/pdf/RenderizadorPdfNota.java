@@ -8,7 +8,6 @@ import com.creanexusatreus.ublkit.render.modelo.ResultadoRender;
 import com.creanexusatreus.ublkit.qr.GeneradorQrSunat;
 import com.creanexusatreus.ublkit.ubl.modelo.DocumentoBase;
 
-import com.microsoft.playwright.Page;
 import com.creanexusatreus.ublkit.render.pdf.helper.PlaywrightBrowserManager;
 
 /**
@@ -49,8 +48,8 @@ public class RenderizadorPdfNota implements RenderizadorDocumento<Object> {
         ResultadoRender resultadoHtml = renderizadorHtml.renderizar(contexto);
         String html = resultadoHtml.contenidoHtml();
 
-        try (Page page = PlaywrightBrowserManager.getBrowser().newPage()) {
-            byte[] pdfBytes = PlaywrightBrowserManager.renderizarPdf(page, html, this.formato);
+        try {
+            byte[] pdfBytes = PlaywrightBrowserManager.render(html, this.formato);
             return ResultadoRender.pdf(pdfBytes);
         } catch (Exception e) {
             throw new RuntimeException("Error convirtiendo Nota Electrónica a PDF con Playwright: " + e.getMessage(), e);

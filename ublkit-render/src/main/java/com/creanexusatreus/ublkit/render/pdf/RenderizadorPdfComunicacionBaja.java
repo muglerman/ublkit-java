@@ -7,7 +7,6 @@ import com.creanexusatreus.ublkit.render.modelo.FormatoImpresion;
 import com.creanexusatreus.ublkit.render.modelo.ResultadoRender;
 import com.creanexusatreus.ublkit.ubl.modelo.sunat.baja.ComunicacionBaja;
 
-import com.microsoft.playwright.Page;
 import com.creanexusatreus.ublkit.render.pdf.helper.PlaywrightBrowserManager;
 
 /**
@@ -22,8 +21,8 @@ public class RenderizadorPdfComunicacionBaja implements RenderizadorDocumento<Co
     @Override
     public ResultadoRender renderizar(ContextoRender<ComunicacionBaja> contexto) {
         String html = renderizadorHtml.renderizar(contexto).contenidoHtml();
-        try (Page page = PlaywrightBrowserManager.getBrowser().newPage()) {
-            byte[] pdfBytes = PlaywrightBrowserManager.renderizarPdf(page, html, FormatoImpresion.A4);
+        try {
+            byte[] pdfBytes = PlaywrightBrowserManager.render(html, FormatoImpresion.A4);
             return ResultadoRender.pdf(pdfBytes);
         } catch (Exception e) {
             throw new RuntimeException("Error renderizando PDF de comunicación de baja con Playwright: " + e.getMessage(), e);

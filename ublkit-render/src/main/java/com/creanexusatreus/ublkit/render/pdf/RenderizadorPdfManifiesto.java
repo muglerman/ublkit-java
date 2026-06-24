@@ -7,7 +7,6 @@ import com.creanexusatreus.ublkit.render.modelo.ContextoRender;
 import com.creanexusatreus.ublkit.render.modelo.FormatoImpresion;
 import com.creanexusatreus.ublkit.render.modelo.ResultadoRender;
 import com.creanexusatreus.ublkit.render.pdf.helper.PlaywrightBrowserManager;
-import com.microsoft.playwright.Page;
 
 /**
  * Convierte un {@link BorradorManifiesto} en PDF (A4 apaisado) usando HTML + Playwright. El
@@ -29,8 +28,8 @@ public class RenderizadorPdfManifiesto implements RenderizadorDocumento<Borrador
         ResultadoRender resultadoHtml = renderizadorHtml.renderizar(contexto);
         String html = resultadoHtml.contenidoHtml();
 
-        try (Page page = PlaywrightBrowserManager.getBrowser().newPage()) {
-            byte[] pdfBytes = PlaywrightBrowserManager.renderizarPdf(page, html, FORMATO);
+        try {
+            byte[] pdfBytes = PlaywrightBrowserManager.render(html, FORMATO);
             return ResultadoRender.pdf(pdfBytes);
         } catch (Exception e) {
             throw new RuntimeException("Error convirtiendo Manifiesto a PDF con Playwright: " + e.getMessage(), e);

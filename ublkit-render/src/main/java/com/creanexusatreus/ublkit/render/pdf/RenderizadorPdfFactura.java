@@ -8,7 +8,6 @@ import com.creanexusatreus.ublkit.render.modelo.ResultadoRender;
 import com.creanexusatreus.ublkit.ubl.modelo.BorradorFactura;
 import com.creanexusatreus.ublkit.qr.GeneradorQrSunat;
 
-import com.microsoft.playwright.Page;
 import com.creanexusatreus.ublkit.render.pdf.helper.PlaywrightBrowserManager;
 
 /**
@@ -47,8 +46,8 @@ public class RenderizadorPdfFactura implements RenderizadorDocumento<BorradorFac
         ResultadoRender resultadoHtml = renderizadorHtml.renderizar(contexto);
         String html = resultadoHtml.contenidoHtml();
 
-        try (Page page = PlaywrightBrowserManager.getBrowser().newPage()) {
-            byte[] pdfBytes = PlaywrightBrowserManager.renderizarPdf(page, html, this.formato);
+        try {
+            byte[] pdfBytes = PlaywrightBrowserManager.render(html, this.formato);
             return ResultadoRender.pdf(pdfBytes);
         } catch (Exception e) {
             throw new RuntimeException("Error convirtiendo HTML a PDF con Playwright: " + e.getMessage(), e);
