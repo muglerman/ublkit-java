@@ -3,10 +3,6 @@ package com.creanexusatreus.ublkit.sign.xml;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.w3c.dom.bootstrap.DOMImplementationRegistry;
-import org.w3c.dom.ls.DOMImplementationLS;
-import org.w3c.dom.ls.LSOutput;
-import org.w3c.dom.ls.LSSerializer;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
@@ -91,30 +87,6 @@ public final class XmlHelper {
 
         transformer.transform(new DOMSource(documento), new StreamResult(salida));
         return salida.toByteArray();
-    }
-
-    /**
-     * @deprecated usar {@link #documentoABytesMinificado(Document)} para flujo de firma/transporte.
-     */
-    @Deprecated
-    public static byte[] documentoABytesLegacy(Document documento) throws Exception {
-        ByteArrayOutputStream salida = new ByteArrayOutputStream();
-        serializarNodo(documento, salida);
-        return salida.toByteArray();
-    }
-
-    /**
-     * Serializa un nodo DOM a un {@link ByteArrayOutputStream}.
-     */
-    private static void serializarNodo(Node nodo, ByteArrayOutputStream salida) throws Exception {
-        DOMImplementationRegistry registro = DOMImplementationRegistry.newInstance();
-        DOMImplementationLS implementacion = (DOMImplementationLS) registro.getDOMImplementation("LS");
-        LSOutput lsOutput = implementacion.createLSOutput();
-        lsOutput.setEncoding(ENCODING);
-        lsOutput.setByteStream(salida);
-        LSSerializer serializer = implementacion.createLSSerializer();
-        serializer.getDomConfig().setParameter("xml-declaration", true);
-        serializer.write(nodo, lsOutput);
     }
 
     /**
