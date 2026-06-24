@@ -81,9 +81,10 @@ public class PlaywrightBrowserManager {
         Browser nuevoBrowser = nuevoPlaywright.chromium().launch(new BrowserType.LaunchOptions()
             .setHeadless(true)
             .setTimeout(LAUNCH_TIMEOUT_MS)
-            // Flags imprescindibles en contenedor: sin sandbox (Chromium corre como usuario no-root)
-            // y sin /dev/shm (default 64 MB) para que no se cuelgue/caiga por memoria compartida.
-            .setArgs(List.of("--no-sandbox", "--disable-dev-shm-usage", "--disable-gpu")));
+            // Flags imprescindibles en contenedor: sin sandbox (Chromium corre como usuario no-root;
+            // --no-sandbox + --disable-setuid-sandbox) y sin /dev/shm (default 64 MB) para que no se
+            // cuelgue/caiga por memoria compartida.
+            .setArgs(List.of("--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage", "--disable-gpu")));
 
         browserLock.lock();
         try {
