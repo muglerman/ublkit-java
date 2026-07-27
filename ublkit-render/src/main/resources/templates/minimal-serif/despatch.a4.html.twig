@@ -128,7 +128,7 @@
   <div><div class="k">Motivo</div><div class="v">{% if doc.envio is not null %}{{ doc.envio.tipoTraslado }} {{ doc.envio.tipoTraslado|catalog('20') }}{% endif %}</div></div>
   <div><div class="k">Modalidad</div><div class="v">{% if doc.envio is not null %}{{ doc.envio.tipoModalidadTraslado }} {{ doc.envio.tipoModalidadTraslado|catalog('18') }}{% endif %}</div></div>
   <div><div class="k">Peso · bultos</div><div class="v">{% if doc.envio is not null %}{{ doc.envio.pesoTotal }} {{ doc.envio.pesoTotalUnidadMedida }}{% if doc.envio.numeroDeBultos is not null %} · {{ doc.envio.numeroDeBultos }}{% endif %}{% endif %}</div></div>
-  <div><div class="k">Estado de pago</div><div class="v">{% if params.estadoPago is not empty %}{{ params.estadoPago }}{% endif %}</div></div><div><div class="k">Nro. taquito</div><div class="v">{% if params.trackingNumber is not empty %}{{ params.trackingNumber }}{% endif %}</div></div><div><div class="k">Total</div><div class="v">{% if params.totalGuia is not empty %}{{ params.totalGuia|n_format }}{% endif %}</div></div>
+  <div><div class="k">Estado de pago</div><div class="v">{% if params.estadoPago is not empty %}{{ params.estadoPago }}{% endif %}</div></div><div><div class="k">Nro. taquito</div><div class="v">{% if params.trackingNumber is not empty %}{{ params.trackingNumber }}{% endif %}</div></div>
 </div>
 
 <div class="section">
@@ -148,7 +148,6 @@
       </tr>
       {% endfor %}
     </tbody>
-  {% if params.totalGuia is not empty and params.totalGuia > 0 %}<tfoot><tr><td colspan="99" style="text-align:right;padding:10px 12px;font-weight:700;">Monto total: S/ {{ params.totalGuia|n_format }}</td></tr></tfoot>{% endif %}
   </table>
 </div>
 

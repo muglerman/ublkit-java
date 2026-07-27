@@ -132,7 +132,7 @@
   <div class="chip"><span class="k">Inicio traslado</span><span class="v">{% if doc.envio is not null and doc.envio.fechaTraslado is not null %}{{ doc.envio.fechaTraslado|date('d/m/Y') }}{% endif %}</span></div>
   <div class="chip"><span class="k">Motivo</span><span class="v">{% if doc.envio is not null %}{{ doc.envio.tipoTraslado|catalog('20') }}{% endif %}</span></div>
   <div class="chip"><span class="k">Modalidad</span><span class="v">{% if doc.envio is not null %}{{ doc.envio.tipoModalidadTraslado|catalog('18') }}{% endif %}</span></div>
-  <div class="chip"><span class="k">Estado de pago</span><span class="v">{% if params.estadoPago is not empty %}{{ params.estadoPago }}{% endif %}</span></div><div class="chip"><span class="k">Nro. taquito</span><span class="v">{% if params.trackingNumber is not empty %}{{ params.trackingNumber }}{% endif %}</span></div><div class="chip"><span class="k">Total</span><span class="v">{% if params.totalGuia is not empty %}{{ params.totalGuia|n_format }}{% endif %}</span></div>
+  <div class="chip"><span class="k">Estado de pago</span><span class="v">{% if params.estadoPago is not empty %}{{ params.estadoPago }}{% endif %}</span></div><div class="chip"><span class="k">Nro. taquito</span><span class="v">{% if params.trackingNumber is not empty %}{{ params.trackingNumber }}{% endif %}</span></div>
 </div>
 
 <div class="parties">
@@ -185,7 +185,6 @@
     </tr>
     {% endfor %}
   </tbody>
-  {% if params.totalGuia is not empty and params.totalGuia > 0 %}<tfoot><tr><td colspan="99" style="text-align:right;padding:10px 12px;font-weight:700;">Monto total: S/ {{ params.totalGuia|n_format }}</td></tr></tfoot>{% endif %}
 </table>
 </div>
 

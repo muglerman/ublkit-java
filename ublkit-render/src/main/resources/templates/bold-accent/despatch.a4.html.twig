@@ -163,7 +163,6 @@
   <div class="chip"><span class="k">Peso · bultos</span><span class="v">{% if doc.envio is not null %}{{ doc.envio.pesoTotal }} {{ doc.envio.pesoTotalUnidadMedida }}{% if doc.envio.numeroDeBultos is not null %} · {{ doc.envio.numeroDeBultos }}{% endif %}{% endif %}</span></div>
   {% if params.estadoPago is not empty %}<div class="chip"><span class="k">Estado de pago</span><span class="v">{{ params.estadoPago }}</span></div>{% endif %}
   {% if params.trackingNumber is not empty %}<div class="chip"><span class="k">Nro. taquito</span><span class="v mono">{{ params.trackingNumber }}</span></div>{% endif %}
-  {% if params.totalGuia is not empty %}<div class="chip"><span class="k">Total</span><span class="v">{{ params.totalGuia|n_format }}</span></div>{% endif %}
 </div>
 
 <div class="items-wrap">
@@ -182,7 +181,6 @@
     </tr>
     {% endfor %}
   </tbody>
-  {% if params.totalGuia is not empty and params.totalGuia > 0 %}<tfoot><tr><td colspan="99" style="text-align:right;padding:10px 12px;font-weight:700;">Monto total: S/ {{ params.totalGuia|n_format }}</td></tr></tfoot>{% endif %}
 </table>
 </div>
 

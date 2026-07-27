@@ -135,6 +135,20 @@ class RenderizadorEstilosDataValidationTest {
         assertSinPlaceholders(html, estilo);
     }
 
+    @ParameterizedTest(name = "guías sin total monetario · estilo {0}")
+    @EnumSource(EstiloPlantilla.class)
+    void guiaNoMuestraTotalMonetarioEnNingunEstilo(EstiloPlantilla estilo) {
+        Map<String, Object> atributos = Map.of("totalGuia", 9876.54);
+
+        String remitente = renderizarGuia(crearGuia(), estilo, atributos);
+        String transportista = renderizarGuia(crearGuiaTransportista(), estilo, atributos);
+
+        assertFalse(remitente.contains("Monto total"));
+        assertFalse(remitente.contains("9876"));
+        assertFalse(transportista.contains("Monto total"));
+        assertFalse(transportista.contains("9876"));
+    }
+
     // ---- helpers de render ----
 
     private String renderizarFactura(BorradorFactura factura, EstiloPlantilla estilo) {
@@ -149,6 +163,13 @@ class RenderizadorEstilosDataValidationTest {
 
     private String renderizarGuia(BorradorGuiaRemision guia, EstiloPlantilla estilo) {
         ContextoRender<BorradorGuiaRemision> contexto = ContextoRender.of(guia, "hash123", null, estilo);
+        return new RenderizadorHtmlGuiaRemision(FormatoImpresion.A4).renderizar(contexto).contenidoHtml();
+    }
+
+    private String renderizarGuia(BorradorGuiaRemision guia, EstiloPlantilla estilo,
+                                  Map<String, Object> atributos) {
+        ContextoRender<BorradorGuiaRemision> contexto =
+                ContextoRender.of(guia, "hash123", null, atributos, estilo);
         return new RenderizadorHtmlGuiaRemision(FormatoImpresion.A4).renderizar(contexto).contenidoHtml();
     }
 
