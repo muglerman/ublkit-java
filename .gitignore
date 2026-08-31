@@ -45,3 +45,6 @@ dependency-reduced-pom.xml
 
 ### Docs only for information
 docsx/
+
+# Local provider credentials must never be versioned
+docs/pse/credenciales-*.md
