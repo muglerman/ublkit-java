@@ -133,6 +133,12 @@ public class UblKitAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
+    public RenderizadorPdfRetencionPercepcion<?> renderizadorPdfRetencionPercepcion() {
+        return new RenderizadorPdfRetencionPercepcion<>();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
     public RenderizadorTicketFactura renderizadorTicketFactura() {
         return new RenderizadorTicketFactura();
     }

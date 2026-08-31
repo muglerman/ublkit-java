@@ -41,10 +41,9 @@ public class ValidadorPercepcion implements Validador<ComprobantePercepcion> {
         if (objetivo.getTipoRegimenPorcentaje() == null || objetivo.getTipoRegimenPorcentaje().signum() < 0) {
             resultado.agregar(new IncidenciaValidacion("VAL-PR-008", "El porcentaje del régimen debe ser mayor o igual a cero", SeveridadValidacion.ERROR));
         }
-        if (objetivo.getOperacion() == null) {
+        if (objetivo.getOperaciones().isEmpty()) {
             resultado.agregar(new IncidenciaValidacion("VAL-PR-009", "Debe existir al menos una operación de percepción", SeveridadValidacion.ERROR));
         }
         return resultado;
     }
 }
-

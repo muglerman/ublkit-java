@@ -1,0 +1,21 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><style>
+{{ fontStyle | raw }}
+body{font-family:Inter,sans-serif;color:#111;padding:36px;font-size:11px}
+header{display:flex;justify-content:space-between;border-bottom:2px solid #111;padding-bottom:18px}
+h1{font-size:18px;margin:0}.number{font-size:20px;font-weight:700}
+.parties{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin:20px 0}
+table{width:100%;border-collapse:collapse}th,td{padding:8px;border-bottom:1px solid #ddd;text-align:left}
+.amount{text-align:right}.totals{margin:20px 0 0 auto;width:300px}.totals div{display:flex;justify-content:space-between;padding:5px}
+</style></head><body>
+<header><div><strong>{{ doc.emisor.razonSocial }}</strong><br>RUC {{ doc.emisor.ruc }}</div>
+<div><h1>{{ kind }}</h1><div class="number">{{ doc.serie }}-{{ doc.numero }}</div></div></header>
+<section class="parties"><div><strong>Receptor</strong><br>{{ doc.cliente.nombre }}<br>{{ doc.cliente.numDocIdentidad }}</div>
+<div><strong>Emisión</strong><br>{{ doc.fechaEmision|date('dd/MM/yyyy') }}<br>Moneda: {{ doc.moneda }} · Régimen: {{ doc.tipoRegimen }}</div></section>
+<table><thead><tr><th>#</th><th>Documento afectado</th><th>Fecha</th><th class="amount">Importe</th></tr></thead>
+<tbody>{% for op in doc.operaciones %}<tr><td>{{ op.numeroOperacion }}</td><td>{{ op.comprobante.tipoComprobante }} {{ op.comprobante.serieNumero }}</td>
+<td>{{ op.comprobante.fechaEmision|date('dd/MM/yyyy') }}</td><td class="amount">{{ op.comprobante.moneda }} {{ op.importeOperacion }}</td></tr>{% endfor %}</tbody></table>
+<div class="totals"><div><span>Tasa</span><strong>{{ doc.tipoRegimenPorcentaje }}</strong></div>
+{% if doc.importeTotalRetenido is not null %}<div><span>Total retenido</span><strong>{{ doc.importeTotalRetenido }}</strong></div><div><span>Total pagado</span><strong>{{ doc.importeTotalPagado }}</strong></div>{% endif %}
+{% if doc.importeTotalPercibido is not null %}<div><span>Total percibido</span><strong>{{ doc.importeTotalPercibido }}</strong></div><div><span>Total cobrado</span><strong>{{ doc.importeTotalCobrado }}</strong></div>{% endif %}</div>
+{% if doc.observacion is not empty %}<p><strong>Observación:</strong> {{ doc.observacion }}</p>{% endif %}
+</body></html>

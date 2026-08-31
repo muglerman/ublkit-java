@@ -1,4 +1,4 @@
-.PHONY: help build clean install test rebuild all package test-verbose
+.PHONY: help build clean install test rebuild all package test-verbose check-credentials
 
 PROJECT_NAME ?= ublkit-java
 PERSEO_ROOT ?= $(shell cd "$(dir $(realpath $(MAKEFILE_LIST)))" && pwd)/..
@@ -19,6 +19,10 @@ help:
 	@echo "  install            - Install all modules"
 	@echo "  package            - Package all JARs"
 	@echo "  rebuild            - Clean + build"
+	@echo "  check-credentials  - Reject tracked credential files under docs/pse"
+
+check-credentials:
+	@./scripts/check-no-pse-credentials.sh
 
 build:
 	@echo "📦 Building..."; \
@@ -48,4 +52,3 @@ rebuild: clean build
 
 all: install build test
 	@echo "🎉 Complete"
-

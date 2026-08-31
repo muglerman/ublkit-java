@@ -6,6 +6,8 @@ import com.creanexusatreus.ublkit.ubl.modelo.actor.ReceptorDocumento;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Clase base para comprobantes de Percepción (40) y Retención (20).
@@ -24,6 +26,7 @@ public abstract class BasePercepcionRetencion {
     private BigDecimal tipoRegimenPorcentaje;
     private String observacion;
     private OperacionPR operacion;
+    private List<OperacionPR> operaciones = new ArrayList<>();
 
     protected BasePercepcionRetencion() {}
 
@@ -37,6 +40,12 @@ public abstract class BasePercepcionRetencion {
     public BigDecimal getTipoRegimenPorcentaje() { return tipoRegimenPorcentaje; }
     public String getObservacion() { return observacion; }
     public OperacionPR getOperacion() { return operacion; }
+    public List<OperacionPR> getOperaciones() {
+        if (operaciones.isEmpty() && operacion != null) {
+            return List.of(operacion);
+        }
+        return operaciones;
+    }
 
     public void setSerie(String serie) { this.serie = serie; }
     public void setNumero(Integer numero) { this.numero = numero; }
@@ -48,4 +57,8 @@ public abstract class BasePercepcionRetencion {
     public void setTipoRegimenPorcentaje(BigDecimal tipoRegimenPorcentaje) { this.tipoRegimenPorcentaje = tipoRegimenPorcentaje; }
     public void setObservacion(String observacion) { this.observacion = observacion; }
     public void setOperacion(OperacionPR operacion) { this.operacion = operacion; }
+    public void setOperaciones(List<OperacionPR> operaciones) {
+        this.operaciones = operaciones == null ? new ArrayList<>() : new ArrayList<>(operaciones);
+        this.operacion = this.operaciones.isEmpty() ? null : this.operaciones.get(0);
+    }
 }

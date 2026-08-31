@@ -25,10 +25,9 @@ public final class EnsambladorPercepcion {
             percepcion.setMoneda("PEN");
         }
 
-        BigDecimal importeOperacion = percepcion.getOperacion() != null
-                && percepcion.getOperacion().importeOperacion() != null
-                ? percepcion.getOperacion().importeOperacion()
-                : BigDecimal.ZERO;
+        BigDecimal importeOperacion = percepcion.getOperaciones().stream()
+                .map(op -> op.importeOperacion() != null ? op.importeOperacion() : BigDecimal.ZERO)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         if (percepcion.getImporteTotalCobrado() == null) {
             percepcion.setImporteTotalCobrado(importeOperacion.setScale(ESCALA, REDONDEO));
@@ -45,4 +44,3 @@ public final class EnsambladorPercepcion {
         return percepcion;
     }
 }
-

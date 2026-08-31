@@ -36,9 +36,13 @@ public final class SerializadorXmlPercepcion implements SerializadorXml<Comproba
         agregarFirma(doc, raiz, percepcion.getFirmante(), percepcion.getEmisor());
         agregarEmisor(doc, raiz, percepcion.getEmisor());
         agregarCliente(doc, raiz, percepcion.getCliente());
-        agregarOperacion(doc, raiz, percepcion.getOperacion(), percepcion.getTipoRegimen(),
-                percepcion.getTipoRegimenPorcentaje(), percepcion.getImporteTotalPercibido(),
-                percepcion.getImporteTotalCobrado(), moneda(percepcion.getMoneda()));
+        for (OperacionPR operacion : percepcion.getOperaciones()) {
+            BigDecimal cobrado = operacion.importeOperacion();
+            BigDecimal percibido = cobrado == null ? BigDecimal.ZERO
+                    : cobrado.multiply(percepcion.getTipoRegimenPorcentaje());
+            agregarOperacion(doc, raiz, operacion, percepcion.getTipoRegimen(),
+                    percepcion.getTipoRegimenPorcentaje(), percibido, cobrado, moneda(percepcion.getMoneda()));
+        }
 
         if (percepcion.getObservacion() != null && !percepcion.getObservacion().isBlank()) {
             raiz.appendChild(cbcCdata(doc, "Note", percepcion.getObservacion()));
@@ -148,4 +152,3 @@ public final class SerializadorXmlPercepcion implements SerializadorXml<Comproba
         return serieNumero.substring(serieNumero.indexOf('-') + 1);
     }
 }
-

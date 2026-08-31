@@ -37,9 +37,13 @@ public final class SerializadorXmlRetencion implements SerializadorXml<Comproban
         agregarFirma(doc, raiz, retencion.getFirmante(), retencion.getEmisor());
         agregarEmisor(doc, raiz, retencion.getEmisor());
         agregarCliente(doc, raiz, retencion.getCliente());
-        agregarOperacion(doc, raiz, retencion.getOperacion(), retencion.getTipoRegimen(),
-                retencion.getTipoRegimenPorcentaje(), retencion.getImporteTotalRetenido(),
-                retencion.getImporteTotalPagado(), moneda(retencion.getMoneda()));
+        for (OperacionPR operacion : retencion.getOperaciones()) {
+            BigDecimal pagado = operacion.importeOperacion();
+            BigDecimal retenido = pagado == null ? BigDecimal.ZERO
+                    : pagado.multiply(retencion.getTipoRegimenPorcentaje());
+            agregarOperacion(doc, raiz, operacion, retencion.getTipoRegimen(),
+                    retencion.getTipoRegimenPorcentaje(), retenido, pagado, moneda(retencion.getMoneda()));
+        }
 
         if (retencion.getObservacion() != null && !retencion.getObservacion().isBlank()) {
             raiz.appendChild(cbcCdata(doc, "Note", retencion.getObservacion()));
@@ -147,4 +151,3 @@ public final class SerializadorXmlRetencion implements SerializadorXml<Comproban
         return serieNumero.substring(serieNumero.indexOf('-') + 1);
     }
 }
-

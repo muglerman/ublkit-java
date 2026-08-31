@@ -25,10 +25,9 @@ public final class EnsambladorRetencion {
             retencion.setMoneda("PEN");
         }
 
-        BigDecimal importeOperacion = retencion.getOperacion() != null
-                && retencion.getOperacion().importeOperacion() != null
-                ? retencion.getOperacion().importeOperacion()
-                : BigDecimal.ZERO;
+        BigDecimal importeOperacion = retencion.getOperaciones().stream()
+                .map(op -> op.importeOperacion() != null ? op.importeOperacion() : BigDecimal.ZERO)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         if (retencion.getImporteTotalPagado() == null) {
             retencion.setImporteTotalPagado(importeOperacion.setScale(ESCALA, REDONDEO));
@@ -45,4 +44,3 @@ public final class EnsambladorRetencion {
         return retencion;
     }
 }
-
