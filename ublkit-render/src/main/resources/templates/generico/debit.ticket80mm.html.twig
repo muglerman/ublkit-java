@@ -90,6 +90,15 @@
     {% endfor %}
   </div>
 
+  {% if doc.detraccion is not null %}
+  <hr class="sep" />
+  <div class="meta">
+    <div class="b">DETRACCIÓN</div>
+    <div>S/ {{ doc.detraccion.monto|n_format }} · {{ doc.detraccion.codigoBien }} - {{ doc.detraccion.codigoBien|catalog('54') }}</div>
+    <div class="muted">Medio: {{ doc.detraccion.medioPago|catalog('59') }} · Cta. BN {{ doc.detraccion.cuentaBanco }}</div>
+  </div>
+  {% endif %}
+
   <hr class="sep" />
 
   <div class="totals">

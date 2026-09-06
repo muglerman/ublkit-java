@@ -3,6 +3,9 @@ package com.creanexusatreus.ublkit.ubl.modelo.linea;
 import java.math.BigDecimal;
 import java.util.List;
 
+import com.creanexusatreus.ublkit.ubl.modelo.complemento.DatosHidrobiologicos;
+import com.creanexusatreus.ublkit.ubl.modelo.complemento.DatosTransporteCarga;
+
 /**
  * Línea de detalle de un documento de venta (factura, boleta, nota de crédito/débito).
  * <p>
@@ -67,6 +70,14 @@ public class LineaDetalle {
 
     private BigDecimal totalImpuestos;
 
+    // ── Complementos SPOT por línea ───────────────────────────────
+
+    /** Información SUNAT de recursos hidrobiológicos (operación 1002). */
+    private DatosHidrobiologicos datosHidrobiologicos;
+
+    /** Información SUNAT de servicio de transporte de carga (operación 1004). */
+    private DatosTransporteCarga datosTransporteCarga;
+
     // ── Constructor vacío ────────────────────────────────────────
 
     public LineaDetalle() {
@@ -98,6 +109,8 @@ public class LineaDetalle {
     public List<CargoDescuento> getDescuentos() { return descuentos; }
     public List<CargoDescuento> getCargos() { return cargos; }
     public BigDecimal getTotalImpuestos() { return totalImpuestos; }
+    public DatosHidrobiologicos getDatosHidrobiologicos() { return datosHidrobiologicos; }
+    public DatosTransporteCarga getDatosTransporteCarga() { return datosTransporteCarga; }
 
     // ── Setters ──────────────────────────────────────────────────
 
@@ -125,4 +138,10 @@ public class LineaDetalle {
     public void setDescuentos(List<CargoDescuento> descuentos) { this.descuentos = descuentos; }
     public void setCargos(List<CargoDescuento> cargos) { this.cargos = cargos; }
     public void setTotalImpuestos(BigDecimal totalImpuestos) { this.totalImpuestos = totalImpuestos; }
+    public void setDatosHidrobiologicos(DatosHidrobiologicos datosHidrobiologicos) {
+        this.datosHidrobiologicos = datosHidrobiologicos;
+    }
+    public void setDatosTransporteCarga(DatosTransporteCarga datosTransporteCarga) {
+        this.datosTransporteCarga = datosTransporteCarga;
+    }
 }

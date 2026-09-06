@@ -69,13 +69,16 @@ public final class SerializadorXmlNotaDebito implements SerializadorXml<Borrador
         // 12. Receptor
         agregarReceptor(doc, raiz, nota.getReceptor());
 
-        // 13. TaxTotal
+        // 13. PaymentMeans / PaymentTerms (detracción)
+        agregarDetraccion(doc, raiz, nota.getDetraccion());
+
+        // 14. TaxTotal
         agregarTotalImpuestos(doc, raiz, nota.getTotalImpuestos(), moneda(nota));
 
-        // 14. RequestedMonetaryTotal
+        // 15. RequestedMonetaryTotal
         agregarMonetaryTotal(doc, raiz, nota);
 
-        // 15. DebitNoteLines
+        // 16. DebitNoteLines
         agregarDebitNoteLines(doc, raiz, nota);
 
         return documentoAString(doc);

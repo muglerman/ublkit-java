@@ -178,13 +178,15 @@
         <p class="small">Cuota 2 · vence 24/06/2026 · {{ sym }} 5,946.20</p>
       </div>
     </div>
+    {% if doc.detraccion is not null %}
     <div class="block">
       <div class="head">Detracción</div>
       <div class="body">
-        <p>{{ sym }} 1,427.09 · 020 Bienes gravados con IGV</p>
-        <p class="small">Transferencia en cuenta · Cta. BN 00-032-019287</p>
+        <p>S/ {{ doc.detraccion.monto|n_format }} · {{ doc.detraccion.codigoBien }} - {{ doc.detraccion.codigoBien|catalog('54') }}</p>
+        <p class="small">Medio: {{ doc.detraccion.medioPago|catalog('59') }} · Cta. BN {{ doc.detraccion.cuentaBanco }}</p>
       </div>
     </div>
+    {% endif %}
     <div class="block">
       <div class="head">Observaciones</div>
       <div class="body">

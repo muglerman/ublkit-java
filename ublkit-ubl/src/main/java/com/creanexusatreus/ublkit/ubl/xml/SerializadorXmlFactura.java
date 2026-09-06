@@ -105,8 +105,8 @@ public final class SerializadorXmlFactura implements SerializadorXml<BorradorFac
         // 14. Delivery (dirección de entrega)
         agregarEntrega(doc, raiz, factura);
 
-        // 15. PaymentMeans (detracción)
-        agregarDetraccion(doc, raiz, factura);
+        // 15. PaymentMeans / PaymentTerms (detracción)
+        agregarDetraccion(doc, raiz, factura.getDetraccion());
 
         // 16. PaymentTerms (percepción)
         agregarPercepcionTerms(doc, raiz, factura);
@@ -198,31 +198,6 @@ public final class SerializadorXmlFactura implements SerializadorXml<BorradorFac
             delivery.appendChild(location);
             raiz.appendChild(delivery);
         }
-    }
-
-    // ── Detracción ───────────────────────────────────────────────
-
-    private void agregarDetraccion(Document doc, Element raiz, BorradorFactura factura) {
-        Detraccion det = factura.getDetraccion();
-        if (det == null) return;
-
-        // PaymentMeans
-        Element pm = cac(doc, "PaymentMeans");
-        pm.appendChild(cbc(doc, "ID", "Detraccion"));
-        pm.appendChild(cbc(doc, "PaymentMeansCode", det.medioDePago()));
-        Element account = cac(doc, "PayeeFinancialAccount");
-        account.appendChild(cbc(doc, "ID", det.cuentaBancaria()));
-        pm.appendChild(account);
-        raiz.appendChild(pm);
-
-        // PaymentTerms
-        Element pt = cac(doc, TAG_PAYMENT_TERMS);
-        pt.appendChild(cbc(doc, "ID", "Detraccion"));
-        pt.appendChild(cbc(doc, TAG_PAYMENT_MEANS_ID, det.tipoBienDetraido()));
-        pt.appendChild(cbc(doc, "PaymentPercent",
-                escalar(det.porcentaje().multiply(new BigDecimal("100")))));
-        pt.appendChild(cbcMonto(doc, "Amount", det.monto(), moneda(factura)));
-        raiz.appendChild(pt);
     }
 
     // ── Percepción PaymentTerms ──────────────────────────────────
@@ -369,6 +344,9 @@ public final class SerializadorXmlFactura implements SerializadorXml<BorradorFac
             // PricingReference
             agregarPricingReference(doc, invoiceLine, linea, m);
 
+            // Delivery (detracción por transporte de carga)
+            agregarDatosTransporteCarga(doc, invoiceLine, linea);
+
             // TaxTotal
             agregarImpuestosLinea(doc, invoiceLine, linea, m);
 
@@ -499,6 +477,7 @@ public final class SerializadorXmlFactura implements SerializadorXml<BorradorFac
             escribirCbcMonto(writer, "LineExtensionAmount", extension, moneda);
 
             escribirPricingReferenceStreaming(writer, linea, moneda);
+            escribirDatosTransporteCargaStreaming(writer, linea);
             escribirImpuestosLineaStreaming(writer, linea, moneda);
             escribirItemYPrecioStreaming(writer, linea, moneda);
 
@@ -626,10 +605,149 @@ public final class SerializadorXmlFactura implements SerializadorXml<BorradorFac
                     "listName", "Item Classification");
             writer.writeEndElement();
         }
+        escribirDatosHidrobiologicosStreaming(writer, linea.getDatosHidrobiologicos());
         writer.writeEndElement();
 
         writer.writeStartElement("cac", "Price", NS_CAC);
         escribirCbcMonto(writer, "PriceAmount", orZero(linea.getPrecio()), moneda);
+        writer.writeEndElement();
+    }
+
+    private void escribirDatosHidrobiologicosStreaming(XMLStreamWriter writer, DatosHidrobiologicos datos)
+            throws XMLStreamException {
+        if (datos == null) {
+            return;
+        }
+        escribirPropiedadItemStreaming(writer, "Matrícula de la embarcación pesquera", "3001",
+                datos.matriculaEmbarcacion());
+        escribirPropiedadItemStreaming(writer, "Nombre de la embarcación pesquera", "3002",
+                datos.nombreEmbarcacion());
+        escribirPropiedadItemStreaming(writer, "Descripción del tipo de la especie vendida", "3003",
+                datos.descripcionEspecie());
+        escribirPropiedadItemStreaming(writer, "Lugar de descarga", "3004", datos.lugarDescarga());
+
+        writer.writeStartElement("cac", "AdditionalItemProperty", NS_CAC);
+        escribirNombrePropiedadItemStreaming(writer, "Cantidad de la especie vendida", "3006");
+        escribirCbcCantidad(writer, "ValueQuantity", datos.cantidadEspecieTne(), "TNE");
+        writer.writeEndElement();
+
+        writer.writeStartElement("cac", "AdditionalItemProperty", NS_CAC);
+        escribirNombrePropiedadItemStreaming(writer, "Fecha de descarga", "3005");
+        writer.writeStartElement("cac", "UsabilityPeriod", NS_CAC);
+        escribirCbc(writer, "StartDate", datos.fechaDescarga().toString());
+        writer.writeEndElement();
+        writer.writeEndElement();
+    }
+
+    private void escribirPropiedadItemStreaming(XMLStreamWriter writer, String nombre, String codigo, String valor)
+            throws XMLStreamException {
+        writer.writeStartElement("cac", "AdditionalItemProperty", NS_CAC);
+        escribirNombrePropiedadItemStreaming(writer, nombre, codigo);
+        escribirCbc(writer, "Value", valor);
+        writer.writeEndElement();
+    }
+
+    private void escribirNombrePropiedadItemStreaming(XMLStreamWriter writer, String nombre, String codigo)
+            throws XMLStreamException {
+        escribirCbc(writer, "Name", nombre);
+        escribirCbcConAtributos(writer, "NameCode", codigo,
+                "listName", "Propiedad del item",
+                "listAgencyName", "PE:SUNAT",
+                "listURI", "urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo55");
+    }
+
+    private void escribirDatosTransporteCargaStreaming(XMLStreamWriter writer, LineaDetalle linea)
+            throws XMLStreamException {
+        DatosTransporteCarga datos = linea.getDatosTransporteCarga();
+        if (datos == null) {
+            return;
+        }
+
+        writer.writeStartElement("cac", "Delivery", NS_CAC);
+        escribirDeliveryLocationStreaming(writer, datos.destino());
+
+        writer.writeStartElement("cac", "Despatch", NS_CAC);
+        escribirCbc(writer, "Instructions", datos.detalleViaje());
+        escribirDespatchAddressStreaming(writer, datos.origen());
+        writer.writeEndElement();
+
+        escribirValorReferencialStreaming(writer, "01", datos.valorReferencialServicio());
+        escribirValorReferencialStreaming(writer, "02", datos.valorReferencialCargaEfectiva());
+        escribirValorReferencialStreaming(writer, "03", datos.valorReferencialCargaUtilNominal());
+
+        if (!datos.tramos().isEmpty()) {
+            writer.writeStartElement("cac", "Shipment", NS_CAC);
+            for (TramoTransporteCarga tramo : datos.tramos()) {
+                escribirTramoStreaming(writer, tramo);
+            }
+            writer.writeEndElement();
+        }
+        writer.writeEndElement();
+    }
+
+    private void escribirDeliveryLocationStreaming(XMLStreamWriter writer, PuntoTransporte punto)
+            throws XMLStreamException {
+        writer.writeStartElement("cac", "DeliveryLocation", NS_CAC);
+        writer.writeStartElement("cac", "Address", NS_CAC);
+        escribirPuntoTransporteStreaming(writer, punto);
+        writer.writeEndElement();
+        writer.writeEndElement();
+    }
+
+    private void escribirDespatchAddressStreaming(XMLStreamWriter writer, PuntoTransporte punto)
+            throws XMLStreamException {
+        writer.writeStartElement("cac", "DespatchAddress", NS_CAC);
+        escribirPuntoTransporteStreaming(writer, punto);
+        writer.writeEndElement();
+    }
+
+    private void escribirPuntoTransporteStreaming(XMLStreamWriter writer, PuntoTransporte punto)
+            throws XMLStreamException {
+        escribirCbcConAtributos(writer, "ID", punto.ubigeo(),
+                "schemeAgencyName", "PE:INEI",
+                "schemeName", "Ubigeos");
+        writer.writeStartElement("cac", "AddressLine", NS_CAC);
+        escribirCbc(writer, "Line", punto.direccionDetallada());
+        writer.writeEndElement();
+    }
+
+    private void escribirValorReferencialStreaming(XMLStreamWriter writer, String tipo, BigDecimal monto)
+            throws XMLStreamException {
+        writer.writeStartElement("cac", "DeliveryTerms", NS_CAC);
+        escribirCbc(writer, "ID", tipo);
+        escribirCbcMonto(writer, "Amount", monto, "PEN");
+        writer.writeEndElement();
+    }
+
+    private void escribirTramoStreaming(XMLStreamWriter writer, TramoTransporteCarga tramo)
+            throws XMLStreamException {
+        writer.writeStartElement("cac", "Consignment", NS_CAC);
+        escribirCbc(writer, "ID", tramo.identificador());
+        if (tramo.descripcion() != null) {
+            escribirCbc(writer, "CarrierServiceInstructions", tramo.descripcion());
+        }
+        if (tramo.origen() != null) {
+            escribirEventoTransporteStreaming(writer, "PlannedPickupTransportEvent", tramo.origen());
+        }
+        if (tramo.destino() != null) {
+            escribirEventoTransporteStreaming(writer, "PlannedDeliveryTransportEvent", tramo.destino());
+        }
+        if (tramo.valorPreliminarReferencialCargaEfectiva() != null) {
+            writer.writeStartElement("cac", "DeliveryTerms", NS_CAC);
+            escribirCbcMonto(writer, "Amount", tramo.valorPreliminarReferencialCargaEfectiva(), "PEN");
+            writer.writeEndElement();
+        }
+        writer.writeEndElement();
+    }
+
+    private void escribirEventoTransporteStreaming(XMLStreamWriter writer, String nombre, PuntoTransporte punto)
+            throws XMLStreamException {
+        writer.writeStartElement("cac", nombre, NS_CAC);
+        writer.writeStartElement("cac", "Location", NS_CAC);
+        escribirCbcConAtributos(writer, "ID", punto.ubigeo(),
+                "schemeAgencyName", "PE:INEI",
+                "schemeName", "Ubigeos");
+        writer.writeEndElement();
         writer.writeEndElement();
     }
 

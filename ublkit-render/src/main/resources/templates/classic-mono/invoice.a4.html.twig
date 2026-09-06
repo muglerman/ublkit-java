@@ -203,7 +203,7 @@
       <div class="head">Detracción</div>
       <div class="body">
         {% if doc.detraccion is not null %}
-          <p>{{ sym }} {{ doc.detraccion.monto|n_format }} · {{ doc.detraccion.codigoBien }} - {{ doc.detraccion.codigoBien|catalog('54') }}</p>
+          <p>S/ {{ doc.detraccion.monto|n_format }} · {{ doc.detraccion.codigoBien }} - {{ doc.detraccion.codigoBien|catalog('54') }}</p>
           <p class="small">Medio: {{ doc.detraccion.medioPago|catalog('59') }} · Cta. BN {{ doc.detraccion.cuentaBanco }}</p>
         {% endif %}
       </div>

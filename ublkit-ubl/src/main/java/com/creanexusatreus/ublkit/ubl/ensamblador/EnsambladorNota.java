@@ -3,13 +3,16 @@ package com.creanexusatreus.ublkit.ubl.ensamblador;
 import com.creanexusatreus.ublkit.ubl.modelo.BorradorNotaCredito;
 import com.creanexusatreus.ublkit.ubl.modelo.BorradorNotaDebito;
 import com.creanexusatreus.ublkit.ubl.modelo.DocumentoBase;
+import com.creanexusatreus.ublkit.ubl.modelo.complemento.Detraccion;
 import com.creanexusatreus.ublkit.ubl.modelo.linea.LineaDetalle;
 import com.creanexusatreus.ublkit.ubl.modelo.total.TotalImporte;
 import com.creanexusatreus.ublkit.ubl.modelo.total.TotalImpuestos;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Ensamblador para Notas de Crédito y Notas de Débito.
@@ -42,6 +45,8 @@ public final class EnsambladorNota {
         ensamblarLineas(nota);
         ensamblarTotalImpuestos(nota);
         ensamblarTotalImporteNota(nota, nota.getTotalImporte(), ti -> nota.setTotalImporte(ti));
+        aplicarReglasDetraccion(nota);
+        ensamblarLeyendasSunat(nota);
         return nota;
     }
 
@@ -54,17 +59,50 @@ public final class EnsambladorNota {
         }
     }
 
-private static void ensamblarLineas(DocumentoBase documento) {
-    List<LineaDetalle> detalles = documento.getDetalles();
-    if (detalles == null) return;
+    private static void aplicarReglasDetraccion(BorradorNotaDebito nota) {
+        Detraccion detraccion = nota.getDetraccion();
+        if (detraccion == null) {
+            return;
+        }
 
-    BigDecimal tasaIgv = documento.getTasaIgv() != null ? documento.getTasaIgv() : TASA_IGV_DEFECTO;
-    for (LineaDetalle linea : detalles) {
-        EnsambladorFactura.ensamblarLinea(linea, tasaIgv, documento.getTasaIcb());
+        String cuenta = detraccion.cuentaBancaria();
+        if ((cuenta == null || cuenta.isBlank()) && nota.getEmisor() != null) {
+            cuenta = nota.getEmisor().cuentaBancoNacionDetraccion();
+        }
+
+        Detraccion normalizada = new Detraccion(
+                detraccion.medioDePago(),
+                cuenta,
+                detraccion.tipoBienDetraido(),
+                detraccion.porcentaje(),
+                detraccion.monto());
+        normalizada.validar();
+        nota.setDetraccion(normalizada);
     }
 
-    EnsambladorFactura.ajustarRedondeoLineas(detalles);
-}
+    private static void ensamblarLeyendasSunat(BorradorNotaDebito nota) {
+        if (nota.getDetraccion() == null) {
+            return;
+        }
+
+        Map<String, String> leyendas = nota.getLeyendas() != null
+                ? new LinkedHashMap<>(nota.getLeyendas())
+                : new LinkedHashMap<>();
+        leyendas.putIfAbsent("2006", "OPERACION SUJETA A DETRACCION");
+        nota.setLeyendas(leyendas);
+    }
+
+    private static void ensamblarLineas(DocumentoBase documento) {
+        List<LineaDetalle> detalles = documento.getDetalles();
+        if (detalles == null) return;
+
+        BigDecimal tasaIgv = documento.getTasaIgv() != null ? documento.getTasaIgv() : TASA_IGV_DEFECTO;
+        for (LineaDetalle linea : detalles) {
+            EnsambladorFactura.ensamblarLinea(linea, tasaIgv, documento.getTasaIcb());
+        }
+
+        EnsambladorFactura.ajustarRedondeoLineas(detalles);
+    }
 
     private static void ensamblarTotalImpuestos(DocumentoBase documento) {
         if (documento.getTotalImpuestos() != null) return;

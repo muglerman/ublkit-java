@@ -6,8 +6,13 @@ import com.creanexusatreus.ublkit.ubl.modelo.DocumentoBase;
 import com.creanexusatreus.ublkit.ubl.modelo.actor.EmisorDocumento;
 import com.creanexusatreus.ublkit.ubl.modelo.actor.FirmanteDocumento;
 import com.creanexusatreus.ublkit.ubl.modelo.actor.ReceptorDocumento;
+import com.creanexusatreus.ublkit.ubl.modelo.complemento.DatosHidrobiologicos;
+import com.creanexusatreus.ublkit.ubl.modelo.complemento.DatosTransporteCarga;
+import com.creanexusatreus.ublkit.ubl.modelo.complemento.Detraccion;
 import com.creanexusatreus.ublkit.ubl.modelo.complemento.DocumentoRelacionado;
 import com.creanexusatreus.ublkit.ubl.modelo.complemento.GuiaRelacionada;
+import com.creanexusatreus.ublkit.ubl.modelo.complemento.PuntoTransporte;
+import com.creanexusatreus.ublkit.ubl.modelo.complemento.TramoTransporteCarga;
 import com.creanexusatreus.ublkit.ubl.modelo.linea.CargoDescuento;
 import com.creanexusatreus.ublkit.ubl.modelo.linea.LineaDetalle;
 import com.creanexusatreus.ublkit.ubl.modelo.total.TotalImpuestos;
@@ -511,12 +516,180 @@ final class FragmentosXml {
                     "listName", "Item Classification"));
             item.appendChild(commodity);
         }
+        agregarDatosHidrobiologicos(doc, item, linea.getDatosHidrobiologicos());
         lineaXml.appendChild(item);
 
         // Price
         Element price = cac(doc, "Price");
         price.appendChild(cbcMonto(doc, "PriceAmount", orZero(linea.getPrecio()), moneda));
         lineaXml.appendChild(price);
+    }
+
+    // ── Detracción ───────────────────────────────────────────────
+
+    /**
+     * Agrega los dos bloques SPOT que SUNAT exige para una detracción.
+     * El importe de detracción siempre se expresa en PEN, incluso cuando el
+     * comprobante se haya emitido en otra moneda.
+     */
+    static void agregarDetraccion(Document doc, Element raiz, Detraccion detraccion) {
+        if (detraccion == null) {
+            return;
+        }
+        detraccion.validar();
+
+        Element paymentMeans = cac(doc, "PaymentMeans");
+        paymentMeans.appendChild(cbc(doc, "ID", "Detraccion"));
+        paymentMeans.appendChild(cbcConAtributos(doc, "PaymentMeansCode", detraccion.medioDePago(),
+                ATTR_LIST_NAME, "Medio de pago",
+                ATTR_LIST_AGENCY_NAME, VALUE_PE_SUNAT,
+                "listURI", "urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo59"));
+        Element account = cac(doc, "PayeeFinancialAccount");
+        account.appendChild(cbc(doc, "ID", detraccion.cuentaBancaria()));
+        paymentMeans.appendChild(account);
+        raiz.appendChild(paymentMeans);
+
+        Element paymentTerms = cac(doc, "PaymentTerms");
+        paymentTerms.appendChild(cbc(doc, "ID", "Detraccion"));
+        paymentTerms.appendChild(cbcConAtributos(doc, "PaymentMeansID", detraccion.tipoBienDetraido(),
+                ATTR_SCHEME_NAME, "Codigo de detraccion",
+                ATTR_SCHEME_AGENCY_NAME, VALUE_PE_SUNAT,
+                "schemeURI", "urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo54"));
+        paymentTerms.appendChild(cbc(doc, "PaymentPercent", detraccion.porcentaje().toPlainString()));
+        paymentTerms.appendChild(cbcMonto(doc, "Amount", detraccion.monto(), "PEN"));
+        raiz.appendChild(paymentTerms);
+    }
+
+    // ── Complementos SPOT por línea ──────────────────────────────
+
+    private static void agregarDatosHidrobiologicos(Document doc, Element item, DatosHidrobiologicos datos) {
+        if (datos == null) {
+            return;
+        }
+
+        agregarPropiedadItem(doc, item, "Matrícula de la embarcación pesquera", "3001",
+                datos.matriculaEmbarcacion());
+        agregarPropiedadItem(doc, item, "Nombre de la embarcación pesquera", "3002",
+                datos.nombreEmbarcacion());
+        agregarPropiedadItem(doc, item, "Descripción del tipo de la especie vendida", "3003",
+                datos.descripcionEspecie());
+        agregarPropiedadItem(doc, item, "Lugar de descarga", "3004", datos.lugarDescarga());
+
+        Element cantidad = nuevaPropiedadItem(doc, "Cantidad de la especie vendida", "3006");
+        cantidad.appendChild(cbcCantidad(doc, "ValueQuantity", datos.cantidadEspecieTne(), "TNE"));
+        item.appendChild(cantidad);
+
+        Element fecha = nuevaPropiedadItem(doc, "Fecha de descarga", "3005");
+        Element periodo = cac(doc, "UsabilityPeriod");
+        periodo.appendChild(cbc(doc, "StartDate", datos.fechaDescarga()));
+        fecha.appendChild(periodo);
+        item.appendChild(fecha);
+    }
+
+    private static void agregarPropiedadItem(Document doc, Element item, String nombre, String codigo, String valor) {
+        Element propiedad = nuevaPropiedadItem(doc, nombre, codigo);
+        propiedad.appendChild(cbc(doc, "Value", valor));
+        item.appendChild(propiedad);
+    }
+
+    private static Element nuevaPropiedadItem(Document doc, String nombre, String codigo) {
+        Element propiedad = cac(doc, "AdditionalItemProperty");
+        propiedad.appendChild(cbc(doc, "Name", nombre));
+        propiedad.appendChild(cbcConAtributos(doc, "NameCode", codigo,
+                ATTR_LIST_NAME, "Propiedad del item",
+                ATTR_LIST_AGENCY_NAME, VALUE_PE_SUNAT,
+                "listURI", "urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo55"));
+        return propiedad;
+    }
+
+    static void agregarDatosTransporteCarga(Document doc, Element lineaXml, LineaDetalle linea) {
+        DatosTransporteCarga datos = linea.getDatosTransporteCarga();
+        if (datos == null) {
+            return;
+        }
+
+        Element delivery = cac(doc, "Delivery");
+        delivery.appendChild(crearDeliveryLocation(doc, datos.destino()));
+
+        Element despatch = cac(doc, "Despatch");
+        despatch.appendChild(cbc(doc, "Instructions", datos.detalleViaje()));
+        despatch.appendChild(crearDespatchAddress(doc, datos.origen()));
+        delivery.appendChild(despatch);
+
+        delivery.appendChild(crearValorReferencial(doc, "01", datos.valorReferencialServicio()));
+        delivery.appendChild(crearValorReferencial(doc, "02", datos.valorReferencialCargaEfectiva()));
+        delivery.appendChild(crearValorReferencial(doc, "03", datos.valorReferencialCargaUtilNominal()));
+
+        if (!datos.tramos().isEmpty()) {
+            Element shipment = cac(doc, "Shipment");
+            for (TramoTransporteCarga tramo : datos.tramos()) {
+                shipment.appendChild(crearTramo(doc, tramo));
+            }
+            delivery.appendChild(shipment);
+        }
+
+        lineaXml.appendChild(delivery);
+    }
+
+    private static Element crearDespatchAddress(Document doc, PuntoTransporte punto) {
+        Element address = cac(doc, "DespatchAddress");
+        agregarPuntoTransporte(doc, address, punto);
+        return address;
+    }
+
+    private static Element crearDeliveryLocation(Document doc, PuntoTransporte punto) {
+        Element location = cac(doc, "DeliveryLocation");
+        Element address = cac(doc, "Address");
+        agregarPuntoTransporte(doc, address, punto);
+        location.appendChild(address);
+        return location;
+    }
+
+    private static void agregarPuntoTransporte(Document doc, Element address, PuntoTransporte punto) {
+        address.appendChild(cbcConAtributos(doc, "ID", punto.ubigeo(),
+                ATTR_SCHEME_AGENCY_NAME, "PE:INEI",
+                ATTR_SCHEME_NAME, "Ubigeos"));
+        Element addressLine = cac(doc, "AddressLine");
+        addressLine.appendChild(cbc(doc, "Line", punto.direccionDetallada()));
+        address.appendChild(addressLine);
+    }
+
+    private static Element crearValorReferencial(Document doc, String tipo, BigDecimal monto) {
+        Element deliveryTerms = cac(doc, "DeliveryTerms");
+        deliveryTerms.appendChild(cbc(doc, "ID", tipo));
+        deliveryTerms.appendChild(cbcMonto(doc, "Amount", monto, "PEN"));
+        return deliveryTerms;
+    }
+
+    private static Element crearTramo(Document doc, TramoTransporteCarga tramo) {
+        Element consignment = cac(doc, "Consignment");
+        consignment.appendChild(cbc(doc, "ID", tramo.identificador()));
+        if (tramo.descripcion() != null) {
+            consignment.appendChild(cbc(doc, "CarrierServiceInstructions", tramo.descripcion()));
+        }
+        if (tramo.origen() != null) {
+            consignment.appendChild(crearEventoTransporte(doc, "PlannedPickupTransportEvent", tramo.origen()));
+        }
+        if (tramo.destino() != null) {
+            consignment.appendChild(crearEventoTransporte(doc, "PlannedDeliveryTransportEvent", tramo.destino()));
+        }
+        if (tramo.valorPreliminarReferencialCargaEfectiva() != null) {
+            Element deliveryTerms = cac(doc, "DeliveryTerms");
+            deliveryTerms.appendChild(cbcMonto(doc, "Amount",
+                    tramo.valorPreliminarReferencialCargaEfectiva(), "PEN"));
+            consignment.appendChild(deliveryTerms);
+        }
+        return consignment;
+    }
+
+    private static Element crearEventoTransporte(Document doc, String nombre, PuntoTransporte punto) {
+        Element event = cac(doc, nombre);
+        Element location = cac(doc, "Location");
+        location.appendChild(cbcConAtributos(doc, "ID", punto.ubigeo(),
+                ATTR_SCHEME_AGENCY_NAME, "PE:INEI",
+                ATTR_SCHEME_NAME, "Ubigeos"));
+        event.appendChild(location);
+        return event;
     }
 
     // ── PricingReference ─────────────────────────────────────────

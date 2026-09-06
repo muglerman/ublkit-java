@@ -1,6 +1,7 @@
 package com.creanexusatreus.ublkit.ubl.modelo;
 
 import com.creanexusatreus.ublkit.ubl.modelo.total.TotalImporte;
+import com.creanexusatreus.ublkit.ubl.modelo.complemento.Detraccion;
 
 /**
  * Borrador de Nota de Débito Electrónica (08).
@@ -28,6 +29,9 @@ public final class BorradorNotaDebito extends DocumentoBase {
     /** Total del importe de la nota. */
     private TotalImporte totalImporte;
 
+    /** Detracción SPOT asociada a la nota de débito. */
+    private Detraccion detraccion;
+
     public BorradorNotaDebito() {
     }
 
@@ -38,6 +42,7 @@ public final class BorradorNotaDebito extends DocumentoBase {
     public String getComprobanteAfectadoTipo() { return comprobanteAfectadoTipo; }
     public String getSustentoDescripcion() { return sustentoDescripcion; }
     public TotalImporte getTotalImporte() { return totalImporte; }
+    public Detraccion getDetraccion() { return detraccion; }
 
     // ── Setters ──────────────────────────────────────────────────
 
@@ -46,4 +51,5 @@ public final class BorradorNotaDebito extends DocumentoBase {
     public void setComprobanteAfectadoTipo(String comprobanteAfectadoTipo) { this.comprobanteAfectadoTipo = comprobanteAfectadoTipo; }
     public void setSustentoDescripcion(String sustentoDescripcion) { this.sustentoDescripcion = sustentoDescripcion; }
     public void setTotalImporte(TotalImporte totalImporte) { this.totalImporte = totalImporte; }
+    public void setDetraccion(Detraccion detraccion) { this.detraccion = detraccion; }
 }

@@ -156,6 +156,12 @@
 
 <div class="bottom">
   <div class="notes">
+    {% if doc.detraccion is not null %}
+    <div class="block"><div class="head">Detracción</div><div class="body">
+      <p>S/ {{ doc.detraccion.monto|n_format }} · {{ doc.detraccion.codigoBien }} - {{ doc.detraccion.codigoBien|catalog('54') }}</p>
+      <p class="small">Medio: {{ doc.detraccion.medioPago|catalog('59') }} · Cta. BN {{ doc.detraccion.cuentaBanco }}</p>
+    </div></div>
+    {% endif %}
     {% if doc.observaciones %}
     <div class="block"><div class="head">Observaciones</div><div class="body">
       <p>{{ doc.observaciones }}</p>

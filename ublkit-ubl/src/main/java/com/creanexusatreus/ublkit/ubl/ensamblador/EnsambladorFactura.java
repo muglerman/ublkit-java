@@ -31,7 +31,6 @@ public final class EnsambladorFactura {
 
     private static final BigDecimal TASA_IGV_DEFECTO = new BigDecimal("0.18");
     private static final BigDecimal UMBRAL_BOLETA_RECEPTOR = new BigDecimal("700.00");
-    private static final BigDecimal CIEN = new BigDecimal("100");
     private static final int ESCALA = 2;
     private static final RoundingMode REDONDEO = RoundingMode.HALF_UP;
 
@@ -53,6 +52,7 @@ public final class EnsambladorFactura {
         aplicarReglasBoleta(factura);
         aplicarReglasFormaPago(factura);
         aplicarReglasDetraccion(factura);
+        validarComplementosSpot(factura);
         ensamblarLeyendasSunat(factura);
         return factura;
     }
@@ -78,25 +78,73 @@ public final class EnsambladorFactura {
 
     private static void aplicarReglasDetraccion(BorradorFactura factura) {
         Detraccion det = factura.getDetraccion();
-        if (det != null && esOperacionDetraccion(factura.getTipoOperacion())) {
-            BigDecimal porcentaje = det.porcentaje();
-            if (porcentaje == null && det.tipoBienDetraido() != null) {
-                porcentaje = CatalogoDetracciones.obtenerPorcentaje(det.tipoBienDetraido());
+        boolean operacionDetraccion = esOperacionDetraccion(factura.getTipoOperacion());
+        if (!operacionDetraccion) {
+            if (det != null) {
+                throw new IllegalArgumentException(
+                        "La detracción solo puede informarse en operaciones 1001, 1002, 1003 o 1004");
             }
+            return;
+        }
 
-            BigDecimal monto = det.monto();
-            if (monto == null && porcentaje != null) {
-                BigDecimal total = montoTotalDocumento(factura);
-                monto = total.multiply(porcentaje).setScale(ESCALA, REDONDEO);
+        if (det == null) {
+            throw new IllegalArgumentException(
+                    "La operación " + factura.getTipoOperacion() + " requiere información de detracción");
+        }
+
+        validarCodigoDetraccionEspecial(factura.getTipoOperacion(), det.tipoBienDetraido());
+
+        String cuenta = det.cuentaBancaria();
+        if ((cuenta == null || cuenta.isBlank()) && factura.getEmisor() != null) {
+            cuenta = factura.getEmisor().cuentaBancoNacionDetraccion();
+        }
+
+        Detraccion normalizada = new Detraccion(
+                det.medioDePago(),
+                cuenta,
+                det.tipoBienDetraido(),
+                det.porcentaje(),
+                det.monto());
+        normalizada.validar();
+        factura.setDetraccion(normalizada);
+    }
+
+    private static void validarCodigoDetraccionEspecial(String tipoOperacion, String codigoDetraccion) {
+        String esperado = switch (tipoOperacion) {
+            case "1002" -> "004";
+            case "1003" -> "028";
+            case "1004" -> "027";
+            default -> null;
+        };
+        if (esperado != null && !esperado.equals(codigoDetraccion)) {
+            throw new IllegalArgumentException(
+                    "La operación " + tipoOperacion + " requiere el código de detracción " + esperado);
+        }
+    }
+
+    private static void validarComplementosSpot(BorradorFactura factura) {
+        if ("1002".equals(factura.getTipoOperacion())) {
+            validarComplementoPorLinea(factura, "datos hidrobiológicos",
+                    linea -> linea.getDatosHidrobiologicos() != null);
+        } else if ("1004".equals(factura.getTipoOperacion())) {
+            validarComplementoPorLinea(factura, "datos de transporte de carga",
+                    linea -> linea.getDatosTransporteCarga() != null);
+        }
+    }
+
+    private static void validarComplementoPorLinea(BorradorFactura factura, String nombre,
+                                                    java.util.function.Predicate<LineaDetalle> presente) {
+        List<LineaDetalle> detalles = factura.getDetalles();
+        if (detalles == null || detalles.isEmpty()) {
+            throw new IllegalArgumentException(
+                    "La operación " + factura.getTipoOperacion() + " requiere líneas con " + nombre);
+        }
+        for (int indice = 0; indice < detalles.size(); indice++) {
+            if (!presente.test(detalles.get(indice))) {
+                throw new IllegalArgumentException(
+                        "La línea " + (indice + 1) + " requiere " + nombre
+                                + " para la operación " + factura.getTipoOperacion());
             }
-
-            String cuenta = det.cuentaBancaria();
-            if (cuenta == null && factura.getEmisor() != null
-                    && factura.getEmisor().cuentaBancoNacionDetraccion() != null) {
-                cuenta = factura.getEmisor().cuentaBancoNacionDetraccion();
-            }
-
-            factura.setDetraccion(new Detraccion(det.medioDePago(), cuenta, det.tipoBienDetraido(), porcentaje, monto));
         }
     }
 
