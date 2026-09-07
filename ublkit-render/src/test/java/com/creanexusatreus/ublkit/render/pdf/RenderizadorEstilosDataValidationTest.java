@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -122,22 +123,62 @@ class RenderizadorEstilosDataValidationTest {
     @EnumSource(EstiloPlantilla.class)
     void guiaTransportistaCablaDatosRealesEnCadaEstilo(EstiloPlantilla estilo) {
         BorradorGuiaRemision guia = crearGuiaTransportista();
-        String html = renderizarGuia(guia, estilo);
+        String html = renderizarGuia(guia, estilo, carrierAttributes());
 
         assertContiene(html, guia.getRemitente().ruc(), estilo, "RUC del transportista emisor");
         assertContiene(html, guia.getRemitente().razonSocial(), estilo, "razón social del transportista emisor");
+        assertContiene(html, guia.getEnvio().getTransportista().numeroDocumentoIdentidad(), estilo,
+                "RUC del transportista");
         assertContiene(html, guia.getTercero().nombre(), estilo, "nombre del remitente (tercero)");
         assertContiene(html, guia.getDestinatario().nombre(), estilo, "nombre del destinatario");
         assertContiene(html, "MTC-123456", estilo, "registro MTC del transportista");
-        assertContiene(html, guia.getSubcontratado().nombre(), estilo, "transportista subcontratado");
+        assertContiene(html, guia.getSubcontratado().nombre(), estilo, "empresa subcontratante");
+        assertContiene(html, guia.getSubcontratado().numeroRegistroMTC(), estilo,
+                "registro MTC del subcontratante");
+        assertContiene(html, "Transportes Aliado S.A.C.", estilo, "transportista subcontratista");
+        assertContiene(html, "MTC-SUB-44", estilo, "registro MTC del subcontratista");
+        assertContiene(html, "Estado de pago", estilo, "estado de pago en cabecera");
+        assertContiene(html, "TRACK-2026-001", estilo, "tracking en cabecera");
+        assertContiene(html, "Flete", estilo, "rótulo de flete");
+        assertContiene(html, "245.50", estilo, "monto del flete");
+        assertContiene(html, "Retorno de vehículo vacío", estilo, "indicador de retorno");
+        assertContiene(html, "Transbordo programado", estilo, "indicador de transbordo");
+        assertContiene(html, "Transporte subcontratado", estilo, "indicador de subcontratación");
+        assertContiene(html, "Pagador del flete: destinatario", estilo, "indicador visual de pagador");
         assertContiene(html, "Producto A", estilo, "descripción del bien transportado");
         assertContiene(html, "GUÍA DE REMISIÓN TRANSPORTISTA", estilo, "rótulo de GRE transportista");
+        assertTrue(html.indexOf("Estado de pago") < html.indexOf("Punto de partida"),
+                "El estilo " + estilo.carpeta() + " debe mostrar el estado de pago en la cabecera");
+        assertTrue(html.indexOf("Nro. tracking") < html.indexOf("Punto de partida"),
+                "El estilo " + estilo.carpeta() + " debe mostrar el tracking en la cabecera");
+        assertTrue(html.indexOf("Subcontratación") < html.indexOf("Vehículos"),
+                "El estilo " + estilo.carpeta() + " debe mostrar subcontratación antes de vehículos");
+        assertFalse(html.contains("class=\"signs\""),
+                "El estilo " + estilo.carpeta() + " no debe incluir bloques de firmas");
+        assertFalse(html.contains("Recepción / Destinatario"));
+        assertFalse(html.contains("Nro. taquito"));
         assertSinPlaceholders(html, estilo);
+    }
+
+    @ParameterizedTest(name = "PDF guía transportista · estilo {0}")
+    @EnumSource(EstiloPlantilla.class)
+    void guiaTransportistaGeneraPdfEnCadaEstilo(EstiloPlantilla estilo) {
+        ContextoRender<BorradorGuiaRemision> contexto = ContextoRender.of(
+                crearGuiaTransportista(), "hash123", null, carrierAttributes(), estilo);
+
+        byte[] pdf = new RenderizadorPdfGuiaRemision(FormatoImpresion.A4)
+                .renderizar(contexto)
+                .contenidoPdf();
+
+        assertTrue(pdf.length > 1_000,
+                "El estilo " + estilo.carpeta() + " debe generar un PDF de GRE Transportista");
+        assertTrue(new String(pdf, 0, 5, StandardCharsets.US_ASCII).equals("%PDF-"),
+                "El estilo " + estilo.carpeta() + " debe generar una cabecera PDF válida");
     }
 
     @ParameterizedTest(name = "guías sin total monetario · estilo {0}")
     @EnumSource(EstiloPlantilla.class)
-    void guiaNoMuestraTotalMonetarioEnNingunEstilo(EstiloPlantilla estilo) {
+    void guiaSoloMuestraFleteEnTransportista(EstiloPlantilla estilo) {
         Map<String, Object> atributos = Map.of("totalGuia", 9876.54);
 
         String remitente = renderizarGuia(crearGuia(), estilo, atributos);
@@ -146,7 +187,8 @@ class RenderizadorEstilosDataValidationTest {
         assertFalse(remitente.contains("Monto total"));
         assertFalse(remitente.contains("9876"));
         assertFalse(transportista.contains("Monto total"));
-        assertFalse(transportista.contains("9876"));
+        assertTrue(transportista.contains("Flete"));
+        assertTrue(transportista.contains("9876.54"));
     }
 
     // ---- helpers de render ----
@@ -171,6 +213,17 @@ class RenderizadorEstilosDataValidationTest {
         ContextoRender<BorradorGuiaRemision> contexto =
                 ContextoRender.of(guia, "hash123", null, atributos, estilo);
         return new RenderizadorHtmlGuiaRemision(FormatoImpresion.A4).renderizar(contexto).contenidoHtml();
+    }
+
+    private Map<String, Object> carrierAttributes() {
+        return Map.of(
+                "estadoPago", "PAGADO",
+                "trackingNumber", "TRACK-2026-001",
+                "totalGuia", new BigDecimal("245.50"),
+                "tipoPagadorFlete", "Destinatario",
+                "subcontratistaNombre", "Transportes Aliado S.A.C.",
+                "subcontratistaRuc", "20444444444",
+                "subcontratistaMtc", "MTC-SUB-44");
     }
 
     private void assertContiene(String html, String esperado, EstiloPlantilla estilo, String campo) {
@@ -266,7 +319,12 @@ class RenderizadorEstilosDataValidationTest {
                 "20600456789", "Transportes Mantaro", "Transportes Mantaro E.I.R.L.",
                 null, null));
         guia.setTercero(new TerceroGuia("6", "20512345678", "Manufacturas Andina Textil S.A.C.", null));
-        guia.setSubcontratado(new TerceroGuia("6", "20222222222", "Subcontratista Andino S.A.C.", null));
+        guia.setSubcontratado(new TerceroGuia(
+                "6", "20222222222", "Operador Logístico Andino S.A.C.", "MTC-SUBCONTRATANTE-22"));
+        guia.getEnvio().setIndicadores(List.of(
+                "SUNAT_Envio_IndicadorRetornoVehiculoVacio",
+                "SUNAT_Envio_IndicadorTransbordoProgramado",
+                "SUNAT_Envio_IndicadorTrasporteSubcontratado"));
         return guia;
     }
 

@@ -14,7 +14,11 @@ import io.pebbletemplates.pebble.template.PebbleTemplate;
 
 import java.io.StringWriter;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -24,6 +28,8 @@ import java.util.Map;
  * @since 0.3.0
  */
 public class RenderizadorHtmlGuiaRemision implements RenderizadorDocumento<BorradorGuiaRemision> {
+
+    private static final Map<String, String> TRANSPORT_INDICATOR_LABELS = transportIndicatorLabels();
 
     private final FormatoImpresion formato;
     private final PebbleEngine engine;
@@ -65,6 +71,8 @@ public class RenderizadorHtmlGuiaRemision implements RenderizadorDocumento<Borra
             scope.put("params", contexto.atributosPlantilla());
             scope.putAll(contexto.atributosPlantilla());
         }
+        scope.put("indicadoresTraslado",
+                transportIndicatorLabels(contexto.documento(), contexto.atributosPlantilla()));
 
         try {
             PebbleTemplate compiledTemplate = engine.getTemplate(obtenerRutaPlantilla(contexto));
@@ -74,5 +82,42 @@ public class RenderizadorHtmlGuiaRemision implements RenderizadorDocumento<Borra
         } catch (Exception e) {
             throw new RuntimeException("Error renderizando guía HTML: " + e.getMessage(), e);
         }
+    }
+
+    private List<String> transportIndicatorLabels(BorradorGuiaRemision document, Map<String, Object> attributes) {
+        List<String> labels = new ArrayList<>();
+        if (document.getEnvio() != null && document.getEnvio().getIndicadores() != null) {
+            document.getEnvio().getIndicadores().stream()
+                    .filter(indicator -> indicator != null && !indicator.isBlank())
+                    .map(indicator -> TRANSPORT_INDICATOR_LABELS.getOrDefault(indicator, indicator))
+                    .forEach(labels::add);
+        }
+        if (attributes != null && attributes.get("tipoPagadorFlete") != null) {
+            String payerType = attributes.get("tipoPagadorFlete").toString().trim();
+            if (!payerType.isEmpty()) {
+                labels.add("Pagador del flete: " + payerType.toLowerCase(Locale.ROOT));
+            }
+        }
+        return labels.stream().distinct().toList();
+    }
+
+    private static Map<String, String> transportIndicatorLabels() {
+        Map<String, String> labels = new LinkedHashMap<>();
+        labels.put("SUNAT_Envio_IndicadorRetornoVehiculoVacio", "Retorno de vehículo vacío");
+        labels.put("SUNAT_Envio_IndicadorRetornoVehiculoEnvaseVacio",
+                "Retorno de envases o embalajes vacíos");
+        labels.put("SUNAT_Envio_IndicadorTransbordoProgramado", "Transbordo programado");
+        labels.put("SUNAT_Envio_IndicadorTransbordo", "Transbordo");
+        labels.put("SUNAT_Envio_IndicadorTrasladoTotal", "Traslado total");
+        labels.put("SUNAT_Envio_IndicadorTrasladoTotalDAMoDS", "Traslado total DAM/DS");
+        labels.put("SUNAT_Envio_IndicadorTrasladoVehiculoM1L", "Vehículo categoría M1/L");
+        labels.put("SUNAT_Envio_IndicadorVehiculoConductoresTransp",
+                "Vehículo y conductores de transportista");
+        labels.put("SUNAT_Envio_IndicadorTrasporteSubcontratado", "Transporte subcontratado");
+        labels.put("SUNAT_Envio_IndicadorPagadorFlete_Remitente", "Pagador del flete: remitente");
+        labels.put("SUNAT_Envio_IndicadorPagadorFlete_Subcontratador",
+                "Pagador del flete: subcontratador");
+        labels.put("SUNAT_Envio_IndicadorPagadorFlete_Tercero", "Pagador del flete: tercero");
+        return Map.copyOf(labels);
     }
 }
