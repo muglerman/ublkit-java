@@ -1,6 +1,7 @@
 package com.creanexusatreus.ublkit.render.html;
 
 import com.creanexusatreus.ublkit.render.modelo.ContextoRender;
+import com.creanexusatreus.ublkit.render.modelo.EstiloPlantilla;
 import com.creanexusatreus.ublkit.render.modelo.FormatoImpresion;
 import com.creanexusatreus.ublkit.render.modelo.ResultadoRender;
 import com.creanexusatreus.ublkit.ubl.modelo.guia.BorradorGuiaRemision;
@@ -15,6 +16,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -148,6 +150,25 @@ class RenderizadorHtmlGuiaRemisionTest {
             String html = resultado.contenidoHtml();
 
             assertTrue(html.contains(qr), "Must contain QR");
+        }
+
+        @ParameterizedTest
+        @EnumSource(EstiloPlantilla.class)
+        @DisplayName("Should highlight carrier tracking number in every A4 style")
+        void shouldHighlightCarrierTrackingNumber(EstiloPlantilla estilo) {
+            BorradorGuiaRemision guia = crearGuiaCompleta();
+            guia.setTipoComprobante("31");
+            String trackingNumber = "TQ-000123";
+            ContextoRender<BorradorGuiaRemision> contexto = ContextoRender.of(
+                    guia, "hash", null, Map.of("trackingNumber", trackingNumber), estilo);
+
+            String html = new RenderizadorHtmlGuiaRemision(FormatoImpresion.A4)
+                    .renderizar(contexto)
+                    .contenidoHtml();
+
+            assertTrue(html.contains(trackingNumber), "Must contain tracking number for " + estilo);
+            assertTrue(html.contains("tracking-number"), "Must use highlighted tracking style for " + estilo);
+            assertTrue(html.contains("font-size: 14px"), "Must render a larger tracking number for " + estilo);
         }
     }
 

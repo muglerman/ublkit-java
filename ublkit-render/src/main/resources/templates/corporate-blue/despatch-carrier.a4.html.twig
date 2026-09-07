@@ -29,6 +29,7 @@
   .band .docbox .kind { font-size: 13px; font-weight: 700; color: var(--accent); margin-top: 4px; letter-spacing: 0.02em; }
   .band .docbox .sub { font-size: 9.5px; color: var(--ink-2); font-weight: 600; }
   .band .docbox .num { font-family: 'IBM Plex Mono', monospace; font-size: 22px; font-weight: 600; margin-top: 2px; }
+  .tracking-number { font-size: 14px !important; font-weight: 700 !important; letter-spacing: 0.03em; }
 
   .body-wrap { padding: 22px 36px 28px; }
 
@@ -116,7 +117,7 @@
     <div class="kind">{{ name|upper }} ELECTRÓNICA</div>
     <div class="num">{{ doc.serie }}-{{ doc.numero|str_pad(8, '0', 'left') }}</div>
     {% if params.estadoPago is not empty %}<div class="sub" style="margin-top:6px;">Estado de pago: {{ params.estadoPago }}</div>{% endif %}
-    {% if params.trackingNumber is not empty %}<div class="sub">Nro. taquito: {{ params.trackingNumber }}</div>{% endif %}
+    {% if params.trackingNumber is not empty %}<div class="sub tracking-number">Nro. taquito: <span class="mono">{{ params.trackingNumber }}</span></div>{% endif %}
   </div>
 </div>
 

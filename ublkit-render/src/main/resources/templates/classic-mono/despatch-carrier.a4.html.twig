@@ -48,6 +48,7 @@
   .strip { display: grid; grid-template-columns: repeat(4, 1fr); padding: 10px 0; border-bottom: 1px solid #0a0a0a; font-size: 10px; }
   .strip > div .k { display: block; font-size: 9px; color: #737373; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 2px; }
   .strip > div .v { color: #0a0a0a; font-weight: 500; }
+  .tracking-number { font-size: 14px !important; font-weight: 700 !important; letter-spacing: 0.03em; }
 
   .twocol { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; padding: 16px 0; border-bottom: 1px solid #0a0a0a; }
   .twocol .block .head { font-size: 9px; text-transform: uppercase; letter-spacing: 0.14em; color: #737373; margin-bottom: 6px; }
@@ -146,7 +147,7 @@
   <div><span class="k">Modalidad</span><span class="v">{% if doc.envio is not null %}{{ doc.envio.tipoModalidadTraslado|catalog('18') }}{% endif %}</span></div>
   <div><span class="k">Peso bruto</span><span class="v">{% if doc.envio is not null %}{{ doc.envio.pesoTotal }} {{ doc.envio.pesoTotalUnidadMedida }}{% endif %}</span></div>
   <div><span class="k">Bultos</span><span class="v">{% if doc.envio is not null and doc.envio.numeroDeBultos is not null %}{{ doc.envio.numeroDeBultos }}{% endif %}</span></div>
-  <div><span class="k">Estado de pago</span><span class="v">{% if params.estadoPago is not empty %}{{ params.estadoPago }}{% endif %}</span></div><div><span class="k">Nro. taquito</span><span class="v">{% if params.trackingNumber is not empty %}{{ params.trackingNumber }}{% endif %}</span></div>
+  <div><span class="k">Estado de pago</span><span class="v">{% if params.estadoPago is not empty %}{{ params.estadoPago }}{% endif %}</span></div><div><span class="k">Nro. taquito</span><span class="v mono tracking-number">{% if params.trackingNumber is not empty %}{{ params.trackingNumber }}{% endif %}</span></div>
 </div>
 
 <div class="twocol">

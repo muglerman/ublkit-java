@@ -36,6 +36,7 @@
   .hero .right .row { display: flex; justify-content: space-between; font-size: 10px; padding: 1.5px 0; }
   .hero .right .row .k { opacity: 0.62; }
   .hero .right .row .v { font-weight: 500; }
+  .tracking-number { font-size: 14px !important; font-weight: 700 !important; letter-spacing: 0.03em; }
 
   .route { background: var(--accent); color: var(--ink); border-radius: 4px; padding: 14px 18px; display: grid; grid-template-columns: 1fr auto 1fr; gap: 16px; align-items: center; margin-bottom: 14px; }
   .route .leg .k { font-size: 9px; text-transform: uppercase; letter-spacing: 0.16em; font-weight: 800; }
@@ -125,7 +126,7 @@
       <div class="row"><span class="k">Modalidad</span><span class="v">{% if doc.envio is not null %}{{ doc.envio.tipoModalidadTraslado|catalog('18') }}{% endif %}</span></div>
       <div class="row"><span class="k">Peso · bultos</span><span class="v">{% if doc.envio is not null %}{{ doc.envio.pesoTotal }} {{ doc.envio.pesoTotalUnidadMedida }}{% if doc.envio.numeroDeBultos is not null %} · {{ doc.envio.numeroDeBultos }}{% endif %}{% endif %}</span></div>
       {% if params.estadoPago is not empty %}<div class="row"><span class="k">Estado de pago</span><span class="v">{{ params.estadoPago }}</span></div>{% endif %}
-      {% if params.trackingNumber is not empty %}<div class="row"><span class="k">Nro. taquito</span><span class="v mono">{{ params.trackingNumber }}</span></div>{% endif %}
+      {% if params.trackingNumber is not empty %}<div class="row"><span class="k">Nro. taquito</span><span class="v mono tracking-number">{{ params.trackingNumber }}</span></div>{% endif %}
     </div>
   </div>
 </div>
