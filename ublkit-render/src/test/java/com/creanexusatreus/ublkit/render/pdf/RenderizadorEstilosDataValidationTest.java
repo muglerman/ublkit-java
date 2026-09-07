@@ -265,8 +265,8 @@ class RenderizadorEstilosDataValidationTest {
         guia.setRemitente(new EmisorDocumento(
                 "20600456789", "Transportes Mantaro", "Transportes Mantaro E.I.R.L.",
                 null, null));
-        guia.setTercero(new TerceroGuia("6", "20512345678", "Manufacturas Andina Textil S.A.C."));
-        guia.setSubcontratado(new TerceroGuia("6", "20222222222", "Subcontratista Andino S.A.C."));
+        guia.setTercero(new TerceroGuia("6", "20512345678", "Manufacturas Andina Textil S.A.C.", null));
+        guia.setSubcontratado(new TerceroGuia("6", "20222222222", "Subcontratista Andino S.A.C.", null));
         return guia;
     }
 

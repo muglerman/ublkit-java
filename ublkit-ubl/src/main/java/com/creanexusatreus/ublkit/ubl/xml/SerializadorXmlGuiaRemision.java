@@ -446,6 +446,9 @@ public final class SerializadorXmlGuiaRemision implements SerializadorXml<Borrad
         party.appendChild(pid);
         Element legal = cac(doc, "PartyLegalEntity");
         legal.appendChild(cbcCdata(doc, "RegistrationName", parte.nombre()));
+        if (parte.numeroRegistroMTC() != null && !parte.numeroRegistroMTC().isBlank()) {
+            legal.appendChild(cbc(doc, "CompanyID", parte.numeroRegistroMTC()));
+        }
         party.appendChild(legal);
         consignment.appendChild(party);
     }

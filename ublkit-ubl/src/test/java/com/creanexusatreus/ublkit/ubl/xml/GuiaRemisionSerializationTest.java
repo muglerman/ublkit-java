@@ -181,7 +181,7 @@ class GuiaRemisionSerializationTest {
         // SUNAT valida cac:Consignment/cac:LogisticsOperatorParty/cac:PartyIdentification/cbc:ID (schemeID '6'),
         // sin envoltorio cac:Party ni CustomerAssignedAccountID (ExceptionXsd 0306 en caso contrario).
         BorradorGuiaRemision guia = guiaConTercero("31");
-        guia.setSubcontratado(new TerceroGuia("6", "10200242390", "GLADYS HUAROC HIDALGO"));
+        guia.setSubcontratado(new TerceroGuia("6", "10200242390", "GLADYS HUAROC HIDALGO", "REG-MTC-778899"));
 
         String xml = new SerializadorXmlGuiaRemision().serializar(guia);
         String compacto = xml.replaceAll(">\\s+<", "><");
@@ -193,6 +193,9 @@ class GuiaRemisionSerializationTest {
         assertTrue(compacto.contains("<cac:PartyLegalEntity><cbc:RegistrationName>")
                         && xml.contains("GLADYS HUAROC HIDALGO"),
                 "La razon social del operador va en cac:PartyLegalEntity/cbc:RegistrationName");
+        assertTrue(compacto.contains(
+                "<cac:PartyLegalEntity><cbc:RegistrationName><![CDATA[GLADYS HUAROC HIDALGO]]></cbc:RegistrationName><cbc:CompanyID>REG-MTC-778899</cbc:CompanyID></cac:PartyLegalEntity>"),
+                "PartyLegalEntity debe emitir RegistrationName seguido de CompanyID con el REG MTC");
         assertFalse(xml.contains("CustomerAssignedAccountID"),
                 "No debe usar CustomerAssignedAccountID (estructura invalida)");
     }
@@ -201,7 +204,7 @@ class GuiaRemisionSerializationTest {
     @DisplayName("GRE-T pagador tercero: OriginatorCustomerParty usa envoltorio cac:Party/PartyIdentification")
     void testConsignmentOriginatorCustomerParty() {
         BorradorGuiaRemision guia = guiaConTercero("31");
-        guia.setPagadorFleteTercero(new TerceroGuia("6", "20606514540", "PAGADOR S.A.C."));
+        guia.setPagadorFleteTercero(new TerceroGuia("6", "20606514540", "PAGADOR S.A.C.", null));
 
         String xml = new SerializadorXmlGuiaRemision().serializar(guia);
         String compacto = xml.replaceAll(">\\s+<", "><");
@@ -219,7 +222,7 @@ class GuiaRemisionSerializationTest {
                 .withNumero(1)
                 .withTipoComprobante(tipoComprobante)
                 .withFechaEmision(LocalDate.of(2026, 6, 12))
-                .withTercero(new TerceroGuia("1", "42523276", "MORY ALANIA, LUIS"))
+                .withTercero(new TerceroGuia("1", "42523276", "MORY ALANIA, LUIS", null))
                 .withDestinatario(new DestinatarioGuia("6", "20606514540", "BRENDENA S.A.C."))
                 .withEnvio(DatosEnvioBuilder.aDatosEnvio()
                         .withTipoTraslado("01")
