@@ -1,5 +1,6 @@
 package com.creanexusatreus.ublkit.render.pdf;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -127,16 +128,19 @@ class RenderizadorEstilosDataValidationTest {
 
         assertContiene(html, guia.getRemitente().ruc(), estilo, "RUC del transportista emisor");
         assertContiene(html, guia.getRemitente().razonSocial(), estilo, "razón social del transportista emisor");
-        assertContiene(html, guia.getEnvio().getTransportista().numeroDocumentoIdentidad(), estilo,
-                "RUC del transportista");
         assertContiene(html, guia.getTercero().nombre(), estilo, "nombre del remitente (tercero)");
         assertContiene(html, guia.getDestinatario().nombre(), estilo, "nombre del destinatario");
-        assertContiene(html, "MTC-123456", estilo, "registro MTC del transportista");
+        assertContiene(html, "Av. Ferrocarril 1250", estilo, "dirección del emisor");
+        assertContiene(html, "Junín", estilo, "departamento del emisor");
+        assertContiene(html, "Huancayo", estilo, "provincia del emisor");
+        assertContiene(html, "El Tambo", estilo, "distrito del emisor");
+        assertContiene(html, "120114", estilo, "ubigeo del emisor");
+        assertContiene(html, "contacto@mantaro.pe", estilo, "email del emisor");
+        assertContiene(html, "064-555100", estilo, "teléfono del emisor");
         assertContiene(html, guia.getSubcontratado().nombre(), estilo, "empresa subcontratante");
         assertContiene(html, guia.getSubcontratado().numeroRegistroMTC(), estilo,
                 "registro MTC del subcontratante");
-        assertContiene(html, "Transportes Aliado S.A.C.", estilo, "transportista subcontratista");
-        assertContiene(html, "MTC-SUB-44", estilo, "registro MTC del subcontratista");
+        assertContiene(html, "MTC-123456", estilo, "registro MTC del emisor");
         assertContiene(html, "Estado de pago", estilo, "estado de pago en cabecera");
         assertContiene(html, "TRACK-2026-001", estilo, "tracking en cabecera");
         assertContiene(html, "Flete", estilo, "rótulo de flete");
@@ -151,13 +155,59 @@ class RenderizadorEstilosDataValidationTest {
                 "El estilo " + estilo.carpeta() + " debe mostrar el estado de pago en la cabecera");
         assertTrue(html.indexOf("Nro. tracking") < html.indexOf("Punto de partida"),
                 "El estilo " + estilo.carpeta() + " debe mostrar el tracking en la cabecera");
+        assertTrue(html.indexOf("Producto A") < html.indexOf("Flete"),
+                "El estilo " + estilo.carpeta() + " debe mostrar el flete después de los bienes");
         assertTrue(html.indexOf("Subcontratación") < html.indexOf("Vehículos"),
                 "El estilo " + estilo.carpeta() + " debe mostrar subcontratación antes de vehículos");
+        assertEquals(1, contar(html, "class=\"subcontract-fields\""),
+                "El estilo " + estilo.carpeta() + " debe mostrar una sola empresa de subcontratación");
+        assertTrue(html.contains("grid-template-columns: repeat(3, minmax(0, 1fr))"),
+                "El estilo " + estilo.carpeta() + " debe definir tres columnas para la subcontratación");
+        assertTrue(html.contains("grid-template-columns: minmax(0, 1fr)"),
+                "El estilo " + estilo.carpeta() + " debe dar todo el ancho a la empresa presente");
+        assertTrue(html.contains("issuer-mtc"),
+                "El estilo " + estilo.carpeta() + " debe identificar el MTC en la cabecera");
+        assertTrue(contar(html, "class=\"vehicle-field\"") >= 9,
+                "El estilo " + estilo.carpeta() + " debe presentar label y valor para cada dato del vehículo");
+        assertTrue(html.contains(".vehicle-field { display: flex; align-items: baseline;"),
+                "El estilo " + estilo.carpeta() + " debe alinear horizontalmente cada label y valor");
+        assertTrue(html.contains("white-space: nowrap;"),
+                "El estilo " + estilo.carpeta() + " no debe separar el label de su valor");
+        assertTrue(html.contains(".vehicle-field .k { display: inline;"),
+                "El estilo " + estilo.carpeta() + " no debe renderizar el label como bloque");
+        assertTrue(html.contains(".vehicle-field .v { display: inline;"),
+                "El estilo " + estilo.carpeta() + " no debe renderizar el valor como bloque");
+        assertContiene(html, "ABC-123", estilo, "placa principal");
+        assertContiene(html, "TUC-001", estilo, "TUC/CHV principal");
+        assertContiene(html, "HAB-2024-001", estilo, "autorización principal");
+        assertContiene(html, "VOLVO", estilo, "marca principal");
+        assertContiene(html, "FH16", estilo, "modelo principal");
+        assertContiene(html, "REM-456", estilo, "placa secundaria");
+        assertFalse(html.contains("Transportista emisor"),
+                "El estilo " + estilo.carpeta() + " no debe repetir el emisor como transportista");
+        assertFalse(html.contains("20111111111"),
+                "El estilo " + estilo.carpeta() + " no debe renderizar el bloque de transportista del XML");
         assertFalse(html.contains("class=\"signs\""),
                 "El estilo " + estilo.carpeta() + " no debe incluir bloques de firmas");
         assertFalse(html.contains("Recepción / Destinatario"));
         assertFalse(html.contains("Nro. taquito"));
         assertSinPlaceholders(html, estilo);
+    }
+
+    @ParameterizedTest(name = "subcontratista exclusivo · estilo {0}")
+    @EnumSource(EstiloPlantilla.class)
+    void guiaTransportistaUsaTodoElAnchoParaSubcontratista(EstiloPlantilla estilo) {
+        BorradorGuiaRemision guia = crearGuiaTransportista();
+        guia.setSubcontratado(null);
+
+        String html = renderizarGuia(guia, estilo, subcontractorAttributes());
+
+        assertContiene(html, "Transportes Aliado S.A.C.", estilo, "transportista subcontratista");
+        assertContiene(html, "MTC-SUB-44", estilo, "registro MTC del subcontratista");
+        assertEquals(1, contar(html, "class=\"subcontract-fields\""),
+                "El estilo " + estilo.carpeta() + " debe mostrar solo el subcontratista");
+        assertFalse(html.contains("Operador Logístico Andino S.A.C."),
+                "El estilo " + estilo.carpeta() + " no debe reservar una segunda empresa");
     }
 
     @ParameterizedTest(name = "PDF guía transportista · estilo {0}")
@@ -191,6 +241,39 @@ class RenderizadorEstilosDataValidationTest {
         assertTrue(transportista.contains("9876.54"));
     }
 
+    @ParameterizedTest(name = "contacto opcional · estilo {0}")
+    @EnumSource(EstiloPlantilla.class)
+    void guiaTransportistaOcultaContactoVacio(EstiloPlantilla estilo) {
+        BorradorGuiaRemision guia = crearGuiaTransportista();
+        EmisorDocumento emisor = guia.getRemitente();
+        guia.setRemitente(new EmisorDocumento(
+                emisor.ruc(), emisor.nombreComercial(), emisor.razonSocial(), emisor.direccion(),
+                new Contacto(null, null, null)));
+
+        String html = renderizarGuia(guia, estilo, carrierAttributes());
+
+        assertFalse(html.contains("issuer-contact"),
+                "El estilo " + estilo.carpeta() + " no debe mostrar el contacto vacío");
+    }
+
+    @ParameterizedTest(name = "contacto parcial · estilo {0}")
+    @EnumSource(EstiloPlantilla.class)
+    void guiaTransportistaMuestraContactoParcialSinSeparadorHuerfano(EstiloPlantilla estilo) {
+        BorradorGuiaRemision guia = crearGuiaTransportista();
+        EmisorDocumento emisor = guia.getRemitente();
+        guia.setRemitente(new EmisorDocumento(
+                emisor.ruc(), emisor.nombreComercial(), emisor.razonSocial(), emisor.direccion(),
+                new Contacto(null, null, "solo-email@mantaro.pe")));
+
+        String html = renderizarGuia(guia, estilo, carrierAttributes());
+
+        assertContiene(html, "solo-email@mantaro.pe", estilo, "email sin teléfono");
+        assertTrue(html.contains("issuer-contact"),
+                "El estilo " + estilo.carpeta() + " debe mostrar el contacto parcial");
+        assertFalse(html.contains("solo-email@mantaro.pe ·"),
+                "El estilo " + estilo.carpeta() + " no debe dejar un separador tras el email");
+    }
+
     // ---- helpers de render ----
 
     private String renderizarFactura(BorradorFactura factura, EstiloPlantilla estilo) {
@@ -220,7 +303,11 @@ class RenderizadorEstilosDataValidationTest {
                 "estadoPago", "PAGADO",
                 "trackingNumber", "TRACK-2026-001",
                 "totalGuia", new BigDecimal("245.50"),
-                "tipoPagadorFlete", "Destinatario",
+                "tipoPagadorFlete", "Destinatario");
+    }
+
+    private Map<String, Object> subcontractorAttributes() {
+        return Map.of(
                 "subcontratistaNombre", "Transportes Aliado S.A.C.",
                 "subcontratistaRuc", "20444444444",
                 "subcontratistaMtc", "MTC-SUB-44");
@@ -237,6 +324,10 @@ class RenderizadorEstilosDataValidationTest {
     private void assertSinPlaceholders(String html, EstiloPlantilla estilo) {
         assertFalse(html.contains("{{") || html.contains("{%"),
                 "El estilo " + estilo.carpeta() + " dejó bindings Pebble sin resolver en el HTML");
+    }
+
+    private int contar(String texto, String fragmento) {
+        return (texto.length() - texto.replace(fragmento, "").length()) / fragmento.length();
     }
 
     // ---- fixtures ----
@@ -315,9 +406,11 @@ class RenderizadorEstilosDataValidationTest {
         guia.setTipoComprobante("31");
         // En GRE-31 el emisor (remitente del documento) es la empresa de transporte
         // y el remitente real de la carga viaja como tercero.
+        Direccion direccionEmisor = new Direccion(
+                "120114", "0000", null, "Junín", "Huancayo", "El Tambo", "Av. Ferrocarril 1250", "PE");
         guia.setRemitente(new EmisorDocumento(
                 "20600456789", "Transportes Mantaro", "Transportes Mantaro E.I.R.L.",
-                null, null));
+                direccionEmisor, new Contacto(null, "064-555100", "contacto@mantaro.pe")));
         guia.setTercero(new TerceroGuia("6", "20512345678", "Manufacturas Andina Textil S.A.C.", null));
         guia.setSubcontratado(new TerceroGuia(
                 "6", "20222222222", "Operador Logístico Andino S.A.C.", "MTC-SUBCONTRATANTE-22"));
@@ -325,6 +418,10 @@ class RenderizadorEstilosDataValidationTest {
                 "SUNAT_Envio_IndicadorRetornoVehiculoVacio",
                 "SUNAT_Envio_IndicadorTransbordoProgramado",
                 "SUNAT_Envio_IndicadorTrasporteSubcontratado"));
+        guia.getEnvio().setVehiculo(new Vehiculo(
+                "ABC-123", "TUC-001", "HAB-2024-001", "MTC", "VOLVO", "FH16",
+                List.of(new Vehiculo("REM-456", "TUC-002", "HAB-2024-002", "MTC",
+                        "RANDON", "SR-2026", null))));
         return guia;
     }
 

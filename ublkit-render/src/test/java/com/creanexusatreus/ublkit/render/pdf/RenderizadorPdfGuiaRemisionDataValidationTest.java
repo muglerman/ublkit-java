@@ -255,16 +255,18 @@ class RenderizadorPdfGuiaRemisionDataValidationTest {
     class TransportistaVehiculosTests {
 
         @Test
-        @DisplayName("✓ Datos del transportista presentes")
-        void transportistaPresente() {
+        @DisplayName("✓ Registro MTC del emisor presente sin bloque redundante")
+        void registroMtcEmisorPresente() {
             BorradorGuiaRemision guia = crearGuiaTransportista();
 
             String html = renderizarHtml(guia);
 
-            // En la GRE-31 el transportista ES la empresa emisora, por lo que el nombre redundante
-            // se omitió del encabezado; lo que identifica al transportista en la guía es su Reg. MTC.
+            assertFalse(html.contains("Transportista emisor"),
+                "No debe repetir el emisor en un bloque de transportista");
+            assertTrue(html.contains("issuer-mtc"),
+                "Debe identificar el Registro MTC dentro de la cabecera");
             assertTrue(html.contains("MTC-123456"),
-                "Debe contener el Registro MTC del transportista");
+                "Debe mostrar el Registro MTC de la empresa emisora");
         }
 
         @Test
@@ -276,6 +278,8 @@ class RenderizadorPdfGuiaRemisionDataValidationTest {
 
             assertTrue(html.contains("ABC-123"),
                 "Debe contener placa del vehículo");
+            assertTrue(html.contains("class=\"vehicle-field\""),
+                "Debe mostrar los datos del vehículo con el patrón label/valor");
         }
 
         @Test

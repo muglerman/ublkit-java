@@ -6,29 +6,6 @@
 {% set tercero = doc.tercero %}
 {% set cl = doc.destinatario %}
 {% set name = doc.tipoComprobante|catalog('01') %}
-{% set transportista = null %}
-{% if doc.envio is not null %}
-  {% set transportista = doc.envio.transportista %}
-{% endif %}
-{% set carrierName = null %}
-{% set carrierRuc = null %}
-{% set carrierMtc = null %}
-{% if transportista is not null and transportista.nombre is not empty %}
-  {% set carrierName = transportista.nombre %}
-{% endif %}
-{% if transportista is not null and transportista.numeroDocumentoIdentidad is not empty %}
-  {% set carrierRuc = transportista.numeroDocumentoIdentidad %}
-{% endif %}
-{% if transportista is not null and transportista.numeroRegistroMTC is not empty %}
-  {% set carrierMtc = transportista.numeroRegistroMTC %}
-{% endif %}
-{% if carrierName is empty and cp is not null and cp.razonSocial is not empty %}
-  {% set carrierName = cp.razonSocial %}
-{% endif %}
-{% if carrierRuc is empty and cp is not null and cp.ruc is not empty %}
-  {% set carrierRuc = cp.ruc %}
-{% endif %}
-{% set hasCarrierSection = carrierName is not empty or carrierRuc is not empty or carrierMtc is not empty %}
 {% set hasSubcontratante = doc.subcontratado is not null and (doc.subcontratado.nombre is not empty or doc.subcontratado.numeroDocumentoIdentidad is not empty or doc.subcontratado.numeroRegistroMTC is not empty) %}
 {% set hasSubcontratista = params.subcontratistaNombre is not empty or params.subcontratistaRuc is not empty or params.subcontratistaMtc is not empty %}
 {% set hasSubcontratacion = hasSubcontratante or hasSubcontratista %}
@@ -88,7 +65,10 @@
   .detail-card .name { font-size: 11.5px; font-weight: 700; margin-bottom: 6px; }
   .detail-card .row { display: grid; grid-template-columns: 78px 1fr; font-size: 10px; padding: 1px 0; }
   .detail-card .row .k { color: var(--ink-3); }
-  .detail-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+  .detail-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
+  .subcontract-fields { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+  .subcontract-field .k { display: block; color: var(--ink-3); font-size: 9px; text-transform: uppercase; letter-spacing: 0.12em; }
+  .subcontract-field .v { display: block; margin-top: 2px; font-size: 10px; overflow-wrap: anywhere; }
   .indicator-list { display: flex; flex-wrap: wrap; gap: 8px; }
   .indicator { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); font-size: 9.5px; font-weight: 600; }
 
@@ -102,6 +82,9 @@
   .items .c-unit { width: 50px; text-align: center; color: var(--ink-3); }
   .items .desc .main { font-weight: 500; }
   .items .desc .sub { font-size: 9.5px; color: var(--ink-3); margin-top: 2px; }
+  .freight-summary { display: flex; justify-content: flex-end; gap: 12px; margin-top: 8px; padding: 8px 12px; background: var(--accent-soft); border-radius: 10px; }
+  .freight-summary .k { color: var(--accent); font-size: 9px; text-transform: uppercase; letter-spacing: 0.14em; }
+  .freight-summary .v { font-size: 11px; font-weight: 600; }
 
   .transport { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
   .transport .card { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
@@ -110,6 +93,12 @@
   .transport .card .head .title { font-size: 11px; font-weight: 700; }
   .transport .card .row { display: grid; grid-template-columns: 82px 1fr; font-size: 10px; padding: 1.5px 0; }
   .transport .card .row .k { color: var(--ink-3); }
+  .vehicle-entry { padding: 3px 0; }
+  .vehicle-entry + .vehicle-entry { margin-top: 5px; padding-top: 7px; border-top: 1px solid var(--line); }
+  .vehicle-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5px 12px; }
+  .vehicle-field { display: flex; align-items: baseline; gap: 4px; min-width: 0; white-space: nowrap; }
+  .vehicle-field .k { display: inline; flex: 0 0 auto; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.12em; font-size: 9px; }
+  .vehicle-field .v { display: inline; min-width: 0; margin-top: 0; font-size: 10px; }
 
   .related { background: var(--accent-soft); border-radius: 12px; padding: 14px 18px; margin-top: 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
   .related .block .head { font-size: 9px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--accent); font-weight: 600; margin-bottom: 4px; }
@@ -139,8 +128,9 @@
       </div>
     </div>
     <div class="meta">
-      {% if cp is not null and cp.direccion is not null %}<p>{{ cp.direccion.direccion }}</p>{% endif %}
-      {% if cp is not null and cp.contacto is not null and (cp.contacto.email is not empty or cp.contacto.telefono is not empty) %}<p>{% if cp.contacto.email is not empty %}{{ cp.contacto.email }}{% endif %}{% if cp.contacto.email is not empty and cp.contacto.telefono is not empty %} · {% endif %}{% if cp.contacto.telefono is not empty %}{{ cp.contacto.telefono }}{% endif %}</p>{% endif %}
+      {% if cp is not null and cp.direccion is not null %}<p class="issuer-address">{{ cp.direccion.direccion }}{% if cp.direccion.departamento is not empty %}{% if cp.direccion.direccion is not empty %} · {% endif %}{{ cp.direccion.departamento }}{% endif %}{% if cp.direccion.provincia is not empty %}{% if cp.direccion.direccion is not empty or cp.direccion.departamento is not empty %} · {% endif %}{{ cp.direccion.provincia }}{% endif %}{% if cp.direccion.distrito is not empty %}{% if cp.direccion.direccion is not empty or cp.direccion.departamento is not empty or cp.direccion.provincia is not empty %} · {% endif %}{{ cp.direccion.distrito }}{% endif %}{% if cp.direccion.ubigeo is not empty %}{% if cp.direccion.direccion is not empty or cp.direccion.departamento is not empty or cp.direccion.provincia is not empty or cp.direccion.distrito is not empty %} · {% endif %}Ubigeo {{ cp.direccion.ubigeo }}{% endif %}</p>{% endif %}
+      {% if cp is not null and cp.contacto is not null and (cp.contacto.email is not empty or cp.contacto.telefono is not empty) %}<p class="issuer-contact">{% if cp.contacto.email is not empty %}{{ cp.contacto.email }}{% endif %}{% if cp.contacto.email is not empty and cp.contacto.telefono is not empty %} · {% endif %}{% if cp.contacto.telefono is not empty %}{{ cp.contacto.telefono }}{% endif %}</p>{% endif %}
+      {% if doc.envio is not null and doc.envio.transportista is not null and doc.envio.transportista.numeroRegistroMTC is not empty %}<p class="issuer-mtc">REG. MTC <span class="mono">{{ doc.envio.transportista.numeroRegistroMTC }}</span></p>{% endif %}
     </div>
   </div>
   <div class="doc-id">
@@ -172,7 +162,6 @@
   <div class="chip"><span class="k">Inicio traslado</span><span class="v">{% if doc.envio is not null and doc.envio.fechaTraslado is not null %}{{ doc.envio.fechaTraslado|date('d/m/Y') }}{% endif %}</span></div>
   <div class="chip"><span class="k">Modalidad</span><span class="v">{% if doc.envio is not null %}{{ doc.envio.tipoModalidadTraslado|catalog('18') }}{% endif %}</span></div>
   <div class="chip"><span class="k">Peso · bultos</span><span class="v">{% if doc.envio is not null %}{{ doc.envio.pesoTotal }} {{ doc.envio.pesoTotalUnidadMedida }}{% if doc.envio.numeroDeBultos is not null %} · {{ doc.envio.numeroDeBultos }}{% endif %}{% endif %}</span></div>
-  {% if params.totalGuia is not null %}<div class="chip"><span class="k">Flete</span><span class="v">S/ {{ params.totalGuia|n_format }}</span></div>{% endif %}
 </div>
 
 <div class="parties">
@@ -191,15 +180,6 @@
     {% endif %}
   </div>
 </div>
-
-{% if hasCarrierSection %}
-<div class="detail-card">
-  <div class="head">Transportista emisor</div>
-  {% if carrierName is not empty %}<div class="name">{{ carrierName }}</div>{% endif %}
-  {% if carrierRuc is not empty %}<div class="row"><span class="k">RUC</span><span class="mono">{{ carrierRuc }}</span></div>{% endif %}
-  {% if carrierMtc is not empty %}<div class="row"><span class="k">REG. MTC</span><span class="mono">{{ carrierMtc }}</span></div>{% endif %}
-</div>
-{% endif %}
 
 {% if hasIndicadoresTraslado %}
 <div class="detail-card">
@@ -232,6 +212,8 @@
 </table>
 </div>
 
+{% if params.totalGuia is not null %}<div class="freight-summary"><span class="k">Flete</span><span class="v">S/ {{ params.totalGuia|n_format }}</span></div>{% endif %}
+
 {% if hasSubcontratacion %}
 <div class="detail-card">
   <div class="head">Subcontratación</div>
@@ -239,17 +221,21 @@
     {% if hasSubcontratante %}
     <div>
       <div class="name">Subcontratante</div>
-      {% if doc.subcontratado.nombre is not empty %}<div class="row"><span class="k">Nombre</span><span>{{ doc.subcontratado.nombre }}</span></div>{% endif %}
-      {% if doc.subcontratado.numeroDocumentoIdentidad is not empty %}<div class="row"><span class="k">RUC</span><span class="mono">{{ doc.subcontratado.numeroDocumentoIdentidad }}</span></div>{% endif %}
-      {% if doc.subcontratado.numeroRegistroMTC is not empty %}<div class="row"><span class="k">REG. MTC</span><span class="mono">{{ doc.subcontratado.numeroRegistroMTC }}</span></div>{% endif %}
+      <div class="subcontract-fields">
+        {% if doc.subcontratado.nombre is not empty %}<div class="subcontract-field"><span class="k">Nombre</span><span class="v">{{ doc.subcontratado.nombre }}</span></div>{% endif %}
+        {% if doc.subcontratado.numeroDocumentoIdentidad is not empty %}<div class="subcontract-field"><span class="k">RUC</span><span class="v mono">{{ doc.subcontratado.numeroDocumentoIdentidad }}</span></div>{% endif %}
+        {% if doc.subcontratado.numeroRegistroMTC is not empty %}<div class="subcontract-field"><span class="k">REG. MTC</span><span class="v mono">{{ doc.subcontratado.numeroRegistroMTC }}</span></div>{% endif %}
+      </div>
     </div>
     {% endif %}
     {% if hasSubcontratista %}
     <div>
       <div class="name">Subcontratista</div>
-      {% if params.subcontratistaNombre is not empty %}<div class="row"><span class="k">Nombre</span><span>{{ params.subcontratistaNombre }}</span></div>{% endif %}
-      {% if params.subcontratistaRuc is not empty %}<div class="row"><span class="k">RUC</span><span class="mono">{{ params.subcontratistaRuc }}</span></div>{% endif %}
-      {% if params.subcontratistaMtc is not empty %}<div class="row"><span class="k">REG. MTC</span><span class="mono">{{ params.subcontratistaMtc }}</span></div>{% endif %}
+      <div class="subcontract-fields">
+        {% if params.subcontratistaNombre is not empty %}<div class="subcontract-field"><span class="k">Nombre</span><span class="v">{{ params.subcontratistaNombre }}</span></div>{% endif %}
+        {% if params.subcontratistaRuc is not empty %}<div class="subcontract-field"><span class="k">RUC</span><span class="v mono">{{ params.subcontratistaRuc }}</span></div>{% endif %}
+        {% if params.subcontratistaMtc is not empty %}<div class="subcontract-field"><span class="k">REG. MTC</span><span class="v mono">{{ params.subcontratistaMtc }}</span></div>{% endif %}
+      </div>
     </div>
     {% endif %}
   </div>
@@ -260,20 +246,9 @@
   <div class="card">
     <div class="head"><div class="icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 17V7h13l5 5v5M3 17h2M9 17h10M5 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm14 0a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"/></svg></div><div class="title">Vehículos</div></div>
     {% if doc.envio is not null and doc.envio.vehiculo is not null %}
-    <div class="row"><span class="k">Placa principal</span><span class="mono">{{ doc.envio.vehiculo.placa }}</span></div>
-    {% if doc.envio.vehiculo.numeroCirculacion is not empty %}
-    <div class="row"><span class="k">TUC/CHV</span><span class="mono">{{ doc.envio.vehiculo.numeroCirculacion }}</span></div>
-    {% endif %}
-    {% if doc.envio.vehiculo.marca is not empty %}
-    <div class="row"><span class="k">Marca</span><span>{{ doc.envio.vehiculo.marca }}</span></div>
-    {% endif %}
-    {% if doc.envio.vehiculo.modelo is not empty %}
-    <div class="row"><span class="k">Modelo</span><span>{{ doc.envio.vehiculo.modelo }}</span></div>
-    {% endif %}
-    {% if doc.envio.vehiculo.numeroAutorizacion is not empty %}
-    <div class="row"><span class="k">Autorización</span><span class="mono">{{ doc.envio.vehiculo.numeroAutorizacion }}</span></div>
-    {% endif %}
-    {% if doc.envio.vehiculo.secundarios is not empty %}{% for v in doc.envio.vehiculo.secundarios %}<div class="row"><span class="k">Placa secundaria</span><span class="mono">{{ v.placa }}{% if v.numeroCirculacion is not empty %} · TUC {{ v.numeroCirculacion }}{% endif %}</span></div>{% endfor %}{% endif %}
+    {% set vp = doc.envio.vehiculo %}
+    <div class="vehicle-entry"><div class="vehicle-fields"><div class="vehicle-field"><span class="k">Placa</span><span class="v mono">{{ vp.placa }}</span></div>{% if vp.numeroCirculacion is not empty %}<div class="vehicle-field"><span class="k">TUC/CHV</span><span class="v mono">{{ vp.numeroCirculacion }}</span></div>{% endif %}{% if vp.marca is not empty %}<div class="vehicle-field"><span class="k">Marca</span><span class="v">{{ vp.marca }}</span></div>{% endif %}{% if vp.modelo is not empty %}<div class="vehicle-field"><span class="k">Modelo</span><span class="v">{{ vp.modelo }}</span></div>{% endif %}{% if vp.numeroAutorizacion is not empty %}<div class="vehicle-field"><span class="k">Autorización</span><span class="v mono">{{ vp.numeroAutorizacion }}</span></div>{% endif %}</div></div>
+    {% if vp.secundarios is not empty %}{% for v in vp.secundarios %}<div class="vehicle-entry"><div class="vehicle-fields"><div class="vehicle-field"><span class="k">Placa secundaria</span><span class="v mono">{{ v.placa }}</span></div>{% if v.numeroCirculacion is not empty %}<div class="vehicle-field"><span class="k">TUC/CHV</span><span class="v mono">{{ v.numeroCirculacion }}</span></div>{% endif %}{% if v.marca is not empty %}<div class="vehicle-field"><span class="k">Marca</span><span class="v">{{ v.marca }}</span></div>{% endif %}{% if v.modelo is not empty %}<div class="vehicle-field"><span class="k">Modelo</span><span class="v">{{ v.modelo }}</span></div>{% endif %}{% if v.numeroAutorizacion is not empty %}<div class="vehicle-field"><span class="k">Autorización</span><span class="v mono">{{ v.numeroAutorizacion }}</span></div>{% endif %}</div></div>{% endfor %}{% endif %}
     {% endif %}
   </div>
   <div class="card">
