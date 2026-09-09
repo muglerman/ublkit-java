@@ -127,11 +127,16 @@
     <div class="row"><span>Ubicación</span><span>LIMA — LIMA — MIRAFLORES</span></div>
   </div>
   <div class="party">
+    {% if doc.direccionEntrega is defined and doc.direccionEntrega is not empty and doc.direccionEntrega.direccion is not empty %}
     <div class="label">Entrega</div>
-    <div class="name">Almacén Los Portales — Callao</div>
-    <div class="row"><span>O/C</span><span class="mono">OC-2026-00487</span></div>
-    <div class="row"><span>Guía</span><span class="mono">GRE T001-00452</span></div>
-    <div class="row"><span>Operación</span><span>0101 · Venta interna</span></div>
+    <div class="name">{{ doc.direccionEntrega.direccion }}</div>
+    {% endif %}
+    {% if doc.ordenDeCompra is not empty %}
+    <div class="row"><span>O/C</span><span class="mono">{{ doc.ordenDeCompra }}</span></div>
+    {% endif %}
+    {% if doc.guias is not empty %}<div class="row"><span>Guía</span><span class="mono">{% for guia in doc.guias %}{{ guia.serieNumero }}{% if not loop.last %}, {% endif %}{% endfor %}</span></div>{% endif %}
+    {% if doc.documentosRelacionados is not empty %}<div class="row"><span>Doc. relacionado</span><span class="mono">{% for rel in doc.documentosRelacionados %}{{ rel.serieNumero }}{% if not loop.last %}, {% endif %}{% endfor %}</span></div>{% endif %}
+    <div class="row"><span>Operación</span><span>{{ doc.tipoOperacion }}{% if doc.tipoOperacion is not null %} · {{ doc.tipoOperacion | catalog('51') }}{% endif %}</span></div>
   </div>
 </div>
 
@@ -179,13 +184,15 @@
         <p class="small">Cuota 2 · vence 24/06/2026 · {{ sym }} 5,946.20</p>
       </div>
     </div>
+    {% if doc.detraccion is not empty and doc.detraccion.monto is not null and doc.detraccion.codigoBien is not empty and doc.detraccion.medioPago is not empty and doc.detraccion.cuentaBanco is not empty %}
     <div class="block">
       <div class="head">Detracción</div>
       <div class="body">
-        <p>{{ sym }} 1,427.09 · 020 Bienes gravados con IGV</p>
-        <p class="small">Transferencia en cuenta · Cta. BN 00-032-019287</p>
+        <p>S/ {{ doc.detraccion.monto|n_format }} · {{ doc.detraccion.codigoBien }} - {{ doc.detraccion.codigoBien|catalog('54') }}</p>
+        <p class="small">Medio: {{ doc.detraccion.medioPago|catalog('59') }} · Cta. BN {{ doc.detraccion.cuentaBanco }}</p>
       </div>
     </div>
+    {% endif %}
     <div class="block">
       <div class="head">Observaciones</div>
       <div class="body">
@@ -198,7 +205,6 @@
       <div class="head">Leyendas SUNAT</div>
       <div class="body">
         <p class="small">· SON ONCE MIL OCHOCIENTOS NOVENTA Y DOS CON 40/100 {{ mon }}</p>
-        <p class="small">· Operación sujeta a detracción</p>
       </div>
     </div>
   </div>

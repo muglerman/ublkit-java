@@ -5,20 +5,20 @@
 <title>{{ doc.numero }} · Manifiesto de Carga</title>
 <style>
   {{ fontStyle | raw }}
+  @page { size: A4 landscape; margin: 12mm 10mm 12mm 10mm; }
   * { box-sizing: border-box; }
-  html, body { margin: 0; }
-  body { font-family: 'Inter', sans-serif; font-size: 10px; line-height: 1.4; color: #0a0a0a; background: #fff; width: 1123px; min-height: 794px; padding: 30px 38px; }
+  html, body { margin: 0; padding: 0; }
+  body { font-family: 'Inter', sans-serif; font-size: 10px; line-height: 1.4; color: #0a0a0a; background: #fff; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
   .mono { font-family: 'IBM Plex Mono', monospace; font-variant-numeric: tabular-nums; }
   p { margin: 0; }
 
   .top { display: grid; grid-template-columns: 1fr 340px; align-items: start; gap: 24px; padding-bottom: 13px; border-bottom: 2px solid #0a0a0a; margin-bottom: 13px; }
+  .top, .foot { break-inside: avoid; page-break-inside: avoid; }
   .brand .mark { display: flex; align-items: center; gap: 11px; margin-bottom: 9px; }
   .brand .logo { width: 38px; height: 38px; flex: none; color: #0a0a0a; }
   .brand .name { font-size: 14px; font-weight: 700; letter-spacing: 0.02em; }
-  .brand .meta { display: grid; grid-template-columns: 78px 1fr; column-gap: 12px; row-gap: 2px; font-size: 9.5px; margin: 0; }
-  .brand .meta dt { text-transform: uppercase; letter-spacing: 0.08em; font-size: 8px; color: #737373; }
-  .brand .meta dd { margin: 0; }
-  .brand .meta dd b { font-family: 'IBM Plex Mono', monospace; }
+  .brand .meta { display: grid; gap: 3px; font-size: 9.5px; margin: 0; }
+  .brand .meta b { font-family: 'IBM Plex Mono', monospace; }
 
   .doc-id { text-align: right; }
   .doc-id .kind { font-size: 15px; font-weight: 700; letter-spacing: 0.02em; }
@@ -33,6 +33,9 @@
   .sec-title .c { font-size: 9px; color: #737373; text-transform: uppercase; letter-spacing: 0.1em; }
 
   .items { width: 100%; border-collapse: collapse; table-layout: fixed; }
+  .items thead { display: table-header-group; }
+  .items tfoot { display: table-row-group; }
+  .items tr { break-inside: avoid; page-break-inside: avoid; }
   .items thead th { font-size: 8.5px; text-transform: uppercase; letter-spacing: 0.06em; color: #737373; font-weight: 500; text-align: left; padding: 0 10px 7px 0; border-bottom: 1px solid #0a0a0a; }
   .items tbody td { padding: 8px 10px 8px 0; border-bottom: 1px dashed #d4d4d4; vertical-align: top; font-size: 9.5px; }
   .items .c-fecha { width: 70px; white-space: nowrap; }
@@ -64,15 +67,17 @@
 <div class="top">
   <div class="brand">
     <div class="mark">
-      {% if params.logo is not empty %}<img class="logo" src="{{ params.logo }}" alt="logo" style="object-fit:contain"/>{% else %}<svg class="logo" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="20" cy="20" r="14"/><path d="M9 23l5-9 6 4 6-7"/></svg>{% endif %}
+      {% if params.logo is not empty %}<img class="logo manifest-logo" src="{{ params.logo }}" alt="logo" style="object-fit:contain"/>{% else %}<svg class="logo manifest-logo" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="20" cy="20" r="14"/><path d="M9 23l5-9 6 4 6-7"/></svg>{% endif %}
       <div class="name">{{ doc.emisorRazonSocial }}</div>
     </div>
-    <dl class="meta">
-      {% if doc.emisorDireccion is not empty %}<dt>Dirección</dt><dd>{{ doc.emisorDireccion }}</dd>{% endif %}
-      {% if doc.emisorUbicacion is not empty %}<dt>Ubicación</dt><dd>{{ doc.emisorUbicacion }}</dd>{% endif %}
-      <dt>RUC · MTC</dt><dd><b>{{ doc.emisorRuc }}</b>{% if doc.emisorRegistroMtc is not empty %} · Reg. MTC {{ doc.emisorRegistroMtc }}{% endif %}</dd>
-      {% if doc.emisorEmail is not empty or doc.emisorTelefono is not empty %}<dt>Contacto</dt><dd>{% if doc.emisorEmail is not empty %}{{ doc.emisorEmail }}{% endif %}{% if doc.emisorEmail is not empty and doc.emisorTelefono is not empty %} · {% endif %}{{ doc.emisorTelefono }}</dd>{% endif %}
-    </dl>
+    <div class="meta">
+      {% if doc.emisorDireccion is not empty %}<div class="manifest-header-address">{{ doc.emisorDireccion }}</div>{% endif %}
+      {% if doc.emisorUbicacion is not empty %}<div class="manifest-header-location">{{ doc.emisorUbicacion }}</div>{% endif %}
+      <div class="manifest-header-registration">RUC <b>{{ doc.emisorRuc }}</b>{% if doc.emisorRegistroMtc is not empty %} · Reg. MTC <b>{{ doc.emisorRegistroMtc }}</b>{% endif %}</div>
+      {% if doc.emisorEmail is not empty or doc.emisorTelefono is not empty %}
+      <div class="manifest-header-contact">{% if doc.emisorEmail is not empty %}<span class="manifest-contact-email">{{ doc.emisorEmail }}</span>{% endif %}{% if doc.emisorTelefono is not empty %}{% if doc.emisorEmail is not empty %}<span class="manifest-contact-separator"> · </span>{% endif %}<span class="manifest-contact-phone">{{ doc.emisorTelefono }}</span>{% endif %}</div>
+      {% endif %}
+    </div>
   </div>
   <div class="doc-id">
     <div class="kind">MANIFIESTO DE CARGA</div>

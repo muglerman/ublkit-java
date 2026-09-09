@@ -5,14 +5,16 @@
 <title>{{ doc.numero }} · Manifiesto de Carga</title>
 <style>
   {{ fontStyle | raw }}
+  @page { size: A4 landscape; margin: 12mm 10mm 12mm 10mm; }
   * { box-sizing: border-box; }
-  html, body { margin: 0; }
+  html, body { margin: 0; padding: 0; }
   :root { --ink: #0f0f10; --ink-2: #4a4a50; --ink-3: #8c8c94; --accent: #ff5a1f; --accent-soft: #fff1ea; --line: #e8e6df; --paper: #fbfaf4; }
-  body { font-family: 'Archivo', sans-serif; font-size: 10px; line-height: 1.4; color: var(--ink); background: var(--paper); width: 1123px; min-height: 794px; padding: 28px 36px; }
+  body { font-family: 'Archivo', sans-serif; font-size: 10px; line-height: 1.4; color: var(--ink); background: var(--paper); print-color-adjust: exact; -webkit-print-color-adjust: exact; }
   .mono { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
   p { margin: 0; }
 
   .top { display: grid; grid-template-columns: 1fr 320px; gap: 16px; align-items: stretch; margin-bottom: 14px; }
+  .top, .foot { break-inside: avoid; page-break-inside: avoid; }
   .id-left { padding: 14px 16px; border: 1.5px solid var(--ink); border-radius: 4px; background: #fff; display: flex; flex-direction: column; justify-content: center; }
   .id-left .mark { display: flex; align-items: center; gap: 10px; margin-bottom: 9px; }
   .id-left .logo { width: 36px; height: 36px; flex: none; background: var(--ink); color: var(--accent); border-radius: 2px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
@@ -38,6 +40,9 @@
 
   .items-wrap { background: #fff; border-radius: 4px; border: 1px solid var(--line); overflow: hidden; }
   .items { width: 100%; border-collapse: collapse; table-layout: fixed; }
+  .items thead { display: table-header-group; }
+  .items tfoot { display: table-row-group; }
+  .items tr { break-inside: avoid; page-break-inside: avoid; }
   .items thead th { font-size: 8.5px; text-transform: uppercase; letter-spacing: 0.04em; color: #fff; font-weight: 700; text-align: left; padding: 9px 10px; background: var(--ink); }
   .items tbody td { padding: 8px 10px; border-top: 1px solid var(--line); vertical-align: top; font-size: 9.5px; }
   .items tbody tr:nth-child(even) td { background: #faf9f3; }
@@ -72,17 +77,19 @@
 <div class="top">
   <div class="id-left">
     <div class="mark">
-      <div class="logo">{% if params.logo is not empty %}<img src="{{ params.logo }}" alt="logo"/>{% else %}<svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="3"><circle cx="20" cy="20" r="14"/><path d="M9 23l5-9 6 4 6-7"/></svg>{% endif %}</div>
+      <div class="logo manifest-logo">{% if params.logo is not empty %}<img src="{{ params.logo }}" alt="logo"/>{% else %}<svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="3"><circle cx="20" cy="20" r="14"/><path d="M9 23l5-9 6 4 6-7"/></svg>{% endif %}</div>
       <div>
         <div class="co-name">{{ doc.emisorRazonSocial }}</div>
         {% if doc.emisorNombreComercial is not empty and doc.emisorNombreComercial != doc.emisorRazonSocial %}<div class="co-tag">{{ doc.emisorNombreComercial }}</div>{% endif %}
       </div>
     </div>
     <div class="info">
-      {% if doc.emisorDireccion is not empty %}<span>{{ doc.emisorDireccion }}</span>{% endif %}
-      {% if doc.emisorUbicacion is not empty %}<span>{{ doc.emisorUbicacion }}</span>{% endif %}
-      {% if doc.emisorEmail is not empty or doc.emisorTelefono is not empty %}<span>{% if doc.emisorEmail is not empty %}{{ doc.emisorEmail }}{% endif %}{% if doc.emisorEmail is not empty and doc.emisorTelefono is not empty %} · {% endif %}{{ doc.emisorTelefono }}</span>{% endif %}
-      <span>RUC <b>{{ doc.emisorRuc }}</b>{% if doc.emisorRegistroMtc is not empty %} · Reg. MTC <b>{{ doc.emisorRegistroMtc }}</b>{% endif %}</span>
+      {% if doc.emisorDireccion is not empty %}<span class="manifest-header-address">{{ doc.emisorDireccion }}</span>{% endif %}
+      {% if doc.emisorUbicacion is not empty %}<span class="manifest-header-location">{{ doc.emisorUbicacion }}</span>{% endif %}
+      <span class="manifest-header-registration">RUC <b>{{ doc.emisorRuc }}</b>{% if doc.emisorRegistroMtc is not empty %} · Reg. MTC <b>{{ doc.emisorRegistroMtc }}</b>{% endif %}</span>
+      {% if doc.emisorEmail is not empty or doc.emisorTelefono is not empty %}
+      <span class="manifest-header-contact">{% if doc.emisorEmail is not empty %}<span class="manifest-contact-email">{{ doc.emisorEmail }}</span>{% endif %}{% if doc.emisorTelefono is not empty %}{% if doc.emisorEmail is not empty %}<span class="manifest-contact-separator"> · </span>{% endif %}<span class="manifest-contact-phone">{{ doc.emisorTelefono }}</span>{% endif %}</span>
+      {% endif %}
     </div>
   </div>
   <div class="id-right">

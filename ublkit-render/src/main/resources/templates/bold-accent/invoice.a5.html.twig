@@ -154,14 +154,14 @@
     <div class="row"><span class="k">{{ cl.tipoDocIdentidad|catalogAttr('06','abreviatura') }}</span><span class="mono">{{ cl.numDocIdentidad }}</span></div>
     <div class="row"><span class="k">Dirección</span><span>{{ cl.direccion.direccion }}</span></div>
     <div class="row"><span class="k">Ubicación</span><span>{{ cl.direccion.departamento }} — {{ cl.direccion.provincia }} — {{ cl.direccion.distrito }}</span></div>
-    {% if doc.ordenDeCompra %}
+    {% if doc.ordenDeCompra is not empty %}
     <div class="row"><span class="k">O/C</span><span class="mono">{{ doc.ordenDeCompra }}</span></div>
     {% endif %}
   </div>
   <div class="party">
     <div class="label">Operación</div>
     <div class="name">{% if doc.tipoOperacion %}{{ doc.tipoOperacion }} — {{ doc.tipoOperacion|catalog('51') }}{% else %}VENTA INTERNA{% endif %}</div>
-    {% if doc.direccionEntrega is not null %}
+    {% if doc.direccionEntrega is not empty and doc.direccionEntrega.direccion is not empty %}
     <div class="row"><span class="k">Entrega</span><span>{{ doc.direccionEntrega.direccion }}</span></div>
     {% endif %}
     {% if doc.guias is not empty %}
@@ -216,7 +216,7 @@
     </div></div>
     {% endif %}
 
-    {% if doc.detraccion is not null %}
+    {% if doc.detraccion is not empty and doc.detraccion.monto is not null and doc.detraccion.codigoBien is not empty and doc.detraccion.medioPago is not empty and doc.detraccion.cuentaBanco is not empty %}
     <div class="block"><div class="head">Detracción</div><div class="body">
       <p><b>S/ {{ doc.detraccion.monto|n_format }}</b> · {{ doc.detraccion.codigoBien }} - {{ doc.detraccion.codigoBien|catalog('54') }}</p>
       <p class="small">Medio: {{ doc.detraccion.medioPago|catalog('59') }} · Cta. BN {{ doc.detraccion.cuentaBanco }}</p>

@@ -196,7 +196,7 @@
       </div>
     </div>
     {% endif %}
-    {% if doc.detraccion is not null %}
+    {% if doc.detraccion is not empty and doc.detraccion.monto is not null and doc.detraccion.codigoBien is not empty and doc.detraccion.medioPago is not empty and doc.detraccion.cuentaBanco is not empty %}
     <div class="block">
       <div class="head">Detracción SPOT</div>
       <div class="body">

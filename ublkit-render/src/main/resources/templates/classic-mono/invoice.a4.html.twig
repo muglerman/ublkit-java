@@ -144,9 +144,13 @@
     <div class="row"><span>Ubicación</span><span>{% if cl is not null and cl.direccion is not null %}{{ cl.direccion.departamento }} — {{ cl.direccion.provincia }} — {{ cl.direccion.distrito }}{% endif %}</span></div>
   </div>
   <div class="party">
+    {% if doc.direccionEntrega is defined and doc.direccionEntrega is not empty and doc.direccionEntrega.direccion is not empty %}
     <div class="label">Entrega</div>
-    <div class="name">{% if doc.direccionEntrega is defined and doc.direccionEntrega is not null %}{{ doc.direccionEntrega.direccion }}{% endif %}</div>
+    <div class="name">{{ doc.direccionEntrega.direccion }}</div>
+    {% endif %}
+    {% if doc.ordenDeCompra is not empty %}
     <div class="row"><span>O/C</span><span class="mono">{{ doc.ordenDeCompra }}</span></div>
+    {% endif %}
     {% if doc.guias is not empty %}<div class="row"><span>Guía</span><span class="mono">{% for guia in doc.guias %}{{ guia.serieNumero }}{% if not loop.last %}, {% endif %}{% endfor %}</span></div>{% endif %}
     {% if doc.documentosRelacionados is not empty %}<div class="row"><span>Doc. relacionado</span><span class="mono">{% for rel in doc.documentosRelacionados %}{{ rel.serieNumero }}{% if not loop.last %}, {% endif %}{% endfor %}</span></div>{% endif %}
     <div class="row"><span>Operación</span><span>{{ doc.tipoOperacion }} · {{ doc.tipoOperacion | catalog('51') }}</span></div>
@@ -199,15 +203,15 @@
       </div>
     </div>
     {% endif %}
+    {% if doc.detraccion is not empty and doc.detraccion.monto is not null and doc.detraccion.codigoBien is not empty and doc.detraccion.medioPago is not empty and doc.detraccion.cuentaBanco is not empty %}
     <div class="block">
       <div class="head">Detracción</div>
       <div class="body">
-        {% if doc.detraccion is not null %}
-          <p>S/ {{ doc.detraccion.monto|n_format }} · {{ doc.detraccion.codigoBien }} - {{ doc.detraccion.codigoBien|catalog('54') }}</p>
-          <p class="small">Medio: {{ doc.detraccion.medioPago|catalog('59') }} · Cta. BN {{ doc.detraccion.cuentaBanco }}</p>
-        {% endif %}
+        <p>S/ {{ doc.detraccion.monto|n_format }} · {{ doc.detraccion.codigoBien }} - {{ doc.detraccion.codigoBien|catalog('54') }}</p>
+        <p class="small">Medio: {{ doc.detraccion.medioPago|catalog('59') }} · Cta. BN {{ doc.detraccion.cuentaBanco }}</p>
       </div>
     </div>
+    {% endif %}
     {% if doc.observaciones is not empty %}
     <div class="block">
       <div class="head">Observaciones</div>
