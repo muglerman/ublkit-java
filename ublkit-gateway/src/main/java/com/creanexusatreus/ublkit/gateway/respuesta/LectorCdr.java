@@ -2,14 +2,18 @@ package com.creanexusatreus.ublkit.gateway.respuesta;
 
 import com.creanexusatreus.ublkit.core.error.ExcepcionUblKit;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.ByteArrayInputStream;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -20,6 +24,9 @@ import java.util.zip.ZipInputStream;
  * @since 0.1.0
  */
 public final class LectorCdr {
+
+    private static final String CAC_NS = "urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2";
+    private static final String CBC_NS = "urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2";
 
     private LectorCdr() { }
 
@@ -54,19 +61,19 @@ public final class LectorCdr {
         Document doc = parsearXmlSeguro(xmlBytes);
 
         // cbc:ResponseCode
-        String responseCode = extraerValorNodo(doc, "cbc:ResponseCode");
+        String responseCode = extraerValorNodo(doc, CBC_NS, "ResponseCode");
 
         // cbc:Description
-        String descripcion = extraerValorNodo(doc, "cbc:Description");
+        String descripcion = extraerValorNodo(doc, CBC_NS, "Description");
 
         // cbc:Note (pueden ser varias, usualmente las observaciones)
         List<String> notas = new ArrayList<>();
-        NodeList noteNodes = doc.getElementsByTagName("cbc:Note");
+        NodeList noteNodes = doc.getElementsByTagNameNS(CBC_NS, "Note");
         for (int i = 0; i < noteNodes.getLength(); i++) {
             notas.add(noteNodes.item(i).getTextContent());
         }
 
-        return new ArchivoCdr(zipBase, responseCode, descripcion, notas);
+        return new ArchivoCdr(zipBase, responseCode, descripcion, notas, extraerQrUrl(doc));
     }
 
     private static Document parsearXmlSeguro(byte[] xmlBytes) {
@@ -89,12 +96,65 @@ public final class LectorCdr {
         }
     }
 
-    private static String extraerValorNodo(Document doc, String tagName) {
-        NodeList nodos = doc.getElementsByTagName(tagName);
+    private static String extraerValorNodo(Document doc, String namespace, String localName) {
+        NodeList nodos = doc.getElementsByTagNameNS(namespace, localName);
         if (nodos.getLength() > 0) {
             return nodos.item(0).getTextContent();
         }
         return null;
+    }
+
+    private static String extraerQrUrl(Document doc) {
+        NodeList documentResponseNodes = doc.getElementsByTagNameNS(CAC_NS, "DocumentResponse");
+        for (int i = 0; i < documentResponseNodes.getLength(); i++) {
+            Node responseNode = documentResponseNodes.item(i);
+            if (!(responseNode instanceof Element responseElement)) {
+                continue;
+            }
+            NodeList documentReferenceNodes = responseElement.getElementsByTagNameNS(CAC_NS, "DocumentReference");
+            for (int j = 0; j < documentReferenceNodes.getLength(); j++) {
+                Node documentReferenceNode = documentReferenceNodes.item(j);
+                if (!(documentReferenceNode instanceof Element documentReferenceElement)) {
+                    continue;
+                }
+                NodeList descriptionNodes = documentReferenceElement.getElementsByTagNameNS(CBC_NS,
+                        "DocumentDescription");
+                for (int k = 0; k < descriptionNodes.getLength(); k++) {
+                    String candidate = normalizarQrUrl(descriptionNodes.item(k).getTextContent());
+                    if (candidate != null) {
+                        return candidate;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    private static String normalizarQrUrl(String candidate) {
+        if (candidate == null) {
+            return null;
+        }
+        String trimmed = candidate.trim();
+        if (trimmed.isEmpty()) {
+            return null;
+        }
+        try {
+            URI uri = URI.create(trimmed);
+            if (!uri.isAbsolute()) {
+                return null;
+            }
+            String scheme = uri.getScheme();
+            if (scheme == null) {
+                return null;
+            }
+            String normalizedScheme = scheme.toLowerCase(Locale.ROOT);
+            if (!"http".equals(normalizedScheme) && !"https".equals(normalizedScheme)) {
+                return null;
+            }
+            return uri.toString();
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
     }
 
     /**

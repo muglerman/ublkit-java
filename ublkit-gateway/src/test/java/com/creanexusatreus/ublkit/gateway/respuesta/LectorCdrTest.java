@@ -85,7 +85,62 @@ class LectorCdrTest {
         
         assertThat(cdr.codigoRegreso()).isEqualTo("0");
         assertThat(cdr.notas()).hasSize(2).contains("4001 - Faltan datos secundarios");
-        
+
         assertThat(LectorCdr.determinarEstado(cdr)).isEqualTo(EstadoEnvio.ACEPTADO_CON_OBSERVACIONES);
+    }
+
+    @Test
+    void testExtraerQrUrlOficialDesdeDocumentDescription() {
+        String qrUrl = "https://e-factura.sunat.gob.pe/v1/contribuyente/gre/comprobantes/descargaqr?hashqr=abc123";
+        String xmlCdr = """
+                <?xml version="1.0" encoding="ISO-8859-1"?>
+                <ar:ApplicationResponse xmlns:ar="urn:oasis:names:specification:ubl:schema:xsd:ApplicationResponse-2"
+                                        xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+                                        xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
+                    <cac:DocumentResponse>
+                        <cac:Response>
+                            <cbc:ResponseCode>0</cbc:ResponseCode>
+                            <cbc:Description>El Comprobante ha sido aceptado</cbc:Description>
+                        </cac:Response>
+                        <cac:DocumentReference>
+                            <cbc:ID>T001-1</cbc:ID>
+                            <cbc:DocumentDescription>%s</cbc:DocumentDescription>
+                        </cac:DocumentReference>
+                    </cac:DocumentResponse>
+                </ar:ApplicationResponse>
+                """.formatted(qrUrl);
+
+        byte[] zipBytes = ZipHelper.comprimir(xmlCdr, "R-20000000000-09-T001-1.xml");
+
+        ArchivoCdr cdr = LectorCdr.extraer(zipBytes);
+
+        assertThat(cdr.qrUrl()).isEqualTo(qrUrl);
+    }
+
+    @Test
+    void testIgnoraDocumentDescriptionSinHttpOHttps() {
+        String xmlCdr = """
+                <?xml version="1.0" encoding="ISO-8859-1"?>
+                <ar:ApplicationResponse xmlns:ar="urn:oasis:names:specification:ubl:schema:xsd:ApplicationResponse-2"
+                                        xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+                                        xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
+                    <cac:DocumentResponse>
+                        <cac:Response>
+                            <cbc:ResponseCode>0</cbc:ResponseCode>
+                            <cbc:Description>El Comprobante ha sido aceptado</cbc:Description>
+                        </cac:Response>
+                        <cac:DocumentReference>
+                            <cbc:ID>T001-2</cbc:ID>
+                            <cbc:DocumentDescription>javascript:alert('xss')</cbc:DocumentDescription>
+                        </cac:DocumentReference>
+                    </cac:DocumentResponse>
+                </ar:ApplicationResponse>
+                """;
+
+        byte[] zipBytes = ZipHelper.comprimir(xmlCdr, "R-20000000000-09-T001-2.xml");
+
+        ArchivoCdr cdr = LectorCdr.extraer(zipBytes);
+
+        assertThat(cdr.qrUrl()).isNull();
     }
 }

@@ -19,11 +19,16 @@ public record ArchivoCdr(
         byte[] archivoBytes,
         String codigoRegreso,
         String descripcion,
-        List<String> notas
+        List<String> notas,
+        String qrUrl
 ) {
     public ArchivoCdr {
         archivoBytes = archivoBytes == null ? null : archivoBytes.clone();
         notas = notas == null ? List.of() : List.copyOf(notas);
+    }
+
+    public ArchivoCdr(byte[] archivoBytes, String codigoRegreso, String descripcion, List<String> notas) {
+        this(archivoBytes, codigoRegreso, descripcion, notas, null);
     }
 
     @Override
@@ -38,13 +43,14 @@ public record ArchivoCdr(
         return Arrays.equals(this.archivoBytes, other.archivoBytes)
                 && Objects.equals(this.codigoRegreso, other.codigoRegreso)
                 && Objects.equals(this.descripcion, other.descripcion)
-                && Objects.equals(this.notas, other.notas);
+                && Objects.equals(this.notas, other.notas)
+                && Objects.equals(this.qrUrl, other.qrUrl);
     }
 
     @Override
     public int hashCode() {
         int result = Arrays.hashCode(archivoBytes);
-        result = 31 * result + Objects.hash(codigoRegreso, descripcion, notas);
+        result = 31 * result + Objects.hash(codigoRegreso, descripcion, notas, qrUrl);
         return result;
     }
 
@@ -55,6 +61,7 @@ public record ArchivoCdr(
                 ", codigoRegreso=" + codigoRegreso +
                 ", descripcion=" + descripcion +
                 ", notas=" + notas +
+                ", qrUrl=" + qrUrl +
                 ']';
     }
 }

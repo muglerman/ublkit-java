@@ -22,13 +22,15 @@ class ArchivoCdrTest {
         String codigo = "0";
         String descripcion = "Aceptado";
         List<String> notas = List.of("nota1", "nota2");
+        String qrUrl = "https://e-factura.sunat.gob.pe/gre";
 
-        ArchivoCdr cdr = new ArchivoCdr(bytes, codigo, descripcion, notas);
+        ArchivoCdr cdr = new ArchivoCdr(bytes, codigo, descripcion, notas, qrUrl);
 
         assertThat(cdr).isNotNull();
         assertThat(cdr.codigoRegreso()).isEqualTo(codigo);
         assertThat(cdr.descripcion()).isEqualTo(descripcion);
         assertThat(cdr.notas()).hasSize(2);
+        assertThat(cdr.qrUrl()).isEqualTo(qrUrl);
     }
 
     /**
@@ -206,12 +208,14 @@ class ArchivoCdrTest {
      */
     @Test
     void record_toString_providesReadableRepresentation() {
-        ArchivoCdr cdr = new ArchivoCdr(new byte[] { 1, 2, 3 }, "0", "Aceptado", List.of("nota1"));
+        ArchivoCdr cdr = new ArchivoCdr(new byte[] { 1, 2, 3 }, "0", "Aceptado", List.of("nota1"),
+                "https://e-factura.sunat.gob.pe/gre");
         String str = cdr.toString();
 
         assertThat(str).contains("ArchivoCdr");
         assertThat(str).contains("codigoRegreso=0");
         assertThat(str).contains("Aceptado");
+        assertThat(str).contains("qrUrl=https://e-factura.sunat.gob.pe/gre");
     }
 
     /**
