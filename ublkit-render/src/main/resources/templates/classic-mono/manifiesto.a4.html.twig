@@ -5,7 +5,7 @@
 <title>{{ doc.numero }} · Manifiesto de Carga</title>
 <style>
   {{ fontStyle | raw }}
-  @page { size: A4 landscape; margin: 12mm 10mm 12mm 10mm; }
+  @page { size: A4 portrait; margin: 12mm 10mm; }
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; }
   body { font-family: 'Inter', sans-serif; font-size: 10px; line-height: 1.4; color: #0a0a0a; background: #fff; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
@@ -41,7 +41,6 @@
   .items .c-fecha { width: 70px; white-space: nowrap; }
   .items .c-serie { width: 96px; }
   .items .c-taquito { width: 104px; white-space: nowrap; }
-  .items .c-placa { width: 70px; white-space: nowrap; }
   .items .c-bul, .items .c-weight, .items .c-flete { text-align: right; }
   .items .c-bul { width: 52px; font-weight: 600; }
   .items .c-weight { width: 78px; color: #525252; }
@@ -99,9 +98,7 @@
       <th class="c-fecha">F. Emisión</th>
       <th class="c-serie">Serie · N°</th>
       <th class="c-taquito">N° Tracking</th>
-      <th>Remitente</th>
-      <th>Destino</th>
-      <th class="c-placa">Placa</th>
+      <th>Destinatario</th>
       <th class="c-weight">Peso kg</th>
       <th class="c-bul">Bultos</th>
       <th class="c-flete">Flete S/</th>
@@ -114,9 +111,7 @@
       <td class="c-fecha mono">{% if l.fechaEmision is not null %}{{ l.fechaEmision|date('d/m/Y') }}{% endif %}</td>
       <td class="c-serie mono">{{ l.guiaSerieNumero }}</td>
       <td class="c-taquito mono">{{ l.taquito }}</td>
-      <td class="party">{{ l.remitente }}</td>
-      <td class="party">{{ l.destinoDistrito }}</td>
-      <td class="c-placa mono">{{ l.placa }}</td>
+      <td class="party">{{ l.destinatario }}</td>
       <td class="c-weight mono">{{ l.peso|n_format }}</td>
       <td class="c-bul mono">{{ l.bultos }}</td>
       <td class="c-flete mono">{{ l.flete|n_format }}</td>
@@ -126,7 +121,7 @@
   </tbody>
   <tfoot>
     <tr>
-      <td class="lbl" colspan="6">Total · {{ doc.totalGuias }} guías consolidadas</td>
+      <td class="lbl" colspan="4">Total · {{ doc.totalGuias }} guías consolidadas</td>
       <td class="c-weight mono">{{ doc.totalPeso|n_format }}</td>
       <td class="c-bul mono">{{ doc.totalBultos }}</td>
       <td class="c-flete mono">{{ doc.totalFlete|n_format }}</td>

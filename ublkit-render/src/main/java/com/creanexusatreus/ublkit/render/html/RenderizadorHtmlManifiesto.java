@@ -18,15 +18,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Renderizador del Manifiesto de Carga en HTML usando Pebble. Documento interno: solo A4 apaisado
- * (horizontal, por la cantidad de columnas), sin QR ni hash. El estilo visual se resuelve por
+ * Renderizador del Manifiesto de Carga en HTML usando Pebble. Documento interno en A4 vertical,
+ * sin QR ni hash. El estilo visual se resuelve por
  * {@link EstiloPlantilla}.
  *
  * @since 0.4.0
  */
 public class RenderizadorHtmlManifiesto implements RenderizadorDocumento<BorradorManifiesto> {
 
-    private static final FormatoImpresion FORMATO = FormatoImpresion.A4_LANDSCAPE;
+    private static final FormatoImpresion FORMATO = FormatoImpresion.A4;
     private final PebbleEngine engine;
 
     public RenderizadorHtmlManifiesto() {

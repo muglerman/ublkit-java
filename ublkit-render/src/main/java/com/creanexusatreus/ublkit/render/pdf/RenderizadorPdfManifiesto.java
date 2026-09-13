@@ -9,14 +9,13 @@ import com.creanexusatreus.ublkit.render.modelo.ResultadoRender;
 import com.creanexusatreus.ublkit.render.pdf.helper.PlaywrightBrowserManager;
 
 /**
- * Convierte un {@link BorradorManifiesto} en PDF (A4 apaisado) usando HTML + Playwright. El
- * manifiesto consolida muchas columnas, por lo que se imprime en horizontal para que no se solapen.
+ * Convierte un {@link BorradorManifiesto} en PDF A4 vertical usando HTML + Playwright.
  *
  * @since 0.4.0
  */
 public class RenderizadorPdfManifiesto implements RenderizadorDocumento<BorradorManifiesto> {
 
-    private static final FormatoImpresion FORMATO = FormatoImpresion.A4_LANDSCAPE;
+    private static final FormatoImpresion FORMATO = FormatoImpresion.A4;
     private final RenderizadorHtmlManifiesto renderizadorHtml;
 
     public RenderizadorPdfManifiesto() {

@@ -24,7 +24,7 @@ import com.creanexusatreus.ublkit.render.modelo.LineaManifiesto;
 import com.creanexusatreus.ublkit.render.modelo.ResultadoRender;
 
 /**
- * Gate del Manifiesto de Carga: verifica que las 5 plantillas {@code manifiesto.a4-landscape.html.twig}
+ * Gate del Manifiesto de Carga: verifica que las 5 plantillas {@code manifiesto.a4.html.twig}
  * compilan y cablean los datos reales (cabecera con ubicación del emisor, tabla de guías con distrito
  * de destino, condición de pago → pill). Valida HTML y PDF multipágina para cubrir sintaxis Pebble,
  * contrato de cabecera y paginación en cada estilo.
@@ -134,9 +134,12 @@ class RenderizadorManifiestoTest {
         // Tabla de guías
         assertTrue(html.contains("T001-02139"), "Falta serie-número de guía en " + estilo);
         assertTrue(html.contains("0002-026708"), "Falta taquito en " + estilo);
-        assertTrue(html.contains("Zoilo Espinoza Castillo"), "Falta remitente en " + estilo);
-        assertTrue(html.contains("PUCALLPA"), "Falta distrito de destino en " + estilo);
-        assertTrue(html.contains("AHP-842"), "Falta placa en " + estilo);
+        assertTrue(html.contains("Comercial San Juan E.I.R.L."), "Falta destinatario en " + estilo);
+        assertFalse(html.contains("Zoilo Espinoza Castillo"), "No debe mostrarse remitente en " + estilo);
+        assertFalse(html.contains("PUCALLPA"), "No debe mostrarse destino en " + estilo);
+        assertFalse(html.contains("AHP-842"), "No debe mostrarse placa en " + estilo);
+        assertFalse(html.contains(">Remitente<"), "No debe existir columna Remitente en " + estilo);
+        assertTrue(html.contains(">Destinatario<"), "Falta columna Destinatario en " + estilo);
         // Pills de condición de pago (clase derivada vía matches)
         assertTrue(html.contains("cancelado"), "Falta clase pill 'cancelado' en " + estilo);
         assertTrue(html.contains("cobrar"), "Falta clase pill 'cobrar' en " + estilo);
@@ -186,7 +189,7 @@ class RenderizadorManifiestoTest {
     void declaraReglasLocalesDePaginacionYMargenes(EstiloPlantilla estilo) {
         String html = renderHtml(sample(), estilo);
 
-        assertTrue(html.contains("@page { size: A4 landscape; margin: 12mm 10mm 12mm 10mm; }"),
+        assertTrue(html.contains("@page { size: A4 portrait; margin: 12mm 10mm; }"),
                 "Faltan reglas @page locales en " + estilo);
         assertTrue(html.contains("display: table-header-group;"), "Falta repetición de cabecera de tabla en " + estilo);
         assertTrue(html.contains("display: table-row-group;"), "Falta footer no repetido en " + estilo);
