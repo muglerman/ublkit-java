@@ -37,6 +37,11 @@ class RenderizadorManifiestoTest {
     private static final String LOGO_DATA_URI =
             "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCI+PHJlY3Qgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjMUU0Njk0Ii8+PC9zdmc+";
     private static final Pattern PAGE_OBJECT_PATTERN = Pattern.compile("/Type\\s*/Page\\b");
+    private static final Pattern PDF_OBJECT_PATTERN = Pattern.compile("\\d+\\s+\\d+\\s+obj\\b(.*?)endobj", Pattern.DOTALL);
+    private static final Pattern PAGE_TYPE_INSIDE_OBJECT_PATTERN = Pattern.compile("/Type\\s*/Page\\b");
+    private static final Pattern MEDIABOX_PATTERN =
+            Pattern.compile("/MediaBox\\s*\\[\\s*([\\d.+-]+)\\s+([\\d.+-]+)\\s+([\\d.+-]+)\\s+([\\d.+-]+)\\s*]");
+    private static final Pattern ROTATE_PATTERN = Pattern.compile("/Rotate\\s+(-?\\d+)");
 
     private static BorradorManifiesto sample() {
         return sample("operaciones@mantaro.pe", "(01) 555-7788");
@@ -110,6 +115,61 @@ class RenderizadorManifiestoTest {
             pages++;
         }
         return pages;
+    }
+
+    private static void assertPaginasA4Vertical(byte[] pdf, EstiloPlantilla estilo) {
+        String contenidoPdf = new String(pdf, StandardCharsets.ISO_8859_1);
+        Matcher objetos = PDF_OBJECT_PATTERN.matcher(contenidoPdf);
+        Matcher mediaBoxGlobal = MEDIABOX_PATTERN.matcher(contenidoPdf);
+        float[] mediaBoxHeredado = mediaBoxGlobal.find()
+                ? parseMediaBox(mediaBoxGlobal)
+                : null;
+
+        int paginasValidadas = 0;
+        while (objetos.find()) {
+            String objeto = objetos.group(1);
+            if (!PAGE_TYPE_INSIDE_OBJECT_PATTERN.matcher(objeto).find()) {
+                continue;
+            }
+            paginasValidadas++;
+
+            Matcher mediaBoxLocal = MEDIABOX_PATTERN.matcher(objeto);
+            float[] mediaBox = mediaBoxLocal.find()
+                    ? parseMediaBox(mediaBoxLocal)
+                    : mediaBoxHeredado;
+
+            assertTrue(mediaBox != null,
+                    "No se pudo resolver MediaBox de la página " + paginasValidadas + " en " + estilo);
+
+            float width = mediaBox[2] - mediaBox[0];
+            float height = mediaBox[3] - mediaBox[1];
+            assertTrue(height > width,
+                    "La página " + paginasValidadas + " no está en vertical (alto <= ancho) en " + estilo);
+            assertTrue(width >= 590f && width <= 600f,
+                    "Ancho fuera de rango A4 en página " + paginasValidadas + " (" + width + ") para " + estilo);
+            assertTrue(height >= 835f && height <= 850f,
+                    "Alto fuera de rango A4 en página " + paginasValidadas + " (" + height + ") para " + estilo);
+
+            Matcher rotate = ROTATE_PATTERN.matcher(objeto);
+            if (rotate.find()) {
+                int rotacion = Math.floorMod(Integer.parseInt(rotate.group(1)), 360);
+                assertTrue(rotacion != 90 && rotacion != 270,
+                        "La página " + paginasValidadas + " tiene rotación apaisada (" + rotacion + "°) en " + estilo);
+            }
+        }
+
+        assertTrue(paginasValidadas > 1, "No se validaron páginas suficientes para verificar multipágina en " + estilo);
+        assertTrue(paginasValidadas == pageCount(pdf),
+                "Cantidad de páginas validadas no coincide con el conteo detectado en " + estilo);
+    }
+
+    private static float[] parseMediaBox(Matcher mediaBoxMatcher) {
+        return new float[]{
+                Float.parseFloat(mediaBoxMatcher.group(1)),
+                Float.parseFloat(mediaBoxMatcher.group(2)),
+                Float.parseFloat(mediaBoxMatcher.group(3)),
+                Float.parseFloat(mediaBoxMatcher.group(4))
+        };
     }
 
     @ParameterizedTest(name = "manifiesto · estilo {0}")
@@ -208,5 +268,6 @@ class RenderizadorManifiestoTest {
         assertTrue(pdf[0] == '%' && pdf[1] == 'P' && pdf[2] == 'D' && pdf[3] == 'F',
                 "El contenido no inicia con la cabecera %PDF en " + estilo);
         assertTrue(pageCount(pdf) > 1, "El manifiesto debería abarcar más de una página en " + estilo);
+        assertPaginasA4Vertical(pdf, estilo);
     }
 }
