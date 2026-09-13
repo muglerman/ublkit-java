@@ -19,6 +19,32 @@ class ResolvedorEndpointsTest {
     }
 
     @Test
+    void testUrlSoapConsultaTicketApuntaBillServiceEnBetaYProduccion() {
+        assertThat(ResolvedorEndpoints.urlSoapConsultaTicket(TipoAmbiente.BETA))
+                .isEqualTo(ConstantesEndpoint.SOAP_BETA_FACTURA);
+        assertThat(ResolvedorEndpoints.urlSoapConsultaTicket(TipoAmbiente.PRODUCCION))
+                .isEqualTo(ConstantesEndpoint.SOAP_PROD_FACTURA);
+    }
+
+    @Test
+    void testUrlSoapConsultaTicketHeredaOverrideDelBillService() {
+        String key = "ublkit.sunat.endpoint.soap.factura.produccion";
+        System.setProperty(key, "https://ose.example.test/billService");
+        try {
+            assertThat(ResolvedorEndpoints.urlSoapConsultaTicket(TipoAmbiente.PRODUCCION))
+                    .isEqualTo("https://ose.example.test/billService");
+        } finally {
+            System.clearProperty(key);
+        }
+    }
+
+    @Test
+    void testUrlSoapConsultaDocumentalConservaBillConsultServiceEnProduccion() {
+        assertThat(ResolvedorEndpoints.urlSoapConsulta(TipoAmbiente.PRODUCCION))
+                .isEqualTo(ConstantesEndpoint.SOAP_PROD_CONSULTA);
+    }
+
+    @Test
     void testUrlRestToken() {
         assertThat(ResolvedorEndpoints.urlRestToken(TipoAmbiente.PRODUCCION, "mi_client_id"))
                 .isEqualTo("https://api-seguridad.sunat.gob.pe/v1/clientessol/mi_client_id/oauth2/token");

@@ -4,6 +4,7 @@ import com.creanexusatreus.ublkit.core.enumerado.TipoAmbiente;
 import com.creanexusatreus.ublkit.gateway.autenticacion.CredencialesEmpresa;
 import com.creanexusatreus.ublkit.gateway.autenticacion.ProveedorToken;
 import com.creanexusatreus.ublkit.gateway.config.ConfiguracionGateway;
+import com.creanexusatreus.ublkit.gateway.endpoint.ResolvedorEndpoints;
 import com.creanexusatreus.ublkit.gateway.respuesta.ArchivoCdr;
 import com.creanexusatreus.ublkit.gateway.respuesta.EstadoEnvio;
 import com.creanexusatreus.ublkit.gateway.respuesta.ResultadoConsulta;
@@ -148,14 +149,66 @@ class PasarelaSunatDefectoTest {
 
     @Test
     void consultarTicketSoap_delegatesToSoapClientAndReturnsConsultResult() {
+        var endpointCapture = new Object() {
+            String endpoint;
+        };
+        ClienteSoap soapCapturing = new ClienteSoap() {
+            @Override
+            public ResultadoEnvio enviarSincrono(String xmlFirmado, String nombreArchivo, String endpointUrl, CredencialesEmpresa credenciales) {
+                return ResultadoEnvio.error("NOT_USED", "not used");
+            }
+
+            @Override
+            public ResultadoEnvio enviarAsincrono(String xmlFirmado, String nombreArchivo, String endpointUrl, CredencialesEmpresa credenciales) {
+                return ResultadoEnvio.error("NOT_USED", "not used");
+            }
+
+            @Override
+            public ResultadoConsulta consultarTicket(String numeroTicket, String endpointUrl, CredencialesEmpresa credenciales) {
+                endpointCapture.endpoint = endpointUrl;
+                return ResultadoConsulta.pendiente();
+            }
+        };
+        PasarelaSunatDefecto gatewayCapture = new PasarelaSunatDefecto(soapCapturing, mockClienteRest, mockProveedorToken);
         String ticket = "123456789";
         CredencialesEmpresa credenciales = new CredencialesEmpresa("20000000000", "USER", "PASS", "client", "secret");
         TipoAmbiente ambiente = TipoAmbiente.PRODUCCION;
 
-        ResultadoConsulta resultado = gateway.consultarTicketSoap(ticket, credenciales, ambiente);
+        ResultadoConsulta resultado = gatewayCapture.consultarTicketSoap(ticket, credenciales, ambiente);
 
         assertThat(resultado).isNotNull();
         assertThat(resultado.estado()).isEqualTo(EstadoEnvio.EN_PROCESAMIENTO);
+        assertThat(endpointCapture.endpoint).isEqualTo(ResolvedorEndpoints.urlSoapConsultaTicket(ambiente));
+    }
+
+    @Test
+    void consultarTicketSoap_enBetaUsaEndpointTicketDeBillService() {
+        var endpointCapture = new Object() {
+            String endpoint;
+        };
+        ClienteSoap soapCapturing = new ClienteSoap() {
+            @Override
+            public ResultadoEnvio enviarSincrono(String xmlFirmado, String nombreArchivo, String endpointUrl, CredencialesEmpresa credenciales) {
+                return ResultadoEnvio.error("NOT_USED", "not used");
+            }
+
+            @Override
+            public ResultadoEnvio enviarAsincrono(String xmlFirmado, String nombreArchivo, String endpointUrl, CredencialesEmpresa credenciales) {
+                return ResultadoEnvio.error("NOT_USED", "not used");
+            }
+
+            @Override
+            public ResultadoConsulta consultarTicket(String numeroTicket, String endpointUrl, CredencialesEmpresa credenciales) {
+                endpointCapture.endpoint = endpointUrl;
+                return ResultadoConsulta.pendiente();
+            }
+        };
+        PasarelaSunatDefecto gatewayCapture = new PasarelaSunatDefecto(soapCapturing, mockClienteRest, mockProveedorToken);
+        CredencialesEmpresa credenciales = new CredencialesEmpresa("20000000000", "USER", "PASS", "client", "secret");
+
+        gatewayCapture.consultarTicketSoap("TK-001", credenciales, TipoAmbiente.BETA);
+
+        assertThat(endpointCapture.endpoint).isEqualTo(ResolvedorEndpoints.urlSoapConsultaTicket(TipoAmbiente.BETA));
     }
 
     @Test

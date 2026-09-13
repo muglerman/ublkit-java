@@ -145,7 +145,7 @@ public class PasarelaSunatDefecto implements PasarelaSunat {
 
     @Override
     public ResultadoConsulta consultarTicketSoap(String ticket, CredencialesEmpresa credenciales, TipoAmbiente ambiente) {
-        String endpoint = ResolvedorEndpoints.urlSoapConsulta(ambiente);
+        String endpoint = ResolvedorEndpoints.urlSoapConsultaTicket(ambiente);
         return conRetry(() -> clienteSoap.consultarTicket(ticket, endpoint, credenciales));
     }
 

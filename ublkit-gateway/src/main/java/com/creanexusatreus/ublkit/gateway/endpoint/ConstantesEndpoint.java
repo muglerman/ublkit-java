@@ -20,9 +20,13 @@ public final class ConstantesEndpoint {
     public static final String SOAP_BETA_RETENCION = "https://e-beta.sunat.gob.pe/ol-ti-itemision-otroscpe-gem-beta/billService";
     public static final String SOAP_PROD_RETENCION = "https://e-factura.sunat.gob.pe/ol-ti-itemision-otroscpe-gem/billService";
 
-    // Consulta de validez / Ticket (Opcional, distintos WSDL según el caso)
+    // Consulta de validez documental por criterios (ruc/tipo/serie/número)
     public static final String SOAP_BETA_CONSULTA = "https://e-beta.sunat.gob.pe/ol-ti-itcpfegem-beta/billService"; 
     public static final String SOAP_PROD_CONSULTA = "https://e-factura.sunat.gob.pe/ol-it-wsconscpegem/billConsultService"; 
+
+    // Consulta de ticket RA/RC/Comprobantes asíncronos (getStatus(ticket) en billService)
+    public static final String SOAP_BETA_CONSULTA_TICKET = SOAP_BETA_FACTURA;
+    public static final String SOAP_PROD_CONSULTA_TICKET = SOAP_PROD_FACTURA;
 
 
     // --- REST (Guías de Remisión Electrónica - GRE) ---

@@ -7,15 +7,21 @@ import com.creanexusatreus.ublkit.gateway.respuesta.EstadoEnvio;
 import com.creanexusatreus.ublkit.gateway.respuesta.LectorCdr;
 import com.creanexusatreus.ublkit.gateway.respuesta.ResultadoConsulta;
 import com.creanexusatreus.ublkit.gateway.respuesta.ResultadoEnvio;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
+import javax.xml.XMLConstants;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.ByteArrayInputStream;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Base64;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Implementación de {@link ClienteSoap} utilizando {@link HttpClient} nativo de Java 11+.
@@ -49,10 +55,11 @@ public class HttpClienteNativoSoap implements ClienteSoap {
 
             String payload = buildSendBillPayload(credenciales, nombreZip, base64Zip);
             String response = executePost(endpointUrl, payload);
+            Document responseDoc = parsearXmlSeguro(response);
 
-            String applicationResponseBase64 = extractValue(response, "applicationResponse");
+            String applicationResponseBase64 = extractValue(responseDoc, "applicationResponse");
             if (applicationResponseBase64 == null) {
-                String fault = extractValue(response, "faultstring");
+                String fault = extractValue(responseDoc, "faultstring");
                 return ResultadoEnvio.error("SOAP_FAULT", fault != null ? fault : "No se encontró CDR ni Fault en la respuesta");
             }
 
@@ -77,10 +84,11 @@ public class HttpClienteNativoSoap implements ClienteSoap {
 
             String payload = buildSendSummaryPayload(credenciales, nombreZip, base64Zip);
             String response = executePost(endpointUrl, payload);
+            Document responseDoc = parsearXmlSeguro(response);
 
-            String ticket = extractValue(response, "ticket");
+            String ticket = extractValue(responseDoc, "ticket");
             if (ticket == null) {
-                String fault = extractValue(response, "faultstring");
+                String fault = extractValue(responseDoc, "faultstring");
                 return ResultadoEnvio.error("SOAP_FAULT", fault != null ? fault : "No se encontró Ticket ni Fault en la respuesta");
             }
 
@@ -98,27 +106,43 @@ public class HttpClienteNativoSoap implements ClienteSoap {
         try {
             String payload = buildGetStatusPayload(credenciales, numeroTicket);
             String response = executePost(endpointUrl, payload);
+            Document responseDoc = parsearXmlSeguro(response);
 
-            // status/statusCode (SUNAT dice: 0=Procesado OK, 98=En Proceso, 99=Con Error)
-            String statusCode = extractValue(response, "statusCode");
+            String fault = extractValue(responseDoc, "faultstring");
+            if (fault != null && !fault.isBlank()) {
+                String faultCode = extractValue(responseDoc, "faultcode");
+                return ResultadoConsulta.error(
+                        faultCode != null && !faultCode.isBlank() ? faultCode : "SOAP_FAULT",
+                        fault
+                );
+            }
+
+            // status/statusCode (XSD billService: 0 = procesado, 98 = en proceso, 99 = procesado con error)
+            String statusCode = extractValue(responseDoc, "statusCode");
             if ("98".equals(statusCode)) {
                 return ResultadoConsulta.pendiente();
             }
 
-            String contentBase64 = extractValue(response, "content");
-            if (contentBase64 == null || contentBase64.isBlank()) {
-                String fault = extractValue(response, "faultstring");
-                if (fault != null) {
-                    return ResultadoConsulta.error("SOAP_FAULT", fault);
+            if ("0".equals(statusCode) || "99".equals(statusCode)) {
+                String contentBase64 = extractValue(responseDoc, "content");
+                if (contentBase64 == null || contentBase64.isBlank()) {
+                    return ResultadoConsulta.error(statusCode,
+                            "SUNAT devolvió statusCode " + statusCode + " sin content CDR");
                 }
-                return ResultadoConsulta.error("UNKOWN_STATUS", "No se encontró contenido CDR ni fault en estado: " + statusCode);
+
+                byte[] cdrZipBytes = Base64.getDecoder().decode(contentBase64);
+                ArchivoCdr cdr = LectorCdr.extraer(cdrZipBytes);
+                EstadoEnvio estado = LectorCdr.determinarEstado(cdr);
+
+                return ResultadoConsulta.completado(estado, cdr);
             }
 
-            byte[] cdrZipBytes = Base64.getDecoder().decode(contentBase64);
-            ArchivoCdr cdr = LectorCdr.extraer(cdrZipBytes);
-            EstadoEnvio estado = LectorCdr.determinarEstado(cdr);
+            if (statusCode == null || statusCode.isBlank()) {
+                return ResultadoConsulta.error("UNKNOWN_STATUS",
+                        "Respuesta SOAP sin statusCode para la consulta de ticket");
+            }
 
-            return ResultadoConsulta.completado(estado, cdr);
+            return ResultadoConsulta.error(statusCode, "SUNAT devolvió statusCode " + statusCode);
 
         } catch (com.creanexusatreus.ublkit.core.error.ExcepcionTransporte e) {
             return ResultadoConsulta.error("HTTP_5XX", e.getMessage());
@@ -138,7 +162,7 @@ public class HttpClienteNativoSoap implements ClienteSoap {
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
         if (response.statusCode() >= 500) {
-            String fault = extractValue(response.body(), "faultstring");
+            String fault = extractValueSeguro(response.body(), "faultstring");
             if (fault == null || fault.isBlank()) {
                 throw new com.creanexusatreus.ublkit.core.error.ExcepcionTransporte("HTTP_" + response.statusCode() + " - " + response.body());
             }
@@ -209,19 +233,53 @@ public class HttpClienteNativoSoap implements ClienteSoap {
                 """.formatted(cred.getUsernameConcatenado(), cred.claveSol(), ticket);
     }
 
-    private String extractValue(String xml, String tag) {
-        Pattern pattern = Pattern.compile("<" + tag + "[^>]*>(.*?)</" + tag + ">", Pattern.DOTALL);
-        Matcher matcher = pattern.matcher(xml);
-        if (matcher.find()) {
-            return matcher.group(1).trim();
+    private Document parsearXmlSeguro(String xml) throws Exception {
+        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        dbf.setNamespaceAware(true);
+        dbf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+        dbf.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+        dbf.setFeature("http://xml.org/sax/features/external-general-entities", false);
+        dbf.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+        dbf.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+        dbf.setXIncludeAware(false);
+        dbf.setExpandEntityReferences(false);
+        dbf.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+        dbf.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+        DocumentBuilder db = dbf.newDocumentBuilder();
+        return db.parse(new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8)));
+    }
+
+    private String extractValue(Document doc, String localName) {
+        NodeList namespaced = doc.getElementsByTagNameNS("*", localName);
+        if (namespaced.getLength() > 0) {
+            String value = namespaced.item(0).getTextContent();
+            return value != null ? value.trim() : null;
         }
-        
-        // Handle namespace prefixes (e.g. <ns2:applicationResponse>)
-        pattern = Pattern.compile("<[^>]+:" + tag + "[^>]*>(.*?)</[^>]+:" + tag + ">", Pattern.DOTALL);
-        matcher = pattern.matcher(xml);
-        if (matcher.find()) {
-            return matcher.group(1).trim();
+
+        NodeList plain = doc.getElementsByTagName(localName);
+        if (plain.getLength() > 0) {
+            String value = plain.item(0).getTextContent();
+            return value != null ? value.trim() : null;
+        }
+
+        NodeList allNodes = doc.getElementsByTagName("*");
+        for (int i = 0; i < allNodes.getLength(); i++) {
+            Node node = allNodes.item(i);
+            String nodeName = node.getNodeName();
+            if (nodeName != null && nodeName.endsWith(":" + localName)) {
+                String value = node.getTextContent();
+                return value != null ? value.trim() : null;
+            }
         }
         return null;
+    }
+
+    private String extractValueSeguro(String xml, String localName) {
+        try {
+            Document doc = parsearXmlSeguro(xml);
+            return extractValue(doc, localName);
+        } catch (Exception e) {
+            return null;
+        }
     }
 }

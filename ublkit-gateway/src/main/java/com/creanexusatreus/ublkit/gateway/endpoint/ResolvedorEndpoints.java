@@ -34,13 +34,24 @@ public final class ResolvedorEndpoints {
     }
 
     /**
-     * Resuelve el endpoint SOAP para consulta de estatus o tickets.
+     * Resuelve el endpoint SOAP para consulta documental por criterios
+     * (ruc/tipo/serie/número) del servicio {@code billConsultService}.
+     * <p>
+     * Este endpoint no debe usarse para consultar tickets de RA/RC.
      */
     public static String urlSoapConsulta(TipoAmbiente ambiente) {
         String defecto = ambiente == TipoAmbiente.PRODUCCION
                 ? ConstantesEndpoint.SOAP_PROD_CONSULTA
                 : ConstantesEndpoint.SOAP_BETA_CONSULTA;
         return override("ublkit.sunat.endpoint.soap.consulta", ambiente, defecto);
+    }
+
+    /**
+     * Resuelve el endpoint SOAP para consulta de ticket ({@code getStatus(ticket)})
+     * de envíos asíncronos como RA/RC en {@code billService}.
+     */
+    public static String urlSoapConsultaTicket(TipoAmbiente ambiente) {
+        return override("ublkit.sunat.endpoint.soap.consulta.ticket", ambiente, urlSoapFactura(ambiente));
     }
 
     /**
