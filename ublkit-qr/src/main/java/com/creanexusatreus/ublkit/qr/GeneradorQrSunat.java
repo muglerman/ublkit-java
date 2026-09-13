@@ -63,6 +63,19 @@ public class GeneradorQrSunat {
     }
 
     /**
+     * Genera una imagen QR PNG en Base64 para un contenido ya definido.
+     *
+     * @param contenidoQr texto que debe codificar el QR.
+     * @return imagen QR codificada en Base64.
+     */
+    public String generarQrBase64(String contenidoQr) {
+        if (contenidoQr == null || contenidoQr.isBlank()) {
+            throw new IllegalArgumentException("El contenido del QR no puede estar vacío");
+        }
+        return generarImagenBase64(contenidoQr);
+    }
+
+    /**
      * Construye la trama de datos QR según el formato normativo SUNAT.
      * <p>
      * Formato: {@code RUC|TIPO|SERIE|NUMERO|IGV|TOTAL|FECHA|TIPO_DOC_ADQ|NUM_DOC_ADQ|HASH|}

@@ -72,6 +72,20 @@ class RenderizadorHtmlGuiaRemisionTest {
             assertTrue(resultado.isHtml());
             assertNotNull(resultado.contenidoHtml());
         }
+
+        @Test
+        @DisplayName("Should render PNG QR data in classic mono A5")
+        void shouldRenderPngQrInClassicMonoA5() {
+            BorradorGuiaRemision guia = crearGuiaBasica();
+            ContextoRender<BorradorGuiaRemision> contexto = ContextoRender.of(
+                    guia, "hash", "png-base64", Map.of(), EstiloPlantilla.CLASSIC_MONO);
+            RenderizadorHtmlGuiaRemision renderer = new RenderizadorHtmlGuiaRemision(FormatoImpresion.A5);
+
+            String html = renderer.renderizar(contexto).contenidoHtml();
+
+            assertTrue(html.contains("data:image/png;base64,png-base64"));
+            assertFalse(html.contains("data:image/svg+xml;base64,png-base64"));
+        }
     }
 
     @Nested

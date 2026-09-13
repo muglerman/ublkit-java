@@ -169,7 +169,7 @@
 
 <div class="foot">
   <div class="qr">
-    <img src="data:image/svg+xml;base64,{{ qrBase64 }}" />
+    {% if qrBase64 is not empty %}<img src="data:image/png;base64,{{ qrBase64 }}" alt="QR Code" />{% endif %}
   </div>
   <div class="meta">
     <p><strong>Representación impresa</strong> de la Guía De Remisión Electrónica.</p>

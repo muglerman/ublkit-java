@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Base64;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -25,6 +26,21 @@ class GeneradorQrSunatTest {
 
         assertNotNull(qrBase64);
         assertFalse(qrBase64.isEmpty());
+    }
+
+    @Test
+    void generarQrBase64_conContenidoGeneraPng() {
+        String qrBase64 = generador.generarQrBase64(
+                "https://e-factura.sunat.gob.pe/v1/contribuyente/gre/comprobantes/descargaqr?hashqr=abc");
+
+        byte[] png = Base64.getDecoder().decode(qrBase64);
+        assertArrayEquals(new byte[] { (byte) 0x89, 0x50, 0x4E, 0x47 },
+                java.util.Arrays.copyOf(png, 4));
+    }
+
+    @Test
+    void generarQrBase64_rechazaContenidoVacio() {
+        assertThrows(IllegalArgumentException.class, () -> generador.generarQrBase64(" "));
     }
 
     @Test
