@@ -142,6 +142,24 @@ public class RenderizadorHtmlNotaTest {
         }
     }
 
+    @ParameterizedTest
+    @EnumSource(EstiloPlantilla.class)
+    @DisplayName("Muestra valor unitario e importe neto en todas las tablas de notas")
+    void shouldRenderUnitValueAndStoredLineAmountInNoteTables(EstiloPlantilla estilo) {
+        for (FormatoImpresion formato : List.of(FormatoImpresion.A4, FormatoImpresion.A5)) {
+            assertImportesNota(renderizarNotaConImportes(crearNotaCreditoCompleta(), estilo, formato));
+            assertImportesNota(renderizarNotaConImportes(crearNotaDebitoCompleta(), estilo, formato));
+        }
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = FormatoImpresion.class, names = {"TICKET_80MM", "TICKET_58MM"}, mode = EnumSource.Mode.INCLUDE)
+    @DisplayName("Muestra V.U. e importe neto almacenado en tickets de notas")
+    void shouldRenderUnitValueAndStoredLineAmountInNoteTickets(FormatoImpresion formato) {
+        assertImportesTicket(renderizarNotaConImportes(crearNotaCreditoCompleta(), EstiloPlantilla.BOLD_ACCENT, formato));
+        assertImportesTicket(renderizarNotaConImportes(crearNotaDebitoCompleta(), EstiloPlantilla.BOLD_ACCENT, formato));
+    }
+
     @Nested
     @DisplayName("Format Support Tests")
     class FormatSupportTests {
@@ -476,6 +494,35 @@ public class RenderizadorHtmlNotaTest {
         nota.setFechaEmision(LocalDate.now());
         nota.setTipoComprobante("07");
         return nota;
+    }
+
+    private String renderizarNotaConImportes(Object nota, EstiloPlantilla estilo, FormatoImpresion formato) {
+        LineaDetalle linea = nota instanceof BorradorNotaCredito credito
+                ? credito.getDetalles().getFirst()
+                : ((BorradorNotaDebito) nota).getDetalles().getFirst();
+        linea.setCantidad(new BigDecimal("4"));
+        linea.setPrecio(new BigDecimal("110.17"));
+        linea.setPrecioReferencia(new BigDecimal("130.00"));
+        linea.setIgvBaseImponible(new BigDecimal("440.68"));
+        linea.setIgv(new BigDecimal("79.32"));
+
+        return new RenderizadorHtmlNota(formato).renderizar(
+                ContextoRender.of(nota, "hash", null, Map.of(), estilo, ExtensionPlantilla.TWIG))
+                .contenidoHtml();
+    }
+
+    private void assertImportesNota(String html) {
+        assertTrue(html.contains("V. UNIT."));
+        assertFalse(html.contains("P. Unit."));
+        assertTrue(html.contains("110.17"));
+        assertTrue(html.contains("440.68"));
+        assertFalse(html.contains("130.00"));
+    }
+
+    private void assertImportesTicket(String html) {
+        assertTrue(html.contains("V.U."));
+        assertTrue(html.contains("110.17"));
+        assertTrue(html.contains("440.68"));
     }
 
     private BorradorNotaCredito crearNotaCreditoCompleta() {

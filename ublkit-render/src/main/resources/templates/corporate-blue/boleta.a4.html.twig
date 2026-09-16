@@ -137,7 +137,7 @@
 
 <table class="items">
   <thead>
-    <tr><th class="c-idx">#</th><th class="c-code">Código</th><th>Descripción</th><th class="c-unit">Und</th><th class="c-qty">Cant.</th><th class="c-price">P. Unit.</th><th class="c-amt">Importe</th></tr>
+    <tr><th class="c-idx">#</th><th class="c-code">Código</th><th>Descripción</th><th class="c-unit">Und</th><th class="c-qty">Cant.</th><th class="c-price">V. UNIT.</th><th class="c-amt">Importe</th></tr>
   </thead>
   <tbody>
     {% for det in doc.detalles %}
@@ -148,7 +148,7 @@
       <td class="c-unit">{{ det.unidadMedida }}</td>
       <td class="c-qty mono">{{ det.cantidad|q_format }}</td>
       <td class="c-price mono">{{ det.precio|n_format }}</td>
-      <td class="c-amt mono">{{ (det.precio * det.cantidad)|n_format }}</td>
+      <td class="c-amt mono">{{ det.igvBaseImponible|n_format }}</td>
     </tr>
     {% endfor %}
   </tbody>

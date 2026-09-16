@@ -41,6 +41,50 @@ public class RenderizadorHtmlFacturaTest {
         assertNotNull(new RenderizadorHtmlFactura());
     }
 
+    @ParameterizedTest
+    @EnumSource(EstiloPlantilla.class)
+    @DisplayName("Muestra valor unitario e importe neto en todas las tablas de factura y boleta")
+    void shouldRenderUnitValueAndStoredLineAmountInInvoiceAndReceiptTables(EstiloPlantilla estilo) {
+        for (FormatoImpresion formato : List.of(FormatoImpresion.A4, FormatoImpresion.A5)) {
+            String html = renderizarImportesFactura(estilo, formato, "01");
+            assertTrue(html.contains("V. UNIT."));
+            assertFalse(html.contains("P. Unit."));
+            assertTrue(html.contains("110.17"));
+            assertTrue(html.contains("440.68"));
+            assertFalse(html.contains("130.00"));
+        }
+
+        String boletaHtml = renderizarImportesFactura(estilo, FormatoImpresion.A4, "03");
+        assertTrue(boletaHtml.contains("V. UNIT."));
+        assertTrue(boletaHtml.contains("110.17"));
+        assertTrue(boletaHtml.contains("440.68"));
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = FormatoImpresion.class, names = {"TICKET_80MM", "TICKET_58MM"}, mode = EnumSource.Mode.INCLUDE)
+    @DisplayName("Muestra V.U. e importe neto almacenado en tickets de factura")
+    void shouldRenderUnitValueAndStoredLineAmountInInvoiceTickets(FormatoImpresion formato) {
+        String html = renderizarImportesFactura(EstiloPlantilla.BOLD_ACCENT, formato, "01");
+
+        assertTrue(html.contains("V.U."));
+        assertTrue(html.contains("110.17"));
+        assertTrue(html.contains("440.68"));
+    }
+
+    @Test
+    @DisplayName("Conserva el mismo valor unitario e importe para una línea exonerada")
+    void shouldRenderExoneratedLineWithItsStoredUnitValueAndAmount() {
+        BorradorFactura factura = crearFacturaBasica();
+        factura.setDetalles(List.of(crearLineaParaImportes("25.00", "25.00")));
+
+        String html = new RenderizadorHtmlFactura().renderizar(
+                ContextoRender.of(factura, "hash", null, Map.of(), EstiloPlantilla.BOLD_ACCENT, ExtensionPlantilla.TWIG))
+                .contenidoHtml();
+
+        assertTrue(html.contains("V. UNIT."));
+        assertTrue(html.contains("25.00"));
+    }
+
     @Nested
     @DisplayName("Basic HTML Rendering Tests")
     class BasicHtmlRenderingTests {
@@ -580,6 +624,27 @@ public class RenderizadorHtmlFacturaTest {
         factura.setFechaEmision(LocalDate.now());
         factura.setTipoComprobante("01");
         return factura;
+    }
+
+    private String renderizarImportesFactura(EstiloPlantilla estilo, FormatoImpresion formato, String tipoComprobante) {
+        BorradorFactura factura = crearFacturaBasica();
+        factura.setTipoComprobante(tipoComprobante);
+        factura.setDetalles(List.of(crearLineaParaImportes("110.17", "440.68")));
+        return new RenderizadorHtmlFactura(formato).renderizar(
+                ContextoRender.of(factura, "hash", null, Map.of(), estilo, ExtensionPlantilla.TWIG))
+                .contenidoHtml();
+    }
+
+    private LineaDetalle crearLineaParaImportes(String valorUnitario, String importeLinea) {
+        LineaDetalle linea = new LineaDetalle();
+        linea.setDescripcion("Línea de importes");
+        linea.setCantidad(new BigDecimal("4"));
+        linea.setUnidadMedida("NIU");
+        linea.setPrecio(new BigDecimal(valorUnitario));
+        linea.setPrecioReferencia(new BigDecimal("130.00"));
+        linea.setIgvBaseImponible(new BigDecimal(importeLinea));
+        linea.setIgv(new BigDecimal("79.32"));
+        return linea;
     }
 
     private BorradorFactura crearFacturaCompleta() {
