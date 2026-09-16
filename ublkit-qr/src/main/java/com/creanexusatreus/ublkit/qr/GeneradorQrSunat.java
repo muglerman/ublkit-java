@@ -44,8 +44,8 @@ public class GeneradorQrSunat {
 
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-    /** Tamaño en píxeles del código QR (6cm ≈ 227px a 96 DPI, usamos 230px con margen). */
-    private static final int QR_SIZE_PX = 230;
+    /** Resolución nativa alta para que el PDF reduzca módulos nítidos, sin interpolar un QR pequeño. */
+    private static final int QR_SIZE_PX = 512;
 
     /** Margen (quiet zone) en módulos QR. 4 módulos ≈ 1mm+ a esta resolución. */
     private static final int QR_QUIET_ZONE = 4;

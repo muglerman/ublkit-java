@@ -75,7 +75,7 @@ public class BorradorGuiaRemision {
 
     /**
      * Pagador del flete cuando es un TERCERO (GRE-31). Se serializa como
-     * {@code cac:Shipment/cac:Consignment/cac:OriginatorCustomerParty}.
+     * {@code cac:OriginatorCustomerParty}.
      */
     private TerceroGuia pagadorFleteTercero;
 

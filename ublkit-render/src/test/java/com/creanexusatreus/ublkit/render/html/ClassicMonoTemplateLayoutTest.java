@@ -42,6 +42,17 @@ class ClassicMonoTemplateLayoutTest {
         assertTrue(invoice.contains("{{ hashDocumento }}"));
     }
 
+    @Test
+    void classicMonoDejaElQuietZoneAlPngSinPaddingAcumulado() throws IOException {
+        for (String template : TEMPLATES.stream().filter(template -> !template.equals("manifiesto.a4")).toList()) {
+            String html = resource(template);
+            assertTrue(html.contains(".foot .qr { width: 112px; height: 112px; padding: 0; aspect-ratio: 1 / 1; }"),
+                    template + " debe conservar el contenedor QR y delegar el quiet zone al PNG");
+            assertTrue(html.contains("data:image/png;base64,{{ qrBase64 }}"),
+                    template + " debe renderizar el PNG QR sin convertirlo ni añadir padding propio");
+        }
+    }
+
     private String resource(String name) throws IOException {
         String path = "templates/classic-mono/" + name + ".html.twig";
         try (var input = getClass().getClassLoader().getResourceAsStream(path)) {

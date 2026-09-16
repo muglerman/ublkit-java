@@ -176,10 +176,8 @@ class GuiaRemisionSerializationTest {
     }
 
     @Test
-    @DisplayName("GRE-T subcontratada: LogisticsOperatorParty usa PartyIdentification/ID sin envoltorio cac:Party")
+    @DisplayName("GRE-T subcontratada: LogisticsOperatorParty usa PartyIdentification y PartyLegalEntity directos")
     void testConsignmentLogisticsOperatorParty() {
-        // SUNAT valida cac:Consignment/cac:LogisticsOperatorParty/cac:PartyIdentification/cbc:ID (schemeID '6'),
-        // sin envoltorio cac:Party ni CustomerAssignedAccountID (ExceptionXsd 0306 en caso contrario).
         BorradorGuiaRemision guia = guiaConTercero("31");
         guia.setSubcontratado(new TerceroGuia("6", "10200242390", "GLADYS HUAROC HIDALGO", "REG-MTC-778899"));
 
@@ -193,16 +191,15 @@ class GuiaRemisionSerializationTest {
         assertTrue(compacto.contains("<cac:PartyLegalEntity><cbc:RegistrationName>")
                         && xml.contains("GLADYS HUAROC HIDALGO"),
                 "La razon social del operador va en cac:PartyLegalEntity/cbc:RegistrationName");
-        assertTrue(compacto.contains(
-                "<cac:PartyLegalEntity><cbc:RegistrationName><![CDATA[GLADYS HUAROC HIDALGO]]></cbc:RegistrationName><cbc:CompanyID>REG-MTC-778899</cbc:CompanyID></cac:PartyLegalEntity>"),
-                "PartyLegalEntity debe emitir RegistrationName seguido de CompanyID con el REG MTC");
+        assertFalse(xml.contains("REG-MTC-778899"),
+                "El Registro MTC no pertenece al LogisticsOperatorParty");
         assertFalse(xml.contains("CustomerAssignedAccountID"),
-                "No debe usar CustomerAssignedAccountID (estructura invalida)");
+                "LogisticsOperatorParty es PartyType y no debe usar CustomerAssignedAccountID");
     }
 
     @Test
-    @DisplayName("GRE-T pagador tercero: OriginatorCustomerParty usa envoltorio cac:Party/PartyIdentification")
-    void testConsignmentOriginatorCustomerParty() {
+    @DisplayName("GRE-T pagador tercero: OriginatorCustomerParty es hijo directo y precede Shipment")
+    void testOriginatorCustomerParty() {
         BorradorGuiaRemision guia = guiaConTercero("31");
         guia.setPagadorFleteTercero(new TerceroGuia("6", "20606514540", "PAGADOR S.A.C.", null));
 
@@ -213,6 +210,27 @@ class GuiaRemisionSerializationTest {
                 "El pagador tercero lleva envoltorio cac:Party");
         assertTrue(xml.contains(">20606514540</cbc:ID>"), "El documento del pagador va en cbc:ID");
         assertTrue(xml.contains("PAGADOR S.A.C."), "Debe consignar la razon social del pagador");
+        assertTrue(compacto.indexOf("<cac:OriginatorCustomerParty>")
+                        < compacto.indexOf("<cac:Shipment>"),
+                "OriginatorCustomerParty debe preceder Shipment según el xs:sequence");
+        assertFalse(compacto.contains("<cac:Consignment><cbc:ID>SUNAT_Envio</cbc:ID><cac:OriginatorCustomerParty>"),
+                "OriginatorCustomerParty nunca debe emitirse dentro de Consignment");
+    }
+
+    @Test
+    @DisplayName("GRE-T con subcontratación y pagador tercero conserva ambos bloques separados")
+    void testSubcontractedAndThirdPartyPayer() {
+        BorradorGuiaRemision guia = guiaConTercero("31");
+        guia.setSubcontratado(new TerceroGuia("6", "10200242390", "SUBCONTRATADOR S.A.C.", null));
+        guia.setPagadorFleteTercero(new TerceroGuia("1", "74049995", "PAGADOR", null));
+
+        String compacto = new SerializadorXmlGuiaRemision().serializar(guia).replaceAll(">\\s+<", "><");
+
+        assertTrue(compacto.contains("<cac:OriginatorCustomerParty>"));
+        assertTrue(compacto.contains("<cac:Consignment><cbc:ID>SUNAT_Envio</cbc:ID>"
+                + "<cac:LogisticsOperatorParty>"));
+        assertFalse(compacto.contains("<cac:Consignment><cbc:ID>SUNAT_Envio</cbc:ID>"
+                + "<cac:OriginatorCustomerParty>"));
     }
 
     private BorradorGuiaRemision guiaConTercero(String tipoComprobante) {

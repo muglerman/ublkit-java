@@ -7,11 +7,15 @@ import com.creanexusatreus.ublkit.ubl.modelo.actor.ReceptorDocumento;
 import com.creanexusatreus.ublkit.ubl.modelo.total.TotalImporte;
 import com.creanexusatreus.ublkit.ubl.modelo.total.TotalImpuestos;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestReporter;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Base64;
 import java.io.ByteArrayInputStream;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+import java.awt.image.BufferedImage;
 import javax.imageio.ImageIO;
 import com.google.zxing.BinaryBitmap;
 import com.google.zxing.MultiFormatReader;
@@ -85,6 +89,51 @@ class GeneradorQrSunatTest {
         var image = ImageIO.read(new ByteArrayInputStream(Base64.getDecoder().decode(png)));
         BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(new BufferedImageLuminanceSource(image)));
         assertEquals(expected, new MultiFormatReader().decode(bitmap).getText());
+    }
+
+    @Test
+    void generarQrBase64_tramaFirmadaLarga_seLeeEnLasEscalasDeImpresion(TestReporter reporter) throws Exception {
+        String digestValue = "QmFzZTY0RGlnZXN0VmFsdWVDb25UaWVuZVN1ZmljaWVudGVEZW5zaWRhZA==";
+        String signatureValue = ("MIICXQIBAAKBgQDC5T4v7h2Jr0mD6y4s8q1b3c9eF5gH7iK9lM2nP4rS6tU8vW0xYz"
+                + "AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz0123456789").repeat(3);
+        String expected = "20123456789|01|F001|00000001|18.00|118.00|2026-09-16|6|10234567890|"
+                + digestValue + "|" + signatureValue + "|";
+
+        String png = generador.generarQrBase64(expected);
+        BufferedImage image = ImageIO.read(new ByteArrayInputStream(Base64.getDecoder().decode(png)));
+
+        assertEquals(512, image.getWidth());
+        assertEquals(512, image.getHeight());
+        assertEquals(expected, decodificar(image), "La trama QR firmada debe leerse a su tamaño real");
+        for (double scale : new double[] { .75, .50 }) {
+            int percentage = (int) (scale * 100);
+            try {
+                boolean readable = expected.equals(decodificar(escalarSinSuavizado(image, scale)));
+                reporter.publishEntry("QR " + percentage + "% readable", Boolean.toString(readable));
+            } catch (Exception exception) {
+                reporter.publishEntry("QR " + percentage + "% readable", "false: "
+                        + exception.getClass().getSimpleName());
+            }
+        }
+    }
+
+    private String decodificar(BufferedImage image) throws Exception {
+        BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(new BufferedImageLuminanceSource(image)));
+        return new MultiFormatReader().decode(bitmap).getText();
+    }
+
+    private BufferedImage escalarSinSuavizado(BufferedImage source, double scale) {
+        int size = (int) Math.round(source.getWidth() * scale);
+        BufferedImage scaled = new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);
+        Graphics2D graphics = scaled.createGraphics();
+        try {
+            graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
+                    RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
+            graphics.drawImage(source, 0, 0, size, size, null);
+        } finally {
+            graphics.dispose();
+        }
+        return scaled;
     }
 
     @Test

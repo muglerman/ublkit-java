@@ -75,7 +75,7 @@
   .signs .box .meta { font-size: 9px; color: #737373; margin-top: 1px; }
 
   .foot { display: grid; grid-template-columns: 90px 1fr auto; gap: 16px; align-items: start; margin-top: 22px; padding-top: 16px; border-top: 2px solid #0a0a0a; }
-  .foot .qr { width: 90px; height: 90px; border: 1px solid #0a0a0a; padding: 4px; }
+  .foot .qr { width: 90px; height: 90px; border: 1px solid #0a0a0a; padding: 2px; }
   .foot .qr img { width: 100%; height: 100%; display: block; }
   .foot .meta { font-size: 9.5px; color: #525252; }
   .foot .meta strong { color: #0a0a0a; }
@@ -85,6 +85,13 @@
   .foot .stamp .line { font-size: 9.5px; color: #525252; margin-top: 6px; max-width: 180px; }
   /* Classic Mono refinement: precise hierarchy, compact metadata and stable tables. */
   .masthead { gap: 28px; padding-bottom: 15px; border-bottom-width: 1.5px; } .brand .mark { gap: 10px; margin-bottom: 8px; } .brand .mark .logo { width: 52px; height: 52px; } .brand .mark .name { font-size: 12.5px; font-weight: 600; } .brand .meta { grid-template-columns: 104px minmax(0, 1fr); column-gap: 14px; row-gap: 3px; } .brand .meta dt, .party .label, .strip > div .k { letter-spacing: .07em; } .doc-id .kind { font-size: 16px; font-weight: 600; letter-spacing: .025em; } .doc-id .num { font-size: 19px; margin-top: 4px; } .doc-id .issued { margin-top: 5px; } .parties { gap: 28px; padding: 15px 0; } .party .row { gap: 12px; line-height: 1.35; } .party .row span:first-child { flex: 0 0 80px; min-width: 80px; letter-spacing: .045em; } .party .row span:last-child { min-width: 0; } .strip { gap: 8px 20px; padding: 8px 0; } .items { table-layout: fixed; margin-top: 14px; } .items thead { display: table-header-group; } .items tr { break-inside: avoid; page-break-inside: avoid; } .items thead th { letter-spacing: .07em; padding-bottom: 7px; } .items tbody td { padding-top: 9px; padding-bottom: 9px; } .items .desc .main { font-weight: 600; } .items .desc .sub { margin-top: 3px; line-height: 1.3; } .foot { grid-template-columns: 102px minmax(0, 1fr) 152px; gap: 15px; margin-top: 18px; padding-top: 13px; } .foot .qr { width: 102px; height: 102px; padding: 5px; } .foot .qr img, .foot .qr svg { width: 100%; height: 100%; display: block; object-fit: contain; } .foot .meta { line-height: 1.4; } .foot .meta .hash { font-size: 8.5px; line-height: 1.35; overflow-wrap: anywhere; } .foot .stamp { text-align: center; } .foot .stamp .badge { padding: 3px 8px; letter-spacing: .08em; } .foot .stamp .line { margin: 5px auto 0; max-width: 150px; line-height: 1.35; }
+  /* Final visual polish: shared QR and footer treatment. */
+  .foot { grid-template-columns: 112px minmax(0, 1fr) 152px; }
+  .foot .qr { width: 112px; height: 112px; padding: 0; aspect-ratio: 1 / 1; }
+  .foot .qr img { image-rendering: pixelated; }
+  .foot .meta p + p { margin-top: 4px; }
+  .foot .meta .hash { margin-top: 2px; }
+  .foot .stamp { align-self: center; padding-top: 2px; }
 </style>
 </head>
 <body>
@@ -239,7 +246,7 @@
   <div class="meta">
     <p><strong>Representación impresa</strong> de la Guía de Remisión Remitente Electrónica.</p>
     <p>Consulte la validez en <strong>{{ params.consultaUrl|default('sunat.gob.pe') }}</strong> con el RUC del remitente y el número del documento.</p>
-    <p style="margin-top:6px;">Firmante: {% if cp is not null %}{{ cp.ruc }} · {{ cp.razonSocial }}{% endif %}</p>
+    <p style="margin-top:3px;">Firmante: {% if cp is not null %}{{ cp.ruc }} · {{ cp.razonSocial }}{% endif %}</p>
     {% if hashDocumento is not empty %}<p class="hash">Hash: {{ hashDocumento }}</p>{% endif %}
     {% if params.footer is not null %}<p id="custom-footer-box" style="margin-top:10px; font-style:italic;">{{ params.footer }}</p>{% endif %}
   </div>

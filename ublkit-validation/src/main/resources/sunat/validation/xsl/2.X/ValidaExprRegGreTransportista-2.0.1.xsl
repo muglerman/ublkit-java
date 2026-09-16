@@ -15,15 +15,14 @@
   extension-element-prefixes="dp" exclude-result-prefixes="dp" version="1.0">                                                                                                                                                                                  
   <!-- xsl:include href="../../../commons/error/error_utils.xsl" dp:ignore-multiple="yes" / -->
 
-  <!-- Inicio: SUNAT -->
+  <!-- Inicio: SFS -->
   <!-- <xsl:include href="local:///commons/error/error_utils.xsl" dp:ignore-multiple="yes" />
   <xsl:include href="local:///commons/error/validate_utils.xsl" dp:ignore-multiple="yes" /> -->
-  <xsl:include href="../../error/validate_utils.xsl" dp:ignore-multiple="yes"/>
-  <!-- Ruta Desarrollo MS -->
-  <!-- <xsl:include href="/cpeses/data/trabajo/../../error/validate_utils.xsl" dp:ignore-multiple="yes"/> -->
-  <!-- Ruta Calidad y Produccion MS -->
-  <!-- <xsl:include href="/cpe/data/../../error/validate_utils.xsl" dp:ignore-multiple="yes"/> -->
-  <!-- Fin: SUNAT -->
+  <!-- Ruta Desarrollo -->
+  <!-- <xsl:include href="/cpeses/data/trabajo/sunat_archivos/sfs/VALI/commons/error/validate_utils.xsl" dp:ignore-multiple="yes"/> -->
+  <!-- Ruta Calidad y Produccion -->
+  <xsl:include href="/cpe/data/sunat_archivos/sfs/VALI/commons/error/validate_utils.xsl" dp:ignore-multiple="yes"/>
+  <!-- Fin: SFS -->
   
   <!-- key Tipo y Numero de documento relacionado duplicados -->  
   <xsl:key name="by-document-additional-reference" match="*[local-name()='DespatchAdvice']/cac:AdditionalDocumentReference" use="concat(cbc:DocumentTypeCode,' ', cbc:ID)"/>
@@ -34,13 +33,13 @@
   <!-- key Numero de lineas duplicados -->
   <xsl:key name="by-despatchLine-id" match="*[local-name()='DespatchAdvice']/cac:DespatchLine" use="number(cbc:ID)"/>
 
-  <!-- Inicio: SUNAT -->
+  <!-- Inicio: SFS -->
   <xsl:param name="nombreArchivoEnviado"/>
-  <!-- Fin: SUNAT -->
+  <!-- Fin: SFS -->
   <xsl:template match="/*">
     
      <!-- Variables -->
-	 <!-- Inicio: SUNAT -->
+	 <!-- Inicio: SFS -->
      <!-- <xsl:variable name="numeroRuc" select="substring(dp:variable('var://context/cpe/nombreArchivoEnviado'), 1, 11)"/>
      <xsl:variable name="tipoComprobante" select="substring(dp:variable('var://context/cpe/nombreArchivoEnviado'), 13, 2)"/>
      <xsl:variable name="numeroSerie" select="substring(dp:variable('var://context/cpe/nombreArchivoEnviado'), 16, 4)"/>
@@ -51,7 +50,7 @@
 	 <xsl:variable name="numeroSerie" select="substring($nombreArchivoEnviado, 16, 4)"/>
 	 <xsl:variable name="numeroComprobante" select="substring($nombreArchivoEnviado, 21, string-length($nombreArchivoEnviado) - 24)"/>
 	 
-	 <!-- Fin: SUNAT -->
+	 <!-- Fin: SFS -->
 	 
      <!-- Version del UBL -->
      
@@ -475,16 +474,21 @@
 
      <!-- DATOS DEL DESTINATARIO -->
 
+    <xsl:call-template name="existElement">
+       <xsl:with-param name="errorCodeNotExist" select="'2757'"/>
+       <xsl:with-param name="node" select="cac:DeliveryCustomerParty/cac:Party/cac:PartyIdentification/cbc:ID"/>
+    </xsl:call-template> 
+
      <xsl:call-template name="existElement">
        <xsl:with-param name="errorCodeNotExist" select="'2759'"/>
        <xsl:with-param name="node" select="cac:DeliveryCustomerParty/cac:Party/cac:PartyIdentification/cbc:ID/@schemeID"/>
      </xsl:call-template>  
 
-		 <xsl:call-template name="findElementInCatalog">
-		    <xsl:with-param name="errorCodeValidate" select="'2760'"/>
-		    <xsl:with-param name="idCatalogo" select="cac:DeliveryCustomerParty/cac:Party/cac:PartyIdentification/cbc:ID/@schemeID"/>
-        <xsl:with-param name="catalogo" select="'06'"/>
-		 </xsl:call-template>
+     <xsl:call-template name="findElementInCatalog">
+       <xsl:with-param name="errorCodeValidate" select="'2760'"/>
+       <xsl:with-param name="idCatalogo" select="cac:DeliveryCustomerParty/cac:Party/cac:PartyIdentification/cbc:ID/@schemeID"/>
+       <xsl:with-param name="catalogo" select="'06'"/>
+     </xsl:call-template>
 
      <xsl:call-template name="regexpValidateElementIfExist">
         <xsl:with-param name="errorCodeValidate" select="'4255'"/>
@@ -509,12 +513,6 @@
        <xsl:with-param name="isError" select ="false()"/>
        <xsl:with-param name="descripcion" select="'Tipo de documento de identidad del Destinatario'"/>
     </xsl:call-template>
-
-
-    <xsl:call-template name="existElement">
-       <xsl:with-param name="errorCodeNotExist" select="'2757'"/>
-       <xsl:with-param name="node" select="cac:DeliveryCustomerParty/cac:Party/cac:PartyIdentification/cbc:ID"/>
-    </xsl:call-template>  
                    
     <xsl:choose>
        <xsl:when test="cac:DeliveryCustomerParty/cac:Party/cac:PartyIdentification/cbc:ID/@schemeID = '1'">
@@ -833,7 +831,7 @@
 
      <xsl:call-template name="regexpValidateElementIfExist">
         <xsl:with-param name="errorCodeValidate" select="'3413'"/>
-        <xsl:with-param name="node" select="/cac:Shipment/cac:Delivery/cac:DeliveryAddress/cac:LocationCoordinate/cbc:LongitudeDegreesMeasure"/>
+        <xsl:with-param name="node" select="cac:Shipment/cac:Delivery/cac:DeliveryAddress/cac:LocationCoordinate/cbc:LongitudeDegreesMeasure"/>
         <xsl:with-param name="regexp" select="'^[+\-]?[0-9]{1,3}(\.[0-9]{1,8})?$'"/>
         <xsl:with-param name="descripcion" select="'Georeferencia punto de llegada - Longitud'"/>
      </xsl:call-template>     
@@ -1259,13 +1257,15 @@
            <xsl:with-param name="descripcion" select="'Pagador del servicio'"/>           
         </xsl:call-template>
 
-        <xsl:call-template name="findElementInCatalog">
-           <xsl:with-param name="errorCodeValidate" select="'3399'"/>
-           <xsl:with-param name="idCatalogo" select="cac:OriginatorCustomerParty/cac:Party/cac:PartyIdentification/cbc:ID/@schemeID"/>
-           <xsl:with-param name="catalogo" select="'06'"/>
-           <xsl:with-param name="descripcion" select="'Pagador del servicio'"/>
-        </xsl:call-template>        
-
+        <xsl:if test="cac:OriginatorCustomerParty/cac:Party/cac:PartyIdentification/cbc:ID/@schemeID != ''">
+           <xsl:call-template name="findElementInCatalog">
+              <xsl:with-param name="errorCodeValidate" select="'3399'"/>
+              <xsl:with-param name="idCatalogo" select="cac:OriginatorCustomerParty/cac:Party/cac:PartyIdentification/cbc:ID/@schemeID"/>
+              <xsl:with-param name="catalogo" select="'06'"/>
+              <xsl:with-param name="descripcion" select="'Pagador del servicio'"/>
+           </xsl:call-template>        
+        </xsl:if>
+        
         <!-- Numero de documento de identidad-->
         <xsl:call-template name="existElement">
            <xsl:with-param name="errorCodeNotExist" select="'4402'"/>
@@ -1430,40 +1430,40 @@
            <xsl:with-param name="isError" select="false()"/>
            <xsl:with-param name="descripcion" select="concat('Documento Relacionado : ', cbc:DocumentTypeCode,'-',cbc:ID)"/>
         </xsl:call-template>
-     </xsl:if> 
 
-     <xsl:choose>
-        <xsl:when test="string-length(cbc:DocumentType) &gt; 120 or string-length(cbc:DocumentType) &lt; 1 ">
-           <xsl:call-template name="isTrueExpresion">
-              <xsl:with-param name="errorCodeValidate" select="'4372'" />
-              <xsl:with-param name="node" select="cbc:DocumentType" />
-              <xsl:with-param name="expresion" select="true()" />
-              <xsl:with-param name="isError" select ="false()"/>
-              <xsl:with-param name="descripcion" select="concat('Documento Relacionado : ', cbc:DocumentTypeCode,'-',cbc:ID)"/>
-           </xsl:call-template>
-        </xsl:when>
+        <xsl:choose>
+           <xsl:when test="string-length(cbc:DocumentType) &gt; 120 or string-length(cbc:DocumentType) &lt; 1 ">
+              <xsl:call-template name="isTrueExpresion">
+                 <xsl:with-param name="errorCodeValidate" select="'4372'" />
+                 <xsl:with-param name="node" select="cbc:DocumentType" />
+                 <xsl:with-param name="expresion" select="true()" />
+                 <xsl:with-param name="isError" select ="false()"/>
+                 <xsl:with-param name="descripcion" select="concat('Documento Relacionado : ', cbc:DocumentTypeCode,'-',cbc:ID)"/>
+              </xsl:call-template>
+           </xsl:when>
         
-        <xsl:when test="string-length(translate(cbc:DocumentType,' ','')) = 0 " >
-           <xsl:call-template name="regexpValidateElementIfExist">
-             <xsl:with-param name="errorCodeValidate" select="'4372'"/>
-             <xsl:with-param name="node" select="cbc:DocumentType" />
-             <xsl:with-param name="regexp" select="true()" />
-             <xsl:with-param name="isError" select="false()"/>
-             <xsl:with-param name="descripcion" select="concat('Documento Relacionado : ', cbc:DocumentTypeCode,'-',cbc:ID)"/>
-           </xsl:call-template>
-        </xsl:when>
+           <xsl:when test="string-length(translate(cbc:DocumentType,' ','')) = 0 " >
+              <xsl:call-template name="regexpValidateElementIfExist">
+                <xsl:with-param name="errorCodeValidate" select="'4372'"/>
+                <xsl:with-param name="node" select="cbc:DocumentType" />
+                <xsl:with-param name="regexp" select="true()" />
+                <xsl:with-param name="isError" select="false()"/>
+                <xsl:with-param name="descripcion" select="concat('Documento Relacionado : ', cbc:DocumentTypeCode,'-',cbc:ID)"/>
+             </xsl:call-template>
+           </xsl:when>
                 
-        <xsl:otherwise>				
-           <xsl:call-template name="regexpValidateElementIfExist">
-              <xsl:with-param name="errorCodeValidate" select="'4372'"/>
-              <xsl:with-param name="node" select="cbc:DocumentType"/>
-              <xsl:with-param name="regexp" select="'^[^\n\t\r\f]{1,}$'"/>
-              <xsl:with-param name="isError" select ="false()"/>
-              <xsl:with-param name="descripcion" select="concat('Documento Relacionado : ', cbc:DocumentTypeCode,'-',cbc:ID)"/>
-           </xsl:call-template>
-        </xsl:otherwise>
-     </xsl:choose>
-
+           <xsl:otherwise>				
+              <xsl:call-template name="regexpValidateElementIfExist">
+                 <xsl:with-param name="errorCodeValidate" select="'4372'"/>
+                 <xsl:with-param name="node" select="cbc:DocumentType"/>
+                 <xsl:with-param name="regexp" select="'^[^\n\t\r\f]{1,}$'"/>
+                 <xsl:with-param name="isError" select ="false()"/>
+                 <xsl:with-param name="descripcion" select="concat('Documento Relacionado : ', cbc:DocumentTypeCode,'-',cbc:ID)"/>
+              </xsl:call-template>
+           </xsl:otherwise>
+        </xsl:choose>
+     </xsl:if>
+     
      <!-- Tipo de documento - Codigo -->
      <xsl:if test= "cbc:DocumentTypeCode != ''">
         <xsl:call-template name="findElementInCatalog61tProperty">
@@ -1553,7 +1553,7 @@
         <xsl:call-template name="regexpValidateElementIfExist">
            <xsl:with-param name="errorCodeValidate" select="'3441'"/>
            <xsl:with-param name="node" select="cbc:ID"/>
-           <xsl:with-param name="regexp" select="'^(([T][A-Z0-9]{3}|[\d]{1,4}|[E][G][0][1]|[E][G][0][2])-(?!0+$)([0-9]{1,8}))$'"/>
+           <xsl:with-param name="regexp" select="'^(([T][A-Z0-9]{3}|[\d]{1,4}|[E][G][0][7]|[E][G][0][2])-(?!0+$)([0-9]{1,8}))$'"/>
            <xsl:with-param name="descripcion" select="concat('Documento Relacionado : ', cbc:DocumentTypeCode,'-',cbc:ID)"/>
          </xsl:call-template>
      </xsl:if>
@@ -1580,16 +1580,21 @@
         <xsl:call-template name="regexpValidateElementIfExist">
            <xsl:with-param name="errorCodeValidate" select="'3441'"/>
            <xsl:with-param name="node" select="cbc:ID"/>
-           <xsl:with-param name="regexp" select="'^(?!0+$)([0-9]{1,15})$'"/>
+           <xsl:with-param name="regexp" select="'^(?!0+$)([0-9]{1,20})$'"/>
            <xsl:with-param name="descripcion" select="concat('Documento Relacionado : ', cbc:DocumentTypeCode,'-',cbc:ID)"/>
          </xsl:call-template>
      </xsl:if>          
-
-     <xsl:if test= "cbc:DocumentTypeCode[text() = '50' or text() = '52']">
+    <!--Ini PAS20251U210700052 JVO-->
+    <!-- <xsl:if test= "cbc:DocumentTypeCode[text() = '50' or text() = '52']">-->
+      <xsl:if test= "cbc:DocumentTypeCode[text() = '50']">
+    <!--Fin PAS20251U210700052 JVO-->
         <xsl:call-template name="regexpValidateElementIfExist">
            <xsl:with-param name="errorCodeValidate" select="'3441'"/>
            <xsl:with-param name="node" select="cbc:ID"/>
-           <xsl:with-param name="regexp" select="'^[0-9]{3}-[0-9]{4}-[0-9]{2}-[0-9]{1,6}$'"/>
+           <!--Ini PAS20251U210700052 JHR-->
+           <!--<xsl:with-param name="regexp" select="'^[0-9]{3}-[0-9]{4}-[0-9]{2}-[0-9]{1,6}$'"/>-->
+           <xsl:with-param name="regexp" select="'^[0-9]{3}-[0-9]{4}-([1][0]|[4][0])-[0-9]{1,6}$'"/>
+           <!--Fin PAS20251U210700052 JHR-->
            <xsl:with-param name="descripcion" select="concat('Documento Relacionado : ', cbc:DocumentTypeCode,'-',cbc:ID)"/>
          </xsl:call-template>
      </xsl:if>
@@ -1624,6 +1629,17 @@
            </xsl:otherwise>
         </xsl:choose>
      </xsl:if> 
+
+     <!-- Ini PAS20251U210700052 JVO -->
+     <xsl:if test= "cbc:DocumentTypeCode[text() = '93' or text() = '94' or text() = '95']">
+        <xsl:call-template name="regexpValidateElementIfExist">
+           <xsl:with-param name="errorCodeValidate" select="'3441'"/>
+           <xsl:with-param name="node" select="cbc:ID"/>
+           <xsl:with-param name="regexp" select="'^([a-zA-Z0-9\-\/]{1,35})$'"/>
+           <xsl:with-param name="descripcion" select="concat('Documento Relacionado : ', cbc:DocumentTypeCode,'-',cbc:ID)"/>
+         </xsl:call-template>
+     </xsl:if> 
+	  <!-- Fin PAS20251U210700052 JVO -->
                
      <!-- Numero de RUC del emisor del documento relacionado -->
 
@@ -1728,12 +1744,14 @@
         </xsl:call-template>
      </xsl:if>     
 
-     <xsl:call-template name="regexpValidateElementIfExist">
-        <xsl:with-param name="errorCodeValidate" select="'3355'"/>
-        <xsl:with-param name="node" select="cac:ApplicableTransportMeans/cbc:RegistrationNationalityID"/>
-        <xsl:with-param name="regexp" select="'^(?!0+$)([0-9A-Z]{10,15})$'"/>
-        <xsl:with-param name="descripcion" select="concat('Vehiculo secundario: ',cbc:ID)"/>
-     </xsl:call-template>
+     <xsl:if test="cac:ApplicableTransportMeans/cbc:RegistrationNationalityID != ''">
+        <xsl:call-template name="regexpValidateElementIfExist">
+           <xsl:with-param name="errorCodeValidate" select="'3355'"/>
+           <xsl:with-param name="node" select="cac:ApplicableTransportMeans/cbc:RegistrationNationalityID"/>
+           <xsl:with-param name="regexp" select="'^(?!0+$)([0-9A-Z]{10,15})$'"/>
+           <xsl:with-param name="descripcion" select="concat('Vehiculo secundario: ',cbc:ID)"/>
+        </xsl:call-template>
+     </xsl:if>
 
      <!-- Autorizacion especial Vehiculo secundario -->
 
@@ -2220,7 +2238,7 @@
               <xsl:call-template name="regexpValidateElementIfExist">
                  <xsl:with-param name="errorCodeValidate" select="'4084'"/>
                  <xsl:with-param name="node" select="cac:Item/cbc:Description"/>
-                 <xsl:with-param name="regexp" select="'^[^\n\t\r\f]{3,}$'"/> 
+                 <xsl:with-param name="regexp" select="'^(?!\s*$)[\S\s]{3,}$'"/> 
                  <xsl:with-param name="isError" select="false()"/>
                  <xsl:with-param name="descripcion" select="concat('Error en la linea: ', $nroLinea)"/>
               </xsl:call-template>            
@@ -2255,7 +2273,7 @@
               <xsl:call-template name="regexpValidateElementIfExist">
                  <xsl:with-param name="errorCodeValidate" select="'4430'"/>
                  <xsl:with-param name="node" select="cac:Item/cbc:Description"/>
-                 <xsl:with-param name="regexp" select="'^[^\n\t\r\f]{3,}$'"/> 
+                 <xsl:with-param name="regexp" select="'^(?!\s*$)[\S\s]{3,}$'"/> 
                  <xsl:with-param name="isError" select="false()"/>
                  <xsl:with-param name="descripcion" select="concat('Error en la linea: ', $nroLinea)"/>
               </xsl:call-template>            

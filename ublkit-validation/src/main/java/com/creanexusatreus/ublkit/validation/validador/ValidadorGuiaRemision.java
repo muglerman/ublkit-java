@@ -54,8 +54,43 @@ public class ValidadorGuiaRemision implements Validador<BorradorGuiaRemision> {
             resultado.agregar(new IncidenciaValidacion("VAL-GRE-009", "Se requiere al menos una línea de detalle en la guía", SeveridadValidacion.ERROR));
         }
 
+        agregarValidacionesCondicionales(resultado, objetivo);
+        agregarValidacionXsd(resultado, objetivo);
         agregarValidacionSunat(resultado, objetivo);
         return resultado;
+    }
+
+    private void agregarValidacionesCondicionales(ResultadoValidacion resultado, BorradorGuiaRemision objetivo) {
+        if (objetivo.getPagadorFleteTercero() != null) {
+            var pagador = objetivo.getPagadorFleteTercero();
+            if (esVacio(pagador.tipoDocumentoIdentidad()) || esVacio(pagador.numeroDocumentoIdentidad())
+                    || esVacio(pagador.nombre())) {
+                resultado.agregar(new IncidenciaValidacion("VAL-GRE-010",
+                        "El pagador de flete tercero requiere tipo, número de documento y razón social",
+                        SeveridadValidacion.ERROR));
+            }
+        }
+        if (objetivo.getSubcontratado() != null) {
+            var subcontratado = objetivo.getSubcontratado();
+            if (esVacio(subcontratado.numeroDocumentoIdentidad()) || esVacio(subcontratado.nombre())) {
+                resultado.agregar(new IncidenciaValidacion("VAL-GRE-011",
+                        "La subcontratación requiere RUC y razón social del subcontratador",
+                        SeveridadValidacion.ERROR));
+            }
+        }
+    }
+
+    private boolean esVacio(String valor) {
+        return valor == null || valor.isBlank();
+    }
+
+    private void agregarValidacionXsd(ResultadoValidacion resultado, BorradorGuiaRemision objetivo) {
+        try {
+            ValidadorXsdDespatchAdvice.validar(serializadorXml.serializar(objetivo));
+        } catch (Exception e) {
+            resultado.agregar(new IncidenciaValidacion("XSD-GRE-001",
+                    "El XML GRE no cumple el XSD UBL 2.1: " + e.getMessage(), SeveridadValidacion.ERROR));
+        }
     }
 
     private void agregarValidacionSunat(ResultadoValidacion resultado, BorradorGuiaRemision objetivo) {

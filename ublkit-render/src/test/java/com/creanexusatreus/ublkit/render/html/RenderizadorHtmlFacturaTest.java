@@ -2,6 +2,7 @@ package com.creanexusatreus.ublkit.render.html;
 
 import com.creanexusatreus.ublkit.core.modelo.Contacto;
 import com.creanexusatreus.ublkit.core.modelo.Direccion;
+import com.creanexusatreus.ublkit.qr.GeneradorQrSunat;
 import com.creanexusatreus.ublkit.render.modelo.ContextoRender;
 import com.creanexusatreus.ublkit.render.modelo.EstiloPlantilla;
 import com.creanexusatreus.ublkit.render.modelo.ExtensionPlantilla;
@@ -19,10 +20,20 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
+import com.google.zxing.BinaryBitmap;
+import com.google.zxing.MultiFormatReader;
+import com.google.zxing.client.j2se.BufferedImageLuminanceSource;
+import com.google.zxing.common.HybridBinarizer;
+
+import java.io.ByteArrayInputStream;
+import java.util.Base64;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import javax.imageio.ImageIO;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -39,6 +50,23 @@ public class RenderizadorHtmlFacturaTest {
     @DisplayName("Should detect test class")
     void shouldDetectTestClass() {
         assertNotNull(new RenderizadorHtmlFactura());
+    }
+
+    @Test
+    @DisplayName("Preserva y permite decodificar el PNG QR al renderizar Classic Mono")
+    void shouldRenderClassicMonoQrWithoutChangingItsContent() throws Exception {
+        String expected = "20123456789|01|F001|00000001|18.00|118.00|2026-09-16|6|10234567890|DIGEST|SIGNATURE|";
+        String qrBase64 = new GeneradorQrSunat().generarQrBase64(expected);
+        String html = new RenderizadorHtmlFactura(FormatoImpresion.A4).renderizar(
+                ContextoRender.of(crearFacturaCompleta(), "hash", qrBase64, Map.of(),
+                        EstiloPlantilla.CLASSIC_MONO, ExtensionPlantilla.TWIG))
+                .contenidoHtml();
+
+        Matcher image = Pattern.compile("data:image/png;base64,([^\\\"]+)").matcher(html);
+        assertTrue(image.find(), "Classic Mono debe renderizar el QR como PNG");
+        var bufferedImage = ImageIO.read(new ByteArrayInputStream(Base64.getDecoder().decode(image.group(1))));
+        BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(new BufferedImageLuminanceSource(bufferedImage)));
+        assertEquals(expected, new MultiFormatReader().decode(bitmap).getText());
     }
 
     @ParameterizedTest

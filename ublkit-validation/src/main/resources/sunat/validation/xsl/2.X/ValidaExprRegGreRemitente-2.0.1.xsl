@@ -15,15 +15,17 @@
   extension-element-prefixes="dp" exclude-result-prefixes="dp" version="1.0">
   <!-- xsl:include href="../../../commons/error/error_utils.xsl" dp:ignore-multiple="yes" / -->
   
-  <!-- Inicio: SUNAT -->
+  <!-- Inicio: SFS -->
   <!-- <xsl:include href="local:///commons/error/error_utils.xsl" dp:ignore-multiple="yes" />
   <xsl:include href="local:///commons/error/validate_utils.xsl" dp:ignore-multiple="yes" /> -->
-  <xsl:include href="../../error/validate_utils.xsl" dp:ignore-multiple="yes"/>
-  <!-- Ruta Desarrollo MS -->
-  <!-- <xsl:include href="/cpeses/data/trabajo/../../error/validate_utils.xsl" dp:ignore-multiple="yes"/> -->
-  <!-- Ruta Calidad y Produccion MS -->
-  <!-- <xsl:include href="/cpe/data/../../error/validate_utils.xsl" dp:ignore-multiple="yes"/> -->
-  <!-- Fin: SUNAT -->
+  <!-- Ruta Desarrollo -->
+  <!-- <xsl:include href="/cpeses/data/trabajo/sunat_archivos/sfs/VALI/commons/error/validate_utils.xsl" dp:ignore-multiple="yes"/> -->
+  <!-- Ruta Calidad y Produccion -->
+  <!-- Ini PAS20241U210700035 JHR -->
+  <xsl:include href="/cpe/data/sunat_archivos/sfs/VALI/commons/error/validate_utils.xsl" dp:ignore-multiple="yes"/>
+  <!--<xsl:include href="sunat_archivos/sfs/VALI/commons/error/validate_utils.xsl" dp:ignore-multiple="yes"/>-->
+  <!-- Fin PAS20241U210700035 JHR -->
+  <!-- Fin: SFS -->
   
   <!-- key Tipo y Numero de documento relacionado duplicados -->  
   <xsl:key name="by-document-additional-reference" match="*[local-name()='DespatchAdvice']/cac:AdditionalDocumentReference" use="concat(cbc:DocumentTypeCode,' ', cbc:ID)"/>
@@ -40,13 +42,22 @@
   <!-- key Numero de lineas duplicados -->
   <xsl:key name="by-despatchLine-id" match="*[local-name()='DespatchAdvice']/cac:DespatchLine" use="number(cbc:ID)"/>
 
-  <!-- Inicio: SUNAT -->
+ <!-- Ini PAS20241U210700035 JVO -->
+ <!-- key Numero de Documentos y Detalle duplicados  -->  
+  <xsl:key name="by-despatchLine-item-carga-suelta" match="*[local-name()='DespatchAdvice']/cac:DespatchLine/cac:Item"  use="concat(cac:AdditionalItemProperty[cbc:NameCode = '7024']/cbc:Value, '-', cac:AdditionalItemProperty[cbc:NameCode = '7025']/cbc:Value)"/>
+  <xsl:key name="by-despatchLine-item-contenedor" match="*[local-name()='DespatchAdvice']/cac:DespatchLine/cac:Item"  	use="concat(cac:AdditionalItemProperty[cbc:NameCode = '7026']/cbc:Value, '-', cac:AdditionalItemProperty[cbc:NameCode = '7024']/cbc:Value, '-', cac:AdditionalItemProperty[cbc:NameCode = '7025']/cbc:Value)"/> 
+  
+ <!-- key contenedores a nivel de linea -->
+  <xsl:key name="by-despatchLine-contenedores" match="*[local-name()='DespatchAdvice']/cac:DespatchLine/cac:Item"  	use="cac:AdditionalItemProperty[cbc:NameCode = '7026']/cbc:Value"/> 
+ <!--Fin PAS20241U210700035 JVO-->
+
+  <!-- Inicio: SFS -->
   <xsl:param name="nombreArchivoEnviado"/>
-  <!-- Fin: SUNAT -->
+  <!-- Fin: SFS -->
   <xsl:template match="/*">
     
      <!-- Variables -->
-     <!-- Inicio: SUNAT -->
+     <!-- Inicio: SFS -->
      <!-- <xsl:variable name="numeroRuc" select="substring(dp:variable('var://context/cpe/nombreArchivoEnviado'), 1, 11)"/>
      <xsl:variable name="tipoComprobante" select="substring(dp:variable('var://context/cpe/nombreArchivoEnviado'), 13, 2)"/>
      <xsl:variable name="numeroSerie" select="substring(dp:variable('var://context/cpe/nombreArchivoEnviado'), 16, 4)"/>
@@ -56,7 +67,8 @@
 	 <xsl:variable name="tipoComprobante" select="substring($nombreArchivoEnviado, 13, 2)"/>
 	 <xsl:variable name="numeroSerie" select="substring($nombreArchivoEnviado, 16, 4)"/>
 	 <xsl:variable name="numeroComprobante" select="substring($nombreArchivoEnviado, 21, string-length($nombreArchivoEnviado) - 24)"/>
-	 <!-- Fin: SUNAT -->
+	 <xsl:variable name="tipoDocumentoCita" select="(cac:AdditionalDocumentReference[cbc:DocumentTypeCode[text() = '92']])"/>
+    <!-- Fin: SFS -->
 	 
  
      <xsl:variable name="motivoTraslado" select="cac:Shipment/cbc:HandlingCode"/>
@@ -64,7 +76,12 @@
      <xsl:variable name="numdocDestinatario" select="cac:DeliveryCustomerParty/cac:Party/cac:PartyIdentification/cbc:ID"/>
      <xsl:variable name="numdocRemitente" select="cac:DespatchSupplierParty/cac:Party/cac:PartyIdentification/cbc:ID"/>     
      <xsl:variable name="modalidadTraslado" select="cac:Shipment/cac:ShipmentStage/cbc:TransportModeCode"/>
-     
+     <!--Ini PAS20241U210700035 JVO-->
+     <xsl:variable name="indicadorTraslado" select="cac:Shipment/cbc:SpecialInstructions"/>
+     <!--Fin PAS20241U210700035 JVO-->
+     <xsl:variable name="condicionTrasladoDAM_DS" select ="($motivoTraslado = '08' or $motivoTraslado = '19')
+													and count(cac:AdditionalDocumentReference[cbc:DocumentTypeCode[text() = '50' or text() = '52']])  &gt; 0
+													and count(cac:Shipment/cbc:SpecialInstructions[text() = 'SUNAT_Envio_IndicadorTrasladoTotalDAMoDS']) = 0"/>
      <!-- Version del UBL -->
      
      <xsl:call-template name="existAndRegexpValidateElement">
@@ -263,7 +280,10 @@
         <xsl:with-param name="catalogo" select="'06'"/>
 		 </xsl:call-template>
 
-     <xsl:if test="$motivoTraslado[text() = '06' or text() = '17']">
+     <!-- Ini PAS20241U210700035 JHR -->
+     <!--<xsl:if test="$motivoTraslado[text() = '06' or text() = '17']">-->
+     <xsl:if test="$motivoTraslado[text() = '06' or text() = '17' or text() = '19']">
+     <!-- Fin PAS20241U210700035 JHR -->
         <xsl:if test="cac:DeliveryCustomerParty/cac:Party/cac:PartyIdentification/cbc:ID/@schemeID != '6'"> 
            <xsl:call-template name="isTrueExpresion">
            <xsl:with-param name="errorCodeValidate" select="'3417'" />
@@ -336,7 +356,7 @@
        </xsl:otherwise>
      </xsl:choose>    
 
-     <xsl:if test="$motivoTraslado[text() = '02' or text() = '04' or text() = '07']">
+     <xsl:if test="$motivoTraslado[text() = '02' or text() = '04' or text() = '18' or text() = '07']">
         <xsl:if test="cac:DeliveryCustomerParty/cac:Party/cac:PartyIdentification/cbc:ID/@schemeID != '6' or ($numdocDestinatario != $numdocRemitente)"> 
            <xsl:call-template name="isTrueExpresion">
            <xsl:with-param name="errorCodeValidate" select="'2554'" />
@@ -607,15 +627,90 @@
            <xsl:with-param name="expresion" select="count(cac:AdditionalDocumentReference[cbc:DocumentTypeCode[text() != '09' and text() != '49' and text() != '50' and text() != '52' and text() != '80']]) &gt; 0" />
         </xsl:call-template>
      </xsl:if>
-
-     <xsl:if test="$motivoTraslado[text() != '08' and text() != '09' and text() != '13']">
+     <!-- Ini PAS20251U210700052 JHR -->
+     <xsl:if test="$motivoTraslado[text() = '13']">
+        <xsl:call-template name="isTrueExpresion">
+           <xsl:with-param name="errorCodeValidate" select="'3445'" />
+           <xsl:with-param name="node" select="cac:Shipment/cbc:HandlingCode" />
+           <xsl:with-param name="expresion" select="count(cac:AdditionalDocumentReference[cbc:DocumentTypeCode[text() = '52']]) &gt; 0" />
+        </xsl:call-template>
+     </xsl:if>
+     <!-- Fin PAS20251U210700052 JHR -->
+     <!-- Ini PAS20241U210700035 JHR -->
+     <!--<xsl:if test="$motivoTraslado[text() != '08' and text() != '09' and text() != '13']">-->
+     <xsl:if test="$motivoTraslado[text() != '08' and text() != '09' and text() != '13' and text() != '19']">
+     <!-- Fin PAS20241U210700035 JHR -->
         <xsl:call-template name="isTrueExpresion">
            <xsl:with-param name="errorCodeValidate" select="'3445'"/>
-           <xsl:with-param name="node" select="cac:Shipment/cbc:HandlingCode" />
+           <!-- Ini PAS20241U210700035 JHR -->
+           <!--<xsl:with-param name="node" select="cac:Shipment/cbc:HandlingCode" />-->
+           <xsl:with-param name="node" select="cac:AdditionalDocumentReference/cbc:DocumentTypeCode" />
+           <!-- Fin PAS20241U210700035 JHR -->
            <xsl:with-param name="expresion" select="count(cac:AdditionalDocumentReference[cbc:DocumentTypeCode[text() = '50' or text() = '52']]) &gt; 0" />
         </xsl:call-template>
      </xsl:if> 
+     <!-- Ini PAS20241U210700035 JHR -->
+	 <xsl:if test="$motivoTraslado[text() != '19']">
+        <xsl:call-template name="isTrueExpresion">
+           <xsl:with-param name="errorCodeValidate" select="'3445'"/>
+           <xsl:with-param name="node" select="$motivoTraslado" />
+       <!-- Ini PAS20251U210700052 JVO -->
+       <!--<xsl:with-param name="expresion" select="count(cac:AdditionalDocumentReference[cbc:DocumentTypeCode[text() = '91']]) &gt; 0" /> -->
+           <xsl:with-param name="expresion" select="count(cac:AdditionalDocumentReference[cbc:DocumentTypeCode[text() = '91' or text() = '92']]) &gt; 0" />
+       <!-- Fin PAS20251U210700052 JVO -->
+        </xsl:call-template>
+     </xsl:if> 
+     <xsl:if test="$motivoTraslado[text() = '19']">
+        <xsl:call-template name="isTrueExpresion">
+           <xsl:with-param name="errorCodeValidate" select="'3445'" />
+           <xsl:with-param name="node" select="cac:AdditionalDocumentReference/cbc:DocumentTypeCode" />
+       <!-- Ini PAS20251U210700052 JVO -->
+       <!--<xsl:with-param name="expresion" select="count(cac:AdditionalDocumentReference[cbc:DocumentTypeCode[text() != '50' and text() != '52' and text() != '91']]) &gt; 0" /> -->
+           <xsl:with-param name="expresion" select="count(cac:AdditionalDocumentReference[cbc:DocumentTypeCode[text() != '50' and text() != '52' and text() != '91' and text() != '92']]) &gt; 0" />
+       <!-- Fin PAS20251U210700052 JVO -->  
+        </xsl:call-template>
+	
+        <xsl:call-template name="isTrueExpresion">
+           <xsl:with-param name="errorCodeValidate" select="'3493'" />
+           <xsl:with-param name="node" select="cac:AdditionalDocumentReference/cbc:DocumentTypeCode" />
+      <!-- Ini PAS20251U210700052 JVO -->
+      <!-- <xsl:with-param name="expresion" select="count(cac:AdditionalDocumentReference[cbc:DocumentTypeCode[text() = '50' or text() = '52' or text() = '91']]) = 0" /> -->
+           <xsl:with-param name="expresion" select="count(cac:AdditionalDocumentReference[cbc:DocumentTypeCode[text() = '50' or text() = '52' or text() = '91' or text() = '92']]) = 0" />
+      <!-- Fin PAS20251U210700052 JVO -->  
+        </xsl:call-template>
 
+        <xsl:call-template name="isTrueExpresion">
+           <xsl:with-param name="errorCodeValidate" select="'3494'" />
+           <xsl:with-param name="node" select="cac:AdditionalDocumentReference/cbc:DocumentTypeCode" />
+           <xsl:with-param name="expresion" select="count(cac:AdditionalDocumentReference[cbc:DocumentTypeCode[text() = '91']]) &gt; 1" />
+        </xsl:call-template>
+
+        <!-- Ini PAS20251U210700052 JVO -->
+        <xsl:call-template name="isTrueExpresion">
+           <xsl:with-param name="errorCodeValidate" select="'3612'" />
+           <xsl:with-param name="node" select="cac:AdditionalDocumentReference/cbc:DocumentTypeCode" />
+           <xsl:with-param name="expresion" select="count(cac:AdditionalDocumentReference[cbc:DocumentTypeCode[text() = '92']]) &gt; 1" />
+        </xsl:call-template>
+
+        <xsl:call-template name="isTrueExpresion">
+           <xsl:with-param name="errorCodeValidate" select="'3613'" />
+           <xsl:with-param name="node" select="cac:AdditionalDocumentReference/cbc:DocumentTypeCode" />
+           <xsl:with-param name="expresion" 
+           select="(count(cac:AdditionalDocumentReference[cbc:DocumentTypeCode[text() = '50']]) &gt; 0 and count(cac:AdditionalDocumentReference[cbc:DocumentTypeCode[text() = '92']]) &gt; 0)
+           or (count(cac:AdditionalDocumentReference[cbc:DocumentTypeCode[text() = '52']]) &gt; 0 and count(cac:AdditionalDocumentReference[cbc:DocumentTypeCode[text() = '92']]) &gt; 0) 
+           or (count(cac:AdditionalDocumentReference[cbc:DocumentTypeCode[text() = '91']]) &gt; 0 and count(cac:AdditionalDocumentReference[cbc:DocumentTypeCode[text() = '92']]) &gt; 0)" />
+        </xsl:call-template>
+        <!-- Fin PAS20251U210700052 JVO -->
+
+        <xsl:call-template name="isTrueExpresion">
+           <xsl:with-param name="errorCodeValidate" select="'3463'" />
+           <xsl:with-param name="node" select="cac:AdditionalDocumentReference/cbc:DocumentTypeCode" />
+           <xsl:with-param name="expresion" 
+           select="(count(cac:AdditionalDocumentReference[cbc:DocumentTypeCode[text() = '50']]) &gt; 0 and count(cac:AdditionalDocumentReference[cbc:DocumentTypeCode[text() = '91']]) &gt; 0)
+           or (count(cac:AdditionalDocumentReference[cbc:DocumentTypeCode[text() = '52']]) &gt; 0 and count(cac:AdditionalDocumentReference[cbc:DocumentTypeCode[text() = '91']]) &gt; 0)" />
+        </xsl:call-template>
+     </xsl:if>
+     <!-- Fin PAS20241U210700035 JHR -->
      <xsl:if test="count(cac:AdditionalDocumentReference[cbc:DocumentTypeCode[text() = '49' or text() = '80']]) > 0">
         <xsl:if test="count(cac:Shipment[cbc:SpecialInstructions[text() = 'SUNAT_Envio_IndicadorTrasladoTotalDAMoDS']]) = 0">
            <xsl:call-template name="isTrueExpresion">
@@ -674,8 +769,16 @@
            <xsl:with-param name="errorCodeNotExist" select="'3457'"/>
            <xsl:with-param name="node" select="cac:Shipment/cbc:HandlingInstructions"/>
         </xsl:call-template>
-
-        <xsl:variable name="alfabeto" select="'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzÃÃÃÃÃÃ¡Ã©Ã­Ã³Ãº'"/>
+        
+        <xsl:call-template name="isTrueExpresion">
+           <xsl:with-param name="errorCodeValidate" select="'4440'"/>
+           <xsl:with-param name="node" select="cac:Shipment/cbc:HandlingInstructions"/>
+           <xsl:with-param name="expresion" select="count(cac:Shipment/cbc:HandlingInstructions) &gt; 1"/>
+           <xsl:with-param name="descripcion" select="'Existe mas de una descripcion del motivo de traslado'"/>
+           <xsl:with-param name="isError" select ="false()"/>                                          
+        </xsl:call-template>     
+ 
+        <xsl:variable name="alfabeto" select="'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzÁÉÍÓÚáéíóú'"/>
         <xsl:variable name="cadena" select="cac:Shipment/cbc:HandlingInstructions"/>
         
         <xsl:choose>          
@@ -709,17 +812,67 @@
         </xsl:choose>  
      </xsl:if>
 
+   <!--Ini Validacion de Documento Cita-->
+   <xsl:if test="($motivoTraslado[text() = '19'] and $tipoDocumentoCita)">
+  		 <xsl:call-template name="isTrueExpresion">
+			<xsl:with-param name="errorCodeValidate" select="'3623'"/>
+			<xsl:with-param name="node" select="cac:Shipment/cbc:NetWeightMeasure"/>
+			<xsl:with-param name="expresion" select="(cac:Shipment/cbc:NetWeightMeasure)" />			
+		 </xsl:call-template>
+		
+  		 <xsl:call-template name="isTrueExpresion">
+			<xsl:with-param name="errorCodeValidate" select="'3624'"/>
+			<xsl:with-param name="node" select="cac:Shipment/cbc:Information"/>
+			<xsl:with-param name="expresion" select="(cac:Shipment/cbc:Information)" />			
+		 </xsl:call-template>
+		
+  		 <xsl:call-template name="isTrueExpresion">
+			<xsl:with-param name="errorCodeValidate" select="'3625'"/>
+			<xsl:with-param name="node" select="cac:Shipment/cbc:GrossWeightMeasure"/>
+			<xsl:with-param name="expresion" select="(cac:Shipment/cbc:GrossWeightMeasure)" />			
+		 </xsl:call-template>
+
+  		 <xsl:call-template name="isTrueExpresion">
+			<xsl:with-param name="errorCodeValidate" select="'3626'"/>
+			<xsl:with-param name="node" select="cac:Shipment/cbc:TotalTransportHandlingUnitQuantity"/>
+			<xsl:with-param name="expresion" select="(cac:Shipment/cbc:TotalTransportHandlingUnitQuantity)" />			
+		</xsl:call-template>
+
+	   <xsl:call-template name="isTrueExpresion">
+			<xsl:with-param name="errorCodeValidate" select="'3627'"/>
+			<xsl:with-param name="node" select="cac:Shipment/cac:TransportHandlingUnit/cac:Package/cbc:ID"/>
+			<xsl:with-param name="expresion" select="(cac:Shipment/cac:TransportHandlingUnit/cac:Package/cbc:ID)" />
+		</xsl:call-template>
+
+		<xsl:call-template name="isTrueExpresion">
+			<xsl:with-param name="errorCodeValidate" select="'3628'"/>
+			<xsl:with-param name="node" select="cac:Shipment/cac:TransportHandlingUnit/cac:Package/cbc:TraceID"/>
+			<xsl:with-param name="expresion" select="(cac:Shipment/cac:TransportHandlingUnit/cac:Package/cbc:TraceID)" />			
+		</xsl:call-template>  
+   </xsl:if> 
+ <!-- Fin validacion de cita-->
+
      <!-- Peso bruto total de los items seleccionados -->
-     <xsl:if test="($motivoTraslado[text() = '08' or text() = '09'] and count(cac:Shipment/cbc:SpecialInstructions[text() = 'SUNAT_Envio_IndicadorTrasladoTotalDAMoDS']) = 0)">
+     <!--ini PAS20241U210700035 JVO-->
+     <!--<xsl:if test="($motivoTraslado[text() = '08' or text() = '09'] and count(cac:Shipment/cbc:SpecialInstructions[text() = 'SUNAT_Envio_IndicadorTrasladoTotalDAMoDS']) = 0)">-->
+      <!--Ini PAS20251U210700052 JVO-->
+      <!--<xsl:if test="($motivoTraslado[text() = '08' or text() = '09' or text() = '19'] and count(cac:Shipment/cbc:SpecialInstructions[text() = 'SUNAT_Envio_IndicadorTrasladoTotalDAMoDS']) = 0)">-->
+    <xsl:if test="$motivoTraslado[text() = '09'] and count(cac:Shipment/cbc:SpecialInstructions[text() = 'SUNAT_Envio_IndicadorTrasladoTotalDAMoDS']) = 0
+	             and not($tipoDocumentoCita) and not($condicionTrasladoDAM_DS)">
+       <!--Fin PAS20251U210700052 JVO--> 
+     <!--Fin PAS20241U210700035 JVO-->
         <xsl:call-template name="existElement">
            <xsl:with-param name="errorCodeNotExist" select="'4383'"/>
            <xsl:with-param name="node" select="cac:Shipment/cbc:NetWeightMeasure"/>
            <xsl:with-param name="isError" select ="false()"/>
            <xsl:with-param name="descripcion" select="'Campo cac:Shipment/cbc:NetWeightMeasure'"/>
         </xsl:call-template>
-     </xsl:if>   
+     </xsl:if>  
 
-     <xsl:if test="$motivoTraslado[text() != '08' and text() != '09'] and cac:Shipment/cbc:NetWeightMeasure">
+   <!--Ini PAS20241U210700035 JVO-->
+   <!--<xsl:if test="$motivoTraslado[text() != '08' and text() != '09'] and cac:Shipment/cbc:NetWeightMeasure"> -->
+     <xsl:if test="$motivoTraslado[text() != '08' and text() != '09' and text() != '19'] and cac:Shipment/cbc:NetWeightMeasure">
+   <!--Fin PAS20241U210700035 JVO-->
         <xsl:call-template name="isTrueExpresion">
            <xsl:with-param name="errorCodeValidate" select="'3395'" />
            <xsl:with-param name="node" select="cac:Shipment/cbc:NetWeightMeasure"/>
@@ -739,22 +892,32 @@
      </xsl:call-template>     
 
      <!-- Sustento de diferencia de Peso bruto total -->
-     <xsl:if test="($motivoTraslado[text() = '08' or text() = '09'] and count(cac:Shipment/cbc:SpecialInstructions[text() = 'SUNAT_Envio_IndicadorTrasladoTotalDAMoDS']) = 0)">
+     <!--Ini PAS20241U210700035 JVO-->
+     <!--<xsl:if test="($motivoTraslado[text() = '08' or text() = '09'] and count(cac:Shipment/cbc:SpecialInstructions[text() = 'SUNAT_Envio_IndicadorTrasladoTotalDAMoDS']) = 0)"> -->
+          <!--Ini PAS20251U210700052 JVO-->
+     <!--<xsl:if test="($motivoTraslado[text() = '08' or text() = '09' or text() = '19'] and count(cac:Shipment/cbc:SpecialInstructions[text() = 'SUNAT_Envio_IndicadorTrasladoTotalDAMoDS']) = 0)"> -->
+     <xsl:if test="$motivoTraslado[text() = '09'] and count(cac:Shipment/cbc:SpecialInstructions[text() = 'SUNAT_Envio_IndicadorTrasladoTotalDAMoDS']) = 0
+                   and not($tipoDocumentoCita) and not($condicionTrasladoDAM_DS)">
+         <!--Fin PAS20251U210700052 JVO--> 
+     <!--Fin PAS20241U210700035 JVO-->   
         <xsl:call-template name="existElement">
            <xsl:with-param name="errorCodeNotExist" select="'4387'"/>
            <xsl:with-param name="node" select="cac:Shipment/cbc:Information"/>
            <xsl:with-param name="isError" select ="false()"/>
            <xsl:with-param name="descripcion" select="'Campo cac:Shipment/cbc:Information'"/>
         </xsl:call-template>
-     </xsl:if>      
+     </xsl:if>   
 
-     <xsl:if test="$motivoTraslado[text() != '08' and text() != '09'] and cac:Shipment/cbc:Information">
+     <!--Ini PAS20241U210700035 JVO-->
+     <!-- <xsl:if test="$motivoTraslado[text() != '08' and text() != '09'] and cac:Shipment/cbc:Information"> -->
+     <xsl:if test="$motivoTraslado[text() != '08' and text() != '09' and text() != '19'] and cac:Shipment/cbc:Information">
+     <!--Fin PAS20241U210700035 JVO-->
         <xsl:call-template name="isTrueExpresion">
            <xsl:with-param name="errorCodeValidate" select="'3418'" />
            <xsl:with-param name="node" select="cac:Shipment/cbc:Information"/>
            <xsl:with-param name="expresion" select="true()" />
         </xsl:call-template>
-     </xsl:if>      
+     </xsl:if> 
 
      <xsl:if test="cac:Shipment/cbc:Information">
         <xsl:choose>          
@@ -779,7 +942,7 @@
            <xsl:otherwise>          
               <xsl:call-template name="regexpValidateElementIfExist">
                  <xsl:with-param name="errorCodeValidate" select="'4428'"/>
-                 <xsl:with-param name="node" select="text()"/>
+                 <xsl:with-param name="node" select="cac:Shipment/cbc:Information"/>
                  <xsl:with-param name="regexp" select="'^[^\n\t\r\f]{1,}$'"/> 
                  <xsl:with-param name="isError" select="false()"/>
               </xsl:call-template>            
@@ -788,51 +951,123 @@
      </xsl:if>
         
      <!-- Peso bruto -->
+   <!--Ini PAS20251U210700052 JVO-->
+   <xsl:if test="count(cac:AdditionalDocumentReference[cbc:DocumentTypeCode[text() = '92']]) = 0">
+   <!--Fin PAS20251U210700052 JVO-->
      <xsl:call-template name="existElement">
         <xsl:with-param name="errorCodeNotExist" select="'2880'"/>
         <xsl:with-param name="node" select="cac:Shipment/cbc:GrossWeightMeasure"/>
      </xsl:call-template>
-     
+   </xsl:if>
+
      <xsl:call-template name="validateValueThreeDecimalIfExist">
        <xsl:with-param name="errorCodeValidate" select="'2523'"/>
        <xsl:with-param name="node" select="cac:Shipment/cbc:GrossWeightMeasure"/>
-     </xsl:call-template>    
-     
+     </xsl:call-template>
+
+    <!--Ini PAS20251U210700052 JVO-->
+    <xsl:if test="count(cac:AdditionalDocumentReference[cbc:DocumentTypeCode[text() = '92']]) = 0">
+    <!--Fin PAS20251U210700052 JVO-->
      <xsl:call-template name="existElement">
         <xsl:with-param name="errorCodeNotExist" select="'2881'"/>
         <xsl:with-param name="node" select="cac:Shipment/cbc:GrossWeightMeasure/@unitCode"/>
-     </xsl:call-template>    
+     </xsl:call-template>
+    </xsl:if>
          
      <xsl:call-template name="regexpValidateElementIfExist">
         <xsl:with-param name="errorCodeValidate" select="'2523'"/>
         <xsl:with-param name="node" select="cac:Shipment/cbc:GrossWeightMeasure/@unitCode"/>
         <xsl:with-param name="regexp" select="'^(KGM)|(TNE)$'"/>
      </xsl:call-template>
+	 
+	 <!--Ini PAS20241U210700035 JVO -->
+	 <xsl:if test="count(cac:Shipment/cbc:SpecialInstructions[text() = 'SUNAT_Envio_IndicadorTrasladoContenedorManifiestoCarga']) &gt; 0">
+        <xsl:call-template name="existElement">
+		   <xsl:with-param name="errorCodeNotExist" select="'3487'"/>
+		   <xsl:with-param name="node" select="cac:Shipment/cac:TransportHandlingUnit/cac:Package/cbc:ID" />
+		 </xsl:call-template>
+     </xsl:if>
+     <!--Fin PAS20241U210700035 JVO -->
     
      <!-- Numero de bultos o pallets -->
      <xsl:variable name="motivoTraslado" select="cac:Shipment/cbc:HandlingCode"/>
-     <xsl:if test="($motivoTraslado = '08' or $motivoTraslado = '09') and count(cac:Shipment/cac:TransportHandlingUnit/cac:Package/cbc:ID[text() != '']) = 0 ">
+     <!--Ini PAS20241U210700035 JVO-->
+     <!--<xsl:if test="($motivoTraslado = '08' or $motivoTraslado = '09') and count(cac:Shipment/cac:TransportHandlingUnit/cac:Package/cbc:ID[text() != '']) = 0 ">-->
+         <!--Ini PAS20251U210700052 JVO-->
+     <!--<xsl:if test="($motivoTraslado = '08' or $motivoTraslado = '09' or $motivoTraslado = '19') and count(cac:Shipment/cac:TransportHandlingUnit/cac:Package/cbc:ID[text() != '']) = 0 "> -->
+     <xsl:if test="(($motivoTraslado = '09' and count(cac:AdditionalDocumentReference[cbc:DocumentTypeCode[text() = '50' or text() = '52']])  &gt; 0)
+	               or ($motivoTraslado = '19' and count(cac:AdditionalDocumentReference[cbc:DocumentTypeCode[text() = '91']])  &gt; 0))
+				      and count(cac:Shipment/cac:TransportHandlingUnit/cac:Package/cbc:ID[normalize-space(.) != '']) = 0">
+         <!--Fin PAS20251U210700052 JVO-->
+     <!--Fin PAS20241U210700035 JVO-->
         <xsl:call-template name="existElement">
            <xsl:with-param name="errorCodeNotExist" select="'3419'"/>
            <xsl:with-param name="node" select="cac:Shipment/cbc:TotalTransportHandlingUnitQuantity"/>
         </xsl:call-template> 
      </xsl:if>
 
+      <!--Ini PAS20251U210700052 JVO-->
+    <!-- <xsl:if test="($motivoTraslado = '08') and count(cac:Shipment/cbc:SpecialInstructions[text() = 'SUNAT_Envio_IndicadorTrasladoTotalDAMoDS']) = 0
+                  and count(cac:Shipment/cac:TransportHandlingUnit/cac:Package/cbc:ID[text() != '']) = 0 
+                  and count(cac:Shipment/cbc:SpecialInstructions[text() = 'SUNAT_Envio_IndicadorTrasladoContenedor']) = 0">
+         <xsl:call-template name="existElement">
+            <xsl:with-param name="errorCodeNotExist" select="'3615'"/>
+            <xsl:with-param name="node" select="cac:Shipment/cbc:TotalTransportHandlingUnitQuantity"/>
+         </xsl:call-template> 
+      </xsl:if> -->
+
+	 <xsl:if test="((($motivoTraslado = '08' or $motivoTraslado = '09' or $motivoTraslado = '19') and count(cac:AdditionalDocumentReference[cbc:DocumentTypeCode[text() = '50' or text() = '52']])  &gt; 0)
+	               or ($motivoTraslado = '19' and count(cac:AdditionalDocumentReference[cbc:DocumentTypeCode[text() = '91']])  &gt; 0))
+				   and count(cac:Shipment/cac:TransportHandlingUnit/cac:Package/cbc:ID[normalize-space(.) != '']) &gt; 0">
+        <xsl:call-template name="isTrueExpresion">
+           <xsl:with-param name="errorCodeValidate" select="'3621'"/>
+           <xsl:with-param name="node" select="cac:Shipment/cbc:TotalTransportHandlingUnitQuantity"/>
+		   <xsl:with-param name="expresion" select="(cac:Shipment/cbc:TotalTransportHandlingUnitQuantity)" />
+        </xsl:call-template> 
+     </xsl:if>
+
+    <xsl:if test="($motivoTraslado = '08' or $motivoTraslado = '19') and count(cac:AdditionalDocumentReference[cbc:DocumentTypeCode[text() = '50' or text() = '52']])  &gt; 0
+				   and count(cac:Shipment/cbc:SpecialInstructions[text() = 'SUNAT_Envio_IndicadorTrasladoTotalDAMoDS']) &gt; 0
+				   and count(cac:Shipment/cac:TransportHandlingUnit/cac:Package/cbc:ID[normalize-space(.) != '']) = 0">
+        <xsl:call-template name="existElement">
+           <xsl:with-param name="errorCodeNotExist" select="'3631'"/>
+           <xsl:with-param name="node" select="cac:Shipment/cbc:TotalTransportHandlingUnitQuantity"/>
+        </xsl:call-template> 
+    </xsl:if>
+	 	 
+	<xsl:if test="($motivoTraslado = '08' or $motivoTraslado = '19') and count(cac:AdditionalDocumentReference[cbc:DocumentTypeCode[text() = '50' or text() = '52']])  &gt; 0
+				   and count(cac:Shipment/cbc:SpecialInstructions[text() = 'SUNAT_Envio_IndicadorTrasladoTotalDAMoDS']) = 0
+				   and count(cac:Shipment/cac:TransportHandlingUnit/cac:Package) = 0">
+        <xsl:call-template name="existElement">
+           <xsl:with-param name="errorCodeNotExist" select="'3632'"/>
+           <xsl:with-param name="node" select="cac:Shipment/cbc:TotalTransportHandlingUnitQuantity"/>
+        </xsl:call-template> 
+   </xsl:if>
+      <!--Fin PAS20251U210700052 JVO-->    
+	 
+
+
      <xsl:call-template name="regexpValidateElementIfExist">
-        <xsl:with-param name="errorCodeValidate" select="'4384'"/>
+        <xsl:with-param name="errorCodeValidate" select="'3489'"/>
         <xsl:with-param name="node" select="cac:Shipment/cbc:TotalTransportHandlingUnitQuantity"/>
-        <xsl:with-param name="regexp" select="'^([0-9]{1,6})$'"/>
-        <xsl:with-param name="isError" select ="false()"/>
+        <xsl:with-param name="regexp" select="'^([0-9]{1,13})$'"/>
+      <!--Ini PAS20241U210700035 JVO-->
+      <!--<xsl:with-param name="isError" select ="false()"/> -->
+      <!--Fin PAS20241U210700035 JVO-->
      </xsl:call-template>
 
      <!-- Numero de contenedor -->
-     <xsl:if test="($motivoTraslado = '08' or $motivoTraslado = '09') and count(cac:Shipment/cac:TransportHandlingUnit/cac:Package/cbc:ID[text() != '']) &gt; 2 ">
+     <!--Ini PAS20241U210700035 JVO-->
+     <!-- <xsl:if test="($motivoTraslado = '08' or $motivoTraslado = '09') and count(cac:Shipment/cac:TransportHandlingUnit/cac:Package/cbc:ID[text() != '']) &gt; 2 ">-->
+     <xsl:if test="($motivoTraslado = '08' or $motivoTraslado = '09' or $motivoTraslado = '19') and count(cac:Shipment/cac:TransportHandlingUnit/cac:Package/cbc:ID[text() != '']) &gt; 2 ">
+     <!--Fin PAS20241U210700035 JVO-->  
         <xsl:call-template name="isTrueExpresion">
            <xsl:with-param name="errorCodeValidate" select="'3420'"/>
            <xsl:with-param name="node" select="cac:Shipment/cac:TransportHandlingUnit/cac:Package/cbc:ID" />
            <xsl:with-param name="expresion" select="true()" />
         </xsl:call-template>
      </xsl:if>
+
 
      <xsl:for-each select="cac:Shipment/cac:TransportHandlingUnit/cac:Package">
         <xsl:if test="cbc:ID != '' ">
@@ -846,19 +1081,53 @@
 
         <xsl:call-template name="regexpValidateElementIfExist">
            <xsl:with-param name="errorCodeValidate" select="'4071'"/>
-           <xsl:with-param name="node" select="cbc:ID"/>                      
-           <xsl:with-param name="regexp" select="'^([0-9A-Za-z]{1,11})$'"/>
+           <xsl:with-param name="node" select="cbc:ID"/>
+           <!--Ini PAS20241U210700035 JVO-->  
+           <!--<xsl:with-param name="regexp" select="'^([0-9A-Za-z]{1,11})$'"/>-->                 
+           <xsl:with-param name="regexp" select="'^[A-Z0-9\-\/]{1,17}$'"/>
+           <!--Fin PAS20241U210700035 JVO-->
            <xsl:with-param name="isError" select ="false()"/>
            <xsl:with-param name="descripcion" select="concat('Contenedor : ', cbc:ID)"/>
-        </xsl:call-template>                                      
+        </xsl:call-template>                                   
 
         <!-- Precintos -->
-        <xsl:if test="($motivoTraslado = '08' or $motivoTraslado = '09') and cbc:ID != ''">
+        <!--Ini PAS20241U210700035 JVO-->
+        <!--<xsl:if test="($motivoTraslado = '08' or $motivoTraslado = '09') and cbc:ID != ''">-->
+             <!--Ini PAS20251U210700052 JVO-->
+         <!-- <xsl:if test="($motivoTraslado = '08' or $motivoTraslado = '09' or $motivoTraslado = '19') and count($indicadorTraslado[text()='SUNAT_Envio_IndicadorTrasladoContenedorManifiestoCarga']) = 0 and cbc:ID != ''"> -->
+         <xsl:if test="($motivoTraslado = '09') and count($indicadorTraslado[text()='SUNAT_Envio_IndicadorTrasladoContenedorManifiestoCarga']) = 0 and cbc:ID != '' 
+                       and count($indicadorTraslado[text() = 'SUNAT_Envio_IndicadorTrasladoTotalDAMoDS']) = 0">
+            <!--Fin PAS20251U210700052 JVO-->
+        <!--Fin PAS20241U210700035 JVO-->    
            <xsl:call-template name="existElement">
               <xsl:with-param name="errorCodeNotExist" select="'3422'"/>
               <xsl:with-param name="node" select="cbc:TraceID"/>
+			     <xsl:with-param name="descripcion" select="concat('Contenedor : ', cbc:ID)"/>
            </xsl:call-template> 
         </xsl:if>
+
+      <!--Ini PAS20251U210700052 JVO-->
+		<xsl:if test="($motivoTraslado = '08' or $motivoTraslado = '09' or $motivoTraslado = '19') and count($indicadorTraslado[text()='SUNAT_Envio_IndicadorTrasladoContenedorManifiestoCarga']) = 0 and cbc:ID != ''
+						and count($indicadorTraslado[text() = 'SUNAT_Envio_IndicadorTrasladoTotalDAMoDS']) &gt; 0">			   
+          <xsl:call-template name="existElement">
+              <xsl:with-param name="errorCodeNotExist" select="'3422'"/>
+              <xsl:with-param name="node" select="cbc:TraceID"/>
+			     <xsl:with-param name="descripcion" select="concat('Contenedor : ', cbc:ID)"/>
+           </xsl:call-template> 
+        </xsl:if>
+		 <!--Fin PAS20251U210700052 JVO-->
+
+        <!--Ini PAS20241U210700035 JVO-->
+        <xsl:if test="$motivoTraslado = '19' and count($indicadorTraslado[text()='SUNAT_Envio_IndicadorTrasladoContenedorManifiestoCarga']) &gt; 0 and cbc:ID != ''">        
+      	  <xsl:if test="(key('by-despatchLine-contenedores', cbc:ID))[1]/cac:AdditionalItemProperty[cbc:NameCode = '7028']/cbc:Value = 0 " > 
+               <xsl:call-template name="existElement">
+                  <xsl:with-param name="errorCodeNotExist" select="'3495'"/>
+                  <xsl:with-param name="node" select="cbc:TraceID"/> 
+				      <xsl:with-param name="descripcion" select="concat('Contenedor : ', cbc:ID)"/>				  
+               </xsl:call-template>
+		      </xsl:if>
+        </xsl:if>
+        <!--Fin PAS20241U210700035 JVO-->
         
         <xsl:if test="cbc:TraceID != '' ">
            <xsl:call-template name="isTrueExpresion">
@@ -867,13 +1136,19 @@
                <xsl:with-param name="expresion" select="count(key('by-precintos',cbc:TraceID )) &gt; 1" />
                <xsl:with-param name="descripcion" select="concat('Precinto : ', cbc:TraceID)"/>
            </xsl:call-template>
-        </xsl:if>   
-        
-        <xsl:if test="$motivoTraslado = '08' or $motivoTraslado = '09'">
+        </xsl:if>
+
+        <!--Ini PAS20241U210700035 JVO-->
+        <!-- <xsl:if test="$motivoTraslado = '08' or $motivoTraslado = '09'">-->
+        <xsl:if test="$motivoTraslado = '08' or $motivoTraslado = '09' or $motivoTraslado = '19' and cbc:TraceID != ''">
+        <!--Fin PAS20241U210700035 JVO-->
            <xsl:call-template name="regexpValidateElementIfExist">
               <xsl:with-param name="errorCodeValidate" select="'4074'"/>
               <xsl:with-param name="node" select="cbc:TraceID"/>
-              <xsl:with-param name="regexp" select="'^(?!0+$)([0-9A-Za-z]{1,20})$'"/>
+              <!--Ini PAS20241U210700035 JVO-->
+              <!--<xsl:with-param name="regexp" select="'^(?!0+$)([0-9A-Z]{1,20})$'"/>-->
+              <xsl:with-param name="regexp" select="'^(?!0+$)([A-Z0-9]{1,100})(,(?!0+$)[A-Z0-9]{1,100})*$'"/>
+              <!--Fin PAS20241U210700035 JVO-->
               <xsl:with-param name="isError" select ="false()"/>
            </xsl:call-template>
         </xsl:if>
@@ -909,9 +1184,15 @@
         <xsl:with-param name="isError" select ="false()"/>
      </xsl:call-template>
      
-     <!-- Fecha Inicio de traslado -->
-     <xsl:if test="$modalidadTraslado = '02' or ($modalidadTraslado = '01' and count(cac:Shipment/cbc:SpecialInstructions[text() = 'SUNAT_Envio_IndicadorTrasladoVehiculoM1L']) = 1) or 
-                  ($modalidadTraslado = '01' and count(cac:Shipment/cbc:SpecialInstructions[text() = 'SUNAT_Envio_IndicadorTrasladoVehiculoM1L']) = 0 and count(cac:Shipment/cbc:SpecialInstructions[text() = 'SUNAT_Envio_IndicadorVehiculoConductoresTransp']) = 1)">
+	 <!--Ini PAS20251U210700052 JHR-->
+     <!-- Fecha Inicio de traslado Parte 1-->
+     <!-- <xsl:if test="$modalidadTraslado = '02' or ($modalidadTraslado = '01' and count(cac:Shipment/cbc:SpecialInstructions[text() = 'SUNAT_Envio_IndicadorTrasladoVehiculoM1L']) = 1) or 
+                  ($modalidadTraslado = '01' and count(cac:Shipment/cbc:SpecialInstructions[text() = 'SUNAT_Envio_IndicadorTrasladoVehiculoM1L']) = 0 and count(cac:Shipment/cbc:SpecialInstructions[text() = 'SUNAT_Envio_IndicadorVehiculoConductoresTransp']) = 1)">-->
+	 <xsl:if test="$modalidadTraslado = '02' or 
+                  ($modalidadTraslado = '01' and 
+				  count(cac:Shipment/cbc:SpecialInstructions[text() = 'SUNAT_Envio_IndicadorTrasladoVehiculoM1L']) = 0 and 
+				  count(cac:Shipment/cbc:SpecialInstructions[text() = 'SUNAT_Envio_IndicadorVehiculoConductoresTransp']) = 1)">
+	<!--Fin PAS20251U210700052 JHR-->		  
         <xsl:call-template name="existElement">
            <xsl:with-param name="errorCodeNotExist" select="'3406'"/>
            <xsl:with-param name="node" select="cac:Shipment/cac:ShipmentStage/cac:TransitPeriod/cbc:StartDate"/>
@@ -922,52 +1203,96 @@
            <xsl:with-param name="node" select="cac:Shipment/cac:ShipmentStage/cac:TransitPeriod/cbc:StartDate" />
            <xsl:with-param name="regexp" select="'^[0-9]{4}-[0-9]{2}-[0-9]{2}?$'"/>
         </xsl:call-template>   
-                
+      
+      <xsl:if test="$modalidadTraslado = '02'">     
         <xsl:call-template name="isTrueExpresion">
            <xsl:with-param name="errorCodeValidate" select="'3343'" />
            <xsl:with-param name="node" select="cac:Shipment/cac:ShipmentStage/cac:TransitPeriod/cbc:StartDate" />
            <xsl:with-param name="expresion" select="number(translate(cac:Shipment/cac:ShipmentStage/cac:TransitPeriod/cbc:StartDate,'-','')) &lt; number(translate(cbc:IssueDate,'-',''))" />
         </xsl:call-template>
-           
+      </xsl:if>
      </xsl:if>
+     
 
      <!-- Fecha entrega de bienes al transportista -->
-     <xsl:if test="($modalidadTraslado = '01' and count(cac:Shipment/cbc:SpecialInstructions[text() = 'SUNAT_Envio_IndicadorTrasladoVehiculoM1L']) = 0) and count(cac:Shipment/cbc:SpecialInstructions[text() = 'SUNAT_Envio_IndicadorVehiculoConductoresTransp']) = 0">
-        <xsl:call-template name="existElement">
+     <!--Ini PAS20251U210700052 JHR-->
+     <!--<xsl:if test="($modalidadTraslado = '01' and count(cac:Shipment/cbc:SpecialInstructions[text() = 'SUNAT_Envio_IndicadorTrasladoVehiculoM1L']) = 0) and count(cac:Shipment/cbc:SpecialInstructions[text() = 'SUNAT_Envio_IndicadorVehiculoConductoresTransp']) = 0">-->
+     <xsl:if test="$modalidadTraslado = '01'">
+        <!--<xsl:call-template name="existElement">
            <xsl:with-param name="errorCodeNotExist" select="'4385'"/>
            <xsl:with-param name="node" select="cac:Shipment/cac:ShipmentStage/cac:TransitPeriod/cbc:StartDate"/>
            <xsl:with-param name="isError" select ="false()"/>
+        </xsl:call-template>-->
+		<xsl:call-template name="existElement">
+           <xsl:with-param name="errorCodeNotExist" select="'3617'"/>
+           <xsl:with-param name="node" select="cac:Shipment/cac:ShipmentStage/cac:LoadingTransportEvent/cbc:OccurrenceDate"/>
         </xsl:call-template>
-
+	 <!--Fin PAS20251U210700052 JHR-->	
         <xsl:call-template name="regexpValidateElementIfExist">
-           <xsl:with-param name="errorCodeValidate" select="'3407'" />
-           <xsl:with-param name="node" select="cac:Shipment/cac:ShipmentStage/cac:TransitPeriod/cbc:StartDate" />
+	 <!--Ini PAS20251U210700052 JHR-->
+           <!--<xsl:with-param name="errorCodeValidate" select="'3407'" />
+           <xsl:with-param name="node" select="cac:Shipment/cac:ShipmentStage/cac:TransitPeriod/cbc:StartDate" />-->
+           <xsl:with-param name="errorCodeValidate" select="'3619'" />
+           <xsl:with-param name="node" select="cac:Shipment/cac:ShipmentStage/cac:LoadingTransportEvent/cbc:OccurrenceDate" />
+     <!--Fin PAS20251U210700052 JHR-->
            <xsl:with-param name="regexp" select="'^[0-9]{4}-[0-9]{2}-[0-9]{2}?$'"/>
         </xsl:call-template>
         
-        <xsl:call-template name="isTrueExpresion">
-           <xsl:with-param name="errorCodeValidate" select="'4386'" />
+	 <!--Ini PAS20251U210700052 JHR-->
+        <!--<xsl:call-template name="isTrueExpresion">
+			<xsl:with-param name="errorCodeValidate" select="'4386'" />
            <xsl:with-param name="node" select="cac:Shipment/cac:ShipmentStage/cac:TransitPeriod/cbc:StartDate" />
            <xsl:with-param name="expresion" select="number(translate(cac:Shipment/cac:ShipmentStage/cac:TransitPeriod/cbc:StartDate,'-','')) &lt; number(translate(cbc:IssueDate,'-',''))" />
            <xsl:with-param name="isError" select ="false()"/>
         </xsl:call-template>
+		-->
 
+        <xsl:call-template name="isTrueExpresion">
+           <xsl:with-param name="errorCodeValidate" select="'3618'" />
+           <xsl:with-param name="node" select="cac:Shipment/cac:ShipmentStage/cac:LoadingTransportEvent/cbc:OccurrenceDate" />
+           <xsl:with-param name="expresion" select="number(translate(cac:Shipment/cac:ShipmentStage/cac:LoadingTransportEvent/cbc:OccurrenceDate,'-','')) &lt; number(translate(cbc:IssueDate,'-',''))" />
+        </xsl:call-template>
+
+	 <!--Fin PAS20251U210700052 JHR-->
      </xsl:if>
+	 
+	 <!-- Fecha Inicio de traslado Parte 2-->
+     <!--Ini PAS20251U210700052 JHR-->
+	 <xsl:if test="$modalidadTraslado = '01' and 
+				  count(cac:Shipment/cbc:SpecialInstructions[text() = 'SUNAT_Envio_IndicadorTrasladoVehiculoM1L']) = 0 and 
+				  count(cac:Shipment/cbc:SpecialInstructions[text() = 'SUNAT_Envio_IndicadorVehiculoConductoresTransp']) = 1">
+				  
+        <xsl:call-template name="isTrueExpresion">
+           <xsl:with-param name="errorCodeValidate" select="'3616'" />
+           <xsl:with-param name="node" select="cac:Shipment/cac:ShipmentStage/cac:TransitPeriod/cbc:StartDate" />
+           <xsl:with-param name="expresion" select="number(translate(cac:Shipment/cac:ShipmentStage/cac:TransitPeriod/cbc:StartDate,'-','')) &lt; number(translate(cac:Shipment/cac:ShipmentStage/cac:LoadingTransportEvent/cbc:OccurrenceDate,'-',''))" />
+        </xsl:call-template>
+     </xsl:if>
+     <!--Fin PAS20251U210700052 JHR-->
+	 
 
      <!-- Indicadores -->
 
-     <xsl:for-each select="cac:Shipment/cbc:SpecialInstructions">
+        <xsl:for-each select="cac:Shipment/cbc:SpecialInstructions">
 
         <xsl:if test="substring(text(),1,6) = 'SUNAT_' ">     
            <xsl:call-template name="isTrueExpresion">
               <xsl:with-param name="errorCodeValidate" select="'3388'" />
               <xsl:with-param name="node" select="text()" />
+              <!--Ini PAS20241U210700035 JVO-->
+              <!--<xsl:with-param name="expresion" select="text() != 'SUNAT_Envio_IndicadorTransbordoProgramado' and text() != 'SUNAT_Envio_IndicadorTrasladoVehiculoM1L' and text() != 'SUNAT_Envio_IndicadorRetornoVehiculoEnvaseVacio' 
+                                                   and text() != 'SUNAT_Envio_IndicadorRetornoVehiculoVacio' and text() != 'SUNAT_Envio_IndicadorTrasladoTotalDAMoDS' and text() != 'SUNAT_Envio_IndicadorVehiculoConductoresTransp'" /> 
+              -->
               <xsl:with-param name="expresion" select="text() != 'SUNAT_Envio_IndicadorTransbordoProgramado' and text() != 'SUNAT_Envio_IndicadorTrasladoVehiculoM1L' and text() != 'SUNAT_Envio_IndicadorRetornoVehiculoEnvaseVacio' 
-                                                   and text() != 'SUNAT_Envio_IndicadorRetornoVehiculoVacio' and text() != 'SUNAT_Envio_IndicadorTrasladoTotalDAMoDS' and text() != 'SUNAT_Envio_IndicadorVehiculoConductoresTransp'" />
+                                                   and text() != 'SUNAT_Envio_IndicadorRetornoVehiculoVacio' and text() != 'SUNAT_Envio_IndicadorTrasladoTotalDAMoDS' and text() != 'SUNAT_Envio_IndicadorVehiculoConductoresTransp'
+												               and text() != 'SUNAT_Envio_IndicadorTrasladoContenedorManifiestoCarga'
+                                                   and text() != 'SUNAT_Envio_IndicadorTrasladoContenedor'" /> 
+              <!--Fin PAS20241U210700035 JVO-->
            </xsl:call-template>
         </xsl:if>          
                  
      </xsl:for-each>  
+
 
      <xsl:call-template name="isTrueExpresion">
         <xsl:with-param name="errorCodeValidate" select="'3344'" />
@@ -1003,16 +1328,50 @@
         <xsl:with-param name="errorCodeValidate" select="'3344'" />
         <xsl:with-param name="node" select="cac:Shipment/cbc:SpecialInstructions[text()='SUNAT_Envio_IndicadorVehiculoConductoresTransp']" />
         <xsl:with-param name="expresion" select="count(cac:Shipment/cbc:SpecialInstructions[text() = 'SUNAT_Envio_IndicadorVehiculoConductoresTransp']) &gt; 1" />
-     </xsl:call-template>     
-
-     <xsl:if test="($motivoTraslado != '08' and $motivoTraslado != '09') and count(cac:Shipment/cbc:SpecialInstructions[text() = 'SUNAT_Envio_IndicadorTrasladoTotalDAMoDS']) = 1">
+     </xsl:call-template>
+	 
+	 <!--Ini PAS20241U210700035 JVO-->
+     <xsl:call-template name="isTrueExpresion">
+        <xsl:with-param name="errorCodeValidate" select="'3344'" />
+        <xsl:with-param name="node" select="cac:Shipment/cbc:SpecialInstructions[text()='SUNAT_Envio_IndicadorTrasladoContenedorManifiestoCarga']" />
+        <xsl:with-param name="expresion" select="count(cac:Shipment/cbc:SpecialInstructions[text() = 'SUNAT_Envio_IndicadorTrasladoContenedorManifiestoCarga']) &gt; 1" />
+     </xsl:call-template>
+	 <!--Fin PAS20241U210700035 JVO-->
+	  
+	 <!--Ini PAS20241U210700035 JVO-->
+	  <xsl:if test="($motivoTraslado != '19' or count(cac:AdditionalDocumentReference[cbc:DocumentTypeCode[text() = '91']]) = 0)">
+        <xsl:call-template name="isTrueExpresion">
+           <xsl:with-param name="errorCodeValidate" select="'3478'" />
+           <xsl:with-param name="node" select="cac:Shipment/cbc:SpecialInstructions[text() = 'SUNAT_Envio_IndicadorTrasladoContenedorManifiestoCarga']" />
+           <xsl:with-param name="expresion" select="count(cac:Shipment/cbc:SpecialInstructions[text() = 'SUNAT_Envio_IndicadorTrasladoContenedorManifiestoCarga']) = 1" />
+        </xsl:call-template>
+     </xsl:if>
+	  <!--Fin PAS20241U210700035 JVO-->
+	
+     <!--Ini PAS20241U210700035 JVO-->
+     <!-- <xsl:if test="($motivoTraslado != '08' and $motivoTraslado != '09') and count(cac:Shipment/cbc:SpecialInstructions[text() = 'SUNAT_Envio_IndicadorTrasladoTotalDAMoDS']) = 1">-->
+     <xsl:if test="($motivoTraslado != '08' and $motivoTraslado != '09' and $motivoTraslado != '19') and count(cac:Shipment/cbc:SpecialInstructions[text() = 'SUNAT_Envio_IndicadorTrasladoTotalDAMoDS']) = 1">
+     <!--Fin PAS20241U210700035 JVO-->
         <xsl:call-template name="isTrueExpresion">
            <xsl:with-param name="errorCodeValidate" select="'3392'" />
            <xsl:with-param name="node" select="cac:Shipment/cbc:SpecialInstructions[text()='SUNAT_Envio_IndicadorTrasladoTotalDAMoDS']" />
            <xsl:with-param name="expresion" select="true()" />
         </xsl:call-template>
      </xsl:if>
-     
+	 
+	 <!--Ini PAS20241U210700035 JVO-->
+	 		<!--Ini PAS20251U210700052 JVO-->
+	  <!--<xsl:if test="($motivoTraslado = '19' and count(cac:AdditionalDocumentReference[cbc:DocumentTypeCode[text() = '91']]) &gt; 0)">-->
+     <xsl:if test="($motivoTraslado = '19' and count(cac:AdditionalDocumentReference[cbc:DocumentTypeCode[text() = '91' or text() = '92']]) &gt; 0)">
+		   <!--Fin PAS20251U210700052 JVO-->
+        <xsl:call-template name="isTrueExpresion">
+           <xsl:with-param name="errorCodeValidate" select="'3485'" />
+           <xsl:with-param name="node" select="cac:Shipment/cbc:SpecialInstructions[text() = 'SUNAT_Envio_IndicadorTrasladoTotalDAMoDS']" />
+           <xsl:with-param name="expresion" select="count(cac:Shipment/cbc:SpecialInstructions[text() = 'SUNAT_Envio_IndicadorTrasladoTotalDAMoDS']) = 1" />
+        </xsl:call-template>
+     </xsl:if>
+     <!--Fin PAS20241U210700035 JVO-->
+	 
      <xsl:if test="$motivoTraslado = '08' and count(cac:Shipment/cbc:SpecialInstructions[text() = 'SUNAT_Envio_IndicadorTrasladoTotalDAMoDS']) = 0">
         <xsl:call-template name="isTrueExpresion">
            <xsl:with-param name="errorCodeValidate" select="'4437'" />
@@ -1039,6 +1398,13 @@
         </xsl:call-template>
      </xsl:if>   
 
+     <xsl:if test="$modalidadTraslado = '01' and count(cac:Shipment/cbc:SpecialInstructions[text() = 'SUNAT_Envio_IndicadorTransbordoProgramado']) = 1 and count(cac:Shipment/cbc:SpecialInstructions[text() = 'SUNAT_Envio_IndicadorVehiculoConductoresTransp']) = 1">
+        <xsl:call-template name="isTrueExpresion">
+           <xsl:with-param name="errorCodeValidate" select="'3615'" />
+           <xsl:with-param name="node" select="cac:Shipment/cbc:SpecialInstructions[text()='SUNAT_Envio_IndicadorVehiculoConductoresTransp']" />
+           <xsl:with-param name="expresion" select="true()" />
+        </xsl:call-template>
+     </xsl:if> 
 
      <!-- Tipo de evento -->
      <xsl:if test="cac:Shipment/cac:ShipmentStage/cac:TransportEvent/cbc:TransportEventTypeCode != ''">
@@ -1091,7 +1457,7 @@
 
      <xsl:call-template name="regexpValidateElementIfExist">
         <xsl:with-param name="errorCodeValidate" select="'4257'"/>
-        <xsl:with-param name="node" select="cac:Shipment/cac:ShipmentStage/cac:CarrierParty/cac:PartyIdentification/cbc:ID/cbc:ID/@schemeURI"/>
+        <xsl:with-param name="node" select="cac:Shipment/cac:ShipmentStage/cac:CarrierParty/cac:PartyIdentification/cbc:ID/@schemeURI"/>
         <xsl:with-param name="regexp" select="'^(urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo06)$'"/>
         <xsl:with-param name="isError" select ="false()"/>
      </xsl:call-template>     
@@ -1142,8 +1508,8 @@
            <xsl:otherwise>          
               <xsl:call-template name="regexpValidateElementIfExist">
                  <xsl:with-param name="errorCodeValidate" select="'4165'"/>
-                 <xsl:with-param name="node" select="text()"/>
-                 <xsl:with-param name="regexp" select="'^[^\n\t\r\f]{2,}$'"/> 
+                 <xsl:with-param name="node" select="cac:Shipment/cac:ShipmentStage/cac:CarrierParty/cac:PartyLegalEntity/cbc:RegistrationName"/>
+                 <xsl:with-param name="regexp" select="'^[^\n\t\r\f]{3,}$'"/> 
                  <xsl:with-param name="isError" select="false()"/>
               </xsl:call-template>            
            </xsl:otherwise>
@@ -1299,7 +1665,7 @@
         </xsl:call-template>
      </xsl:if>     
 
-     <xsl:if test="count(cac:Shipment/cbc:SpecialInstructions[text() = 'SUNAT_Envio_IndicadorVehiculoConductoresTransp']) = 0 and cac:Shipment/cac:TransportHandlingUnit/cac:TransportEquipment/cac:ApplicableTransportMeans/cbc:RegistrationNationalityID != ''">
+     <xsl:if test="($modalidadTraslado = '01' and count(cac:Shipment/cbc:SpecialInstructions[text() = 'SUNAT_Envio_IndicadorVehiculoConductoresTransp']) = 0 and cac:Shipment/cac:TransportHandlingUnit/cac:TransportEquipment/cac:ApplicableTransportMeans/cbc:RegistrationNationalityID != '' )">
         <xsl:call-template name="isTrueExpresion">
            <xsl:with-param name="errorCodeValidate" select="'3452'"/>
            <xsl:with-param name="node" select="cac:Shipment/cac:TransportHandlingUnit/cac:TransportEquipment/cac:ApplicableTransportMeans/cbc:RegistrationNationalityID"/>
@@ -1312,7 +1678,7 @@
         <xsl:call-template name="regexpValidateElementIfExist">
            <xsl:with-param name="errorCodeValidate" select="'3355'"/>
            <xsl:with-param name="node" select="cac:Shipment/cac:TransportHandlingUnit/cac:TransportEquipment/cac:ApplicableTransportMeans/cbc:RegistrationNationalityID"/>
-           <xsl:with-param name="regexp" select="'^(?!0+$)([0-9A-Z]{10,15})$'"/>
+           <xsl:with-param name="regexp" select="'^(?!0+$)([0-9A-Z]{9,15})$'"/>
            <xsl:with-param name="descripcion" select="'Vehiculo principal - Tarjeta unica de circulacion'"/>
         </xsl:call-template>
      </xsl:if>
@@ -1731,7 +2097,16 @@
            <xsl:with-param name="descripcion" select="'Punto de LLegada - Establecimiento anexo'"/>
         </xsl:call-template>     
      </xsl:if>     
-
+     <!-- Ini PAS20241U210700035 JHR -->
+     <xsl:if test="cac:Shipment/cac:Delivery/cac:DeliveryAddress/cbc:AddressTypeCode/@listID != '' and $motivoTraslado[text() = '19']">
+        <xsl:call-template name="isTrueExpresion">
+           <xsl:with-param name="errorCodeValidate" select="'3488'" />
+           <xsl:with-param name="node" select="cac:Shipment/cac:Delivery/cac:DeliveryAddress/cbc:AddressTypeCode/@listID" />
+           <xsl:with-param name="expresion" select="cac:Shipment/cac:Delivery/cac:DeliveryAddress/cbc:AddressTypeCode/@listID != cac:DeliveryCustomerParty/cac:Party/cac:PartyIdentification/cbc:ID" />
+           <xsl:with-param name="descripcion" select="'Punto de LLegada - Establecimiento anexo'"/>
+        </xsl:call-template>     
+     </xsl:if>
+    <!-- Fin PAS20241U210700035 JHR -->
      <xsl:if test="cac:Shipment/cac:Delivery/cac:DeliveryAddress/cbc:AddressTypeCode/@listID != ''">
         <xsl:call-template name="regexpValidateElementIfExist">
            <xsl:with-param name="errorCodeValidate" select="'3409'"/>
@@ -1742,7 +2117,10 @@
      </xsl:if>
 
      <!-- Codigo de establecimiento de punto de llegada -->
-     <xsl:if test="cac:Shipment/cac:Delivery/cac:DeliveryAddress/cbc:AddressTypeCode/@listID != '' or $motivoTraslado = '04'">
+	 <!-- Ini PAS20241U210700035 JHR -->
+     <!--<xsl:if test="cac:Shipment/cac:Delivery/cac:DeliveryAddress/cbc:AddressTypeCode/@listID != '' or $motivoTraslado = '04'">-->
+	 <xsl:if test="cac:Shipment/cac:Delivery/cac:DeliveryAddress/cbc:AddressTypeCode/@listID != '' or $motivoTraslado[text() = '04' or text() = '19']">
+	 <!-- Fin PAS20241U210700035 JHR -->
         <xsl:call-template name="existElement">
            <xsl:with-param name="errorCodeNotExist" select="'3369'"/>
            <xsl:with-param name="node" select="cac:Shipment/cac:Delivery/cac:DeliveryAddress/cbc:AddressTypeCode"/>
@@ -1797,52 +2175,74 @@
      </xsl:call-template>
 
      <!--Puerto o Aeropuerto de embarque/desembarque -->
+	 <!-- Ini PAS20241U210700035 JHR -->
+	 <xsl:if test="$motivoTraslado[text() = '19']">
+		 <xsl:call-template name="isTrueExpresion">
+			   <xsl:with-param name="errorCodeValidate" select="'3483'" />
+			   <xsl:with-param name="node" select="cac:Shipment/cac:FirstArrivalPortLocation/cbc:LocationTypeCode"/>
+			   <!--<xsl:with-param name="expresion" select="count(cac:Shipment[cac:FirstArrivalPortLocation[cbc:LocationTypeCode[text() = '1' or text() = '2' or text() = '3']]]) = 0" />-->
+            <xsl:with-param name="expresion" select="count(cac:Shipment[cac:FirstArrivalPortLocation[cbc:LocationTypeCode[text() = '1' or text() = '2']]]) = 0" />
+		 </xsl:call-template>
+	 </xsl:if>
      <!-- PUERTO -->
-     <xsl:if test="$motivoTraslado[text() = '08' or text() = '09'] and cac:Shipment/cac:FirstArrivalPortLocation/cbc:LocationTypeCode = '1' ">
-        <xsl:call-template name="existElement">
-           <xsl:with-param name="errorCodeNotExist" select="'4413'"/>
-           <xsl:with-param name="node" select="cac:Shipment/cac:FirstArrivalPortLocation/cbc:ID"/>
-           <xsl:with-param name="isError" select ="false()"/>
-           <xsl:with-param name="descripcion" select="'Codigo de Puerto'"/>
-        </xsl:call-template>      
+     <!--<xsl:if test="$motivoTraslado[text() = '08' or text() = '09'] and cac:Shipment/cac:FirstArrivalPortLocation/cbc:LocationTypeCode = '1' ">-->
+	<xsl:if test="$motivoTraslado[text() = '08' or text() = '09' or text() = '19'] and cac:Shipment/cac:FirstArrivalPortLocation/cbc:LocationTypeCode = '1' ">
+      <xsl:if test="$motivoTraslado[text() = '08' or text() = '09']">
+         <xsl:call-template name="existElement">
+            <xsl:with-param name="errorCodeNotExist" select="'4413'"/>
+            <xsl:with-param name="node" select="cac:Shipment/cac:FirstArrivalPortLocation/cbc:ID"/>
+            <xsl:with-param name="isError" select ="false()"/>
+            <xsl:with-param name="descripcion" select="'Codigo de Puerto'"/>
+         </xsl:call-template> 
+      </xsl:if>
 
-        <xsl:if test="cac:Shipment/cac:FirstArrivalPortLocation/cbc:ID != ''">
-           <xsl:call-template name="findElementInCatalog">
-		          <xsl:with-param name="errorCodeValidate" select="'3459'"/>
-		          <xsl:with-param name="idCatalogo" select="cac:Shipment/cac:FirstArrivalPortLocation/cbc:ID"/>
-              <xsl:with-param name="catalogo" select="'63'"/>
-              <xsl:with-param name="descripcion" select="'Codigo de Puerto'"/>
-		       </xsl:call-template>
-        </xsl:if>
-    </xsl:if>
+      <xsl:if test="$motivoTraslado[text() = '19']">
+         <xsl:call-template name="existElement">
+            <xsl:with-param name="errorCodeNotExist" select="'3484'"/>
+            <xsl:with-param name="node" select="cac:Shipment/cac:FirstArrivalPortLocation/cbc:ID"/>
+         </xsl:call-template>
+      </xsl:if>
 
-     <xsl:if test="cac:Shipment/cac:FirstArrivalPortLocation/cbc:LocationTypeCode = '1' ">
-        <xsl:call-template name="regexpValidateElementIfExist">
-           <xsl:with-param name="errorCodeValidate" select="'4255'"/>
-           <xsl:with-param name="node" select="cac:Shipment/cac:FirstArrivalPortLocation/cbc:ID/@schemeName"/>
-           <xsl:with-param name="regexp" select="'^(Puertos)$'"/>
-           <xsl:with-param name="isError" select ="false()"/>
-           <xsl:with-param name="descripcion" select="'Codigo de Puerto'"/>
-        </xsl:call-template>
-   
-        <xsl:call-template name="regexpValidateElementIfExist">
-           <xsl:with-param name="errorCodeValidate" select="'4257'"/>
-           <xsl:with-param name="node" select="cac:Shipment/cac:FirstArrivalPortLocation/cbc:ID/@schemeURI"/>
-           <xsl:with-param name="regexp" select="'^(urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo63)$'"/>
-           <xsl:with-param name="isError" select ="false()"/>
-           <xsl:with-param name="descripcion" select="'Codigo de Puerto'"/>
-        </xsl:call-template>       
-     </xsl:if>
-     
-     <xsl:call-template name="regexpValidateElementIfExist">
+      <!-- Fin PAS20241U210700035 JHR -->
+      <xsl:if test="cac:Shipment/cac:FirstArrivalPortLocation/cbc:ID != ''">
+         <xsl:call-template name="findElementInCatalog">
+         <xsl:with-param name="errorCodeValidate" select="'3459'"/>
+         <xsl:with-param name="idCatalogo" select="cac:Shipment/cac:FirstArrivalPortLocation/cbc:ID"/>
+         <xsl:with-param name="catalogo" select="'63'"/>
+         <xsl:with-param name="descripcion" select="'Codigo de Puerto'"/>
+         </xsl:call-template>
+      </xsl:if>
+
+      <xsl:call-template name="regexpValidateElementIfExist">
         <xsl:with-param name="errorCodeValidate" select="'4256'"/>
         <xsl:with-param name="node" select="cac:Shipment/cac:FirstArrivalPortLocation/cbc:ID/@schemeAgencyName"/>
         <xsl:with-param name="regexp" select="'^(PE:SUNAT)$'"/>
         <xsl:with-param name="isError" select ="false()"/>
         <xsl:with-param name="descripcion" select="'Codigo de Puerto'"/>
-     </xsl:call-template>
-     
-     <xsl:if test="$motivoTraslado[text() = '08' or text() = '09'] and cac:Shipment/cac:FirstArrivalPortLocation/cbc:ID != '' ">
+      </xsl:call-template>
+
+      <xsl:call-template name="regexpValidateElementIfExist">
+         <xsl:with-param name="errorCodeValidate" select="'4255'"/>
+         <xsl:with-param name="node" select="cac:Shipment/cac:FirstArrivalPortLocation/cbc:ID/@schemeName"/>
+         <xsl:with-param name="regexp" select="'^(Puertos)$'"/>
+         <xsl:with-param name="isError" select ="false()"/>
+         <xsl:with-param name="descripcion" select="'Codigo de Puerto'"/>
+      </xsl:call-template>
+
+      <xsl:call-template name="regexpValidateElementIfExist">
+         <xsl:with-param name="errorCodeValidate" select="'4257'"/>
+         <xsl:with-param name="node" select="cac:Shipment/cac:FirstArrivalPortLocation/cbc:ID/@schemeURI"/>
+         <xsl:with-param name="regexp" select="'^(urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo63)$'"/>
+         <xsl:with-param name="isError" select ="false()"/>
+         <xsl:with-param name="descripcion" select="'Codigo de Puerto'"/>
+      </xsl:call-template>
+   </xsl:if>
+
+	  
+     <!-- Ini PAS20241U210700035 JHR -->
+     <!--<xsl:if test="$motivoTraslado[text() = '08' or text() = '09'] and cac:Shipment/cac:FirstArrivalPortLocation/cbc:ID != '' ">-->
+	 <xsl:if test="$motivoTraslado[text() = '08' or text() = '09' or text() = '19'] and cac:Shipment/cac:FirstArrivalPortLocation/cbc:ID != '' ">
+	 <!-- Fin PAS20241U210700035 JHR -->
         <xsl:call-template name="existElement">
            <xsl:with-param name="errorCodeNotExist" select="'4415'"/>
            <xsl:with-param name="node" select="cac:Shipment/cac:FirstArrivalPortLocation/cbc:LocationTypeCode"/>
@@ -1852,49 +2252,110 @@
         <xsl:call-template name="isTrueExpresion">
 		       <xsl:with-param name="errorCodeValidate" select="'4416'"/>
 		       <xsl:with-param name="node" select="cac:Shipment/cac:FirstArrivalPortLocation/cbc:LocationTypeCode"/>
+		   <!-- Ini PAS20241U210700035 JHR -->
            <xsl:with-param name="expresion" select="cac:Shipment/cac:FirstArrivalPortLocation/cbc:LocationTypeCode[text() != '1' and text() != '2']"/>
+		     <!--<xsl:with-param name="expresion" select="cac:Shipment/cac:FirstArrivalPortLocation/cbc:LocationTypeCode[text() != '1' and text() != '2' and text() != '3']"/>-->
+		   <!-- Fin PAS20241U210700035 JHR -->
            <xsl:with-param name="isError" select ="false()"/>        
 		    </xsl:call-template>
     </xsl:if>
     
     <!-- AEROPUERTO -->     
-     <xsl:if test="$motivoTraslado[text() = '08'] and cac:Shipment/cac:FirstArrivalPortLocation/cbc:LocationTypeCode = '2' ">
-        <xsl:call-template name="existElement">
+	<!-- Ini PAS20241U210700035 JHR -->	
+     <!--<xsl:if test="$motivoTraslado[text() = '08'] and cac:Shipment/cac:FirstArrivalPortLocation/cbc:LocationTypeCode = '2' ">-->
+	 <xsl:if test="$motivoTraslado[text() = '08' or text() = '19'] and cac:Shipment/cac:FirstArrivalPortLocation/cbc:LocationTypeCode = '2' ">
+	<!-- Fin PAS20241U210700035 JHR -->		
+		 <xsl:if test="$motivoTraslado[text() = '08']">
+         <xsl:call-template name="existElement">
            <xsl:with-param name="errorCodeNotExist" select="'4413'"/>
            <xsl:with-param name="node" select="cac:Shipment/cac:FirstArrivalPortLocation/cbc:ID"/>
            <xsl:with-param name="isError" select ="false()"/>
            <xsl:with-param name="descripcion" select="'Codigo de Aeropuerto'"/>
-        </xsl:call-template>      
+         </xsl:call-template> 
+		 </xsl:if>
+		 <xsl:if test="$motivoTraslado[text() = '19']">
+			<xsl:call-template name="existElement">
+			   <xsl:with-param name="errorCodeNotExist" select="'3484'"/>
+			   <xsl:with-param name="node" select="cac:Shipment/cac:FirstArrivalPortLocation/cbc:ID"/>
+			</xsl:call-template>
+		 </xsl:if>
+		 <!-- Fin PAS20241U210700035 JHR -->
+		 <xsl:if test="cac:Shipment/cac:FirstArrivalPortLocation/cbc:ID != ''">
+			<xsl:call-template name="findElementInCatalog">
+			  <xsl:with-param name="errorCodeValidate" select="'3460'"/>
+			  <xsl:with-param name="idCatalogo" select="cac:Shipment/cac:FirstArrivalPortLocation/cbc:ID"/>
+			  <xsl:with-param name="catalogo" select="'64'"/>
+			  <xsl:with-param name="descripcion" select="'Codigo de Aeropuerto'"/>
+			</xsl:call-template>
+		 </xsl:if>
 
-        <xsl:if test="cac:Shipment/cac:FirstArrivalPortLocation/cbc:ID != ''">
-           <xsl:call-template name="findElementInCatalog">
-		          <xsl:with-param name="errorCodeValidate" select="'3460'"/>
-		          <xsl:with-param name="idCatalogo" select="cac:Shipment/cac:FirstArrivalPortLocation/cbc:ID"/>
-              <xsl:with-param name="catalogo" select="'64'"/>
-              <xsl:with-param name="descripcion" select="'Codigo de Aeropuerto'"/>
-           </xsl:call-template>
-        </xsl:if>
-    </xsl:if>
-     
-     <xsl:if test="cac:Shipment/cac:FirstArrivalPortLocation/cbc:LocationTypeCode = '2' ">
-        <xsl:call-template name="regexpValidateElementIfExist">
+       <xsl:call-template name="regexpValidateElementIfExist">
+         <xsl:with-param name="errorCodeValidate" select="'4256'"/>
+         <xsl:with-param name="node" select="cac:Shipment/cac:FirstArrivalPortLocation/cbc:ID/@schemeAgencyName"/>
+         <xsl:with-param name="regexp" select="'^(PE:SUNAT)$'"/>
+         <xsl:with-param name="isError" select ="false()"/>
+         <xsl:with-param name="descripcion" select="'Codigo de Aeropuerto'"/>
+       </xsl:call-template>
+
+       <xsl:call-template name="regexpValidateElementIfExist">
            <xsl:with-param name="errorCodeValidate" select="'4255'"/>
            <xsl:with-param name="node" select="cac:Shipment/cac:FirstArrivalPortLocation/cbc:ID/@schemeName"/>
            <xsl:with-param name="regexp" select="'^(Aeropuertos)$'"/>
            <xsl:with-param name="isError" select ="false()"/>
            <xsl:with-param name="descripcion" select="'Codigo de Aeropuerto'"/>
-        </xsl:call-template>
-   
-        <xsl:call-template name="regexpValidateElementIfExist">
+       </xsl:call-template>
+
+       <xsl:call-template name="regexpValidateElementIfExist">
            <xsl:with-param name="errorCodeValidate" select="'4257'"/>
            <xsl:with-param name="node" select="cac:Shipment/cac:FirstArrivalPortLocation/cbc:ID/@schemeURI"/>
            <xsl:with-param name="regexp" select="'^(urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo64)$'"/>
            <xsl:with-param name="isError" select ="false()"/>
            <xsl:with-param name="descripcion" select="'Codigo de Aeropuerto'"/>
-        </xsl:call-template>       
+        </xsl:call-template>
+    </xsl:if>
+     
+	 <!-- Ini PAS20241U210700035 JHR -->	
+	 <!-- CENTRO DE ATENCION DE FRONTERA -->  
+    <!--
+	 <xsl:if test="$motivoTraslado = '19' and cac:Shipment/cac:FirstArrivalPortLocation/cbc:LocationTypeCode = '3' ">	
+		<xsl:call-template name="existElement">
+           <xsl:with-param name="errorCodeNotExist" select="'3484'"/>
+           <xsl:with-param name="node" select="cac:Shipment/cac:FirstArrivalPortLocation/cbc:ID"/>
+        </xsl:call-template>
+
+        <xsl:if test="cac:Shipment/cac:FirstArrivalPortLocation/cbc:ID != ''">
+           <xsl:call-template name="findElementInCatalog">
+		          <xsl:with-param name="errorCodeValidate" select="'3479'"/>
+				  <xsl:with-param name="idCatalogo" select="cac:Shipment/cac:FirstArrivalPortLocation/cbc:ID"/>
+              <xsl:with-param name="catalogo" select="'66'"/>
+              <xsl:with-param name="descripcion" select="'Codigo de Centro de Atencion de Frontera'"/>
+           </xsl:call-template>
+        </xsl:if>
+    </xsl:if>
+
+	<xsl:if test="cac:Shipment/cac:FirstArrivalPortLocation/cbc:LocationTypeCode = '3' ">
+        <xsl:call-template name="regexpValidateElementIfExist">
+           <xsl:with-param name="errorCodeValidate" select="'4255'"/>
+           <xsl:with-param name="node" select="cac:Shipment/cac:FirstArrivalPortLocation/cbc:ID/@schemeName"/>
+           <xsl:with-param name="regexp" select="'^(Centros de atencion de frontera)$'"/>
+           <xsl:with-param name="isError" select ="false()"/>
+           <xsl:with-param name="descripcion" select="'El nombre es: Centros de atencion de frontera'"/>
+        </xsl:call-template>
+   
+        <xsl:call-template name="regexpValidateElementIfExist">
+           <xsl:with-param name="errorCodeValidate" select="'4257'"/>
+           <xsl:with-param name="node" select="cac:Shipment/cac:FirstArrivalPortLocation/cbc:ID/@schemeURI"/>
+           <xsl:with-param name="regexp" select="'^(urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo66)$'"/>
+           <xsl:with-param name="isError" select ="false()"/>
+           <xsl:with-param name="descripcion" select="'Codigo de Centro de Atencion de Frontera'"/>
+        </xsl:call-template>  
+
      </xsl:if>
-          
-     <xsl:if test="cac:Shipment/cac:FirstArrivalPortLocation/cbc:LocationTypeCode[text() = '1' or text() ='2'] and cac:Shipment/cac:FirstArrivalPortLocation/cbc:ID != '' ">
+
+	 <xsl:if test="cac:Shipment/cac:FirstArrivalPortLocation/cbc:LocationTypeCode[text() = '1' or text() ='2' or text() ='3'] and cac:Shipment/cac:FirstArrivalPortLocation/cbc:ID != '' ">
+    --> 
+    <xsl:if test="cac:Shipment/cac:FirstArrivalPortLocation/cbc:LocationTypeCode[text() = '1' or text() ='2'] and cac:Shipment/cac:FirstArrivalPortLocation/cbc:ID != '' ">
+     <!-- Fin PAS20241U210700035 JHR --> 	
         <xsl:call-template name="existElement">
            <xsl:with-param name="errorCodeNotExist" select="'4418'"/>
            <xsl:with-param name="node" select="cac:Shipment/cac:FirstArrivalPortLocation/cbc:Name"/>
@@ -1903,7 +2364,10 @@
      </xsl:if>     
 
      <!-- Control del ubigeo del punto de partida vs ubigeo del puerto/aeropuerto -->
-     <xsl:if test="$motivoTraslado = '08' and count(cac:Shipment/cac:FirstArrivalPortLocation[cbc:LocationTypeCode[text() = '1' or text()='2'] and cbc:ID !='']) &gt; 0">
+	 <!-- Ini PAS20241U210700035 JHR -->
+     <!--<xsl:if test="$motivoTraslado = '08' and count(cac:Shipment/cac:FirstArrivalPortLocation[cbc:LocationTypeCode[text() = '1' or text()='2'] and cbc:ID !='']) &gt; 0">-->
+	 <xsl:if test="$motivoTraslado[text() = '08' or text() = '19'] and count(cac:Shipment/cac:FirstArrivalPortLocation[cbc:LocationTypeCode[text() = '1' or text()='2'] and cbc:ID !='']) &gt; 0">
+	 <!-- Fin PAS20241U210700035 JHR -->
         <xsl:if test="cac:Shipment/cac:FirstArrivalPortLocation/cbc:LocationTypeCode = '1'">
            <xsl:call-template name="findElementInCatalogGREUbigeoProperty">
               <xsl:with-param name="catalogo" select="'63'"/>
@@ -1926,6 +2390,22 @@
            </xsl:call-template>
         </xsl:if>
      </xsl:if>
+	 <!-- Ini PAS20241U210700035 JHR -->
+    <!--
+	 <xsl:if test="$motivoTraslado = '19' and count(cac:Shipment/cac:FirstArrivalPortLocation[cbc:LocationTypeCode[text()='3'] and cbc:ID !='']) &gt; 0">
+		<xsl:if test="cac:Shipment/cac:FirstArrivalPortLocation/cbc:LocationTypeCode = '3'">
+           <xsl:call-template name="findElementInCatalogGREUbigeoProperty">
+              <xsl:with-param name="catalogo" select="'66'"/>
+              <xsl:with-param name="propiedad" select="'ubigeo'"/>
+              <xsl:with-param name="idCatalogo" select="cac:Shipment/cac:FirstArrivalPortLocation/cbc:ID"/>
+              <xsl:with-param name="valorPropiedad" select="cac:Shipment/cac:Delivery/cac:Despatch/cac:DespatchAddress/cbc:ID"/>
+              <xsl:with-param name="errorCodeValidate" select="'3364'"/>
+              <xsl:with-param name="descripcion" select="'Codigo de Centro de Atencion de Frontera'"/>
+           </xsl:call-template>
+        </xsl:if>
+     </xsl:if>
+     -->
+	 <!-- Fin PAS20241U210700035 JHR -->
 
      <!-- Control del ubigeo del punto de llegada vs ubigeo del puerto -->
      <xsl:if test="$motivoTraslado = '09' and count(cac:Shipment/cac:FirstArrivalPortLocation[cbc:LocationTypeCode[text() = '1'] and cbc:ID !='']) &gt; 0">
@@ -1943,6 +2423,8 @@
      <xsl:apply-templates select="cac:DespatchLine">
         <xsl:with-param name="root" select="."/> 
         <xsl:with-param name="motivoTraslado" select="$motivoTraslado"/>
+        <xsl:with-param name="tipoDocumentoCita" select="$tipoDocumentoCita"/>
+        <xsl:with-param name="condicionTrasladoDAM_DS" select="$condicionTrasladoDAM_DS"/>
      </xsl:apply-templates>     
      
      <xsl:copy-of select="." />
@@ -2436,7 +2918,7 @@
         <xsl:call-template name="regexpValidateElementIfExist">
            <xsl:with-param name="errorCodeValidate" select="'3441'"/>
            <xsl:with-param name="node" select="cbc:ID"/>
-           <xsl:with-param name="regexp" select="'^(([T][A-Z0-9]{3}|[\d]{1,4}|[E][G][0][1]|[E][G][0][2])-(?!0+$)([0-9]{1,8}))$'"/>
+           <xsl:with-param name="regexp" select="'^(([T][A-Z0-9]{3}|[\d]{1,4}|[E][G][0][7]|[E][G][0][2])-(?!0+$)([0-9]{1,8}))$'"/>
            <xsl:with-param name="descripcion" select="concat('Documento Relacionado : ', cbc:DocumentTypeCode,'-',cbc:ID)"/>
          </xsl:call-template>
      </xsl:if>
@@ -2492,7 +2974,10 @@
               <xsl:call-template name="regexpValidateElementIfExist">
                  <xsl:with-param name="errorCodeValidate" select="'3441'"/>
                  <xsl:with-param name="node" select="cbc:ID"/>
-                 <xsl:with-param name="regexp" select="'^[0-9]{3}-[0-9]{4}-([1][0])-[0-9]{1,6}$'"/>
+                 <!-- Ini PAS20241U210700035 JHR -->
+                 <!--<xsl:with-param name="regexp" select="'^[0-9]{3}-[0-9]{4}-([1][0])-[0-9]{1,6}$'"/>-->
+                 <xsl:with-param name="regexp" select="'^[0-9]{3}-[0-9]{4}-([1][0])-[1-9]{1}[0-9]{0,5}$'"/>
+                 <!-- Fin PAS20241U210700035 JHR -->
                  <xsl:with-param name="descripcion" select="concat('Documento Relacionado : ', cbc:DocumentTypeCode,'-',cbc:ID)"/>
               </xsl:call-template>
            </xsl:when>   
@@ -2500,15 +2985,45 @@
               <xsl:call-template name="regexpValidateElementIfExist">
                  <xsl:with-param name="errorCodeValidate" select="'3441'"/>
                  <xsl:with-param name="node" select="cbc:ID"/>
-                 <xsl:with-param name="regexp" select="'^[0-9]{3}-[0-9]{4}-([4][0])-[0-9]{1,6}$'"/>
+                 <!-- Ini PAS20241U210700035 JHR -->
+                 <!--<xsl:with-param name="regexp" select="'^[0-9]{3}-[0-9]{4}-([1][0])-[0-9]{1,6}$'"/>-->
+                 <!--<xsl:with-param name="regexp" select="'^[0-9]{3}-[0-9]{4}-([4][0])-[0-9]{1,6}$'"/>-->
+                 <xsl:with-param name="regexp" select="'^[0-9]{3}-[0-9]{4}-([4][0])-[1-9]{1}[0-9]{0,5}$'"/>
+                 <!-- Fin PAS20241U210700035 JHR -->
                  <xsl:with-param name="descripcion" select="concat('Documento Relacionado : ', cbc:DocumentTypeCode,'-',cbc:ID)"/>
               </xsl:call-template>
            </xsl:when> 
+           <!-- Ini PAS20241U210700035 JHR -->
+		     <xsl:when test= "$motivoTraslado = '19'">
+              <xsl:call-template name="regexpValidateElementIfExist">
+                 <xsl:with-param name="errorCodeValidate" select="'3441'"/>
+                 <xsl:with-param name="node" select="cbc:ID"/>
+                 <!--<xsl:with-param name="regexp" select="'^[0-9]{3}-[0-9]{4}-([1][0]|[2][0]|[2][1]|[3][0]|[3][6]|[7][0]|[8][0])-[0-9]{1,6}$'"/>-->
+                 <xsl:with-param name="regexp" select="'^[0-9]{3}-[0-9]{4}-([1][0]|[2][0]|[2][1]|[3][0]|[3][6]|[7][0]|[8][0])-[1-9]{1}[0-9]{0,5}$'"/>
+                 <xsl:with-param name="descripcion" select="concat('Documento Relacionado : ', cbc:DocumentTypeCode,'-',cbc:ID)"/>
+              </xsl:call-template>
+           </xsl:when>
+           <!-- Fin PAS20241U210700035 JHR -->
+		   <!-- Ini PAS20251U210700052 JHR -->
+			<xsl:when test= "$motivoTraslado = '13'">
+			  <xsl:call-template name="regexpValidateElementIfExist">
+				  <xsl:with-param name="errorCodeValidate" select="'3441'"/>
+				  <xsl:with-param name="node" select="cbc:ID"/>
+				  <xsl:with-param name="regexp" select="'^[0-9]{3}-[0-9]{4}-([2][8])-[1-9][0-9]{0,7}$|^[0-9]{3}-[0-9]{4}-([2][0]|[2][1]|[3][0]|[3][6]|[7][0]|[7][1]|[7][2]|[7][4]|[7][5]|[8][0]|[8][2]|[9][0]|[4][9]|[5][1]|[5][2]|[6][0]|[7][3]|[8][6]|[8][9]|[X][C]|[X][G]|[8][1])-[1-9][0-9]{0,5}$'"/>
+				  <xsl:with-param name="descripcion" select="concat('Documento Relacionado : ', cbc:DocumentTypeCode,'-',cbc:ID)"/>
+			   </xsl:call-template>
+         
+			</xsl:when>
+		 <!-- Fin PAS20251U210700052 JHR -->
            <xsl:otherwise>
               <xsl:call-template name="regexpValidateElementIfExist">
                  <xsl:with-param name="errorCodeValidate" select="'3441'"/>
                  <xsl:with-param name="node" select="cbc:ID"/>
-                 <xsl:with-param name="regexp" select="'^[0-9]{3}-[0-9]{4}-[0-9]{2}-[0-9]{1,6}$'"/>
+                 <!-- Ini PAS20241U210700035 JHR -->
+                 <!--<xsl:with-param name="regexp" select="'^[0-9]{3}-[0-9]{4}-([1][0])-[0-9]{1,6}$'"/>-->
+                 <!--<xsl:with-param name="regexp" select="'^[0-9]{3}-[0-9]{4}-[0-9]{2}-[0-9]{1,6}$'"/>-->
+                 <xsl:with-param name="regexp" select="'^[0-9]{3}-[0-9]{4}-[0-9]{2}-[1-9]{1}[0-9]{0,5}$'"/>
+                 <!-- Fin PAS20241U210700035 JHR -->
                  <xsl:with-param name="descripcion" select="concat('Documento Relacionado : ', cbc:DocumentTypeCode,'-',cbc:ID)"/>
               </xsl:call-template>
            </xsl:otherwise> 
@@ -2521,7 +3036,10 @@
               <xsl:call-template name="regexpValidateElementIfExist">
                  <xsl:with-param name="errorCodeValidate" select="'3441'"/>
                  <xsl:with-param name="node" select="cbc:ID"/>
-                 <xsl:with-param name="regexp" select="'^[0-9]{3}-[0-9]{4}-([1][8])-[0-9]{1,6}$'"/>
+                 <!-- Ini PAS20241U210700035 JHR -->
+                 <!--<xsl:with-param name="regexp" select="'^[0-9]{3}-[0-9]{4}-([1][8])-[0-9]{1,6}$'"/>-->
+                 <xsl:with-param name="regexp" select="'^[0-9]{3}-[0-9]{4}-([1][8])-[1-9]{1}[0-9]{0,5}$'"/>
+                 <!-- Fin PAS20241U210700035 JHR -->
                  <xsl:with-param name="descripcion" select="concat('Documento Relacionado : ', cbc:DocumentTypeCode,'-',cbc:ID)"/>
               </xsl:call-template>
            </xsl:when>   
@@ -2529,20 +3047,93 @@
               <xsl:call-template name="regexpValidateElementIfExist">
                  <xsl:with-param name="errorCodeValidate" select="'3441'"/>
                  <xsl:with-param name="node" select="cbc:ID"/>
-                 <xsl:with-param name="regexp" select="'^[0-9]{3}-[0-9]{4}-([4][8])-[0-9]{1,6}$'"/>
+                 <!-- Ini PAS20241U210700035 JHR -->
+                 <!--<xsl:with-param name="regexp" select="'^[0-9]{3}-[0-9]{4}-([1][8])-[0-9]{1,6}$'"/>-->
+                 <xsl:with-param name="regexp" select="'^[0-9]{3}-[0-9]{4}-([4][8])-[1-9]{1}[0-9]{0,5}$'"/>
+                 <!-- Fin PAS20241U210700035 JHR -->
                  <xsl:with-param name="descripcion" select="concat('Documento Relacionado : ', cbc:DocumentTypeCode,'-',cbc:ID)"/>
               </xsl:call-template>
            </xsl:when> 
+           <!-- Ini PAS20241U210700035 JHR -->
+           <xsl:when test= "$motivoTraslado = '19'">
+              <xsl:call-template name="regexpValidateElementIfExist">
+                 <xsl:with-param name="errorCodeValidate" select="'3441'"/>
+                 <xsl:with-param name="node" select="cbc:ID"/>
+                 <!-- Ini PAS20241U210700035 JHR -->
+                 <!--<xsl:with-param name="regexp" select="'^[0-9]{3}-[0-9]{4}-([1][8])-[0-9]{1,6}$'"/>-->
+                 <xsl:with-param name="regexp" select="'^[0-9]{3}-[0-9]{4}-([1][8])-[1-9]{1}[0-9]{0,5}$'"/>
+                 <!-- Fin PAS20241U210700035 JHR -->
+                 <xsl:with-param name="descripcion" select="concat('Documento Relacionado : ', cbc:DocumentTypeCode,'-',cbc:ID)"/>
+              </xsl:call-template>
+           </xsl:when> 
+           <!-- Fin PAS20241U210700035 JHR -->  
            <xsl:otherwise>
               <xsl:call-template name="regexpValidateElementIfExist">
                  <xsl:with-param name="errorCodeValidate" select="'3441'"/>
                  <xsl:with-param name="node" select="cbc:ID"/>
-                 <xsl:with-param name="regexp" select="'^[0-9]{3}-[0-9]{4}-[0-9]{2}-[0-9]{1,6}$'"/>
+                 <!-- Ini PAS20241U210700035 JHR -->
+                 <!--<xsl:with-param name="regexp" select="'^[0-9]{3}-[0-9]{4}-([1][8])-[0-9]{1,6}$'"/>-->
+                 <!--<xsl:with-param name="regexp" select="'^[0-9]{3}-[0-9]{4}-[0-9]{2}-[0-9]{1,6}$'"/>-->
+                 <xsl:with-param name="regexp" select="'^[0-9]{3}-[0-9]{4}-[0-9]{2}-[1-9]{1}[0-9]{0,5}$'"/>
+                 <!-- Fin PAS20241U210700035 JHR --> 
                  <xsl:with-param name="descripcion" select="concat('Documento Relacionado : ', cbc:DocumentTypeCode,'-',cbc:ID)"/>
               </xsl:call-template>
            </xsl:otherwise> 
         </xsl:choose>
      </xsl:if>
+	 <!-- Ini PAS20241U210700035 JHR -->
+     <xsl:if test= "cbc:DocumentTypeCode[text() = '91']">
+        <xsl:if test= "$motivoTraslado = '19'">
+           <xsl:call-template name="regexpValidateElementIfExist">
+              <xsl:with-param name="errorCodeValidate" select="'3441'"/>
+              <xsl:with-param name="node" select="cbc:ID"/>
+              <!--<xsl:with-param name="regexp" select="'^01-[0-9]{3}-[0-9]{1}-[0-9]{4}-[0-9]{1,6}$'"/>-->
+              <xsl:with-param name="regexp" select="'^01-[0-9]{3}-[0-9]{1}-[0-9]{4}-[1-9]{1}[0-9]{0,5}$'"/>
+              <xsl:with-param name="descripcion" select="concat('Documento Relacionado : ', cbc:DocumentTypeCode,'-',cbc:ID)"/>
+           </xsl:call-template>
+           
+           <xsl:if test= "$root/cac:Shipment/cac:FirstArrivalPortLocation/cbc:LocationTypeCode = '1'">
+              <xsl:call-template name="regexpValidateElementIfExist">
+                 <xsl:with-param name="errorCodeValidate" select="'3441'"/>
+                 <xsl:with-param name="node" select="cbc:ID"/>
+                 <!--<xsl:with-param name="regexp" select="'^01-[0-9]{3}-[1]-[0-9]{4}-[0-9]{1,6}$'"/>-->
+                 <xsl:with-param name="regexp" select="'^01-[0-9]{3}-[1]-[0-9]{4}-[1-9]{1}[0-9]{0,5}$'"/>
+                 <xsl:with-param name="descripcion" select="concat('Documento Relacionado : ', cbc:DocumentTypeCode,'-',cbc:ID)"/>
+              </xsl:call-template>
+           </xsl:if> 
+           <xsl:if test= "$root/cac:Shipment/cac:FirstArrivalPortLocation/cbc:LocationTypeCode = '2'">
+              <xsl:call-template name="regexpValidateElementIfExist">
+                 <xsl:with-param name="errorCodeValidate" select="'3441'"/>
+                 <xsl:with-param name="node" select="cbc:ID"/>
+                 <!--<xsl:with-param name="regexp" select="'^01-[0-9]{3}-[4]-[0-9]{4}-[0-9]{1,6}$'"/>-->
+                 <xsl:with-param name="regexp" select="'^01-[0-9]{3}-[4]-[0-9]{4}-[1-9]{1}[0-9]{0,5}$'"/>
+                 <xsl:with-param name="descripcion" select="concat('Documento Relacionado : ', cbc:DocumentTypeCode,'-',cbc:ID)"/>
+              </xsl:call-template>
+           </xsl:if> 
+           <!--
+           <xsl:if test= "$root/cac:Shipment/cac:FirstArrivalPortLocation/cbc:LocationTypeCode = '3'">
+              <xsl:call-template name="regexpValidateElementIfExist">
+                 <xsl:with-param name="errorCodeValidate" select="'3441'"/>
+                 <xsl:with-param name="node" select="cbc:ID"/>
+                 <xsl:with-param name="regexp" select="'^01-[0-9]{3}-[3]-[0-9]{4}-[0-9]{1,6}$'"/>
+                 <xsl:with-param name="descripcion" select="concat('Documento Relacionado : ', cbc:DocumentTypeCode,'-',cbc:ID)"/>
+              </xsl:call-template>
+           </xsl:if> 
+           -->                        
+        </xsl:if>
+     </xsl:if>
+	 <!-- Fin PAS20241U210700035 JHR -->
+
+    <!-- Ini PAS20251U210700052 JHR -->
+     <xsl:if test= "cbc:DocumentTypeCode = '92'">
+        <xsl:call-template name="regexpValidateElementIfExist">
+           <xsl:with-param name="errorCodeValidate" select="'3441'"/>
+           <xsl:with-param name="node" select="cbc:ID"/>
+           <xsl:with-param name="regexp" select="'^\d{1,50}$'"/>
+           <xsl:with-param name="descripcion" select="concat('Documento Relacionado : ', cbc:DocumentTypeCode,'-',cbc:ID)"/>
+         </xsl:call-template>
+     </xsl:if> 
+	 <!-- Fin PAS20251U210700052 JHR -->
      
      <xsl:if test= "cbc:DocumentTypeCode[text() = '71' or text() = '72' or text() = '73' or text() = '74' or text() = '75' or text() = '76' or text() = '77' or text() = '78']">
         <xsl:choose>
@@ -2568,7 +3159,10 @@
                
      <!-- Numero de RUC del emisor del documento relacionado -->
 
-     <xsl:if test= "cbc:DocumentTypeCode[text() = '01' or text() = '03' or text() = '04' or text() = '09' or text() = '12' or text() = '48']">
+     <!-- Ini PAS20251U210700052 JHR -->
+     <!--<xsl:if test= "cbc:DocumentTypeCode[text() = '01' or text() = '03' or text() = '04' or text() = '09' or text() = '12' or text() = '48']">-->
+     <xsl:if test= "cbc:DocumentTypeCode[text() = '01' or text() = '03' or text() = '04' or text() = '09' or text() = '12' or text() = '48' or text() = '92']">
+     <!-- Fin PAS20251U210700052 JHR -->
       	<xsl:call-template name="existElement">
            <xsl:with-param name="errorCodeNotExist" select="'3380'"/>
            <xsl:with-param name="node" select="cac:IssuerParty/cac:PartyIdentification/cbc:ID"/>
@@ -2622,7 +3216,10 @@
      </xsl:if>
 
      <!-- Tipo de documento del emisor del documento relacionado -->
-     <xsl:if test= "cbc:DocumentTypeCode[text() = '01' or text() = '03' or text() = '04' or text() = '09' or text() = '12' or text() = '48']">
+     <!-- Ini PAS20251U210700052 JHR -->
+     <!--xsl:if test= "cbc:DocumentTypeCode[text() = '01' or text() = '03' or text() = '04' or text() = '09' or text() = '12' or text() = '48']">-->
+     <xsl:if test= "cbc:DocumentTypeCode[text() = '01' or text() = '03' or text() = '04' or text() = '09' or text() = '12' or text() = '48' or text() = '92']">
+     <!-- Fin PAS20251U210700052 JHR -->
       	<xsl:call-template name="existAndRegexpValidateElement">
            <xsl:with-param name="errorCodeNotExist" select="'3382'"/>
            <xsl:with-param name="errorCodeValidate" select="'3382'"/>
@@ -2715,7 +3312,7 @@
         </xsl:call-template>
      </xsl:if>     
 
-     <xsl:if test="count($root/cac:Shipment/cbc:SpecialInstructions[text() = 'SUNAT_Envio_IndicadorVehiculoConductoresTransp']) = 0 and cac:ApplicableTransportMeans/cbc:RegistrationNationalityID != ''">
+     <xsl:if test="($modalidadTraslado = '01' and count($root/cac:Shipment/cbc:SpecialInstructions[text() = 'SUNAT_Envio_IndicadorVehiculoConductoresTransp']) = 0 and cac:ApplicableTransportMeans/cbc:RegistrationNationalityID != '' )">
         <xsl:call-template name="isTrueExpresion">
            <xsl:with-param name="errorCodeValidate" select="'3454'"/>
            <xsl:with-param name="node" select="cac:ApplicableTransportMeans/cbc:RegistrationNationalityID"/>
@@ -2858,7 +3455,7 @@
    
      <!-- Validaciones solo aplican si el tipo de conductor en 'Principal' o 'Secundario' -->
      <xsl:if test="cbc:JobTitle[text() = 'Principal' or text() = 'Secundario']">
-        <!-- Validación de existencia de Tipo de documento del conductor y Numero de documento de identidad del conductor-->
+        <!-- Validaci�n de existencia de Tipo de documento del conductor y Numero de documento de identidad del conductor-->
         <xsl:if test="($modalidadTraslado = '02' and count($root/cac:Shipment/cbc:SpecialInstructions[text() = 'SUNAT_Envio_IndicadorTrasladoVehiculoM1L']) = 0)
                    or ($modalidadTraslado = '01' and count($root/cac:Shipment/cbc:SpecialInstructions[text() = 'SUNAT_Envio_IndicadorTrasladoVehiculoM1L']) = 0 and count($root/cac:Shipment/cbc:SpecialInstructions[text() = 'SUNAT_Envio_IndicadorVehiculoConductoresTransp']) = 1)">
 
@@ -3079,7 +3676,7 @@
    
         <xsl:if test="cbc:FirstName != ''">
            <xsl:choose>          
-              <xsl:when test="(string-length(cbc:FirstName) &gt; 250 or string-length(cbc:FirstName) &lt; 3) " >
+              <xsl:when test="(string-length(cbc:FirstName) &gt; 250 or string-length(cbc:FirstName) &lt; 1) " >
                  <xsl:call-template name="isTrueExpresion">
                     <xsl:with-param name="errorCodeValidate" select="'4409'"/>
                     <xsl:with-param name="node" select="cbc:FirstName" />
@@ -3103,7 +3700,7 @@
                  <xsl:call-template name="regexpValidateElementIfExist">
                     <xsl:with-param name="errorCodeValidate" select="'4409'"/>
                     <xsl:with-param name="node" select="cbc:FirstName"/>
-                    <xsl:with-param name="regexp" select="'^[^\n\t\r\f]{2,}$'"/> 
+                    <xsl:with-param name="regexp" select="'^[^\n\t\r\f]{1,}$'"/> 
                     <xsl:with-param name="isError" select="false()"/>
                     <xsl:with-param name="descripcion" select="concat('Tipo de conductor ',$tipoConductor,' - Nombres - Caracteres invalidos')"/>
                  </xsl:call-template>            
@@ -3202,10 +3799,12 @@
   <xsl:template match="cac:DespatchLine">
      <xsl:param name="root"/>
      <xsl:param name="motivoTraslado" select = "'-'" />
+     <xsl:param name="tipoDocumentoCita"/>
+     <xsl:param name="condicionTrasladoDAM_DS"/>
      
      <xsl:variable name="nroLinea" select="cbc:ID"/>
      <xsl:variable name="bienControlado" select="count(cac:Item/cac:AdditionalItemProperty[cbc:NameCode = '7022' and cbc:Value = '1'])"/>
-     
+     <xsl:variable name="nodosBienes" select="cbc:DeliveredQuantity | cac:Item//*"/>
      <!-- Numero de linea -->
      <xsl:call-template name="existAndRegexpValidateElement">
         <xsl:with-param name="errorCodeNotExist" select="'2023'"/>
@@ -3213,6 +3812,22 @@
         <xsl:with-param name="node" select="cbc:ID"/>
         <xsl:with-param name="regexp" select="'^\d{1,4}$'"/> 
      </xsl:call-template>
+     
+   <!--Ini Validacion de Documento Cita--> 	 
+	 <xsl:if test="($motivoTraslado[text() = '19'] and $tipoDocumentoCita)">	 
+	 	<xsl:call-template name="isTrueExpresion">
+		   <xsl:with-param name="errorCodeValidate" select="'3630'"/>		 
+		   <xsl:with-param name="node" select="$root/cac:DespatchLine[2]"/>
+		   <xsl:with-param name="expresion"   select="count($root/cac:DespatchLine)  &gt; 1"/>		   
+	   </xsl:call-template>
+	 
+		<xsl:call-template name="isTrueExpresion">
+           <xsl:with-param name="errorCodeValidate" select="'3629'" />           
+		     <xsl:with-param name="node" select="$nodosBienes"/>
+           <xsl:with-param name="expresion" select="boolean($nodosBienes)"/>           
+	   </xsl:call-template> 	
+     </xsl:if> 
+ <!-- Fin Validacion de Documento Cita-->
 
      <xsl:call-template name="isTrueExpresion">
         <xsl:with-param name="errorCodeValidate" select="'2752'" />
@@ -3221,32 +3836,68 @@
      </xsl:call-template>
 
      <!-- Cantidad del bien -->
-     <xsl:if test="count($root/cac:Shipment/cbc:SpecialInstructions[text() = 'SUNAT_Envio_IndicadorTrasladoTotalDAMoDS']) = 0">
+     <!--Ini PAS20241U210700035 JVO-->
+     <!-- <xsl:if test="count($root/cac:Shipment/cbc:SpecialInstructions[text() = 'SUNAT_Envio_IndicadorTrasladoTotalDAMoDS']) = 0"> -->
+        <!--Ini PAS20251U210700052 JVO-->
+     <!--<xsl:if test="count($root/cac:Shipment/cbc:SpecialInstructions[text() = 'SUNAT_Envio_IndicadorTrasladoTotalDAMoDS' or text() = 'SUNAT_Envio_IndicadorTrasladoContenedorManifiestoCarga']) = 0"> -->
+
+     <xsl:if test="count($root/cac:Shipment/cbc:SpecialInstructions[text() = 'SUNAT_Envio_IndicadorTrasladoTotalDAMoDS' or text() = 'SUNAT_Envio_IndicadorTrasladoContenedorManifiestoCarga']) = 0
+                   and  $motivoTraslado[text() != '08' and text() != '19']">  
+         <!--Fin PAS20251U210700052 JVO-->  
+     <!--Fin PAS20241U210700035 JVO -->
         <xsl:call-template name="isTrueExpresion">
            <xsl:with-param name="errorCodeValidate" select="'2580'" />
            <xsl:with-param name="node" select="cbc:DeliveredQuantity" />
-           <xsl:with-param name="expresion" select="not(cbc:DeliveredQuantity) or cbc:DeliveredQuantity = 0" />
+           <xsl:with-param name="expresion" select="not(cbc:DeliveredQuantity)" />
            <xsl:with-param name="descripcion" select="concat('Error en la linea: ', $nroLinea)"/>
         </xsl:call-template>      
-     </xsl:if> 
+     </xsl:if>
 
-     <xsl:call-template name="regexpValidateElementIfExist">
-        <xsl:with-param name="errorCodeValidate" select="'2780'"/>
-        <xsl:with-param name="node" select="cbc:DeliveredQuantity"/>
-        <xsl:with-param name="regexp" select="'^(?!0[0-9]*(\.0*)?$)[0-9]{1,12}(\.[0-9]{1,10})?$'"/>
-        <xsl:with-param name="descripcion" select="concat('Error en la linea: ', $nroLinea)"/>
-     </xsl:call-template>
+     <!--Ini PAS20241U210700035 JVO-->
+         <!--Ini PAS20251U210700052 JVO-->
+    <!-- <xsl:if test="$root/cac:AdditionalDocumentReference/cbc:DocumentTypeCode[text() != '91']" > -->
+    <xsl:if test="$root/cac:AdditionalDocumentReference/cbc:DocumentTypeCode[text() != '91']" >
+         <!--Fin PAS20251U210700052 JVO-->
+     <!--Fin PAS20241U210700035 JVO-->  
+        <xsl:call-template name="regexpValidateElementIfExist">
+			<xsl:with-param name="errorCodeValidate" select="'2780'"/>
+			<xsl:with-param name="node" select="cbc:DeliveredQuantity"/>
+			<xsl:with-param name="regexp" select="'^(?!0[0-9]*(\.0*)?$)[0-9]{1,12}(\.[0-9]{1,10})?$'"/>
+			<xsl:with-param name="descripcion" select="concat('Error en la linea: ', $nroLinea)"/>
+       </xsl:call-template>
+     </xsl:if>	
+
+     <!--Ini PAS20241U210700035 JVO-->
+     <xsl:if test="$root/cac:AdditionalDocumentReference/cbc:DocumentTypeCode[text() = '91'] and count($root/cac:Shipment/cbc:SpecialInstructions[text() = 'SUNAT_Envio_IndicadorTrasladoContenedorManifiestoCarga']) = 0" >
+	   <xsl:call-template name="regexpValidateElementIfExist">
+         <xsl:with-param name="errorCodeValidate" select="'2780'"/>
+         <xsl:with-param name="node" select="cbc:DeliveredQuantity"/>
+         <xsl:with-param name="regexp" select="'^([0-9]{1,10})$'"/>
+         <xsl:with-param name="descripcion" select="concat('Error en la linea: ', $nroLinea)"/>
+      </xsl:call-template>
+     </xsl:if> 
+     <!--Fin PAS20241U210700035 JVO--> 
       
      <!-- Unidad de medida de la cantidad del bien --> 
-     <xsl:if test="count($root/cac:Shipment/cbc:SpecialInstructions[text() = 'SUNAT_Envio_IndicadorTrasladoTotalDAMoDS']) = 0">
+     <!--Ini PAS20241U210700035 JVO-->
+     <!--<xsl:if test="count($root/cac:Shipment/cbc:SpecialInstructions[text() = 'SUNAT_Envio_IndicadorTrasladoTotalDAMoDS']) = 0"> -->
+         <!--Ini PAS20251U210700052 JVO-->
+	 <!--<xsl:if test="count($root/cac:Shipment/cbc:SpecialInstructions[text() = 'SUNAT_Envio_IndicadorTrasladoTotalDAMoDS' or text() = 'SUNAT_Envio_IndicadorTrasladoContenedorManifiestoCarga']) = 0"> -->
+	 <xsl:if test="count($root/cac:Shipment/cbc:SpecialInstructions[text() = 'SUNAT_Envio_IndicadorTrasladoTotalDAMoDS' or text() = 'SUNAT_Envio_IndicadorTrasladoContenedorManifiestoCarga']) = 0
+					and not($tipoDocumentoCita) and cbc:DeliveredQuantity">
+	       <!--Fin PAS20251U210700052 JVO-->
+     <!--Fin PAS20241U210700035 JVO--> 
         <xsl:call-template name="existElement">
            <xsl:with-param name="errorCodeNotExist" select="'2883'"/>
            <xsl:with-param name="node" select="cbc:DeliveredQuantity/@unitCode"/>
            <xsl:with-param name="descripcion" select="concat('Error en la linea: ', $nroLinea)"/>
         </xsl:call-template>
-     </xsl:if> 
+     </xsl:if>
       
-     <xsl:if test="$motivoTraslado[text() != '08' and text() != '09' and text() != '13'] and count($root/cac:Shipment/cbc:SpecialInstructions[text() = 'SUNAT_Envio_IndicadorTrasladoTotalDAMoDS']) = 0">
+     <!--Ini PAS20241U210700035 JVO-->
+     <!--<xsl:if test="$motivoTraslado[text() != '08' and text() != '09' and text() != '13'] and count($root/cac:Shipment/cbc:SpecialInstructions[text() = 'SUNAT_Envio_IndicadorTrasladoTotalDAMoDS']) = 0">  -->
+     <xsl:if test="$motivoTraslado[text() != '08' and text() != '09' and text() != '13' and text() != '19'] and count($root/cac:Shipment/cbc:SpecialInstructions[text() = 'SUNAT_Envio_IndicadorTrasladoTotalDAMoDS']) = 0">  
+     <!--Fin PAS20241U210700035 JVO-->
         <xsl:call-template name="findElementInCatalog">
 		   <xsl:with-param name="errorCodeValidate" select="'4320'"/>
 		   <xsl:with-param name="idCatalogo" select="cbc:DeliveredQuantity/@unitCode"/>
@@ -3254,7 +3905,7 @@
            <xsl:with-param name="isError" select="false()"/>
            <xsl:with-param name="descripcion" select="concat('Error en la linea: ', $nroLinea)"/>
 		</xsl:call-template>
-     </xsl:if> 
+     </xsl:if>
 
      <xsl:if test="$motivoTraslado[text() = '13'] and count($root/cac:Shipment/cbc:SpecialInstructions[text() = 'SUNAT_Envio_IndicadorTrasladoTotalDAMoDS']) = 0">
         <xsl:call-template name="findElementInCatalog">
@@ -3265,15 +3916,29 @@
            <xsl:with-param name="descripcion" select="concat('Error en la linea: ', $nroLinea)"/>
         </xsl:call-template>
      </xsl:if> 
-      
-     <xsl:if test="$motivoTraslado[text() = '08' or text() = '09'] and count($root/cac:Shipment/cbc:SpecialInstructions[text() = 'SUNAT_Envio_IndicadorTrasladoTotalDAMoDS']) = 0">
-        <xsl:call-template name="findElementInCatalog">
+   
+    <!--Ini PAS20241U210700035 JVO-->
+    <!-- <xsl:if test="$motivoTraslado[text() = '08' or text() = '09'] and count($root/cac:Shipment/cbc:SpecialInstructions[text() = 'SUNAT_Envio_IndicadorTrasladoTotalDAMoDS']) = 0"> -->
+    <xsl:if test="$motivoTraslado[text() = '08' or text() = '09' or text() = '19'] and count($root/cac:Shipment/cbc:SpecialInstructions[text() = 'SUNAT_Envio_IndicadorTrasladoTotalDAMoDS']) = 0 and $root/cac:AdditionalDocumentReference[cbc:DocumentTypeCode[text() = '50' or text() ='52']]"> 
+    <!--Fin PAS20241U210700035 JVO-->
+    	<xsl:call-template name="findElementInCatalog">
            <xsl:with-param name="errorCodeValidate" select="'3446'"/>
            <xsl:with-param name="idCatalogo" select="cbc:DeliveredQuantity/@unitCode"/>
            <xsl:with-param name="catalogo" select="'65'"/>
            <xsl:with-param name="descripcion" select="concat('Error en la linea: ', $nroLinea)"/>
         </xsl:call-template>
-     </xsl:if>      
+     </xsl:if>
+	 
+	<!--Ini PAS20241U210700035 JVO -->	
+	<xsl:if test="count($root/cac:Shipment/cbc:SpecialInstructions[text() = 'SUNAT_Envio_IndicadorTrasladoContenedorManifiestoCarga']) = 0 and $motivoTraslado[text() = '19'] and $root/cac:AdditionalDocumentReference/cbc:DocumentTypeCode[text() = '91']" >
+        <xsl:call-template name="isTrueExpresion">
+           <xsl:with-param name="errorCodeValidate" select="'3446'"/>
+           <xsl:with-param name="node" select="cbc:DeliveredQuantity/@unitCode"/>
+           <xsl:with-param name="expresion" select="not(cbc:DeliveredQuantity/@unitCode = 'U')"/>
+           <xsl:with-param name="descripcion" select="concat('Error en la linea: ', $nroLinea, ' Unidad: U')"/>
+        </xsl:call-template>
+	</xsl:if>
+	<!--Fin PAS20241U210700035 JVO -->
       
      <xsl:call-template name="regexpValidateElementIfExist">
         <xsl:with-param name="errorCodeValidate" select="'4258'"/>
@@ -3291,7 +3956,7 @@
         <xsl:with-param name="descripcion" select="concat('Error en la linea: ', $nroLinea)"/>
      </xsl:call-template>
       
-     <xsl:if test="count($root/cac:Shipment/cbc:SpecialInstructions[text() = 'SUNAT_Envio_IndicadorTrasladoTotalDAMoDS']) = 0">
+     <xsl:if test="count($root/cac:Shipment/cbc:SpecialInstructions[text() = 'SUNAT_Envio_IndicadorTrasladoTotalDAMoDS']) = 0 and not($tipoDocumentoCita) and not($condicionTrasladoDAM_DS)">
         <xsl:call-template name="existElement">
            <xsl:with-param name="errorCodeNotExist" select="'2781'"/>
            <xsl:with-param name="node" select="cac:Item/cbc:Description"/>
@@ -3312,7 +3977,7 @@
               </xsl:call-template>
            </xsl:when>
    
-           <xsl:when test="string-length(translate(cac:Item/cbc:Description,' ','')) = 0 " >
+           <xsl:when test="string-length(translate(cac:Item/cbc:Description,' ','')) = 0 " > 
               <xsl:call-template name="regexpValidateElementIfExist">
                 <xsl:with-param name="errorCodeValidate" select="'4084'"/>
                 <xsl:with-param name="node" select="cac:Item/cbc:Description" />
@@ -3326,7 +3991,7 @@
               <xsl:call-template name="regexpValidateElementIfExist">
                  <xsl:with-param name="errorCodeValidate" select="'4084'"/>
                  <xsl:with-param name="node" select="cac:Item/cbc:Description"/>
-                 <xsl:with-param name="regexp" select="'^[^\n\t\r\f]{3,}$'"/> 
+                 <xsl:with-param name="regexp" select="'^(?!\s*$)[\S\s]{3,}$'"/> 
                  <xsl:with-param name="isError" select="false()"/>
                  <xsl:with-param name="descripcion" select="concat('Error en la linea: ', $nroLinea)"/>
               </xsl:call-template>            
@@ -3445,18 +4110,39 @@
            <xsl:with-param name="expresion" select="not(cac:Item/cac:AdditionalItemProperty/cbc:NameCode[text() = '7020'])"/>
            <xsl:with-param name="descripcion" select="concat('Error en la linea: ', $nroLinea, ' Concepto: 7020')"/>
         </xsl:call-template>
-
-        <xsl:call-template name="isTrueExpresion">
+      <!--Ini PAS20241U210700035 JVO -->
+      <!--<xsl:call-template name="isTrueExpresion">
            <xsl:with-param name="errorCodeValidate" select="'3379'"/>
            <xsl:with-param name="node" select="cac:Item/cac:AdditionalItemProperty/cbc:NameCode[text() = '7022']"/>
            <xsl:with-param name="expresion" select="count($root/cac:AdditionalDocumentReference[cbc:DocumentTypeCode[text() = '49' or text() ='80']]) = 0"/>
            <xsl:with-param name="descripcion" select="concat('Error en la linea: ', $nroLinea, ' Concepto: 7022')"/>
         </xsl:call-template>
+		-->
+      <!--Fin PAS20241U210700035 JVO-->
+     </xsl:if>
+	 
+	   <!--Ini PAS20241U210700035 JVO -->
+	   <xsl:if test="$motivoTraslado != '19' and count($root/cac:Shipment/cbc:SpecialInstructions[text() = 'SUNAT_Envio_IndicadorTrasladoTotalDAMoDS']) = 0
+               and count(cac:Item/cac:AdditionalItemProperty[cbc:NameCode[text() = '7022'] and cbc:Value[text() = '1']]) &gt; 0">			   
+        <xsl:call-template name="isTrueExpresion">
+           <xsl:with-param name="errorCodeValidate" select="'3379'"/>
+           <xsl:with-param name="node" select="cac:Item/cac:AdditionalItemProperty/cbc:NameCode[text() = '7022']"/>
+           <xsl:with-param name="expresion" select="count($root/cac:AdditionalDocumentReference[cbc:DocumentTypeCode[text() = '49' or text() ='80']]) = 0"/>
+           <xsl:with-param name="descripcion" select="concat('Error en la linea: ', $nroLinea, ' Concepto: 7022')"/>
+        </xsl:call-template>		
      </xsl:if> 
+     <!--Fin PAS20241U210700035 JVO-->
 
+     <!--Ini PAS20241U210700035 JVO-->
+     <!-- <xsl:if test="count($root/cac:Shipment/cbc:SpecialInstructions[text() = 'SUNAT_Envio_IndicadorTrasladoTotalDAMoDS']) = 0
+               and $motivoTraslado[text()='08' or text()='09']">-->
+         <!--Ini PAS20251U210700052 JVO-->
+    <!--<xsl:if test="count($root/cac:Shipment/cbc:SpecialInstructions[text() = 'SUNAT_Envio_IndicadorTrasladoTotalDAMoDS']) = 0
+               and $motivoTraslado[text()='08' or text()='09' or text()='19'] and $root/cac:AdditionalDocumentReference[cbc:DocumentTypeCode[text() != '91']]"> -->
      <xsl:if test="count($root/cac:Shipment/cbc:SpecialInstructions[text() = 'SUNAT_Envio_IndicadorTrasladoTotalDAMoDS']) = 0
-               and $motivoTraslado[text()='08' or text()='09']">
-
+               and $motivoTraslado[text()='09'] and $root/cac:AdditionalDocumentReference[cbc:DocumentTypeCode[text() != '91']]">
+         <!--Fin PAS20251U210700052 JVO--> 
+     <!--Fin PAS20241U210700035 JVO-->			  
         <xsl:call-template name="isTrueExpresion">
            <xsl:with-param name="errorCodeValidate" select="'3427'"/>
            <xsl:with-param name="node" select="cac:Item/cac:AdditionalItemProperty/cbc:NameCode[text() = '7021']"/>
@@ -3471,6 +4157,61 @@
            <xsl:with-param name="descripcion" select="concat('Error en la linea: ', $nroLinea, ' Concepto: 7023')"/>
         </xsl:call-template>
      </xsl:if> 
+	 
+	 <!--Ini PAS20241U210700035 JVO -->
+	 <xsl:if test="$motivoTraslado[text()='19'] and count($root/cac:Shipment/cbc:SpecialInstructions[text() = 'SUNAT_Envio_IndicadorTrasladoContenedorManifiestoCarga']) = 1">
+        <xsl:call-template name="isTrueExpresion">
+           <xsl:with-param name="errorCodeValidate" select="'3480'"/>
+           <xsl:with-param name="node" select="cac:Item/cac:AdditionalItemProperty/cbc:NameCode[text() = '7026']"/>
+           <xsl:with-param name="expresion" select="not(cac:Item/cac:AdditionalItemProperty/cbc:NameCode[text() = '7026'])"/>
+           <xsl:with-param name="descripcion" select="concat('Error en la linea: ', $nroLinea, ' Concepto: 7026')"/>
+        </xsl:call-template>
+     
+        <xsl:if test="cac:Item/cac:AdditionalItemProperty/cbc:NameCode[text() = '7028'] and cac:Item/cac:AdditionalItemProperty/cbc:Value[text() = '0']">
+            <xsl:call-template name="isTrueExpresion">
+               <xsl:with-param name="errorCodeValidate" select="'3481'"/>
+               <xsl:with-param name="node" select="cac:Item/cac:AdditionalItemProperty/cbc:NameCode[text() = '7027']"/>
+               <xsl:with-param name="expresion" select="not(cac:Item/cac:AdditionalItemProperty/cbc:NameCode[text() = '7027'])"/>
+               <xsl:with-param name="descripcion" select="concat('Error en la linea: ', $nroLinea, ' Concepto: 7027')"/>
+            </xsl:call-template>
+		  </xsl:if>
+		<xsl:call-template name="isTrueExpresion">
+           <xsl:with-param name="errorCodeValidate" select="'3482'"/>
+           <xsl:with-param name="node" select="cac:Item/cac:AdditionalItemProperty/cbc:NameCode[text() = '7028']"/>
+           <xsl:with-param name="expresion" select="not(cac:Item/cac:AdditionalItemProperty/cbc:NameCode[text() = '7028'])"/>
+           <xsl:with-param name="descripcion" select="concat('Error en la linea: ', $nroLinea, ' Concepto: 7028')"/>
+        </xsl:call-template>
+		
+     </xsl:if>	
+	<!--Fin PAS20241U210700035 JVO-->
+   
+	<!--Ini PAS20241U210700035 JVO-->
+   <xsl:if test="$motivoTraslado[text()='19'] and $root/cac:AdditionalDocumentReference[cbc:DocumentTypeCode[text() = '91']]">
+      <xsl:call-template name="isTrueExpresion">
+           <xsl:with-param name="errorCodeValidate" select="'3490'"/>
+           <xsl:with-param name="node" select="cac:Item/cac:AdditionalItemProperty/cbc:NameCode[text() = '7024']"/>
+           <xsl:with-param name="expresion" select="not(cac:Item/cac:AdditionalItemProperty/cbc:NameCode[text() = '7024'])"/>
+           <xsl:with-param name="descripcion" select="concat('Error en la linea: ', $nroLinea, ' Concepto: 7024')"/>
+        </xsl:call-template>
+      <xsl:call-template name="isTrueExpresion">
+           <xsl:with-param name="errorCodeValidate" select="'3491'"/>
+           <xsl:with-param name="node" select="cac:Item/cac:AdditionalItemProperty/cbc:NameCode[text() = '7025']"/>
+           <xsl:with-param name="expresion" select="not(cac:Item/cac:AdditionalItemProperty/cbc:NameCode[text() = '7025'])"/>
+           <xsl:with-param name="descripcion" select="concat('Error en la linea: ', $nroLinea, ' Concepto: 7025')"/>
+      </xsl:call-template>
+   </xsl:if>
+   <!--Fin PAS20241U210700035 JVO-->
+
+	<!--Ini PAS20241U210700035 JVO-->
+   <xsl:if test="$motivoTraslado[text() != '19']"> 
+       <xsl:call-template name="isTrueExpresion">
+           <xsl:with-param name="errorCodeValidate" select="'3473'"/>
+           <xsl:with-param name="node" select="cac:Item/cac:AdditionalItemProperty/cbc:NameCode"/>
+           <xsl:with-param name="expresion" select="cac:Item/cac:AdditionalItemProperty/cbc:NameCode[text() = '7024' or text()='7025' or text()='7026' or text()='7027' or text()='7028']"/>
+           <xsl:with-param name="descripcion" select="concat('Error en la linea: ', $nroLinea, ' Concepto: ', cbc:NameCode)"/>
+        </xsl:call-template>    
+     </xsl:if> 
+	<!--Fin PAS20241U210700035 JVO -->
 
      <xsl:apply-templates select="cac:Item/cac:AdditionalItemProperty" mode="linea">
         <xsl:with-param name="nroLinea" select="$nroLinea"/>
@@ -3478,6 +4219,43 @@
         <xsl:with-param name="motivoTraslado" select="$motivoTraslado"/>
         <xsl:with-param name="bienControlado" select="$bienControlado"/>
      </xsl:apply-templates>
+		 
+	<!--Ini PAS20241U210700035 JVO-->
+     <xsl:if test="$root/cac:AdditionalDocumentReference/cbc:DocumentTypeCode[text() = '91'] and count($root/cac:Shipment/cbc:SpecialInstructions[text() = 'SUNAT_Envio_IndicadorTrasladoContenedorManifiestoCarga']) = 0" >
+		 <xsl:if test="cac:Item/cac:AdditionalItemProperty/cbc:NameCode = '7024' and  cac:Item/cac:AdditionalItemProperty/cbc:NameCode = '7025'"> 
+			<xsl:call-template name="isTrueExpresion">
+				<xsl:with-param name="errorCodeValidate" select="'3472'" />  
+				<xsl:with-param name="node" select="cac:Item/cac:AdditionalItemProperty[cbc:NameCode = '7024' or cbc:NameCode = '7025']/cbc:Value" />
+			
+				<xsl:with-param name="expresion" select="count(key('by-despatchLine-item-carga-suelta', concat(cac:Item/cac:AdditionalItemProperty[cbc:NameCode = '7024']/cbc:Value, '-',  cac:Item/cac:AdditionalItemProperty[cbc:NameCode = '7025']/cbc:Value))) &gt; 1 " />        
+				<xsl:with-param name="descripcion" select="concat('Error en la linea: ', $nroLinea,' DocumentoTransporte-NumDetalle : ',   concat(cac:Item/cac:AdditionalItemProperty[cbc:NameCode = '7024']/cbc:Value, '-',  cac:Item/cac:AdditionalItemProperty[cbc:NameCode = '7025']/cbc:Value))" />
+			</xsl:call-template>        
+		 </xsl:if>
+	 </xsl:if>
+	 
+	 <xsl:if test="$root/cac:AdditionalDocumentReference/cbc:DocumentTypeCode[text() = '91'] and count($root/cac:Shipment/cbc:SpecialInstructions[text() = 'SUNAT_Envio_IndicadorTrasladoContenedorManifiestoCarga']) &gt; 0" >
+		 <xsl:if test="cac:Item/cac:AdditionalItemProperty/cbc:NameCode = '7026' and cac:Item/cac:AdditionalItemProperty/cbc:NameCode = '7024' and  cac:Item/cac:AdditionalItemProperty/cbc:NameCode = '7025'"> 
+			<xsl:call-template name="isTrueExpresion">
+				<xsl:with-param name="errorCodeValidate" select="'3492'" />  
+				<xsl:with-param name="node" select="cac:Item/cac:AdditionalItemProperty[cbc:NameCode = '7026' or cbc:NameCode = '7024' or cbc:NameCode = '7025']/cbc:Value" />
+				
+				<xsl:with-param name="expresion" select="count(key('by-despatchLine-item-contenedor', concat(cac:Item/cac:AdditionalItemProperty[cbc:NameCode = '7026']/cbc:Value, '-' , cac:Item/cac:AdditionalItemProperty[cbc:NameCode = '7024']/cbc:Value, '-',  cac:Item/cac:AdditionalItemProperty[cbc:NameCode = '7025']/cbc:Value))) &gt; 1 " />        
+				<xsl:with-param name="descripcion" select="concat('Error en la linea: ', $nroLinea,' Contenedor-DocumentoTransporte-NumDetalle : ',   concat(cac:Item/cac:AdditionalItemProperty[cbc:NameCode = '7026']/cbc:Value, '-', cac:Item/cac:AdditionalItemProperty[cbc:NameCode = '7024']/cbc:Value, '-',  cac:Item/cac:AdditionalItemProperty[cbc:NameCode = '7025']/cbc:Value))" />
+
+			</xsl:call-template>        
+		 </xsl:if>
+	 </xsl:if>
+	 <!--Fin PAS20241U210700035 JVO--> 
+
+	 <!--Ini PAS20241U210700035 JVO -->
+    <xsl:if test="cac:Item/cac:AdditionalItemProperty[cbc:NameCode = '7028']/cbc:Value = 0">      
+            <xsl:call-template name="existElement">
+               <xsl:with-param name="errorCodeNotExist" select="'3064'"/>
+               <xsl:with-param name="node" select="cac:Item/cac:AdditionalItemProperty[cbc:NameCode = '7027']/cbc:Value"/>
+               <xsl:with-param name="descripcion" select="concat('Error en la linea: ', $nroLinea, ' Concepto: ', 7027)"/>
+            </xsl:call-template>      
+	 </xsl:if>                                                                     
+    <!--Fin PAS20241U210700035 JVO -->
 
   </xsl:template>
 
@@ -3526,14 +4304,18 @@
         <xsl:with-param name="isError" select ="false()"/>
         <xsl:with-param name="descripcion" select="concat('Error en la linea: ', $nroLinea, ' Concepto: ', cbc:NameCode)"/>
      </xsl:call-template>
-    
-     <xsl:if test="cbc:NameCode[text() = '7020' or text()='7021' or text()='7022' or text()='7023']">
+
+    <!--Ini PAS20241U210700035 JVO -->
+    <!-- <xsl:if test="cbc:NameCode[text() = '7020' or text()='7021' or text()='7022' or text()='7023']"> -->
+    <xsl:if test="cbc:NameCode[text() = '7020' or text()='7021' or text()='7022' or text()='7023' or text()='7024' or text()='7025' or text()='7026' or text()='7028']"> 
+    <!--Fin PAS20241U210700035 JVO --> 
         <xsl:call-template name="existElement">
            <xsl:with-param name="errorCodeNotExist" select="'3064'"/>
            <xsl:with-param name="node" select="cbc:Value"/>
            <xsl:with-param name="descripcion" select="concat('Error en la linea: ', $nroLinea, ' Concepto: ', cbc:NameCode)"/>
         </xsl:call-template>
-     </xsl:if>                                                                                    
+	 </xsl:if>
+  
 
      <xsl:if test="cbc:NameCode = '7020'">
         <xsl:call-template name="regexpValidateElementIfExist">
@@ -3567,13 +4349,20 @@
         <xsl:call-template name="regexpValidateElementIfExist">
            <xsl:with-param name="errorCodeValidate" select="'2769'"/>
            <xsl:with-param name="node" select="cbc:Value"/>
-           <xsl:with-param name="regexp" select="'^[0-9]{3}-[0-9]{4}-[0-9]{2}-[0-9]{1,6}$'"/>
+           <!--Ini PAS20241U210700035 JVO-->
+           <xsl:with-param name="regexp" select="'^[0-9]{3}-[0-9]{4}-[0-9]{2}-[1-9]\d{0,5}$'"/> 
+           <!--<xsl:with-param name="regexp" select="'^[0-9]{3}-[0-9]{4}-[0-9]{2}-[0-9]{1,8}$'"/>-->
+           <!--Fin PAS20241U210700035 JVO-->
            <xsl:with-param name="descripcion" select="concat('Error en la linea: ', $nroLinea, ' Concepto: ', cbc:NameCode)"/>
         </xsl:call-template>
 
         <xsl:variable name="numDoc" select="cbc:Value"/>
+        <!--Ini PAS20241U210700035 JVO-->
+        <!--<xsl:if test="count($root/cac:Shipment/cbc:SpecialInstructions[text() = 'SUNAT_Envio_IndicadorTrasladoTotalDAMoDS']) = 0
+                  and $motivoTraslado[text()='08' or text()='09']">-->
         <xsl:if test="count($root/cac:Shipment/cbc:SpecialInstructions[text() = 'SUNAT_Envio_IndicadorTrasladoTotalDAMoDS']) = 0
-                  and $motivoTraslado[text()='08' or text()='09']">
+                  and $motivoTraslado[text()='08' or text()='09' or text()='13' or text()='19']">
+        <!--Fin PAS20241U210700035 JVO-->
            <xsl:call-template name="isTrueExpresion">
               <xsl:with-param name="errorCodeValidate" select="'3430'"/>
               <xsl:with-param name="node" select="cbc:Value"/>
@@ -3591,6 +4380,73 @@
            <xsl:with-param name="descripcion" select="concat('Error en la linea: ', $nroLinea, ' Concepto: ', cbc:NameCode)"/>
         </xsl:call-template>
      </xsl:if>
+	 
+	 <!--Ini PAS20241U210700035 JVO-->
+	 <xsl:if test="cbc:NameCode = '7024'">
+        <xsl:call-template name="regexpValidateElementIfExist">
+           <xsl:with-param name="errorCodeValidate" select="'3466'"/>
+           <xsl:with-param name="node" select="cbc:Value"/>
+           <xsl:with-param name="regexp" select="'^[A-Z0-9\/\\\-]{1,25}$'"/>
+           <xsl:with-param name="descripcion" select="concat('Error en la linea: ', $nroLinea, ' Concepto: ', cbc:NameCode)"/>
+        </xsl:call-template>
+     </xsl:if>
+	 <!--Fin PAS20241U210700035 JVO-->
+	  
+	 <!--Ini PAS20241U210700035 JVO-->
+	 <xsl:if test="cbc:NameCode = '7025'">
+        <xsl:call-template name="regexpValidateElementIfExist">
+           <xsl:with-param name="errorCodeValidate" select="'3468'"/>
+           <xsl:with-param name="node" select="cbc:Value"/>
+           <xsl:with-param name="regexp" select="'^[1-9]\d{0,4}$'"/>
+           <xsl:with-param name="descripcion" select="concat('Error en la linea: ', $nroLinea, ' Concepto: ', cbc:NameCode)"/>
+        </xsl:call-template>
+     </xsl:if>
+	 <!--Fin PAS20241U210700035 JVO-->
+	  
+	 <!--Ini PAS20241U210700035 JVO-->	
+	<xsl:if test="cbc:NameCode = '7026'">
+        <xsl:call-template name="regexpValidateElementIfExist">
+           <xsl:with-param name="errorCodeValidate" select="'3470'"/>
+           <xsl:with-param name="node" select="cbc:Value"/>
+           <xsl:with-param name="regexp" select="'^[A-Z0-9\-\/]{1,17}$'"/>
+           <xsl:with-param name="descripcion" select="concat('Error en la linea: ', $nroLinea, ' Concepto: ', cbc:NameCode)"/>
+        </xsl:call-template>
+	</xsl:if>
+	 <!--Fin PAS20241U210700035 JVO-->
+	  
+	 <!--Ini PAS20241U210700035 JVO-->
+	<xsl:if test="cbc:NameCode = '7026'">
+           <xsl:call-template name="isTrueExpresion">
+               <xsl:with-param name="errorCodeValidate" select="'3486'" />
+               <xsl:with-param name="node" select="cbc:Value" />
+               <xsl:with-param name="expresion" select="count(key('by-contenedores',cbc:Value )) = 0" />
+               <xsl:with-param name="descripcion" select="concat('Contenedor : ', cbc:Value)"/>
+           </xsl:call-template>
+   </xsl:if>
+	 <!--Fin PAS20241U210700035 JVO-->
+	  
+	 <!--Ini PAS20241U210700035 JVO-->
+	<xsl:if test="cbc:NameCode = '7027' and cbc:Value != ''">
+        <xsl:call-template name="regexpValidateElementIfExist">
+           <xsl:with-param name="errorCodeValidate" select="'3474'"/>
+           <xsl:with-param name="node" select="cbc:Value"/>
+           <xsl:with-param name="regexp" select="'^(?!0+$)([A-Z0-9]{1,100})(,(?!0+$)[A-Z0-9]{1,100})*$'"/>
+           <xsl:with-param name="descripcion" select="concat('Error en la linea: ', $nroLinea, ' Concepto: ', cbc:NameCode)"/>
+        </xsl:call-template>
+     </xsl:if>
+	 <!--Fin PAS20241U210700035 JVO-->
+	  
+	 <!--Ini PAS20241U210700035 JVO-->
+	<xsl:if test="cbc:NameCode = '7028'">
+		<xsl:call-template name="isTrueExpresion">
+		   <xsl:with-param name="errorCodeValidate" select="'3476'"/>
+		   <xsl:with-param name="node" select="cbc:Value"/>
+		   <xsl:with-param name="expresion" select="count(cbc:Value[text() = '0' or text() ='1']) = 0"/>
+		   <xsl:with-param name="descripcion" select="concat('Error en la linea: ', $nroLinea, ' Concepto: ', cbc:NameCode)"/>
+		</xsl:call-template>
+        
+     </xsl:if>
+	 <!--Fin PAS20241U210700035 JVO -->
 
  </xsl:template>
         

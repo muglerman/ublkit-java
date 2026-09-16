@@ -124,10 +124,14 @@ public final class SerializadorXmlGuiaRemision implements SerializadorXml<Borrad
                     guia.getTercero().nombre());
         }
 
-        // 14. Shipment
+        // 14. OriginatorCustomerParty (pagador del flete tercero, GRE-Transportista).
+        // El xs:sequence de DespatchAdviceType lo exige después de Buyer/SellerSupplierParty y antes de Shipment.
+        agregarPagadorFleteTercero(doc, raiz, guia);
+
+        // 15. Shipment
         agregarShipment(doc, raiz, guia);
 
-        // 15. DespatchLines
+        // 16. DespatchLines
         agregarLineas(doc, raiz, guia);
 
         return documentoAString(doc);
@@ -222,6 +226,15 @@ public final class SerializadorXmlGuiaRemision implements SerializadorXml<Borrad
         raiz.appendChild(container);
     }
 
+    private void agregarPagadorFleteTercero(Document doc, Element raiz, BorradorGuiaRemision guia) {
+        if (guia.getPagadorFleteTercero() == null) {
+            return;
+        }
+        TerceroGuia pagador = guia.getPagadorFleteTercero();
+        agregarParteConIdentidad(doc, raiz, "OriginatorCustomerParty",
+                pagador.tipoDocumentoIdentidad(), pagador.numeroDocumentoIdentidad(), pagador.nombre());
+    }
+
     // ── Shipment ─────────────────────────────────────────────────
 
     private void agregarShipment(Document doc, Element raiz, BorradorGuiaRemision guia) {
@@ -272,8 +285,7 @@ public final class SerializadorXmlGuiaRemision implements SerializadorXml<Borrad
             }
         }
 
-        // Consignment: empresa que subcontrata (LogisticsOperatorParty) y pagador del flete tercero
-        // (OriginatorCustomerParty) en la GRE-Transportista subcontratada.
+        // Consignment: únicamente la empresa que subcontrata (LogisticsOperatorParty).
         agregarConsignment(doc, shipment, guia);
 
         // ShipmentStage
@@ -403,34 +415,20 @@ public final class SerializadorXmlGuiaRemision implements SerializadorXml<Borrad
         shipment.appendChild(delivery);
     }
 
-    /**
-     * cac:Consignment de la GRE-Transportista subcontratada: la empresa que subcontrata el traslado
-     * (cac:LogisticsOperatorParty) y, si el flete lo paga un tercero, el pagador (cac:OriginatorCustomerParty).
-     */
+    /** cac:Consignment de la GRE-Transportista subcontratada. */
     private void agregarConsignment(Document doc, Element shipment, BorradorGuiaRemision guia) {
-        if (guia.getSubcontratado() == null && guia.getPagadorFleteTercero() == null) {
+        if (guia.getSubcontratado() == null) {
             return;
         }
         Element consignment = cac(doc, "Consignment");
         consignment.appendChild(cbc(doc, "ID", "SUNAT_Envio"));
-        if (guia.getSubcontratado() != null) {
-            agregarOperadorLogistico(doc, consignment, guia.getSubcontratado());
-        }
-        if (guia.getPagadorFleteTercero() != null) {
-            // cac:OriginatorCustomerParty lleva envoltorio cac:Party (PartyType), como el destinatario.
-            TerceroGuia pagador = guia.getPagadorFleteTercero();
-            agregarParteConIdentidad(doc, consignment, "OriginatorCustomerParty",
-                    pagador.tipoDocumentoIdentidad(),
-                    pagador.numeroDocumentoIdentidad(),
-                    pagador.nombre());
-        }
+        agregarOperadorLogistico(doc, consignment, guia.getSubcontratado());
         shipment.appendChild(consignment);
     }
 
     /**
-     * cac:LogisticsOperatorParty (empresa que subcontrata): a diferencia de las demás partes NO lleva envoltorio
-     * cac:Party — el identificador y la razón social cuelgan directamente del nodo. El operador es siempre un RUC
-     * (Catálogo 06 código 6; SUNAT exige schemeID '6' vía regexp ^(6)$).
+     * cac:LogisticsOperatorParty (empresa que subcontrata) es PartyType: PartyIdentification y PartyLegalEntity
+     * cuelgan directamente del nodo. El operador es siempre un RUC (Catálogo 06 código 6).
      */
     private void agregarOperadorLogistico(Document doc, Element consignment, TerceroGuia parte) {
         Element party = cac(doc, "LogisticsOperatorParty");
@@ -443,9 +441,6 @@ public final class SerializadorXmlGuiaRemision implements SerializadorXml<Borrad
         party.appendChild(pid);
         Element legal = cac(doc, "PartyLegalEntity");
         legal.appendChild(cbcCdata(doc, "RegistrationName", parte.nombre()));
-        if (parte.numeroRegistroMTC() != null && !parte.numeroRegistroMTC().isBlank()) {
-            legal.appendChild(cbc(doc, "CompanyID", parte.numeroRegistroMTC()));
-        }
         party.appendChild(legal);
         consignment.appendChild(party);
     }
