@@ -51,7 +51,7 @@ public class HttpClienteNativoSoap implements ClienteSoap {
     public ResultadoEnvio enviarSincrono(String xmlFirmado, String nombreArchivo, String endpointUrl, CredencialesEmpresa credenciales) {
         try {
             String base64Zip = ZipHelper.comprimirBase64(xmlFirmado, nombreArchivo);
-            String nombreZip = nombreArchivo.replace(".xml", ".zip");
+            String nombreZip = com.creanexusatreus.ublkit.core.valor.NombresArchivosSunat.submissionZip(nombreArchivo);
 
             String payload = buildSendBillPayload(credenciales, nombreZip, base64Zip);
             String response = executePost(endpointUrl, payload);
@@ -80,7 +80,7 @@ public class HttpClienteNativoSoap implements ClienteSoap {
     public ResultadoEnvio enviarAsincrono(String xmlFirmado, String nombreArchivo, String endpointUrl, CredencialesEmpresa credenciales) {
         try {
             String base64Zip = ZipHelper.comprimirBase64(xmlFirmado, nombreArchivo);
-            String nombreZip = nombreArchivo.replace(".xml", ".zip");
+            String nombreZip = com.creanexusatreus.ublkit.core.valor.NombresArchivosSunat.submissionZip(nombreArchivo);
 
             String payload = buildSendSummaryPayload(credenciales, nombreZip, base64Zip);
             String response = executePost(endpointUrl, payload);

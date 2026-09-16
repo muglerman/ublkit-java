@@ -1,6 +1,7 @@
 package com.creanexusatreus.ublkit.validation.validador;
 
 import com.creanexusatreus.ublkit.ubl.modelo.BorradorFactura;
+import com.creanexusatreus.ublkit.core.valor.NombresArchivosSunat;
 import com.creanexusatreus.ublkit.ubl.modelo.actor.ReceptorDocumento;
 import com.creanexusatreus.ublkit.ubl.modelo.linea.LineaDetalle;
 import com.creanexusatreus.ublkit.ubl.xml.SerializadorXmlFactura;
@@ -136,7 +137,7 @@ public class ValidadorFactura implements Validador<BorradorFactura> {
     private String construirNombreArchivo(BorradorFactura doc, String tipoComprobante) {
         String ruc = doc.getEmisor() != null ? doc.getEmisor().ruc() : "00000000000";
         String tipo = tipoComprobante != null ? tipoComprobante : "01";
-        return ruc + "-" + tipo + "-" + doc.getSerie() + "-" + doc.getNumero() + ".xml";
+        return NombresArchivosSunat.xml(NombresArchivosSunat.buildSunatDocumentName(ruc, tipo, doc.getSerie(), String.valueOf(doc.getNumero())));
     }
 
     private void validarReceptor(ResultadoValidacion resultado, BorradorFactura objetivo) {

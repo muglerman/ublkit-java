@@ -20,10 +20,13 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.HashMap;
 import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("Serializador XML Factura Streaming Tests")
 class SerializadorXmlFacturaStreamingTest {
@@ -56,6 +59,7 @@ class SerializadorXmlFacturaStreamingTest {
         Element typeCode = (Element) ref.getElementsByTagNameNS("*", "DocumentTypeCode").item(0);
         assertEquals("99", typeCode.getTextContent());
         assertEquals("PE:SUNAT", typeCode.getAttribute("listAgencyName"));
+        assertEquals("SUNAT:Identificador de documento relacionado", typeCode.getAttribute("listName"));
         assertEquals("urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo12",
                 typeCode.getAttribute("listURI"));
     }
@@ -77,35 +81,42 @@ class SerializadorXmlFacturaStreamingTest {
         assertEquals("05", codes.item(2).getTextContent());
         for (int i = 0; i < codes.getLength(); i++) {
             Element code = (Element) codes.item(i);
-            assertEquals("SUNAT: Identificador de documento relacionado", code.getAttribute("listName"));
+            assertEquals("SUNAT:Identificador de documento relacionado", code.getAttribute("listName"));
             assertEquals("urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo12", code.getAttribute("listURI"));
         }
     }
 
     @Test
-    @DisplayName("Las observaciones libres se serializan como notas adicionales")
-    void serializar_observacionesLibres_emiteNotaAdicional() {
+    @DisplayName("Las observaciones libres no se serializan como leyendas SUNAT")
+    void serializar_observacionesLibres_noEmiteNota() {
         BorradorFactura factura = crearFactura(1);
         factura.setObservaciones("Entrega urgente\nLlamar antes de entregar");
         factura.setGuias(List.of(new GuiaRelacionada("T001-10", "09"), new GuiaRelacionada("T002-20", "31")));
         factura.setDocumentosRelacionados(List.of(new DocumentoRelacionado("99", "OTR-30")));
 
-        Document doc = parseXml(new SerializadorXmlFactura().serializar(EnsambladorFactura.ensamblar(factura)));
+        String xml = new SerializadorXmlFactura().serializar(EnsambladorFactura.ensamblar(factura));
+        Document doc = parseXml(xml);
 
         NodeList notes = doc.getElementsByTagNameNS("*", "Note");
         assertTrue(notes.getLength() > 0);
-        boolean foundObservation = false;
         for (int i = 0; i < notes.getLength(); i++) {
             Element note = (Element) notes.item(i);
-            if (note.getTextContent().contains("Entrega urgente")) {
-                foundObservation = true;
-                assertTrue(!note.hasAttribute("languageLocaleID"),
-                        "La observación libre no debe identificarse como leyenda oficial");
-            }
+            assertTrue(note.hasAttribute("languageLocaleID"), "Toda nota UBL debe ser leyenda SUNAT");
+            assertFalse(note.getTextContent().contains("Entrega urgente"));
         }
-        assertTrue(foundObservation, "El XML debe conservar la observación libre");
+        assertFalse(xml.contains("Entrega urgente"));
         assertEquals(2, doc.getElementsByTagNameNS("*", "DespatchDocumentReference").getLength());
         assertEquals(1, doc.getElementsByTagNameNS("*", "AdditionalDocumentReference").getLength());
+    }
+
+    @Test
+    void serializar_leyendaSinCodigo_rechazaModeloInvalido() {
+        BorradorFactura factura = crearFactura(1);
+        HashMap<String, String> leyendas = new HashMap<>();
+        leyendas.put(null, "NOTITA 2 PRUEBA");
+        factura.setLeyendas(leyendas);
+        assertThrows(IllegalArgumentException.class,
+                () -> new SerializadorXmlFactura().serializar(EnsambladorFactura.ensamblar(factura)));
     }
 
     @Test

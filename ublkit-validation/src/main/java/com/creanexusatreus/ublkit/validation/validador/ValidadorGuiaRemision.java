@@ -1,6 +1,7 @@
 package com.creanexusatreus.ublkit.validation.validador;
 
 import com.creanexusatreus.ublkit.ubl.modelo.guia.BorradorGuiaRemision;
+import com.creanexusatreus.ublkit.core.valor.NombresArchivosSunat;
 import com.creanexusatreus.ublkit.ubl.xml.SerializadorXmlGuiaRemision;
 import com.creanexusatreus.ublkit.validation.api.Validador;
 import com.creanexusatreus.ublkit.validation.modelo.IncidenciaValidacion;
@@ -85,6 +86,6 @@ public class ValidadorGuiaRemision implements Validador<BorradorGuiaRemision> {
     private String construirNombreArchivo(BorradorGuiaRemision doc) {
         String ruc = doc.getRemitente() != null ? doc.getRemitente().ruc() : "00000000000";
         String tipo = doc.getTipoComprobante() != null ? doc.getTipoComprobante() : "09";
-        return ruc + "-" + tipo + "-" + doc.getSerie() + "-" + doc.getNumero() + ".xml";
+        return NombresArchivosSunat.xml(NombresArchivosSunat.buildSunatDocumentName(ruc, tipo, doc.getSerie(), String.valueOf(doc.getNumero())));
     }
 }

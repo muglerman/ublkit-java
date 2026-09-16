@@ -57,9 +57,24 @@ public class GeneradorQrSunat {
      * @param hashDocumento  hash (DigestValue) de la firma digital del XML.
      * @return imagen QR codificada en Base64.
      */
-    public String generarQrBase64(DocumentoBase documento, String hashDocumento) {
-        String contenidoQr = construirTrama(documento, hashDocumento);
+    public String generarQrBase64(DocumentoBase documento, String digestValue, String signatureValue) {
+        String contenidoQr = construirTrama(documento, digestValue, signatureValue);
         return generarImagenBase64(contenidoQr);
+    }
+
+    /**
+     * Genera un QR firmado usando los importes finales ya emitidos en el XML.
+     * No recalcula impuestos ni totales: el llamador debe suministrar TaxAmount y PayableAmount.
+     */
+    public String generarQrBase64(DocumentoBase documento, BigDecimal igv, BigDecimal total,
+            String digestValue, String signatureValue) {
+        return generarImagenBase64(construirTrama(documento, igv, total, digestValue, signatureValue));
+    }
+
+    /** Compatibilidad para consumidores antiguos; no incluye firma y no debe usarse en emisión. */
+    @Deprecated
+    public String generarQrBase64(DocumentoBase documento, String hashDocumento) {
+        return generarImagenBase64(construirTrama(documento, hashDocumento));
     }
 
     /**
@@ -85,18 +100,20 @@ public class GeneradorQrSunat {
      * @param hashDocumento  hash de la firma digital.
      * @return trama SUNAT con trailing pipe.
      */
-    String construirTrama(DocumentoBase doc, String hashDocumento) {
+    String construirTrama(DocumentoBase doc, String digestValue, String signatureValue) {
+        return construirTrama(doc, extraerIgv(doc), extraerTotal(doc), digestValue, signatureValue);
+    }
+
+    String construirTrama(DocumentoBase doc, BigDecimal igv, BigDecimal total,
+            String digestValue, String signatureValue) {
         String ruc = doc.getEmisor() != null ? doc.getEmisor().ruc() : "";
 
         String tipo = resolverTipoComprobante(doc);
         String serie = doc.getSerie() != null ? doc.getSerie() : "";
-        String numero = doc.getNumero() != null ? String.valueOf(doc.getNumero()) : "";
+        String numero = doc.getNumero() != null ? String.format("%08d", doc.getNumero()) : "";
 
-        BigDecimal igv = extraerIgv(doc);
-        BigDecimal total = extraerTotal(doc);
-
-        String igvStr = igv.stripTrailingZeros().toPlainString();
-        String totalStr = total.stripTrailingZeros().toPlainString();
+        String igvStr = requireAmount(igv, "IGV").setScale(2, java.math.RoundingMode.HALF_UP).toPlainString();
+        String totalStr = requireAmount(total, "total pagable").setScale(2, java.math.RoundingMode.HALF_UP).toPlainString();
         String fecha = doc.getFechaEmision() != null ? doc.getFechaEmision().format(DATE_FORMATTER) : "";
 
         // Datos del adquirente/receptor (campos normativos SUNAT)
@@ -117,8 +134,40 @@ public class GeneradorQrSunat {
                 fecha,
                 tipoDocAdquirente,
                 numDocAdquirente,
-                hashDocumento != null ? hashDocumento : ""
+                requireValue(digestValue, "DigestValue"),
+                requireValue(signatureValue, "SignatureValue")
         ) + "|";
+    }
+
+    /** Compatibilidad de lectura para pruebas/consumidores no firmados. */
+    @Deprecated
+    String construirTrama(DocumentoBase doc, String hashDocumento) {
+        String ruc = doc.getEmisor() != null ? doc.getEmisor().ruc() : "";
+        String tipo = resolverTipoComprobante(doc);
+        String serie = doc.getSerie() != null ? doc.getSerie() : "";
+        String numero = doc.getNumero() != null ? String.valueOf(doc.getNumero()) : "";
+        String fecha = doc.getFechaEmision() != null ? doc.getFechaEmision().format(DATE_FORMATTER) : "";
+        ReceptorDocumento receptor = doc.getReceptor();
+        String tipoDoc = receptor != null && receptor.tipoDocIdentidad() != null ? receptor.tipoDocIdentidad() : "-";
+        String numDoc = receptor != null && receptor.numDocIdentidad() != null ? receptor.numDocIdentidad() : "-";
+        return String.join("|", ruc, tipo, serie, numero,
+                extraerIgvLegacy(doc).stripTrailingZeros().toPlainString(),
+                extraerTotalLegacy(doc).stripTrailingZeros().toPlainString(), fecha, tipoDoc, numDoc,
+                hashDocumento == null ? "" : hashDocumento) + "|";
+    }
+
+    private static String requireValue(String value, String name) {
+        if (value == null || value.isBlank()) {
+            throw new IllegalArgumentException(name + " es obligatorio para generar el QR firmado");
+        }
+        return value.trim();
+    }
+
+    private static BigDecimal requireAmount(BigDecimal value, String name) {
+        if (value == null) {
+            throw new IllegalArgumentException(name + " es obligatorio para generar el QR firmado");
+        }
+        return value;
     }
 
     private String resolverTipoComprobante(DocumentoBase doc) {
@@ -136,7 +185,7 @@ public class GeneradorQrSunat {
         if (doc.getTotalImpuestos() != null && doc.getTotalImpuestos().total() != null) {
             return doc.getTotalImpuestos().total();
         }
-        return BigDecimal.ZERO;
+        throw new IllegalArgumentException("IGV es obligatorio para generar el QR firmado");
     }
 
     private BigDecimal extraerTotal(DocumentoBase doc) {
@@ -154,6 +203,27 @@ public class GeneradorQrSunat {
                 && nd.getTotalImporte() != null
                 && nd.getTotalImporte().importeConImpuestos() != null) {
             return nd.getTotalImporte().importeConImpuestos();
+        }
+        throw new IllegalArgumentException("total pagable es obligatorio para generar el QR firmado");
+    }
+
+    private BigDecimal extraerIgvLegacy(DocumentoBase doc) {
+        return doc.getTotalImpuestos() != null && doc.getTotalImpuestos().total() != null
+                ? doc.getTotalImpuestos().total() : BigDecimal.ZERO;
+    }
+
+    private BigDecimal extraerTotalLegacy(DocumentoBase doc) {
+        if (doc instanceof BorradorFactura factura && factura.getTotalImporte() != null
+                && factura.getTotalImporte().importeConImpuestos() != null) {
+            return factura.getTotalImporte().importeConImpuestos();
+        }
+        if (doc instanceof BorradorNotaCredito nota && nota.getTotalImporte() != null
+                && nota.getTotalImporte().importeConImpuestos() != null) {
+            return nota.getTotalImporte().importeConImpuestos();
+        }
+        if (doc instanceof BorradorNotaDebito nota && nota.getTotalImporte() != null
+                && nota.getTotalImporte().importeConImpuestos() != null) {
+            return nota.getTotalImporte().importeConImpuestos();
         }
         return BigDecimal.ZERO;
     }

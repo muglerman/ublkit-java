@@ -14,8 +14,11 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import javax.xml.crypto.dsig.XMLSignature;
+import javax.xml.crypto.dsig.XMLSignatureFactory;
+import javax.xml.crypto.dsig.dom.DOMValidateContext;
 
 import java.io.InputStream;
 
@@ -108,6 +111,37 @@ class FirmaDigitalTest {
         assertThat(docFirmado.getElementsByTagNameNS(
                 "http://www.w3.org/2000/09/xmldsig#", "DigestValue").getLength()
         ).isGreaterThan(0);
+    }
+
+    @Test
+    void referenciaUblYIdXmlDsig_debenCoincidir_yFirmaDebeValidarse() throws Exception {
+        String xml = XML_FACTURA_MINIMA.replace("</Invoice>", """
+                <cac:Signature><cac:DigitalSignatureAttachment><cac:ExternalReference>
+                  <cbc:URI>#SignID</cbc:URI>
+                </cac:ExternalReference></cac:DigitalSignatureAttachment></cac:Signature>
+                </Invoice>""");
+        Document firmado = FirmadorXml.firmar(xml, "MiSignature", certificado);
+        Element dsSignature = (Element) firmado.getElementsByTagNameNS(XMLSignature.XMLNS, "Signature").item(0);
+        Element uri = (Element) firmado.getElementsByTagNameNS(
+                "urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2", "URI").item(0);
+        assertThat(dsSignature.getAttribute("Id")).isEqualTo("MiSignature");
+        assertThat(uri.getTextContent()).isEqualTo("#MiSignature");
+
+        DOMValidateContext contexto = new DOMValidateContext(certificado.certificado().getPublicKey(), dsSignature);
+        XMLSignature firma = XMLSignatureFactory.getInstance("DOM").unmarshalXMLSignature(contexto);
+        assertThat(firma.validate(contexto)).isTrue();
+    }
+
+    @Test
+    void modificarDocumentoFirmado_debeInvalidarLaFirma() throws Exception {
+        Document firmado = FirmadorXml.firmar(XML_FACTURA_MINIMA, "UBLKIT-SIGN", certificado);
+        Element id = (Element) firmado.getElementsByTagNameNS(
+                "urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2", "ID").item(0);
+        id.setTextContent("F001-999");
+        Element dsSignature = (Element) firmado.getElementsByTagNameNS(XMLSignature.XMLNS, "Signature").item(0);
+        DOMValidateContext contexto = new DOMValidateContext(certificado.certificado().getPublicKey(), dsSignature);
+        XMLSignature firma = XMLSignatureFactory.getInstance("DOM").unmarshalXMLSignature(contexto);
+        assertThat(firma.validate(contexto)).isFalse();
     }
 
     @Test

@@ -2,6 +2,7 @@ package com.creanexusatreus.ublkit.validation.validador;
 
 import com.creanexusatreus.ublkit.ubl.modelo.sunat.baja.ComunicacionBaja;
 import com.creanexusatreus.ublkit.ubl.modelo.sunat.baja.Reversion;
+import com.creanexusatreus.ublkit.core.valor.NombresArchivosSunat;
 import com.creanexusatreus.ublkit.ubl.xml.SerializadorXmlComunicacionBaja;
 import com.creanexusatreus.ublkit.validation.api.Validador;
 import com.creanexusatreus.ublkit.validation.modelo.IncidenciaValidacion;
@@ -111,6 +112,6 @@ public class ValidadorComunicacionBaja implements Validador<ComunicacionBaja> {
         String ruc = doc.getEmisor() != null ? doc.getEmisor().ruc() : "00000000000";
         String prefijo = doc instanceof Reversion ? "RR" : "RA";
         String fecha = doc.getFechaEmision().format(FORMATO_FECHA_ARCHIVO);
-        return ruc + "-" + prefijo + "-" + fecha + "-" + doc.getNumero() + ".xml";
+        return NombresArchivosSunat.xml(NombresArchivosSunat.special(ruc, prefijo, fecha + "-" + doc.getNumero()));
     }
 }

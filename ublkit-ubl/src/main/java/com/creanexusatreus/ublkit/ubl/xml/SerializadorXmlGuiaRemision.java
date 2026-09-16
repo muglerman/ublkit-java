@@ -49,9 +49,6 @@ public final class SerializadorXmlGuiaRemision implements SerializadorXml<Borrad
                 "listURI", "urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo01"));
 
         // 4. Notes
-        if (guia.getObservaciones() != null) {
-            raiz.appendChild(cbcCdata(doc, "Note", guia.getObservaciones()));
-        }
 
         // 5. OrderReference (documento de baja)
         if (guia.getDocumentoBaja() != null) {
@@ -169,7 +166,7 @@ public final class SerializadorXmlGuiaRemision implements SerializadorXml<Borrad
         sig.appendChild(sp);
         Element att = cac(doc, "DigitalSignatureAttachment");
         Element ext = cac(doc, "ExternalReference");
-        ext.appendChild(cbc(doc, "URI", "#UBLKIT-SIGN"));
+        ext.appendChild(cbc(doc, "URI", com.creanexusatreus.ublkit.core.valor.IdentificadoresFirma.uri(com.creanexusatreus.ublkit.core.valor.IdentificadoresFirma.SIGNATURE_ID)));
         att.appendChild(ext);
         sig.appendChild(att);
         raiz.appendChild(sig);

@@ -45,9 +45,6 @@ public final class SerializadorXmlRetencion implements SerializadorXml<Comproban
                     retencion.getTipoRegimenPorcentaje(), retenido, pagado, moneda(retencion.getMoneda()));
         }
 
-        if (retencion.getObservacion() != null && !retencion.getObservacion().isBlank()) {
-            raiz.appendChild(cbcCdata(doc, "Note", retencion.getObservacion()));
-        }
         return documentoAString(doc);
     }
 
@@ -72,7 +69,7 @@ public final class SerializadorXmlRetencion implements SerializadorXml<Comproban
         signature.appendChild(signatoryParty);
         Element attachment = cac(doc, "DigitalSignatureAttachment");
         Element extRef = cac(doc, "ExternalReference");
-        extRef.appendChild(cbc(doc, "URI", "#UBLKIT-SIGN"));
+        extRef.appendChild(cbc(doc, "URI", com.creanexusatreus.ublkit.core.valor.IdentificadoresFirma.uri(com.creanexusatreus.ublkit.core.valor.IdentificadoresFirma.SIGNATURE_ID)));
         attachment.appendChild(extRef);
         signature.appendChild(attachment);
         raiz.appendChild(signature);

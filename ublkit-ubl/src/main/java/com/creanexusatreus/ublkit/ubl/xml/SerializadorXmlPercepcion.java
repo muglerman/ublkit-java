@@ -44,9 +44,6 @@ public final class SerializadorXmlPercepcion implements SerializadorXml<Comproba
                     percepcion.getTipoRegimenPorcentaje(), percibido, cobrado, moneda(percepcion.getMoneda()));
         }
 
-        if (percepcion.getObservacion() != null && !percepcion.getObservacion().isBlank()) {
-            raiz.appendChild(cbcCdata(doc, "Note", percepcion.getObservacion()));
-        }
         return documentoAString(doc);
     }
 
@@ -72,7 +69,7 @@ public final class SerializadorXmlPercepcion implements SerializadorXml<Comproba
         signature.appendChild(signatoryParty);
         Element attachment = cac(doc, "DigitalSignatureAttachment");
         Element extRef = cac(doc, "ExternalReference");
-        extRef.appendChild(cbc(doc, "URI", "#UBLKIT-SIGN"));
+        extRef.appendChild(cbc(doc, "URI", com.creanexusatreus.ublkit.core.valor.IdentificadoresFirma.uri(com.creanexusatreus.ublkit.core.valor.IdentificadoresFirma.SIGNATURE_ID)));
         attachment.appendChild(extRef);
         signature.appendChild(attachment);
         raiz.appendChild(signature);

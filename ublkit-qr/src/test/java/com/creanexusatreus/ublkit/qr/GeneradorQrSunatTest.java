@@ -11,6 +11,12 @@ import org.junit.jupiter.api.Test;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Base64;
+import java.io.ByteArrayInputStream;
+import javax.imageio.ImageIO;
+import com.google.zxing.BinaryBitmap;
+import com.google.zxing.MultiFormatReader;
+import com.google.zxing.client.j2se.BufferedImageLuminanceSource;
+import com.google.zxing.common.HybridBinarizer;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -51,6 +57,69 @@ class GeneradorQrSunatTest {
 
         // Formato: RUC|TIPO|SERIE|NUMERO|IGV|TOTAL|FECHA|TIPO_DOC_ADQ|NUM_DOC_ADQ|HASH|
         assertEquals("20123456789|01|F001|1|18|118|2023-10-01|6|10234567890|hashXYZ|", trama);
+    }
+
+    @Test
+    void construirTrama_boletaUsaPaddingImportesYFirma() {
+        BorradorFactura factura = buildFactura();
+        factura.setEmisor(new EmisorDocumento("10710201396", null, null, null, null));
+        factura.setReceptor(new ReceptorDocumento("6", "20606860618", "Cliente", null, null));
+        factura.setTipoComprobante("03");
+        factura.setSerie("B001");
+        factura.setNumero(6);
+        factura.setFechaEmision(LocalDate.of(2026, 9, 16));
+        factura.setTotalImpuestos(new TotalImpuestos(new BigDecimal("76.27"), new BigDecimal("423.73"),
+                null, null, null, null, null, null, null, null, null, null, null, null, null, null));
+        factura.setTotalImporte(new TotalImporte(new BigDecimal("423.73"), new BigDecimal("423.73"),
+                new BigDecimal("500.00"), null, null));
+
+        assertEquals("10710201396|03|B001|00000006|76.27|500.00|2026-09-16|6|20606860618|DIGEST|SIGNATURE|",
+                generador.construirTrama(factura, "DIGEST", "SIGNATURE"));
+    }
+
+    @Test
+    void generarQrBase64_decodificaLaTramaExacta() throws Exception {
+        BorradorFactura factura = buildFactura();
+        String expected = generador.construirTrama(factura, "DIGEST", "SIGNATURE");
+        String png = generador.generarQrBase64(factura, "DIGEST", "SIGNATURE");
+        var image = ImageIO.read(new ByteArrayInputStream(Base64.getDecoder().decode(png)));
+        BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(new BufferedImageLuminanceSource(image)));
+        assertEquals(expected, new MultiFormatReader().decode(bitmap).getText());
+    }
+
+    @Test
+    void generarQrFirmado_boletaB00100000009_usaImportesFinalesDelXml() throws Exception {
+        BorradorFactura factura = buildFactura();
+        factura.setEmisor(new EmisorDocumento("10710201396", null, null, null, null));
+        factura.setReceptor(new ReceptorDocumento("6", "20606860618", "Cliente", null, null));
+        factura.setTipoComprobante("03");
+        factura.setSerie("B001");
+        factura.setNumero(9);
+        factura.setFechaEmision(LocalDate.of(2026, 9, 16));
+        factura.setTotalImpuestos(null);
+        factura.setTotalImporte(null);
+
+        String expectedPrefix = "10710201396|03|B001|00000009|27.00|377.00|2026-09-16|6|20606860618|";
+        String trama = generador.construirTrama(factura, new BigDecimal("27"), new BigDecimal("377"),
+                "DIGEST", "SIGNATURE");
+        assertTrue(trama.startsWith(expectedPrefix));
+        assertFalse(trama.contains("|0.00|0.00|"));
+
+        String png = generador.generarQrBase64(factura, new BigDecimal("27"), new BigDecimal("377"),
+                "DIGEST", "SIGNATURE");
+        var image = ImageIO.read(new ByteArrayInputStream(Base64.getDecoder().decode(png)));
+        BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(new BufferedImageLuminanceSource(image)));
+        assertEquals(trama, new MultiFormatReader().decode(bitmap).getText());
+    }
+
+    @Test
+    void construirTramaFirmada_rechazaImportesObligatoriosAusentes() {
+        BorradorFactura factura = buildFactura();
+
+        assertThrows(IllegalArgumentException.class,
+                () -> generador.construirTrama(factura, null, new BigDecimal("118"), "DIGEST", "SIGNATURE"));
+        assertThrows(IllegalArgumentException.class,
+                () -> generador.construirTrama(factura, new BigDecimal("18"), null, "DIGEST", "SIGNATURE"));
     }
 
     @Test

@@ -1,6 +1,7 @@
 package com.creanexusatreus.ublkit.sign.xml;
 
 import com.creanexusatreus.ublkit.core.error.ExcepcionUblKit;
+import com.creanexusatreus.ublkit.core.valor.IdentificadoresFirma;
 import com.creanexusatreus.ublkit.sign.certificado.DetallesCertificado;
 
 import org.w3c.dom.Document;
@@ -50,7 +51,7 @@ public final class FirmadorXml {
      * Firma un XML representado como String.
      *
      * @param xml           Contenido XML a firmar.
-     * @param idReferencia  ID de la referencia de firma (ej. "SignSUNAT").
+     * @param idReferencia  ID de la referencia de firma (ej. "UBLKIT-SIGN").
      * @param certificado   Detalles del certificado con clave privada.
      * @return Documento DOM firmado.
      * @throws ExcepcionUblKit si ocurre un error al firmar.
@@ -77,8 +78,12 @@ public final class FirmadorXml {
      */
     public static Document firmar(Document documento, String idReferencia, DetallesCertificado certificado) {
         try {
+            if (idReferencia == null || idReferencia.isBlank()) {
+                throw new IllegalArgumentException("El identificador de firma es obligatorio");
+            }
             Document docFirma = (Document) documento.cloneNode(true);
             XmlHelper.compactarEstructura(docFirma);
+            sincronizarReferenciasFirma(docFirma, idReferencia);
 
             asegurarUBLExtensions(docFirma);
             asegurarUBLExtension(docFirma);
@@ -128,6 +133,23 @@ public final class FirmadorXml {
             throw e;
         } catch (Exception e) {
             throw new ExcepcionUblKit("Error al firmar XML: " + e.getMessage(), e);
+        }
+    }
+
+    /** Mantiene alineada la referencia UBL con el Id real de XMLDSIG. */
+    private static void sincronizarReferenciasFirma(Document documento, String idReferencia) {
+        NodeList referencias = documento.getElementsByTagNameNS(
+                "urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2", "URI");
+        for (int i = 0; i < referencias.getLength(); i++) {
+            Node uri = referencias.item(i);
+            Node parent = uri.getParentNode();
+            Node attachment = parent == null ? null : parent.getParentNode();
+            Node signature = attachment == null ? null : attachment.getParentNode();
+            if (parent != null && "ExternalReference".equals(parent.getLocalName())
+                    && attachment != null && "DigitalSignatureAttachment".equals(attachment.getLocalName())
+                    && signature != null && "Signature".equals(signature.getLocalName())) {
+                uri.setTextContent(IdentificadoresFirma.uri(idReferencia));
+            }
         }
     }
 

@@ -415,7 +415,7 @@ components:
           type: string
         idReferenciaFirma:
           type: string
-          default: SignSUNAT
+          default: UBLKIT-SIGN
         certificado:
           $ref: '#/components/schemas/CertificadoInput'
 

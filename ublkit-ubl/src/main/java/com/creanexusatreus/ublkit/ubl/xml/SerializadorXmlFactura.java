@@ -65,12 +65,7 @@ public final class SerializadorXmlFactura implements SerializadorXml<BorradorFac
         raiz.appendChild(typeCode);
 
         // 5. Notes (leyendas)
-        agregarLeyendas(doc, raiz, factura.getLeyendas());
-        // Las observaciones libres son notas adicionales del comprobante y no
-        // reemplazan las leyendas oficiales, que se agregan con languageLocaleID.
-        if (factura.getObservaciones() != null && !factura.getObservaciones().isBlank()) {
-            raiz.appendChild(cbcCdata(doc, "Note", factura.getObservaciones()));
-        }
+        LeyendasXml.agregar(doc, raiz, factura.getLeyendas());
 
         // 6. DocumentCurrencyCode
         raiz.appendChild(cbcConAtributos(doc, "DocumentCurrencyCode",
@@ -144,16 +139,6 @@ public final class SerializadorXmlFactura implements SerializadorXml<BorradorFac
     }
 
     // ── Leyendas ─────────────────────────────────────────────────
-
-    private void agregarLeyendas(Document doc, Element raiz, Map<String, String> leyendas) {
-        if (leyendas == null) return;
-        for (Map.Entry<String, String> entry : leyendas.entrySet()) {
-            Element note = doc.createElementNS(NS_CBC, "cbc:Note");
-            note.setAttribute("languageLocaleID", entry.getKey());
-            note.appendChild(doc.createCDATASection(entry.getValue()));
-            raiz.appendChild(note);
-        }
-    }
 
     // ── Anticipos DocRef ─────────────────────────────────────────
 

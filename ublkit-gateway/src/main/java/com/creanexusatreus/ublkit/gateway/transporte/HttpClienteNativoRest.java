@@ -72,7 +72,7 @@ public class HttpClienteNativoRest implements ClienteRest {
             byte[] zipBytes = ZipHelper.comprimir(xmlFirmado, nombreArchivo);
             String base64Zip = Base64.getEncoder().encodeToString(zipBytes);
             String hashZip = HashHelper.sha256Hex(zipBytes);
-            String nombreZip = nombreArchivo.replace(".xml", ".zip");
+            String nombreZip = com.creanexusatreus.ublkit.core.valor.NombresArchivosSunat.submissionZip(nombreArchivo);
 
             // 2. Validar contenido del ZIP
             if (log.isLoggable(Level.INFO)) {

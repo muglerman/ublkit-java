@@ -2,6 +2,7 @@ package com.creanexusatreus.ublkit.validation.validador;
 
 import com.creanexusatreus.ublkit.ubl.modelo.sunat.resumen.ItemResumenDiario;
 import com.creanexusatreus.ublkit.ubl.modelo.sunat.resumen.ResumenDiario;
+import com.creanexusatreus.ublkit.core.valor.NombresArchivosSunat;
 import com.creanexusatreus.ublkit.ubl.xml.SerializadorXmlResumenDiario;
 import com.creanexusatreus.ublkit.validation.api.Validador;
 import com.creanexusatreus.ublkit.validation.modelo.IncidenciaValidacion;
@@ -132,6 +133,6 @@ public class ValidadorResumenDiario implements Validador<ResumenDiario> {
     private String construirNombreArchivo(ResumenDiario doc) {
         String ruc = doc.getEmisor() != null ? doc.getEmisor().ruc() : "00000000000";
         String fecha = doc.getFechaEmision().format(FORMATO_FECHA_ARCHIVO);
-        return ruc + "-RC-" + fecha + "-" + doc.getNumero() + ".xml";
+        return NombresArchivosSunat.xml(NombresArchivosSunat.special(ruc, "RC", fecha + "-" + doc.getNumero()));
     }
 }

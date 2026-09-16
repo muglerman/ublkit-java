@@ -1,6 +1,7 @@
 package com.creanexusatreus.ublkit.validation.validador;
 
 import com.creanexusatreus.ublkit.ubl.modelo.BorradorNotaDebito;
+import com.creanexusatreus.ublkit.core.valor.NombresArchivosSunat;
 import com.creanexusatreus.ublkit.ubl.xml.SerializadorXmlNotaDebito;
 import com.creanexusatreus.ublkit.validation.api.Validador;
 import com.creanexusatreus.ublkit.validation.modelo.IncidenciaValidacion;
@@ -90,6 +91,6 @@ public class ValidadorNotaDebito implements Validador<BorradorNotaDebito> {
 
     private String construirNombreArchivo(BorradorNotaDebito doc) {
         String ruc = doc.getEmisor() != null ? doc.getEmisor().ruc() : "00000000000";
-        return ruc + "-08-" + doc.getSerie() + "-" + doc.getNumero() + ".xml";
+        return NombresArchivosSunat.xml(NombresArchivosSunat.buildSunatDocumentName(ruc, "08", doc.getSerie(), String.valueOf(doc.getNumero())));
     }
 }

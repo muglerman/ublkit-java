@@ -32,7 +32,7 @@ public final class SerializadorXmlNotaDebito implements SerializadorXml<Borrador
         agregarDatosGenerales(doc, raiz, nota);
 
         // 3. Leyendas
-        agregarLeyendas(doc, raiz, nota.getLeyendas());
+        LeyendasXml.agregar(doc, raiz, nota.getLeyendas());
 
         // 4. DocumentCurrencyCode
         raiz.appendChild(cbcConAtributos(doc, "DocumentCurrencyCode",
@@ -82,16 +82,6 @@ public final class SerializadorXmlNotaDebito implements SerializadorXml<Borrador
         agregarDebitNoteLines(doc, raiz, nota);
 
         return documentoAString(doc);
-    }
-
-    private void agregarLeyendas(Document doc, Element raiz, Map<String, String> leyendas) {
-        if (leyendas == null) return;
-        for (Map.Entry<String, String> entry : leyendas.entrySet()) {
-            Element note = doc.createElementNS(NS_CBC, "cbc:Note");
-            note.setAttribute("languageLocaleID", entry.getKey());
-            note.appendChild(doc.createCDATASection(entry.getValue()));
-            raiz.appendChild(note);
-        }
     }
 
     private void agregarDiscrepancy(Document doc, Element raiz, BorradorNotaDebito nota) {

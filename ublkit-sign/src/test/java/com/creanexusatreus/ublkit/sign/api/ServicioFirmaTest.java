@@ -58,6 +58,7 @@ class ServicioFirmaTest {
         assertThat(resultado.xmlFirmado()).isNotEmpty();
         assertThat(resultado.xmlFirmadoStr()).isNotEmpty();
         assertThat(resultado.digestValue()).isNotBlank();
+        assertThat(resultado.xmlFirmadoStr()).contains("Id=\"UBLKIT-SIGN\"");
     }
 
     @Test
@@ -110,11 +111,11 @@ class ServicioFirmaTest {
     }
 
     @Test
-    void firmarXml_conIdReferenciaVacio_exitoso() {
+    void firmarXml_conIdReferenciaVacio_fallido() {
         ResultadoFirma resultado = ServicioFirma.firmarXml(XML_FACTURA_MINIMA, "", certificado);
 
-        assertThat(resultado.exitoso()).isTrue();
-        assertThat(resultado.digestValue()).isNotBlank();
+        assertThat(resultado.exitoso()).isFalse();
+        assertThat(resultado.mensajeError()).contains("identificador");
     }
 
     @Test

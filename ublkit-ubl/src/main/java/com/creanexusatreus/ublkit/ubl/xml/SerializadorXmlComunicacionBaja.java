@@ -90,7 +90,7 @@ public final class SerializadorXmlComunicacionBaja implements SerializadorXml<Co
 
         Element attachment = cac(doc, "DigitalSignatureAttachment");
         Element extRef = cac(doc, "ExternalReference");
-        extRef.appendChild(cbc(doc, "URI", "#UBLKIT-SIGN"));
+        extRef.appendChild(cbc(doc, "URI", com.creanexusatreus.ublkit.core.valor.IdentificadoresFirma.uri(com.creanexusatreus.ublkit.core.valor.IdentificadoresFirma.SIGNATURE_ID)));
         attachment.appendChild(extRef);
         signature.appendChild(attachment);
 

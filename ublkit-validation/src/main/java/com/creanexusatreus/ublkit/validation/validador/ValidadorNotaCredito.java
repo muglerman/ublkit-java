@@ -1,6 +1,7 @@
 package com.creanexusatreus.ublkit.validation.validador;
 
 import com.creanexusatreus.ublkit.ubl.modelo.BorradorNotaCredito;
+import com.creanexusatreus.ublkit.core.valor.NombresArchivosSunat;
 import com.creanexusatreus.ublkit.ubl.xml.SerializadorXmlNotaCredito;
 import com.creanexusatreus.ublkit.validation.api.Validador;
 import com.creanexusatreus.ublkit.validation.modelo.IncidenciaValidacion;
@@ -90,6 +91,6 @@ public class ValidadorNotaCredito implements Validador<BorradorNotaCredito> {
 
     private String construirNombreArchivo(BorradorNotaCredito doc) {
         String ruc = doc.getEmisor() != null ? doc.getEmisor().ruc() : "00000000000";
-        return ruc + "-07-" + doc.getSerie() + "-" + doc.getNumero() + ".xml";
+        return NombresArchivosSunat.xml(NombresArchivosSunat.buildSunatDocumentName(ruc, "07", doc.getSerie(), String.valueOf(doc.getNumero())));
     }
 }

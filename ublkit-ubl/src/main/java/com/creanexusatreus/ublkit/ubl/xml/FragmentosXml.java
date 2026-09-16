@@ -2,6 +2,7 @@ package com.creanexusatreus.ublkit.ubl.xml;
 
 import com.creanexusatreus.ublkit.core.modelo.Contacto;
 import com.creanexusatreus.ublkit.core.modelo.Direccion;
+import com.creanexusatreus.ublkit.core.valor.IdentificadoresFirma;
 import com.creanexusatreus.ublkit.ubl.modelo.DocumentoBase;
 import com.creanexusatreus.ublkit.ubl.modelo.actor.EmisorDocumento;
 import com.creanexusatreus.ublkit.ubl.modelo.actor.FirmanteDocumento;
@@ -51,6 +52,7 @@ final class FragmentosXml {
     private static final String ATTR_LIST_NAME = "listName";
     private static final String VALUE_DOC_IDENTIDAD = "Documento de Identidad";
     private static final String VALUE_PE_SUNAT = "PE:SUNAT";
+    private static final String SUNAT_DOCUMENT_RELATED_LIST_NAME = "SUNAT:Identificador de documento relacionado";
     private static final String VALUE_UN_ECE_5305 = "UN/ECE 5305";
     private static final String VALUE_TAX_CATEGORY_IDENTIFIER = "Tax Category Identifier";
     private static final String VALUE_UN_ECE_5153 = "UN/ECE 5153";
@@ -115,7 +117,7 @@ final class FragmentosXml {
 
         Element attachment = cac(doc, "DigitalSignatureAttachment");
         Element extRef = cac(doc, "ExternalReference");
-        extRef.appendChild(cbc(doc, "URI", "#UBLKIT-SIGN"));
+        extRef.appendChild(cbc(doc, "URI", IdentificadoresFirma.uri(IdentificadoresFirma.SIGNATURE_ID)));
         attachment.appendChild(extRef);
         signature.appendChild(attachment);
 
@@ -272,7 +274,7 @@ final class FragmentosXml {
             // atributos de lista, igual que la referencia de anticipos (evita 4009).
             additional.appendChild(cbcConAtributos(doc, "DocumentTypeCode", rel.tipoDocumento(),
                     ATTR_LIST_AGENCY_NAME, VALUE_PE_SUNAT,
-                    ATTR_LIST_NAME, "SUNAT: Identificador de documento relacionado",
+                    ATTR_LIST_NAME, SUNAT_DOCUMENT_RELATED_LIST_NAME,
                     "listURI", "urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo12"));
             raiz.appendChild(additional);
         }
