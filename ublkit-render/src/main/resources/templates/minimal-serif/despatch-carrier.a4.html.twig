@@ -13,6 +13,8 @@
 <title>{{ doc.serie }}-{{ doc.numero|str_pad(8, '0', 'left') }} · {{ name }}</title>
 <style>
   {{ fontStyle | raw }}
+  @page { size: A4 portrait; margin: 12mm 10mm; }
+  .items thead { display: table-header-group; } .items tr, .section, .transport, .foot { break-inside: avoid; page-break-inside: avoid; }
   * { box-sizing: border-box; }
   html, body { margin: 0; }
   :root { --ink: #161411; --ink-2: #57524b; --ink-3: #8c857c; --paper: #fbfaf6; --rule: #161411; --line: #e6e2d9; --accent: #2f5a4a; }
@@ -172,6 +174,7 @@
   <div class="section-title">Bienes transportados</div>
   <table class="items">
     <thead>
+      <tr class="continuation"><th colspan="5">GRE-T · RUC {% if cp is not null %}{{ cp.ruc }}{% endif %} · {{ doc.serie }}-{{ doc.numero|str_pad(8, '0', 'left') }}</th></tr>
       <tr><th class="c-idx">#</th><th class="c-code">Código</th><th>Descripción</th><th class="c-unit">Und</th><th class="c-qty">Cant.</th></tr>
     </thead>
     <tbody>
@@ -271,7 +274,7 @@
     {% if params.footer is not null %}<p id="custom-footer-box" style="margin-top:10px; font-style:italic;">{{ params.footer }}</p>{% endif %}
   </div>
   <div class="stamp">
-    <span class="badge">Documento válido</span>
+    <span class="badge">{{ params.estadoGreT|default('GRE-T EMITIDA · PENDIENTE DE VALIDACIÓN SUNAT') }}</span>
     <div class="line">Emitido conforme a la RS SUNAT 271-2019. Consultable en el portal oficial.</div>
   </div>
 </div>

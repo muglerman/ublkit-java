@@ -13,6 +13,8 @@
 <title>{{ doc.serie }}-{{ doc.numero|str_pad(8, '0', 'left') }} · {{ name }}</title>
 <style>
   {{ fontStyle | raw }}
+  @page { size: A4 portrait; margin: 12mm 10mm; }
+  .items thead { display: table-header-group; } .items tr, .stack, .transport, .foot { break-inside: avoid; page-break-inside: avoid; }
   * { box-sizing: border-box; }
   html, body { margin: 0; }
   :root { --ink: #1a2720; --ink-2: #48554e; --ink-3: #7b8882; --accent: #1d6b4f; --accent-2: #d1e7dc; --accent-soft: #f2f8f5; --line: #d9e0dc; --paper: #fdfdfb; }
@@ -196,6 +198,7 @@
 <div class="items-wrap">
 <table class="items">
   <thead>
+    <tr class="continuation"><th colspan="5">GRE-T · RUC {% if cp is not null %}{{ cp.ruc }}{% endif %} · {{ doc.serie }}-{{ doc.numero|str_pad(8, '0', 'left') }}</th></tr>
     <tr><th class="c-idx">#</th><th class="c-code">Código</th><th>Descripción</th><th class="c-unit">Und</th><th class="c-qty">Cant.</th></tr>
   </thead>
   <tbody>
@@ -294,7 +297,7 @@
     {% if params.footer is not null %}<p id="custom-footer-box" style="margin-top:10px; font-style:italic;">{{ params.footer }}</p>{% endif %}
   </div>
   <div class="stamp">
-    <span class="badge">GRE-T autorizada</span>
+    <span class="badge">{{ params.estadoGreT|default('GRE-T EMITIDA · PENDIENTE DE VALIDACIÓN SUNAT') }}</span>
     <div class="line">Emitido conforme a la RS SUNAT 271-2019.</div>
   </div>
 </div>
