@@ -161,6 +161,11 @@ public class PlaywrightBrowserManager {
         page.setContent(html, new Page.SetContentOptions()
             .setWaitUntil(WaitUntilState.LOAD)
             .setTimeout(RENDER_TIMEOUT_MS));
+        page.waitForFunction("() => !document.fonts || document.fonts.status === 'loaded'",
+            null, new Page.WaitForFunctionOptions().setTimeout(RENDER_TIMEOUT_MS));
+        page.waitForFunction("() => window.__ublkitRenderReady !== false",
+            null, new Page.WaitForFunctionOptions().setTimeout(RENDER_TIMEOUT_MS));
+        page.evaluate("() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))");
         Page.PdfOptions options = getPdfOptions(formato);
         if (formato == FormatoImpresion.A5) {
             options.setScale(escalaAjusteA5(page));

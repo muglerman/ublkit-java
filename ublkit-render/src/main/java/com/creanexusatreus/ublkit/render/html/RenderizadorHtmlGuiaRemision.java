@@ -9,6 +9,7 @@ import com.creanexusatreus.ublkit.render.modelo.ResultadoRender;
 import com.creanexusatreus.ublkit.render.pebble.FuentesEmbebidas;
 import com.creanexusatreus.ublkit.render.pebble.PebbleEngines;
 import com.creanexusatreus.ublkit.ubl.modelo.guia.BorradorGuiaRemision;
+import com.creanexusatreus.ublkit.ubl.modelo.guia.TerceroGuia;
 import io.pebbletemplates.pebble.PebbleEngine;
 import io.pebbletemplates.pebble.template.PebbleTemplate;
 
@@ -30,6 +31,7 @@ import java.util.Map;
 public class RenderizadorHtmlGuiaRemision implements RenderizadorDocumento<BorradorGuiaRemision> {
 
     private static final Map<String, String> TRANSPORT_INDICATOR_LABELS = transportIndicatorLabels();
+    private static final String FREIGHT_PAYER_PREFIX = "Pagador del flete: ";
 
     private final FormatoImpresion formato;
     private final PebbleEngine engine;
@@ -86,29 +88,70 @@ public class RenderizadorHtmlGuiaRemision implements RenderizadorDocumento<Borra
 
     private List<String> transportIndicatorLabels(BorradorGuiaRemision document, Map<String, Object> attributes) {
         List<String> labels = new ArrayList<>();
+        String payerType = stringAttribute(attributes, "tipoPagadorFlete");
+        TerceroGuia thirdPartyPayer = document.getPagadorFleteTercero();
         if (document.getEnvio() != null && document.getEnvio().getIndicadores() != null) {
             document.getEnvio().getIndicadores().stream()
                     .filter(indicator -> indicator != null && !indicator.isBlank())
-                    .filter(indicator -> attributes == null || attributes.get("tipoPagadorFlete") == null
-                            || !indicator.startsWith("SUNAT_Envio_IndicadorPagadorFlete_"))
-                    .map(indicator -> TRANSPORT_INDICATOR_LABELS.getOrDefault(indicator, indicator))
+                    .filter(indicator -> payerType == null || !isFreightPayerIndicator(indicator))
+                    .map(indicator -> resolveIndicatorLabel(indicator, thirdPartyPayer))
                     .forEach(labels::add);
         }
-        if (attributes != null && attributes.get("tipoPagadorFlete") != null) {
-            String payerType = attributes.get("tipoPagadorFlete").toString().trim();
-            if (!payerType.isEmpty()) {
-                String detail = "";
-                if ("Tercero".equalsIgnoreCase(payerType)
-                        && attributes.get("pagadorFleteTerceroNombre") != null) {
-                    detail = " · " + attributes.get("pagadorFleteTerceroNombre")
-                            + (attributes.get("pagadorFleteTerceroDocumento") != null
-                                    ? " (" + attributes.get("pagadorFleteTerceroDocumento") + ")"
-                                    : "");
-                }
-                labels.add("Pagador del servicio de transporte: " + payerType.toLowerCase(Locale.ROOT) + detail);
-            }
+        if (payerType != null) {
+            labels.add(resolveFreightPayerLabel(payerType, attributes, thirdPartyPayer));
         }
         return labels.stream().distinct().toList();
+    }
+
+    private String resolveIndicatorLabel(String indicator, TerceroGuia thirdPartyPayer) {
+        if ("SUNAT_Envio_IndicadorPagadorFlete_Tercero".equals(indicator)) {
+            return resolveFreightPayerLabel("Tercero", null, thirdPartyPayer);
+        }
+        return TRANSPORT_INDICATOR_LABELS.getOrDefault(indicator, indicator);
+    }
+
+    private String resolveFreightPayerLabel(String payerType, Map<String, Object> attributes, TerceroGuia thirdPartyPayer) {
+        String normalizedType = payerType == null ? null : payerType.trim();
+        if (normalizedType == null || normalizedType.isEmpty()) {
+            return "";
+        }
+
+        String baseLabel = switch (normalizedType.toLowerCase(Locale.ROOT)) {
+            case "remitente" -> FREIGHT_PAYER_PREFIX + "remitente";
+            case "subcontratador" -> FREIGHT_PAYER_PREFIX + "contratante SUNAT";
+            case "tercero" -> FREIGHT_PAYER_PREFIX + "tercero";
+            default -> FREIGHT_PAYER_PREFIX + normalizedType;
+        };
+
+        if (!"tercero".equalsIgnoreCase(normalizedType)) {
+            return baseLabel;
+        }
+
+        String detailName = stringAttribute(attributes, "pagadorFleteTerceroNombre");
+        String detailDocument = stringAttribute(attributes, "pagadorFleteTerceroDocumento");
+        if (detailName == null && thirdPartyPayer != null) {
+            detailName = thirdPartyPayer.nombre();
+        }
+        if (detailDocument == null && thirdPartyPayer != null) {
+            detailDocument = thirdPartyPayer.numeroDocumentoIdentidad();
+        }
+        if (detailName == null) {
+            return baseLabel;
+        }
+        return baseLabel + " · " + detailName
+                + (detailDocument != null && !detailDocument.isBlank() ? " (" + detailDocument + ")" : "");
+    }
+
+    private boolean isFreightPayerIndicator(String indicator) {
+        return indicator != null && indicator.startsWith("SUNAT_Envio_IndicadorPagadorFlete_");
+    }
+
+    private String stringAttribute(Map<String, Object> attributes, String key) {
+        if (attributes == null || attributes.get(key) == null) {
+            return null;
+        }
+        String value = attributes.get(key).toString().trim();
+        return value.isEmpty() ? null : value;
     }
 
     private static Map<String, String> transportIndicatorLabels() {
@@ -124,10 +167,10 @@ public class RenderizadorHtmlGuiaRemision implements RenderizadorDocumento<Borra
         labels.put("SUNAT_Envio_IndicadorVehiculoConductoresTransp",
                 "Vehículo y conductores de transportista");
         labels.put("SUNAT_Envio_IndicadorTrasporteSubcontratado", "Transporte subcontratado");
-        labels.put("SUNAT_Envio_IndicadorPagadorFlete_Remitente", "Pagador del servicio de transporte: remitente");
+        labels.put("SUNAT_Envio_IndicadorPagadorFlete_Remitente", FREIGHT_PAYER_PREFIX + "remitente");
         labels.put("SUNAT_Envio_IndicadorPagadorFlete_Subcontratador",
-                "Pagador del servicio de transporte: subcontratador");
-        labels.put("SUNAT_Envio_IndicadorPagadorFlete_Tercero", "Pagador del servicio de transporte: tercero");
+                FREIGHT_PAYER_PREFIX + "contratante SUNAT");
+        labels.put("SUNAT_Envio_IndicadorPagadorFlete_Tercero", FREIGHT_PAYER_PREFIX + "tercero");
         return Map.copyOf(labels);
     }
 }

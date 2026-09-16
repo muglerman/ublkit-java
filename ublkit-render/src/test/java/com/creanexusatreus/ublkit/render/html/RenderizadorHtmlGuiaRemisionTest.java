@@ -168,7 +168,7 @@ class RenderizadorHtmlGuiaRemisionTest {
 
         @ParameterizedTest
         @EnumSource(EstiloPlantilla.class)
-        @DisplayName("Should highlight carrier tracking number in every A4 style")
+        @DisplayName("Should render carrier tracking number as secondary metadata in every A4 style")
         void shouldHighlightCarrierTrackingNumber(EstiloPlantilla estilo) {
             BorradorGuiaRemision guia = crearGuiaCompleta();
             guia.setTipoComprobante("31");
@@ -182,7 +182,9 @@ class RenderizadorHtmlGuiaRemisionTest {
 
             assertTrue(html.contains(trackingNumber), "Must contain tracking number for " + estilo);
             assertTrue(html.contains("tracking-number"), "Must use highlighted tracking style for " + estilo);
-            assertTrue(html.contains("font-size: 14px"), "Must render a larger tracking number for " + estilo);
+            assertTrue(html.contains("font-size: 10px"), "Must render compact tracking metadata for " + estilo);
+            assertFalse(html.contains("tracking-number { font-size: 14px"),
+                    "Must not use the obsolete tracking emphasis for " + estilo);
         }
     }
 

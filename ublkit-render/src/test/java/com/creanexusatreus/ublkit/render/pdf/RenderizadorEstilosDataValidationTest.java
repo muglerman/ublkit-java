@@ -148,7 +148,7 @@ class RenderizadorEstilosDataValidationTest {
         assertContiene(html, "Retorno de vehículo vacío", estilo, "indicador de retorno");
         assertContiene(html, "Transbordo programado", estilo, "indicador de transbordo");
         assertContiene(html, "Transporte subcontratado", estilo, "indicador de subcontratación");
-        assertContiene(html, "Pagador del servicio de transporte: subcontratador", estilo, "indicador visual de pagador");
+        assertContiene(html, "Pagador del flete: contratante SUNAT", estilo, "indicador visual de pagador");
         assertContiene(html, "Producto A", estilo, "descripción del bien transportado");
         assertContiene(html, "GUÍA DE REMISIÓN TRANSPORTISTA", estilo, "rótulo de GRE transportista");
         assertTrue(html.indexOf("Estado de pago") < html.indexOf("Punto de partida"),
@@ -252,7 +252,7 @@ class RenderizadorEstilosDataValidationTest {
 
         String html = renderizarGuia(guia, estilo, carrierAttributes());
 
-        assertFalse(html.contains("issuer-contact"),
+        assertFalse(html.contains("class=\"issuer-contact\""),
                 "El estilo " + estilo.carpeta() + " no debe mostrar el contacto vacío");
     }
 
@@ -268,8 +268,6 @@ class RenderizadorEstilosDataValidationTest {
         String html = renderizarGuia(guia, estilo, carrierAttributes());
 
         assertContiene(html, "solo-email@mantaro.pe", estilo, "email sin teléfono");
-        assertTrue(html.contains("issuer-contact"),
-                "El estilo " + estilo.carpeta() + " debe mostrar el contacto parcial");
         assertFalse(html.contains("solo-email@mantaro.pe ·"),
                 "El estilo " + estilo.carpeta() + " no debe dejar un separador tras el email");
     }
@@ -303,7 +301,8 @@ class RenderizadorEstilosDataValidationTest {
                 "estadoPago", "PAGADO",
                 "trackingNumber", "TRACK-2026-001",
                 "totalGuia", new BigDecimal("245.50"),
-                "tipoPagadorFlete", "Subcontratador");
+                "tipoPagadorFlete", "Subcontratador",
+                "estadoGreT", "GRE-T VÁLIDA");
     }
 
     private Map<String, Object> subcontractorAttributes() {

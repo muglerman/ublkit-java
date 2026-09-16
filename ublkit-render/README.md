@@ -50,6 +50,8 @@ Plantillas Pebble + Playwright (Chromium) para representaciones visuales de docu
 - Tickets 58mm/80mm genéricos.
 - Logos e imágenes como Data URI.
 - Operación 100% en memoria.
+- GRE-T A4 por estilo (`classic-mono`, `corporate-blue`, `forest-modern`, `bold-accent`, `minimal-serif`)
+  alineada visualmente con la Factura A4 del mismo tema.
 
 ## Reglas
 
@@ -58,15 +60,73 @@ Plantillas Pebble + Playwright (Chromium) para representaciones visuales de docu
 - Tickets con fuentes monoespaciadas.
 - `doc` contiene el modelo; `params` contiene branding/ambiente.
 
+## GRE-T A4: reglas de página
+
+Las plantillas `despatch-carrier.a4.html.twig` siguen estas reglas específicas:
+
+- **Página 1**
+  - cabecera completa con logo, razón social, dirección, ubicación y **REG. MTC del emisor**;
+  - bloque documental con **RUC + tipo + serie/correlativo**;
+  - bloques operativos: ruta, remitente, destinatario, metadatos del traslado, indicadores,
+    subcontrataciones, vehículos y conductores.
+- **Páginas 2+**
+  - solo se repite una **cabecera compacta GRE-T / RUC / número**;
+  - se repite el encabezado de columnas de bienes;
+  - **no** se repiten remitente, destinatario, subcontrataciones, vehículos, conductores ni ruta.
+- **Bienes**
+  - cada fila se mantiene indivisible (`break-inside: avoid` / `page-break-inside: avoid`);
+  - el encabezado de columnas se vuelve a emitir en páginas de continuación;
+  - el total del flete, observaciones, documentos relacionados y pie solo aparecen al final del documento.
+
+## GRE-T A4: origen de datos visibles
+
+| Bloque visible | Variable de plantilla | Origen real | Naturaleza |
+| --- | --- | --- | --- |
+| Razón social / RUC / dirección / contacto del emisor | `doc.remitente.*` | `BorradorGuiaRemision.remitente` | UBL renderizado |
+| REG. MTC del emisor transportista | `doc.envio.transportista.numeroRegistroMTC` | empresa transportista emisora | UBL SUNAT |
+| Remitente real de la carga (GRE-T) | `doc.tercero.*` | remitente/cliente original | UBL SUNAT |
+| Destinatario | `doc.destinatario.*` | destinatario del traslado | UBL SUNAT |
+| Punto de partida / llegada | `doc.envio.partida.*`, `doc.envio.destino.*`, `params.partida*`, `params.destino*` | ubigeo en UBL + jerarquía geográfica resuelta en presentación | mixto |
+| Motivo, modalidad, peso, bultos, fecha traslado | `doc.envio.*` | shipment UBL | UBL SUNAT |
+| Indicadores de traslado | `indicadoresTraslado` | `doc.envio.indicadores` + normalización visual | mixto |
+| Estado de pago | `params.estadoPago` | `DocumentToBorradorMapper.buildDispatchPresentationAttrs` | solo presentación |
+| Nro. tracking | `params.trackingNumber` | `DocumentToBorradorMapper.buildDispatchPresentationAttrs` | solo presentación |
+| Sello GRE-T (`GRE-T VÁLIDA`, `GRE-T PENDIENTE`, `GRE-T RECHAZADA`) | `params.estadoGreT` | estados canónicos `SunatConstants.DocumentState` | solo presentación |
+| Flete monetario | `params.totalGuia` | importe total de la guía | solo presentación |
+| Subcontratación SUNAT / contratante del transporte | `doc.subcontratado.*` | `cac:LogisticsOperatorParty` | UBL SUNAT |
+| Subcontratación interna / proveedor subcontratado | `params.subcontratistaNombre/Ruc/Mtc` | negocio interno | solo presentación |
+| Pagador tercero del flete | `params.tipoPagadorFlete`, `params.pagadorFleteTercero*`, `doc.pagadorFleteTercero` | origenador del flete / detalle visual | mixto |
+| Vehículos | `doc.envio.vehiculo.*` | datos del traslado | UBL SUNAT |
+| Conductores | `doc.envio.choferes.*` | datos del traslado | UBL SUNAT |
+| Documentos relacionados | `doc.documentosRelacionados` | referencias UBL | UBL SUNAT |
+| Observaciones | `doc.observaciones` | texto del borrador ya normalizado | solo presentación |
+| QR / hash | `qrBase64`, `hashDocumento` | generación de render / firma | presentación de validación |
+
+### Distinciones que no deben mezclarse
+
+- **Subcontratación SUNAT** (`doc.subcontratado`) y **subcontratación interna**
+  (`params.subcontratista*`) son bloques distintos.
+- Los **REG. MTC** visibles tienen tres orígenes separados:
+  - emisor transportista: `doc.envio.transportista.numeroRegistroMTC`;
+  - contratante SUNAT: `doc.subcontratado.numeroRegistroMTC`;
+  - proveedor interno: `params.subcontratistaMtc`.
+
 ## Pruebas
 
 ```bash
-mvn test -pl ublkit-render
+cd ublkit-java && mvn test -pl ublkit-render -Dtest='RenderizadorHtmlGuiaRemisionTest,RenderizadorHtmlGuiaRemisionCarrierSemanticsTest,RenderizadorEstilosDataValidationTest,RenderizadorPdfGuiaRemisionMultipageTest,RenderizadorPdfGuiaRemisionVisualSnapshotTest'
 ```
 
-Validar compilación Pebble, PDF con muchos ítems y cambios visuales relevantes.
+Para refrescar snapshots visuales de GRE-T Classic Mono de forma explícita:
+
+```bash
+cd ublkit-java && mvn test -pl ublkit-render \
+  -Dtest=RenderizadorPdfGuiaRemisionVisualSnapshotTest \
+  -Dublkit.visual.update=true
+```
+
+Nunca se sobrescriben baselines durante una ejecución normal: el modo de actualización es opt-in.
 
 ---
 
 Desarrollado por **Crea Nexus Atreus**
-

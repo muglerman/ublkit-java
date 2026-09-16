@@ -6,21 +6,38 @@
 {% set tercero = doc.tercero %}
 {% set cl = doc.destinatario %}
 {% set name = doc.tipoComprobante|catalog('01') %}
+{% set docNumber = doc.serie ~ '-' ~ (doc.numero|str_pad(8, '0', 'left')) %}
 {% set hasSubcontratante = doc.subcontratado is not null and (doc.subcontratado.nombre is not empty or doc.subcontratado.numeroDocumentoIdentidad is not empty or doc.subcontratado.numeroRegistroMTC is not empty) %}
 {% set hasSubcontratista = params.subcontratistaNombre is not empty or params.subcontratistaRuc is not empty or params.subcontratistaMtc is not empty %}
 {% set hasSubcontratacion = hasSubcontratante or hasSubcontratista %}
 {% set hasIndicadoresTraslado = indicadoresTraslado is defined and indicadoresTraslado is not empty %}
-<title>{{ doc.serie }}-{{ doc.numero|str_pad(8, '0', 'left') }} · {{ name }}</title>
+{% set hasClosing = doc.documentosRelacionados is not empty or doc.observaciones is not empty %}
+<title>{{ docNumber }} · {{ name }}</title>
 <style>
   {{ fontStyle | raw }}
-  @page { size: A4 portrait; margin: 12mm 10mm; }
-  .items thead { display: table-header-group; } .items tr, .stack, .transport, .foot { break-inside: avoid; page-break-inside: avoid; }
+  @page { size: A4 portrait; margin: 0; }
   * { box-sizing: border-box; }
-  html, body { margin: 0; }
-  :root { --ink: #1a2720; --ink-2: #48554e; --ink-3: #7b8882; --accent: #1d6b4f; --accent-2: #d1e7dc; --accent-soft: #f2f8f5; --line: #d9e0dc; --paper: #fdfdfb; }
-  body { font-family: 'Space Grotesk', sans-serif; font-size: 10.5px; line-height: 1.5; color: var(--ink); background: var(--paper); width: 794px; min-height: 1123px; padding: 40px 44px; }
+  html, body { margin: 0; padding: 0; background: #fdfdfb; }
+  :root {
+    --page-width: 794px;
+    --page-height: 1123px;
+    --ink: #1a2720;
+    --ink-2: #48554e;
+    --ink-3: #7b8882;
+    --accent: #1d6b4f;
+    --accent-2: #d1e7dc;
+    --accent-soft: #f2f8f5;
+    --line: #d9e0dc;
+    --paper: #fdfdfb;
+  }
+  body { font-family: 'Space Grotesk', sans-serif; font-size: 10.5px; line-height: 1.5; color: var(--ink); background: var(--paper); width: var(--page-width); margin: 0 auto; }
   .mono { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
-  p, h1, h2, h3 { margin: 0; }
+  p, h1, h2, h3, h4 { margin: 0; }
+
+  .page { width: var(--page-width); height: var(--page-height); min-height: var(--page-height); padding: 40px 44px; overflow: hidden; background: var(--paper); break-after: page; page-break-after: always; }
+  .page:last-child { break-after: auto; page-break-after: auto; }
+  .page-shell { height: 100%; display: flex; flex-direction: column; min-height: 0; }
+  .source-only { position: fixed; top: 0; left: -200vw; width: var(--page-width); visibility: hidden; pointer-events: none; }
 
   .hero { display: grid; grid-template-columns: 1fr auto; align-items: start; gap: 32px; margin-bottom: 20px; }
   .brand .mark { display: flex; align-items: center; gap: 14px; }
@@ -30,6 +47,8 @@
   .brand .co-name { font-size: 15px; font-weight: 700; }
   .brand .co-tagline { font-size: 10.5px; color: var(--ink-3); margin-top: 1px; }
   .brand .meta { margin-top: 12px; font-size: 10.5px; color: var(--ink-2); }
+  .brand .meta p { padding: 1px 0; overflow-wrap: anywhere; }
+  .issuer-label { display: inline-block; min-width: 76px; margin-right: 8px; color: var(--ink-2); font-size: 9px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; }
 
   .doc-id { text-align: right; border-left: 3px solid var(--accent); padding-left: 18px; min-width: 240px; }
   .doc-id .tag { font-size: 9.5px; color: var(--accent); font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; }
@@ -40,33 +59,44 @@
   .doc-id .aux .label { color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.12em; font-size: 9px; margin-right: 6px; }
   .doc-id .ruc { margin-top: 10px; font-size: 10px; color: var(--ink-2); }
   .doc-id .ruc b { color: var(--ink); font-family: 'JetBrains Mono', monospace; }
+  .tracking-number { font-size: 10px !important; font-weight: 500 !important; letter-spacing: 0.02em; }
 
-  .trip-band { background: var(--accent); color: #fff; border-radius: 14px; padding: 18px 22px; display: grid; grid-template-columns: 1fr auto 1fr; gap: 20px; align-items: center; margin-bottom: 20px; }
+  .continuation-header {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 16px;
+    align-items: end;
+    padding-bottom: 12px;
+    margin-bottom: 16px;
+    border-bottom: 2px solid var(--accent);
+  }
+  .continuation-header .tag { font-size: 9.5px; color: var(--accent); font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; }
+  .continuation-header .ruc { font-size: 10px; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.1em; }
+  .continuation-header .num { font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 500; color: var(--accent); }
+
+  .trip-band { background: var(--accent); color: #fff; border-radius: 14px; padding: 18px 22px; display: grid; grid-template-columns: 1fr auto 1fr; gap: 20px; align-items: center; margin-bottom: 20px; break-inside: avoid; page-break-inside: avoid; }
   .trip-band .leg .k { font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.14em; opacity: 0.75; }
-  .trip-band .leg .v { font-size: 13px; font-weight: 700; margin-top: 2px; }
-  .trip-band .leg .addr { font-size: 10px; opacity: 0.85; margin-top: 2px; }
+  .trip-band .leg .v { font-size: 13px; font-weight: 700; margin-top: 2px; overflow-wrap: anywhere; }
+  .trip-band .leg .addr { font-size: 10px; opacity: 0.85; margin-top: 2px; overflow-wrap: anywhere; }
   .trip-band .arrow { font-size: 24px; opacity: 0.8; }
   .trip-band .right { text-align: right; }
 
   .meta-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; margin-bottom: 20px; }
-  .meta-row .chip { background: var(--accent-soft); border-radius: 10px; padding: 10px 12px; }
+  .meta-row .chip { background: var(--accent-soft); border-radius: 10px; padding: 10px 12px; break-inside: avoid; page-break-inside: avoid; }
   .meta-row .chip .k { font-size: 9px; color: var(--accent); letter-spacing: 0.14em; text-transform: uppercase; font-weight: 600; display: block; margin-bottom: 4px; }
-  .meta-row .chip .v { font-size: 11px; font-weight: 500; }
-  .tracking-number { font-size: 14px !important; font-weight: 700 !important; letter-spacing: 0.03em; }
+  .meta-row .chip .v { font-size: 11px; font-weight: 500; overflow-wrap: anywhere; }
 
   .parties { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 18px; }
-  .party { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+  .party { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; break-inside: avoid; page-break-inside: avoid; }
   .party .label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--ink-3); margin-bottom: 4px; }
-  .party .name { font-size: 11.5px; font-weight: 700; margin-bottom: 6px; }
-  .party .row { display: grid; grid-template-columns: 78px 1fr; font-size: 10px; padding: 1px 0; }
+  .party .name { font-size: 11.5px; font-weight: 700; margin-bottom: 6px; overflow-wrap: anywhere; }
+  .party .row { display: grid; grid-template-columns: 78px 1fr; font-size: 10px; padding: 1px 0; min-width: 0; }
   .party .row .k { color: var(--ink-3); }
+  .party .row span:last-child { min-width: 0; overflow-wrap: anywhere; }
 
-  .section-title { font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--ink-3); font-weight: 600; margin: 0 0 10px; }
-  .detail-card { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; margin-bottom: 18px; }
+  .detail-card { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; margin-bottom: 18px; break-inside: avoid; page-break-inside: avoid; }
   .detail-card .head { font-size: 9px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--ink-3); margin-bottom: 4px; }
-  .detail-card .name { font-size: 11.5px; font-weight: 700; margin-bottom: 6px; }
-  .detail-card .row { display: grid; grid-template-columns: 78px 1fr; font-size: 10px; padding: 1px 0; }
-  .detail-card .row .k { color: var(--ink-3); }
+  .detail-card .name { font-size: 11.5px; font-weight: 700; margin-bottom: 6px; overflow-wrap: anywhere; }
   .detail-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
   .subcontract-fields { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
   .subcontract-field .k { display: block; color: var(--ink-3); font-size: 9px; text-transform: uppercase; letter-spacing: 0.12em; }
@@ -74,21 +104,7 @@
   .indicator-list { display: flex; flex-wrap: wrap; gap: 8px; }
   .indicator { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); font-size: 9.5px; font-weight: 600; }
 
-  .items-wrap { background: #fff; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
-  .items { width: 100%; border-collapse: collapse; }
-  .items thead th { font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-2); font-weight: 600; text-align: left; padding: 12px; background: var(--accent-soft); border-bottom: 1px solid var(--line); }
-  .items tbody td { padding: 11px 12px; border-top: 1px solid var(--line); vertical-align: top; font-size: 10.5px; }
-  .items .c-idx { width: 26px; color: var(--ink-3); text-align: center; }
-  .items .c-code { width: 90px; }
-  .items .c-qty { text-align: right; width: 90px; font-weight: 600; }
-  .items .c-unit { width: 50px; text-align: center; color: var(--ink-3); }
-  .items .desc .main { font-weight: 500; }
-  .items .desc .sub { font-size: 9.5px; color: var(--ink-3); margin-top: 2px; }
-  .freight-summary { display: flex; justify-content: flex-end; gap: 12px; margin-top: 8px; padding: 8px 12px; background: var(--accent-soft); border-radius: 10px; }
-  .freight-summary .k { color: var(--accent); font-size: 9px; text-transform: uppercase; letter-spacing: 0.14em; }
-  .freight-summary .v { font-size: 11px; font-weight: 600; }
-
-  .transport { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
+  .transport { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; break-inside: avoid; page-break-inside: avoid; }
   .transport .card { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
   .transport .card .head { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
   .transport .card .head .icon { width: 24px; height: 24px; background: var(--accent-soft); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: var(--accent); }
@@ -100,18 +116,39 @@
   .vehicle-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5px 12px; }
   .vehicle-field { display: flex; align-items: baseline; gap: 4px; min-width: 0; white-space: nowrap; }
   .vehicle-field .k { display: inline; flex: 0 0 auto; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.12em; font-size: 9px; }
-  .vehicle-field .v { display: inline; min-width: 0; margin-top: 0; font-size: 10px; }
+  .vehicle-field .v { display: inline; min-width: 0; margin-top: 0; font-size: 10px; overflow-wrap: anywhere; white-space: normal; }
 
-  .related { background: var(--accent-soft); border-radius: 12px; padding: 14px 18px; margin-top: 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .items-section { display: flex; flex-direction: column; min-height: 0; break-inside: avoid; page-break-inside: avoid; }
+  .items-card { background: #fff; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; min-height: 0; }
+  .items { width: 100%; border-collapse: collapse; table-layout: fixed; }
+  .items thead { display: table-header-group; }
+  .items tr { break-inside: avoid; page-break-inside: avoid; }
+  .items thead th { font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-2); font-weight: 600; text-align: left; padding: 12px; background: var(--accent-soft); border-bottom: 1px solid var(--line); }
+  .items tbody td { padding: 11px 12px; border-top: 1px solid var(--line); vertical-align: top; font-size: 10.5px; }
+  .items .c-idx { width: 26px; color: var(--ink-3); text-align: center; }
+  .items .c-code { width: 90px; }
+  .items .c-unit { width: 50px; text-align: center; color: var(--ink-3); }
+  .items .c-qty { text-align: right; width: 90px; font-weight: 600; }
+  .items .desc .main { font-weight: 500; overflow-wrap: anywhere; }
+  .items .desc .sub { font-size: 9.5px; color: var(--ink-3); margin-top: 2px; overflow-wrap: anywhere; }
+  .items-section.is-empty .items tbody::after { content: 'Sin bienes consignados'; display: block; padding: 12px; color: var(--ink-3); font-size: 10px; }
+
+  .freight-summary { display: flex; justify-content: flex-end; gap: 12px; margin-top: 8px; padding: 8px 12px; background: var(--accent-soft); border-radius: 10px; break-inside: avoid; page-break-inside: avoid; }
+  .freight-summary .k { color: var(--accent); font-size: 9px; text-transform: uppercase; letter-spacing: 0.14em; }
+  .freight-summary .v { font-size: 11px; font-weight: 600; }
+
+  .related { background: var(--accent-soft); border-radius: 12px; padding: 14px 18px; margin-top: 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 24px; break-inside: avoid; page-break-inside: avoid; }
   .related .block .head { font-size: 9px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--accent); font-weight: 600; margin-bottom: 4px; }
   .related .block .body { font-size: 10px; }
+  .related .block .body p { overflow-wrap: anywhere; }
   .related .small { font-size: 9.5px; color: var(--ink-2); }
 
-  .foot { display: grid; grid-template-columns: 100px 1fr auto; gap: 18px; align-items: start; margin-top: 22px; padding-top: 16px; border-top: 1px solid var(--line); }
+  .foot { display: grid; grid-template-columns: 100px 1fr auto; gap: 18px; align-items: start; margin-top: auto; padding-top: 16px; border-top: 1px solid var(--line); break-inside: avoid; page-break-inside: avoid; }
   .foot .qr { width: 100px; height: 100px; background: #fff; padding: 6px; border-radius: 10px; border: 1px solid var(--line); }
   .foot .qr img { width: 100%; height: 100%; display: block; }
   .foot .meta { font-size: 9.5px; color: var(--ink-2); }
   .foot .meta strong { color: var(--ink); }
+  .foot .meta .hash { font-family: 'JetBrains Mono', monospace; word-break: break-all; font-size: 8.5px; margin-top: 2px; }
   .foot .stamp { text-align: right; min-width: 180px; }
   .foot .stamp .badge { display: inline-flex; align-items: center; gap: 5px; background: var(--accent-2); color: var(--accent); padding: 6px 12px; border-radius: 999px; font-size: 9.5px; font-weight: 600; }
   .foot .stamp .badge::before { content: ""; width: 6px; height: 6px; background: var(--accent); border-radius: 50%; }
@@ -119,188 +156,283 @@
 </style>
 </head>
 <body>
-
-<div class="hero">
-  <div class="brand">
-    <div class="mark">
-      <div class="logo">{% if params.logo is not empty %}<img src="{{ params.logo }}" alt="logo"/>{% else %}<svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="20" cy="20" r="14"/><path d="M9 23l5-9 6 4 6-7"/></svg>{% endif %}</div>
-      <div>
-        <div class="co-name">{% if cp is not null %}{{ cp.razonSocial }}{% endif %}</div>
-        <div class="co-tagline">{% if cp is not null and cp.nombreComercial is not null and cp.nombreComercial != cp.razonSocial %}{{ cp.nombreComercial }}{% endif %}</div>
+<div id="gre-source" class="page source-only" aria-hidden="true">
+  <div class="page-shell">
+    <section data-fragment="full-header">
+      <div class="hero">
+        <div class="brand">
+          <div class="mark">
+            <div class="logo">{% if params.logo is not empty %}<img src="{{ params.logo }}" alt="logo"/>{% else %}<svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="20" cy="20" r="14"/><path d="M9 23l5-9 6 4 6-7"/></svg>{% endif %}</div>
+            <div>
+              <div class="co-name">{% if cp is not null %}{{ cp.razonSocial }}{% endif %}</div>
+              <div class="co-tagline">{% if params.establishmentName is not empty %}{{ params.establishmentName }}{% elseif cp is not null and cp.nombreComercial is not empty and cp.nombreComercial != cp.razonSocial %}{{ cp.nombreComercial }}{% endif %}</div>
+            </div>
+          </div>
+          <div class="meta">
+            {% if cp is not null and cp.direccion is not null %}<p class="issuer-address"><span class="issuer-label">Dirección</span>{{ cp.direccion.direccion }}</p><p class="issuer-address"><span class="issuer-label">Ubicación</span>{{ cp.direccion.departamento }}{% if cp.direccion.provincia is not empty %} — {{ cp.direccion.provincia }}{% endif %}{% if cp.direccion.distrito is not empty %} — {{ cp.direccion.distrito }}{% endif %}{% if cp.direccion.ubigeo is not empty %} · {{ cp.direccion.ubigeo }}{% endif %}</p>{% endif %}
+            {% if cp is not null and cp.contacto is not null and (cp.contacto.email is not empty or cp.contacto.telefono is not empty) %}<p class="issuer-contact">{% if cp.contacto.email is not empty %}{{ cp.contacto.email }}{% endif %}{% if cp.contacto.email is not empty and cp.contacto.telefono is not empty %} · {% endif %}{% if cp.contacto.telefono is not empty %}{{ cp.contacto.telefono }}{% endif %}</p>{% endif %}
+            {% if doc.envio is not null and doc.envio.transportista is not null and doc.envio.transportista.numeroRegistroMTC is not empty %}<p class="issuer-mtc"><span class="issuer-label">Reg. MTC</span><span class="mono">{{ doc.envio.transportista.numeroRegistroMTC }}</span></p>{% endif %}
+          </div>
+        </div>
+        <div class="doc-id">
+          <div class="tag">Servicio de transporte</div>
+          <div class="kind">GUÍA DE REMISIÓN TRANSPORTISTA</div>
+          <div class="sub">GRE-T ELECTRÓNICA</div>
+          <div class="num">{{ docNumber }}</div>
+          {% if params.estadoPago is not empty %}<div class="aux"><span class="label">Estado de pago</span>{{ params.estadoPago }}</div>{% endif %}
+          {% if params.trackingNumber is not empty %}<div class="aux tracking-number"><span class="label">Nro. tracking</span><span class="mono">{{ params.trackingNumber }}</span></div>{% endif %}
+          <div class="ruc">RUC <b>{% if cp is not null %}{{ cp.ruc }}{% endif %}</b></div>
+        </div>
       </div>
-    </div>
-    <div class="meta">
-      {% if cp is not null and cp.direccion is not null %}<p class="issuer-address">{{ cp.direccion.direccion }}{% if cp.direccion.departamento is not empty %}{% if cp.direccion.direccion is not empty %} · {% endif %}{{ cp.direccion.departamento }}{% endif %}{% if cp.direccion.provincia is not empty %}{% if cp.direccion.direccion is not empty or cp.direccion.departamento is not empty %} · {% endif %}{{ cp.direccion.provincia }}{% endif %}{% if cp.direccion.distrito is not empty %}{% if cp.direccion.direccion is not empty or cp.direccion.departamento is not empty or cp.direccion.provincia is not empty %} · {% endif %}{{ cp.direccion.distrito }}{% endif %}{% if cp.direccion.ubigeo is not empty %}{% if cp.direccion.direccion is not empty or cp.direccion.departamento is not empty or cp.direccion.provincia is not empty or cp.direccion.distrito is not empty %} · {% endif %}Ubigeo {{ cp.direccion.ubigeo }}{% endif %}</p>{% endif %}
-      {% if cp is not null and cp.contacto is not null and (cp.contacto.email is not empty or cp.contacto.telefono is not empty) %}<p class="issuer-contact">{% if cp.contacto.email is not empty %}{{ cp.contacto.email }}{% endif %}{% if cp.contacto.email is not empty and cp.contacto.telefono is not empty %} · {% endif %}{% if cp.contacto.telefono is not empty %}{{ cp.contacto.telefono }}{% endif %}</p>{% endif %}
-      {% if doc.envio is not null and doc.envio.transportista is not null and doc.envio.transportista.numeroRegistroMTC is not empty %}<p class="issuer-mtc">REG. MTC <span class="mono">{{ doc.envio.transportista.numeroRegistroMTC }}</span></p>{% endif %}
-    </div>
-  </div>
-  <div class="doc-id">
-    <div class="tag">Servicio de transporte</div>
-    <div class="kind">{{ name|upper }} ELECTRÓNICA</div>
-    <div class="num">{{ doc.serie }}-{{ doc.numero|str_pad(8, '0', 'left') }}</div>
-    {% if params.estadoPago is not empty %}<div class="aux"><span class="label">Estado de pago</span>{{ params.estadoPago }}</div>{% endif %}
-    {% if params.trackingNumber is not empty %}<div class="aux tracking-number"><span class="label">Nro. tracking</span><span class="mono">{{ params.trackingNumber }}</span></div>{% endif %}
-    <div class="ruc">RUC <b>{% if cp is not null %}{{ cp.ruc }}{% endif %}</b></div>
-  </div>
-</div>
+    </section>
 
-<div class="trip-band">
-  <div class="leg">
-    <div class="k">Punto de partida</div>
-    <div class="v">{% if doc.envio is not null and doc.envio.partida is not null %}{{ doc.envio.partida.direccion }}{% endif %}</div>
-    <div class="addr">{% if params.partidaDistrito is not empty %}{% if params.partidaDepartamento is not empty %}{{ params.partidaDepartamento }} — {{ params.partidaProvincia }} — {% endif %}{{ params.partidaDistrito }}{% endif %}{% if doc.envio is not null and doc.envio.partida is not null and doc.envio.partida.ubigeo is not empty %} · Ubigeo {{ doc.envio.partida.ubigeo }}{% endif %}</div>
-  </div>
-  <div class="arrow">→</div>
-  <div class="leg right">
-    <div class="k">Punto de llegada</div>
-    <div class="v">{% if doc.envio is not null and doc.envio.destino is not null %}{{ doc.envio.destino.direccion }}{% endif %}</div>
-    <div class="addr">{% if params.destinoDistrito is not empty %}{% if params.destinoDepartamento is not empty %}{{ params.destinoDepartamento }} — {{ params.destinoProvincia }} — {% endif %}{{ params.destinoDistrito }}{% endif %}{% if doc.envio is not null and doc.envio.destino is not null and doc.envio.destino.ubigeo is not empty %} · Ubigeo {{ doc.envio.destino.ubigeo }}{% endif %}</div>
-  </div>
-</div>
+    <section data-fragment="compact-header">
+      <div class="continuation-header">
+        <div class="tag">GRE-T · Continuación de bienes transportados</div>
+        <div class="ruc">RUC {% if cp is not null %}{{ cp.ruc }}{% endif %}</div>
+        <div class="num">{{ docNumber }}</div>
+      </div>
+    </section>
 
-<div class="meta-row">
-  <div class="chip"><span class="k">Emisión</span><span class="v">{{ doc.fechaEmision|date('d/m/Y') }}</span></div>
-  <div class="chip"><span class="k">Inicio traslado</span><span class="v">{% if doc.envio is not null and doc.envio.fechaTraslado is not null %}{{ doc.envio.fechaTraslado|date('d/m/Y') }}{% endif %}</span></div>
-  <div class="chip"><span class="k">Modalidad</span><span class="v">{% if doc.envio is not null %}{{ doc.envio.tipoModalidadTraslado|catalog('18') }}{% endif %}</span></div>
-  <div class="chip"><span class="k">Peso · bultos</span><span class="v">{% if doc.envio is not null %}{{ doc.envio.pesoTotal }} {{ doc.envio.pesoTotalUnidadMedida }}{% if doc.envio.numeroDeBultos is not null %} · {{ doc.envio.numeroDeBultos }}{% endif %}{% endif %}</span></div>
-</div>
+    <section data-fragment="intro">
+      <div class="trip-band">
+        <div class="leg">
+          <div class="k">Punto de partida</div>
+          <div class="v">{% if doc.envio is not null and doc.envio.partida is not null %}{{ doc.envio.partida.direccion }}{% endif %}</div>
+          <div class="addr">{% if params.partidaDistrito is not empty %}{% if params.partidaDepartamento is not empty %}{{ params.partidaDepartamento }} — {{ params.partidaProvincia }} — {% endif %}{{ params.partidaDistrito }}{% endif %}{% if doc.envio is not null and doc.envio.partida is not null and doc.envio.partida.ubigeo is not empty %} · {{ doc.envio.partida.ubigeo }}{% endif %}</div>
+        </div>
+        <div class="arrow">→</div>
+        <div class="leg right">
+          <div class="k">Punto de llegada</div>
+          <div class="v">{% if doc.envio is not null and doc.envio.destino is not null %}{{ doc.envio.destino.direccion }}{% endif %}</div>
+          <div class="addr">{% if params.destinoDistrito is not empty %}{% if params.destinoDepartamento is not empty %}{{ params.destinoDepartamento }} — {{ params.destinoProvincia }} — {% endif %}{{ params.destinoDistrito }}{% endif %}{% if doc.envio is not null and doc.envio.destino is not null and doc.envio.destino.ubigeo is not empty %} · {{ doc.envio.destino.ubigeo }}{% endif %}</div>
+        </div>
+      </div>
+    </section>
 
-<div class="parties">
-  <div class="party">
-    <div class="label">Remitente</div>
-    {% if tercero is not null %}
-    <div class="name">{{ tercero.nombre }}</div>
-    <div class="row"><span class="k">{{ tercero.tipoDocumentoIdentidad|catalogAttr('06','abreviatura') }}</span><span class="mono">{{ tercero.numeroDocumentoIdentidad }}</span></div>
+    <section data-fragment="intro">
+      <div class="meta-row">
+        <div class="chip"><span class="k">Emisión</span><span class="v">{{ doc.fechaEmision|date('d/m/Y') }}</span></div>
+        <div class="chip"><span class="k">Inicio traslado</span><span class="v">{% if doc.envio is not null and doc.envio.fechaTraslado is not null %}{{ doc.envio.fechaTraslado|date('d/m/Y') }}{% endif %}</span></div>
+        <div class="chip"><span class="k">Modalidad</span><span class="v">{% if doc.envio is not null %}{{ doc.envio.tipoModalidadTraslado|catalog('18') }}{% endif %}</span></div>
+        <div class="chip"><span class="k">Peso · bultos</span><span class="v">{% if doc.envio is not null %}{{ doc.envio.pesoTotal }} {{ doc.envio.pesoTotalUnidadMedida }}{% if doc.envio.numeroDeBultos is not null %} · {{ doc.envio.numeroDeBultos }}{% endif %}{% endif %}</span></div>
+      </div>
+    </section>
+
+    <section data-fragment="intro">
+      <div class="parties">
+        <div class="party">
+          <div class="label">Remitente</div>
+          {% if tercero is not null %}
+          <div class="name">{{ tercero.nombre }}</div>
+          <div class="row"><span class="k">{{ tercero.tipoDocumentoIdentidad|catalogAttr('06','abreviatura') }}</span><span class="mono">{{ tercero.numeroDocumentoIdentidad }}</span></div>
+          {% endif %}
+        </div>
+        <div class="party">
+          <div class="label">Destinatario</div>
+          {% if cl is not null %}
+          <div class="name">{{ cl.nombre }}</div>
+          <div class="row"><span class="k">{{ cl.tipoDocumentoIdentidad|catalogAttr('06','abreviatura') }}</span><span class="mono">{{ cl.numeroDocumentoIdentidad }}</span></div>
+          {% endif %}
+        </div>
+      </div>
+    </section>
+
+    {% if hasIndicadoresTraslado %}
+    <section data-fragment="intro">
+      <div class="detail-card">
+        <div class="head">Indicadores de traslado</div>
+        <div class="indicator-list">{% for indicador in indicadoresTraslado %}<span class="indicator">{{ indicador }}</span>{% endfor %}</div>
+      </div>
+    </section>
     {% endif %}
-  </div>
-  <div class="party">
-    <div class="label">Destinatario</div>
-    {% if cl is not null %}
-    <div class="name">{{ cl.nombre }}</div>
-    <div class="row"><span class="k">{{ cl.tipoDocumentoIdentidad|catalogAttr('06','abreviatura') }}</span><span class="mono">{{ cl.numeroDocumentoIdentidad }}</span></div>
+
+    {% if hasSubcontratacion %}
+    <section data-fragment="intro">
+      <div class="detail-card">
+        <div class="head">Subcontrataciones del traslado</div>
+        <div class="detail-grid">
+          {% if hasSubcontratante %}
+          <div>
+            <div class="name">Subcontratación SUNAT · Contratante del transporte</div>
+            <div class="subcontract-fields">
+              {% if doc.subcontratado.nombre is not empty %}<div class="subcontract-field"><span class="k">Nombre</span><span class="v">{{ doc.subcontratado.nombre }}</span></div>{% endif %}
+              {% if doc.subcontratado.numeroDocumentoIdentidad is not empty %}<div class="subcontract-field"><span class="k">RUC</span><span class="v mono">{{ doc.subcontratado.numeroDocumentoIdentidad }}</span></div>{% endif %}
+              {% if doc.subcontratado.numeroRegistroMTC is not empty %}<div class="subcontract-field"><span class="k">REG. MTC</span><span class="v mono">{{ doc.subcontratado.numeroRegistroMTC }}</span></div>{% endif %}
+            </div>
+          </div>
+          {% endif %}
+          {% if hasSubcontratista %}
+          <div>
+            <div class="name">Subcontratación interna · Proveedor subcontratado</div>
+            <div class="subcontract-fields">
+              {% if params.subcontratistaNombre is not empty %}<div class="subcontract-field"><span class="k">Nombre</span><span class="v">{{ params.subcontratistaNombre }}</span></div>{% endif %}
+              {% if params.subcontratistaRuc is not empty %}<div class="subcontract-field"><span class="k">RUC</span><span class="v mono">{{ params.subcontratistaRuc }}</span></div>{% endif %}
+              {% if params.subcontratistaMtc is not empty %}<div class="subcontract-field"><span class="k">REG. MTC</span><span class="v mono">{{ params.subcontratistaMtc }}</span></div>{% endif %}
+            </div>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </section>
     {% endif %}
-  </div>
-</div>
 
-{% if hasIndicadoresTraslado %}
-<div class="detail-card">
-  <div class="head">Indicadores de traslado</div>
-  <div class="indicator-list">
-    {% for indicador in indicadoresTraslado %}
-    <span class="indicator">{{ indicador }}</span>
-    {% endfor %}
-  </div>
-</div>
-{% endif %}
+    <section data-fragment="intro">
+      <div class="transport">
+        <div class="card">
+          <div class="head"><div class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 17V7h13l5 5v5M3 17h2M9 17h10M5 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm14 0a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"/></svg></div><div class="title">Vehículos</div></div>
+          {% if doc.envio is not null and doc.envio.vehiculo is not null %}
+          {% set vp = doc.envio.vehiculo %}
+          <div class="vehicle-entry"><div class="vehicle-fields"><div class="vehicle-field"><span class="k">Placa</span><span class="v mono">{{ vp.placa }}</span></div>{% if vp.numeroCirculacion is not empty %}<div class="vehicle-field"><span class="k">TUC/CHV</span><span class="v mono">{{ vp.numeroCirculacion }}</span></div>{% endif %}{% if vp.marca is not empty %}<div class="vehicle-field"><span class="k">Marca</span><span class="v">{{ vp.marca }}</span></div>{% endif %}{% if vp.modelo is not empty %}<div class="vehicle-field"><span class="k">Modelo</span><span class="v">{{ vp.modelo }}</span></div>{% endif %}{% if vp.numeroAutorizacion is not empty %}<div class="vehicle-field"><span class="k">Autorización</span><span class="v mono">{{ vp.numeroAutorizacion }}</span></div>{% endif %}</div></div>
+          {% if vp.secundarios is not empty %}{% for v in vp.secundarios %}<div class="vehicle-entry"><div class="vehicle-fields"><div class="vehicle-field"><span class="k">Placa secundaria</span><span class="v mono">{{ v.placa }}</span></div>{% if v.numeroCirculacion is not empty %}<div class="vehicle-field"><span class="k">TUC/CHV</span><span class="v mono">{{ v.numeroCirculacion }}</span></div>{% endif %}{% if v.marca is not empty %}<div class="vehicle-field"><span class="k">Marca</span><span class="v">{{ v.marca }}</span></div>{% endif %}{% if v.modelo is not empty %}<div class="vehicle-field"><span class="k">Modelo</span><span class="v">{{ v.modelo }}</span></div>{% endif %}{% if v.numeroAutorizacion is not empty %}<div class="vehicle-field"><span class="k">Autorización</span><span class="v mono">{{ v.numeroAutorizacion }}</span></div>{% endif %}</div></div>{% endfor %}{% endif %}
+          {% endif %}
+        </div>
+        <div class="card">
+          <div class="head"><div class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0 1 16 0v1"/></svg></div><div class="title">Conductores</div></div>
+          {% if doc.envio is not null and doc.envio.choferes is not empty %}{% for ch in doc.envio.choferes %}
+          <div class="row"><span class="k">{% if loop.first %}Conductor principal{% else %}Conductor secundario{% endif %}</span><span>{{ ch.nombres }} {{ ch.apellidos }}</span></div>
+          <div class="row"><span class="k">{{ ch.tipoDocumentoIdentidad|catalogAttr('06','abreviatura') }} · Brevete</span><span class="mono">{{ ch.numeroDocumentoIdentidad }}{% if ch.licencia is not empty %} · {{ ch.licencia }}{% endif %}</span></div>
+          {% endfor %}{% endif %}
+        </div>
+      </div>
+    </section>
 
-<p class="section-title">Bienes transportados</p>
-<div class="items-wrap">
-<table class="items">
-  <thead>
-    <tr class="continuation"><th colspan="5">GRE-T · RUC {% if cp is not null %}{{ cp.ruc }}{% endif %} · {{ doc.serie }}-{{ doc.numero|str_pad(8, '0', 'left') }}</th></tr>
-    <tr><th class="c-idx">#</th><th class="c-code">Código</th><th>Descripción</th><th class="c-unit">Und</th><th class="c-qty">Cant.</th></tr>
-  </thead>
-  <tbody>
+    <div class="items-card" data-fragment="items-head">
+      <table class="items">
+        <thead>
+          <tr><th class="c-idx">#</th><th class="c-code">Código</th><th>Descripción del bien</th><th class="c-unit">Und</th><th class="c-qty">Cant.</th></tr>
+        </thead>
+      </table>
+    </div>
+
     {% for det in doc.detalles %}
+    <template data-fragment="item-row">
     <tr>
       <td class="c-idx mono">{{ (loop.index + 1)|str_pad(2, '0', 'left') }}</td>
       <td class="c-code mono">{{ det.codigo }}</td>
-      <td class="desc"><div class="main">{{ det.descripcion }}</div></td>
+      <td class="desc"><div class="main">{{ det.descripcion }}</div>{% if det.codigoSunat is not empty %}<div class="sub">SUNAT {{ det.codigoSunat }}</div>{% endif %}</td>
       <td class="c-unit">{{ det.unidadMedida }}</td>
       <td class="c-qty mono">{{ det.cantidad|q_format }}</td>
     </tr>
+    </template>
     {% endfor %}
-  </tbody>
-</table>
-</div>
 
-{% if params.totalGuia is not null %}<div class="freight-summary"><span class="k">Flete</span><span class="v">S/ {{ params.totalGuia|n_format }}</span></div>{% endif %}
+    {% if params.totalGuia is not null %}<div class="freight-summary" data-fragment="closing"><span class="k">Flete</span><span class="v">S/ {{ params.totalGuia|n_format }}</span></div>{% endif %}
 
-{% if hasSubcontratacion %}
-<div class="detail-card">
-  <div class="head">Subcontratación</div>
-  <div class="detail-grid">
-    {% if hasSubcontratante %}
-    <div>
-      <div class="name">Subcontratante</div>
-      <div class="subcontract-fields">
-        {% if doc.subcontratado.nombre is not empty %}<div class="subcontract-field"><span class="k">Nombre</span><span class="v">{{ doc.subcontratado.nombre }}</span></div>{% endif %}
-        {% if doc.subcontratado.numeroDocumentoIdentidad is not empty %}<div class="subcontract-field"><span class="k">RUC</span><span class="v mono">{{ doc.subcontratado.numeroDocumentoIdentidad }}</span></div>{% endif %}
-        {% if doc.subcontratado.numeroRegistroMTC is not empty %}<div class="subcontract-field"><span class="k">REG. MTC</span><span class="v mono">{{ doc.subcontratado.numeroRegistroMTC }}</span></div>{% endif %}
+    {% if hasClosing %}
+    <div class="related" data-fragment="closing">
+      {% if doc.documentosRelacionados is not empty %}
+      <div class="block"><div class="head">Documentos relacionados</div><div class="body">{% for rel in doc.documentosRelacionados %}<p>{{ rel.tipoDocumento }} · <span class="mono">{{ rel.serieNumero }}</span></p>{% endfor %}</div></div>
+      {% endif %}
+      {% if doc.observaciones is not empty %}
+      <div class="block"><div class="head">Observaciones</div><div class="body">{% for obs in doc.observaciones|split('\n') %}<p class="small">· {{ obs }}</p>{% endfor %}</div></div>
+      {% endif %}
+    </div>
+    {% endif %}
+
+    <div class="foot" data-fragment="closing">
+      <div class="qr">{% if qrBase64 is not empty %}<img src="data:image/png;base64,{{ qrBase64 }}" alt="QR Code" />{% endif %}</div>
+      <div class="meta">
+        <p><strong>Representación impresa</strong> de la Guía de Remisión Transportista Electrónica.</p>
+        <p>Consulte la validez en <strong>{{ params.consultaUrl|default('sunat.gob.pe') }}</strong> con el RUC del transportista y el número del documento.</p>
+        <p style="margin-top:6px;">Firmante: {% if cp is not null %}{{ cp.ruc }} · {{ cp.razonSocial }}{% endif %}</p>
+        {% if hashDocumento is not empty %}<p class="hash">Hash: {{ hashDocumento }}</p>{% endif %}
+        {% if params.footer is not null %}<p id="custom-footer-box" style="margin-top:10px; font-style:italic;">{{ params.footer }}</p>{% endif %}
+      </div>
+      <div class="stamp">
+        <span class="badge">{{ params.estadoGreT|default('GRE-T PENDIENTE') }}</span>
+        <div class="line">Documento electrónico emitido conforme a la RS SUNAT 271-2019.</div>
       </div>
     </div>
-    {% endif %}
-    {% if hasSubcontratista %}
-    <div>
-      <div class="name">Subcontratista</div>
-      <div class="subcontract-fields">
-        {% if params.subcontratistaNombre is not empty %}<div class="subcontract-field"><span class="k">Nombre</span><span class="v">{{ params.subcontratistaNombre }}</span></div>{% endif %}
-        {% if params.subcontratistaRuc is not empty %}<div class="subcontract-field"><span class="k">RUC</span><span class="v mono">{{ params.subcontratistaRuc }}</span></div>{% endif %}
-        {% if params.subcontratistaMtc is not empty %}<div class="subcontract-field"><span class="k">REG. MTC</span><span class="v mono">{{ params.subcontratistaMtc }}</span></div>{% endif %}
-      </div>
-    </div>
-    {% endif %}
-  </div>
-</div>
-{% endif %}
-
-<div class="transport">
-  <div class="card">
-    <div class="head"><div class="icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 17V7h13l5 5v5M3 17h2M9 17h10M5 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm14 0a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"/></svg></div><div class="title">Vehículos</div></div>
-    {% if doc.envio is not null and doc.envio.vehiculo is not null %}
-    {% set vp = doc.envio.vehiculo %}
-    <div class="vehicle-entry"><div class="vehicle-fields"><div class="vehicle-field"><span class="k">Placa</span><span class="v mono">{{ vp.placa }}</span></div>{% if vp.numeroCirculacion is not empty %}<div class="vehicle-field"><span class="k">TUC/CHV</span><span class="v mono">{{ vp.numeroCirculacion }}</span></div>{% endif %}{% if vp.marca is not empty %}<div class="vehicle-field"><span class="k">Marca</span><span class="v">{{ vp.marca }}</span></div>{% endif %}{% if vp.modelo is not empty %}<div class="vehicle-field"><span class="k">Modelo</span><span class="v">{{ vp.modelo }}</span></div>{% endif %}{% if vp.numeroAutorizacion is not empty %}<div class="vehicle-field"><span class="k">Autorización</span><span class="v mono">{{ vp.numeroAutorizacion }}</span></div>{% endif %}</div></div>
-    {% if vp.secundarios is not empty %}{% for v in vp.secundarios %}<div class="vehicle-entry"><div class="vehicle-fields"><div class="vehicle-field"><span class="k">Placa secundaria</span><span class="v mono">{{ v.placa }}</span></div>{% if v.numeroCirculacion is not empty %}<div class="vehicle-field"><span class="k">TUC/CHV</span><span class="v mono">{{ v.numeroCirculacion }}</span></div>{% endif %}{% if v.marca is not empty %}<div class="vehicle-field"><span class="k">Marca</span><span class="v">{{ v.marca }}</span></div>{% endif %}{% if v.modelo is not empty %}<div class="vehicle-field"><span class="k">Modelo</span><span class="v">{{ v.modelo }}</span></div>{% endif %}{% if v.numeroAutorizacion is not empty %}<div class="vehicle-field"><span class="k">Autorización</span><span class="v mono">{{ v.numeroAutorizacion }}</span></div>{% endif %}</div></div>{% endfor %}{% endif %}
-    {% endif %}
-  </div>
-  <div class="card">
-    <div class="head"><div class="icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0 1 16 0v1"/></svg></div><div class="title">Conductores</div></div>
-    {% if doc.envio is not null and doc.envio.choferes is not empty %}{% for ch in doc.envio.choferes %}
-    <div class="row"><span class="k">{% if loop.first %}Principal{% else %}Secundario{% endif %}</span><span>{{ ch.nombres }} {{ ch.apellidos }}</span></div>
-    <div class="row"><span class="k">{{ ch.tipoDocumentoIdentidad|catalogAttr('06','abreviatura') }} · Brevete</span><span class="mono">{{ ch.numeroDocumentoIdentidad }}{% if ch.licencia is not empty %} · {{ ch.licencia }}{% endif %}</span></div>
-    {% endfor %}{% endif %}
   </div>
 </div>
 
-{% if doc.documentosRelacionados is not empty or doc.observaciones is not empty %}
-<div class="related">
-  {% if doc.documentosRelacionados is not empty %}
-  <div class="block">
-    <div class="head">Documentos relacionados</div>
-    <div class="body">
-      {% for rel in doc.documentosRelacionados %}
-      <p>{{ rel.tipoDocumento }} · <span class="mono">{{ rel.serieNumero }}</span></p>
-      {% endfor %}
-    </div>
-  </div>
-  {% endif %}
-  {% if doc.observaciones is not empty %}
-  <div class="block">
-    <div class="head">Observaciones</div>
-    <div class="body">
-      {% for obs in doc.observaciones|split('\n') %}<p class="small">· {{ obs }}</p>{% endfor %}
-    </div>
-  </div>
-  {% endif %}
-</div>
-{% endif %}
+<div id="gre-pages"></div>
 
-<div class="foot">
-  <div class="qr">
-    {% if qrBase64 is not empty %}<img src="data:image/png;base64,{{ qrBase64 }}" alt="QR Code" />{% endif %}
-  </div>
-  <div class="meta">
-    <p><strong>Representación impresa</strong> de la Guía de Remisión Transportista Electrónica.</p>
-    <p>Consulte la validez en <strong>{{ params.consultaUrl|default('sunat.gob.pe') }}</strong> con el RUC del transportista y el número del documento.</p>
-    <p style="margin-top:6px;">Firmante: {% if cp is not null %}{{ cp.ruc }} · {{ cp.razonSocial }}{% endif %}</p>
-    {% if params.footer is not null %}<p id="custom-footer-box" style="margin-top:10px; font-style:italic;">{{ params.footer }}</p>{% endif %}
-  </div>
-  <div class="stamp">
-    <span class="badge">{{ params.estadoGreT|default('GRE-T EMITIDA · PENDIENTE DE VALIDACIÓN SUNAT') }}</span>
-    <div class="line">Emitido conforme a la RS SUNAT 271-2019.</div>
-  </div>
-</div>
+<script>
+window.__ublkitRenderReady = false;
+(async function () {
+  const source = document.getElementById('gre-source');
+  const root = document.getElementById('gre-pages');
+  if (!source || !root) {
+    window.__ublkitRenderReady = true;
+    return;
+  }
+  if (document.fonts && document.fonts.ready) {
+    await document.fonts.ready;
+  }
+  await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
 
+  const fullHeader = source.querySelector('[data-fragment="full-header"]');
+  const compactHeader = source.querySelector('[data-fragment="compact-header"]');
+  const introBlocks = Array.from(source.querySelectorAll('[data-fragment="intro"]'));
+  const itemsHead = source.querySelector('[data-fragment="items-head"] .items thead');
+  const itemRows = Array.from(source.querySelectorAll('template[data-fragment="item-row"]'));
+  const closingBlocks = Array.from(source.querySelectorAll('[data-fragment="closing"]'));
+
+  function createPage(firstPage) {
+    const page = document.createElement('section');
+    page.className = 'page' + (firstPage ? ' first-page' : ' continuation-page');
+    const shell = document.createElement('div');
+    shell.className = 'page-shell';
+    page.appendChild(shell);
+    shell.appendChild((firstPage ? fullHeader : compactHeader).cloneNode(true));
+    if (firstPage) {
+      introBlocks.forEach(block => shell.appendChild(block.cloneNode(true)));
+    }
+    const itemsSection = document.createElement('section');
+    itemsSection.className = 'items-section';
+    const itemsCard = document.createElement('div');
+    itemsCard.className = 'items-card';
+    const table = document.createElement('table');
+    table.className = 'items';
+    table.appendChild(itemsHead.cloneNode(true));
+    const tbody = document.createElement('tbody');
+    table.appendChild(tbody);
+    itemsCard.appendChild(table);
+    itemsSection.appendChild(itemsCard);
+    shell.appendChild(itemsSection);
+    root.appendChild(page);
+    return { shell, itemsSection, tbody };
+  }
+
+  function overflows(state) {
+    return state.shell.scrollHeight > (state.shell.clientHeight + 1);
+  }
+
+  let current = createPage(true);
+  itemRows.forEach(row => {
+    const clone = row.content.firstElementChild.cloneNode(true);
+    current.tbody.appendChild(clone);
+    if (overflows(current)) {
+      current.tbody.removeChild(clone);
+      current = createPage(false);
+      current.tbody.appendChild(clone);
+    }
+  });
+
+  root.querySelectorAll('.items-section').forEach(section => {
+    if (!section.querySelector('tbody').children.length) {
+      section.classList.add('is-empty');
+    }
+  });
+
+  if (closingBlocks.length) {
+    const nodes = closingBlocks.map(block => block.cloneNode(true));
+    nodes.forEach(node => current.shell.appendChild(node));
+    if (overflows(current)) {
+      nodes.forEach(node => current.shell.removeChild(node));
+      current = createPage(false);
+      if (!current.tbody.children.length) {
+        current.itemsSection.classList.add('is-empty');
+      }
+      nodes.forEach(node => current.shell.appendChild(node));
+    }
+  }
+
+  source.remove();
+  window.__ublkitRenderReady = true;
+})();
+</script>
 </body>
 </html>
