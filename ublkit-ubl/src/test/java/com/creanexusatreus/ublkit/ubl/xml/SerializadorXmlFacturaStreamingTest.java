@@ -5,6 +5,7 @@ import com.creanexusatreus.ublkit.ubl.modelo.BorradorFactura;
 import com.creanexusatreus.ublkit.ubl.modelo.actor.EmisorDocumento;
 import com.creanexusatreus.ublkit.ubl.modelo.actor.ReceptorDocumento;
 import com.creanexusatreus.ublkit.ubl.modelo.complemento.DocumentoRelacionado;
+import com.creanexusatreus.ublkit.ubl.modelo.complemento.GuiaRelacionada;
 import com.creanexusatreus.ublkit.ubl.modelo.linea.LineaDetalle;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -57,6 +58,32 @@ class SerializadorXmlFacturaStreamingTest {
         assertEquals("PE:SUNAT", typeCode.getAttribute("listAgencyName"));
         assertEquals("urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo12",
                 typeCode.getAttribute("listURI"));
+    }
+
+    @Test
+    @DisplayName("Las observaciones libres se serializan como notas adicionales")
+    void serializar_observacionesLibres_emiteNotaAdicional() {
+        BorradorFactura factura = crearFactura(1);
+        factura.setObservaciones("Entrega urgente\nLlamar antes de entregar");
+        factura.setGuias(List.of(new GuiaRelacionada("T001-10", "09"), new GuiaRelacionada("T002-20", "31")));
+        factura.setDocumentosRelacionados(List.of(new DocumentoRelacionado("99", "OTR-30")));
+
+        Document doc = parseXml(new SerializadorXmlFactura().serializar(EnsambladorFactura.ensamblar(factura)));
+
+        NodeList notes = doc.getElementsByTagNameNS("*", "Note");
+        assertTrue(notes.getLength() > 0);
+        boolean foundObservation = false;
+        for (int i = 0; i < notes.getLength(); i++) {
+            Element note = (Element) notes.item(i);
+            if (note.getTextContent().contains("Entrega urgente")) {
+                foundObservation = true;
+                assertTrue(!note.hasAttribute("languageLocaleID"),
+                        "La observación libre no debe identificarse como leyenda oficial");
+            }
+        }
+        assertTrue(foundObservation, "El XML debe conservar la observación libre");
+        assertEquals(2, doc.getElementsByTagNameNS("*", "DespatchDocumentReference").getLength());
+        assertEquals(1, doc.getElementsByTagNameNS("*", "AdditionalDocumentReference").getLength());
     }
 
     @Test

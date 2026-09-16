@@ -138,6 +138,13 @@
   </div>
 </div>
 
+{% if doc.guias is not empty or doc.documentosRelacionados is not empty %}
+<div class="block"><div class="head">Referencias</div><div class="body">
+  {% if doc.guias is not empty %}<p class="small">Guías: {% for guia in doc.guias %}{{ guia.serieNumero }}{% if not loop.last %}, {% endif %}{% endfor %}</p>{% endif %}
+  {% if doc.documentosRelacionados is not empty %}<p class="small">Documentos relacionados: {% for rel in doc.documentosRelacionados %}{{ rel.serieNumero }}{% if not loop.last %}, {% endif %}{% endfor %}</p>{% endif %}
+</div></div>
+{% endif %}
+
 <div class="items-wrap">
 <table class="items">
   <thead>

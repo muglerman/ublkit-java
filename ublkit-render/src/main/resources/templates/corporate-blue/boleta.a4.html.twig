@@ -128,6 +128,13 @@
   </div>
 </div>
 
+{% if doc.guias is not empty or doc.documentosRelacionados is not empty %}
+<div class="block"><div class="head">Referencias</div><div class="body">
+  {% if doc.guias is not empty %}<p class="small">Guías: {% for guia in doc.guias %}{{ guia.serieNumero }}{% if not loop.last %}, {% endif %}{% endfor %}</p>{% endif %}
+  {% if doc.documentosRelacionados is not empty %}<p class="small">Documentos relacionados: {% for rel in doc.documentosRelacionados %}{{ rel.serieNumero }}{% if not loop.last %}, {% endif %}{% endfor %}</p>{% endif %}
+</div></div>
+{% endif %}
+
 <table class="items">
   <thead>
     <tr><th class="c-idx">#</th><th class="c-code">Código</th><th>Descripción</th><th class="c-unit">Und</th><th class="c-qty">Cant.</th><th class="c-price">P. Unit.</th><th class="c-amt">Importe</th></tr>

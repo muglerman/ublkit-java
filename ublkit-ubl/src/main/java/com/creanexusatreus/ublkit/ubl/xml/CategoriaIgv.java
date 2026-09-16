@@ -11,7 +11,7 @@ package com.creanexusatreus.ublkit.ubl.xml;
  *
  * @since 0.1.0
  */
-record CategoriaIgv(
+public record CategoriaIgv(
         String categoriaId,
         String tribCode,
         String tribName,
@@ -35,11 +35,12 @@ record CategoriaIgv(
      * - 30-37: Inafecto (operaciones no gravadas, retiros y transferencias)
      * - 40: Exportación
      */
-    static CategoriaIgv obtener(String igvTipo) {
+    public static CategoriaIgv obtener(String igvTipo) {
         if (igvTipo == null) return GRAVADO;
         return switch (igvTipo) {
-            // Códigos Gravados (10-16)
-            case "10", "11", "12", "13", "14", "15", "16" -> GRAVADO;
+            // 11-16 son operaciones gravadas gratuitas: el tributo de línea es 9996.
+            case "11", "12", "13", "14", "15", "16" -> GRATUITO;
+            case "10" -> GRAVADO;
 
             // Código 17: Gravado - IVAP
             case "17" -> IVAP;
@@ -48,13 +49,15 @@ record CategoriaIgv(
             // 20: Exonerado - Operación Onerosa
             // 21: Exonerado - Transferencia gratuita
             // 22: Exonerado - Retiro por premio (SUNAT Catalog 7, added Q1 2024)
-            case "20", "21", "22" -> EXONERADO;
+            case "20" -> EXONERADO;
+            case "21", "22" -> GRATUITO;
 
             // Códigos Inafectos (30-37)
             // 30: Inafecto - Operación Onerosa
             // 31-36: Inafecto - Retiros y variantes
             // 37: Inafecto - Transferencia gratuita (SUNAT Catalog 7, added Q1 2024)
-            case "30", "31", "32", "33", "34", "35", "36", "37" -> INAFECTO;
+            case "30" -> INAFECTO;
+            case "31", "32", "33", "34", "35", "36", "37" -> GRATUITO;
 
             // Código 40: Exportación
             case "40" -> EXPORTACION;

@@ -109,44 +109,7 @@ public final class EnsambladorNota {
         List<LineaDetalle> detalles = documento.getDetalles();
         if (detalles == null || detalles.isEmpty()) return;
 
-        BigDecimal totalGeneral = BigDecimal.ZERO;
-        BigDecimal gravadoImp = BigDecimal.ZERO, gravadoBase = BigDecimal.ZERO;
-        BigDecimal exoneradoImp = BigDecimal.ZERO, exoneradoBase = BigDecimal.ZERO;
-        BigDecimal inafectoImp = BigDecimal.ZERO, inafectoBase = BigDecimal.ZERO;
-        BigDecimal gratuitoImp = BigDecimal.ZERO, gratuitoBase = BigDecimal.ZERO;
-        BigDecimal exportacionImp = BigDecimal.ZERO, exportacionBase = BigDecimal.ZERO;
-        BigDecimal ivapImp = BigDecimal.ZERO, ivapBase = BigDecimal.ZERO;
-        BigDecimal icbImp = BigDecimal.ZERO;
-        BigDecimal iscImp = BigDecimal.ZERO, iscBase = BigDecimal.ZERO;
-
-        for (LineaDetalle linea : detalles) {
-            String tipo = linea.getIgvTipo() != null ? linea.getIgvTipo() : "10";
-            BigDecimal igv = orZero(linea.getIgv());
-            BigDecimal base = orZero(linea.getIgvBaseImponible());
-
-            if (EnsambladorFactura.esGratuito(tipo)) { gratuitoImp = gratuitoImp.add(igv); gratuitoBase = gratuitoBase.add(base); }
-            else if (EnsambladorFactura.esGravado(tipo)) { gravadoImp = gravadoImp.add(igv); gravadoBase = gravadoBase.add(base); }
-            else if (EnsambladorFactura.esExonerado(tipo)) { exoneradoImp = exoneradoImp.add(igv); exoneradoBase = exoneradoBase.add(base); }
-            else if (EnsambladorFactura.esInafecto(tipo)) { inafectoImp = inafectoImp.add(igv); inafectoBase = inafectoBase.add(base); }
-            else if (EnsambladorFactura.esExportacion(tipo)) { exportacionImp = exportacionImp.add(igv); exportacionBase = exportacionBase.add(base); }
-            else if (EnsambladorFactura.esIvap(tipo)) { ivapImp = ivapImp.add(igv); ivapBase = ivapBase.add(base); }
-
-            if (linea.getIsc() != null) { iscImp = iscImp.add(linea.getIsc()); iscBase = iscBase.add(orZero(linea.getIscBaseImponible())); }
-            if (linea.getIcb() != null) { icbImp = icbImp.add(linea.getIcb()); }
-        }
-
-        totalGeneral = gravadoImp.add(exoneradoImp).add(inafectoImp).add(iscImp).add(icbImp).add(ivapImp);
-
-        documento.setTotalImpuestos(new TotalImpuestos(
-                totalGeneral.setScale(ESCALA, REDONDEO),
-                nulo(gravadoImp), nulo(gravadoBase),
-                nulo(exoneradoImp), nulo(exoneradoBase),
-                nulo(inafectoImp), nulo(inafectoBase),
-                nulo(gratuitoImp), nulo(gratuitoBase),
-                nulo(exportacionImp), nulo(exportacionBase),
-                nulo(ivapImp), nulo(ivapBase),
-                nulo(icbImp), nulo(iscImp), nulo(iscBase)
-        ));
+        documento.setTotalImpuestos(TotalImpuestos.desdeLineas(detalles));
     }
 
     @FunctionalInterface

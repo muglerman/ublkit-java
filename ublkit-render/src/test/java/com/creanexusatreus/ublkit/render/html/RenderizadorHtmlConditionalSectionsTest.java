@@ -33,6 +33,9 @@ class RenderizadorHtmlConditionalSectionsTest {
 
     private static final List<FormatoImpresion> INVOICE_FORMATS =
             List.of(FormatoImpresion.A4, FormatoImpresion.A5);
+    private static final List<FormatoImpresion> ALL_INVOICE_FORMATS =
+            List.of(FormatoImpresion.A4, FormatoImpresion.A5,
+                    FormatoImpresion.TICKET_58MM, FormatoImpresion.TICKET_80MM);
 
     private static final String ENTREGA_REAL = "Centro logístico Chilca - puerta 3";
     private static final String ORDEN_COMPRA_REAL = "OC-REAL-2026-7788";
@@ -145,6 +148,36 @@ class RenderizadorHtmlConditionalSectionsTest {
                 assertFalse(html.contains(DEMO_MONTO_DETRACCION),
                         () -> contexto + " no debe filtrar el monto demo");
             }
+        }
+    }
+
+    @Test
+    @DisplayName("muestra observaciones y referencias en todos los formatos")
+    void facturaMuestraObservacionesYReferenciasEnTodosLosFormatos() {
+        BorradorFactura factura = crearFacturaBase();
+        factura.setObservaciones("Entrega urgente\nLlamar antes de entregar");
+
+        for (FormatoImpresion formato : ALL_INVOICE_FORMATS) {
+            String html = renderizarFactura(factura, EstiloPlantilla.DEFAULT, formato);
+            assertTrue(html.contains("Entrega urgente"), formato + " debe mostrar la primera observación");
+            assertTrue(html.contains("Llamar antes de entregar"), formato + " debe mostrar la segunda observación");
+            assertTrue(html.contains(GUIA_REAL), formato + " debe mostrar la guía");
+            assertTrue(html.contains(DOC_REL_REAL), formato + " debe mostrar el documento relacionado");
+        }
+    }
+
+    @Test
+    @DisplayName("muestra referencias en las plantillas A4 de boleta")
+    void boletaMuestraReferenciasEnTodosLosEstilos() {
+        BorradorFactura boleta = crearFacturaBase();
+        boleta.setTipoComprobante("03");
+        boleta.setObservaciones("Observación de boleta");
+
+        for (EstiloPlantilla estilo : EstiloPlantilla.values()) {
+            String html = renderizarFactura(boleta, estilo, FormatoImpresion.A4);
+            assertTrue(html.contains("Observación de boleta"), estilo + " debe mostrar observaciones");
+            assertTrue(html.contains(GUIA_REAL), estilo + " debe mostrar la guía");
+            assertTrue(html.contains(DOC_REL_REAL), estilo + " debe mostrar el documento relacionado");
         }
     }
 

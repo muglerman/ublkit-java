@@ -66,7 +66,9 @@ public final class SerializadorXmlFactura implements SerializadorXml<BorradorFac
 
         // 5. Notes (leyendas)
         agregarLeyendas(doc, raiz, factura.getLeyendas());
-        if (factura.getObservaciones() != null) {
+        // Las observaciones libres son notas adicionales del comprobante y no
+        // reemplazan las leyendas oficiales, que se agregan con languageLocaleID.
+        if (factura.getObservaciones() != null && !factura.getObservaciones().isBlank()) {
             raiz.appendChild(cbcCdata(doc, "Note", factura.getObservaciones()));
         }
 
@@ -539,11 +541,12 @@ public final class SerializadorXmlFactura implements SerializadorXml<BorradorFac
                 "schemeName", "Tax Category Identifier");
         escribirCbcConAtributos(writer, "Percent",
                 escalar(linea.getTasaIgv() != null ? linea.getTasaIgv().multiply(new BigDecimal("100")) : BigDecimal.ZERO));
-        escribirCbcConAtributos(writer, "TaxExemptionReasonCode",
-                linea.getIgvTipo() != null ? linea.getIgvTipo() : "10",
-                "listAgencyName", "PE:SUNAT",
-                "listName", "Afectacion del IGV",
-                "listURI", "urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo07");
+        if (linea.getIgvTipo() != null) {
+            escribirCbcConAtributos(writer, "TaxExemptionReasonCode", linea.getIgvTipo(),
+                    "listAgencyName", "PE:SUNAT",
+                    "listName", "Afectacion del IGV",
+                    "listURI", "urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo07");
+        }
 
         writer.writeStartElement("cac", "TaxScheme", NS_CAC);
         escribirCbcConAtributos(writer, "ID", cat.tribCode(),

@@ -16,6 +16,8 @@ import com.creanexusatreus.ublkit.ubl.modelo.complemento.TramoTransporteCarga;
 import com.creanexusatreus.ublkit.ubl.modelo.linea.CargoDescuento;
 import com.creanexusatreus.ublkit.ubl.modelo.linea.LineaDetalle;
 import com.creanexusatreus.ublkit.ubl.modelo.total.TotalImpuestos;
+import com.creanexusatreus.ublkit.ubl.modelo.total.GrupoTributario;
+import com.creanexusatreus.ublkit.ubl.modelo.total.GrupoTributarioFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -283,125 +285,45 @@ final class FragmentosXml {
 
         Element taxTotal = cac(doc, TAG_TAX_TOTAL);
         taxTotal.appendChild(cbcMonto(doc, TAG_TAX_AMOUNT, imp.total(), moneda));
-
-        // ISC
-        if (imp.iscImporte() != null) {
-            taxTotal.appendChild(crearSubtotalImpuesto(doc, moneda,
-                    imp.iscBaseImponible(), imp.iscImporte(),
-                    null, null, null,
-                    "2000", "ISC", "EXC"));
-        }
-
-        // IGV Gravado
-        if (imp.gravadoBaseImponible() != null) {
-            taxTotal.appendChild(crearSubtotalImpuesto(doc, moneda,
-                    imp.gravadoBaseImponible(), imp.gravadoImporte(),
-                    "S", VALUE_UN_ECE_5305, VALUE_TAX_CATEGORY_IDENTIFIER,
-                    "1000", "IGV", "VAT"));
-        }
-
-        // Inafecto
-        if (imp.inafectoBaseImponible() != null) {
-            taxTotal.appendChild(crearSubtotalImpuesto(doc, moneda,
-                    imp.inafectoBaseImponible(), imp.inafectoImporte(),
-                    "S", VALUE_UN_ECE_5305, VALUE_TAX_CATEGORY_IDENTIFIER,
-                    "9998", "INA", "FRE"));
-        }
-
-        // Exonerado
-        if (imp.exoneradoBaseImponible() != null) {
-            taxTotal.appendChild(crearSubtotalImpuesto(doc, moneda,
-                    imp.exoneradoBaseImponible(), imp.exoneradoImporte(),
-                    "S", VALUE_UN_ECE_5305, VALUE_TAX_CATEGORY_IDENTIFIER,
-                    "9997", "EXO", "VAT"));
-        }
-
-        // Gratuito
-        if (imp.gratuitoBaseImponible() != null) {
-            taxTotal.appendChild(crearSubtotalImpuesto(doc, moneda,
-                    imp.gratuitoBaseImponible(), imp.gratuitoImporte(),
-                    "S", VALUE_UN_ECE_5305, VALUE_TAX_CATEGORY_IDENTIFIER,
-                    "9996", "GRA", "FRE"));
-        }
-
-        // Exportación
-        if (imp.exportacionBaseImponible() != null) {
-            taxTotal.appendChild(crearSubtotalImpuesto(doc, moneda,
-                    imp.exportacionBaseImponible(), BigDecimal.ZERO,
-                    null, null, null,
-                    "9995", "EXP", "FRE"));
-        }
-
-        // IVAP
-        if (imp.ivapBaseImponible() != null) {
-            taxTotal.appendChild(crearSubtotalImpuesto(doc, moneda,
-                    imp.ivapBaseImponible(), imp.ivapImporte(),
-                    "S", VALUE_UN_ECE_5305, VALUE_TAX_CATEGORY_IDENTIFIER,
-                    "1016", "IVAP", "VAT"));
-        }
-
-        // ICBPER
-        if (imp.icbImporte() != null) {
-            taxTotal.appendChild(crearSubtotalIcbper(doc, moneda, imp.icbImporte()));
+        for (GrupoTributario grupo : imp.grupos()) {
+            taxTotal.appendChild(crearSubtotalImpuesto(doc, moneda, grupo));
         }
 
         raiz.appendChild(taxTotal);
     }
 
-    private static Element crearSubtotalImpuesto(Document doc, String moneda,
-                                                  BigDecimal base, BigDecimal monto,
-                                                  String catId, String catSchemeId, String catSchemeName,
-                                                  String tribCode, String tribName, String tribTypeCode) {
+    private static Element crearSubtotalImpuesto(Document doc, String moneda, GrupoTributario grupo) {
         Element subtotal = cac(doc, TAG_TAX_SUBTOTAL);
-        if (base != null) {
-            subtotal.appendChild(cbcMonto(doc, TAG_TAXABLE_AMOUNT, base, moneda));
-        }
-        subtotal.appendChild(cbcMonto(doc, TAG_TAX_AMOUNT, monto, moneda));
-
+        subtotal.appendChild(cbcMonto(doc, TAG_TAXABLE_AMOUNT, grupo.baseImponible(), moneda));
+        subtotal.appendChild(cbcMonto(doc, TAG_TAX_AMOUNT, grupo.importe(), moneda));
         Element category = cac(doc, TAG_TAX_CATEGORY);
-        if (catId != null) {
-            Element categoryId = cbcConAtributos(doc, "ID", catId,
-                    ATTR_SCHEME_AGENCY_NAME, VALUE_UN_ECE_AGENCY,
-                    ATTR_SCHEME_ID, catSchemeId,
-                    ATTR_SCHEME_NAME, catSchemeName);
-            category.appendChild(categoryId);
+        category.appendChild(cbcConAtributos(doc, "ID", grupo.categoriaId(),
+                ATTR_SCHEME_AGENCY_NAME, VALUE_UN_ECE_AGENCY,
+                ATTR_SCHEME_ID, VALUE_UN_ECE_5305,
+                ATTR_SCHEME_NAME, VALUE_TAX_CATEGORY_IDENTIFIER));
+        category.appendChild(cbcConAtributos(doc, "Percent", escalar(grupo.porcentaje())));
+        if (grupo.codigoAfectacion() != null && esAfectacionIgv(grupo.tributoId())) {
+            category.appendChild(cbcConAtributos(doc, "TaxExemptionReasonCode", grupo.codigoAfectacion(),
+                    ATTR_LIST_AGENCY_NAME, VALUE_PE_SUNAT,
+                    ATTR_LIST_NAME, "Afectacion del IGV",
+                    "listURI", "urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo07"));
         }
-
         Element scheme = cac(doc, TAG_TAX_SCHEME);
-        Element schemeId = cbcConAtributos(doc, "ID", tribCode,
+        scheme.appendChild(cbcConAtributos(doc, "ID", grupo.tributoId(),
                 ATTR_SCHEME_AGENCY_NAME, VALUE_PE_SUNAT,
                 ATTR_SCHEME_ID, VALUE_UN_ECE_5153,
-                ATTR_SCHEME_NAME, VALUE_CODIGO_TRIBUTOS);
-        scheme.appendChild(schemeId);
-        scheme.appendChild(cbc(doc, "Name", tribName));
-        scheme.appendChild(cbc(doc, TAG_TAX_TYPE_CODE, tribTypeCode));
+                ATTR_SCHEME_NAME, VALUE_CODIGO_TRIBUTOS));
+        scheme.appendChild(cbc(doc, "Name", grupo.tributoNombre()));
+        scheme.appendChild(cbc(doc, TAG_TAX_TYPE_CODE, grupo.tributoTipoCodigo()));
         category.appendChild(scheme);
-
         subtotal.appendChild(category);
         return subtotal;
     }
 
-    private static Element crearSubtotalIcbper(Document doc, String moneda, BigDecimal monto) {
-        Element subtotal = cac(doc, TAG_TAX_SUBTOTAL);
-        subtotal.appendChild(cbcMonto(doc, TAG_TAX_AMOUNT, monto, moneda));
-
-        Element category = cac(doc, TAG_TAX_CATEGORY);
-        category.appendChild(cbcConAtributos(doc, "ID", "S",
-                ATTR_SCHEME_AGENCY_NAME, VALUE_UN_ECE_AGENCY,
-                ATTR_SCHEME_ID, VALUE_UN_ECE_5305,
-                ATTR_SCHEME_NAME, VALUE_TAX_CATEGORY_IDENTIFIER));
-
-        Element scheme = cac(doc, TAG_TAX_SCHEME);
-        scheme.appendChild(cbcConAtributos(doc, "ID", "7152",
-                ATTR_SCHEME_AGENCY_NAME, VALUE_PE_SUNAT,
-                ATTR_SCHEME_ID, VALUE_UN_ECE_5153,
-                ATTR_SCHEME_NAME, VALUE_CODIGO_TRIBUTOS));
-        scheme.appendChild(cbc(doc, "Name", "ICBPER"));
-        scheme.appendChild(cbc(doc, TAG_TAX_TYPE_CODE, "OTH"));
-        category.appendChild(scheme);
-
-        subtotal.appendChild(category);
-        return subtotal;
+    private static boolean esAfectacionIgv(String tributoId) {
+        return "1000".equals(tributoId) || "1016".equals(tributoId)
+                || "9995".equals(tributoId) || "9996".equals(tributoId)
+                || "9997".equals(tributoId) || "9998".equals(tributoId);
     }
 
     // ── Línea de detalle (TaxTotal de la línea) ──────────────────
@@ -432,37 +354,7 @@ final class FragmentosXml {
             taxTotal.appendChild(subtotal);
         }
 
-        // IGV
-        {
-            Element subtotal = cac(doc, TAG_TAX_SUBTOTAL);
-            subtotal.appendChild(cbcMonto(doc, TAG_TAXABLE_AMOUNT, orZero(linea.getIgvBaseImponible()), moneda));
-            subtotal.appendChild(cbcMonto(doc, TAG_TAX_AMOUNT, orZero(linea.getIgv()), moneda));
-
-            Element category = cac(doc, TAG_TAX_CATEGORY);
-            CategoriaIgv cat = CategoriaIgv.obtener(linea.getIgvTipo());
-            category.appendChild(cbcConAtributos(doc, "ID", cat.categoriaId(),
-                    ATTR_SCHEME_AGENCY_NAME, VALUE_UN_ECE_AGENCY,
-                    ATTR_SCHEME_ID, VALUE_UN_ECE_5305,
-                    ATTR_SCHEME_NAME, VALUE_TAX_CATEGORY_IDENTIFIER));
-            category.appendChild(cbcConAtributos(doc, "Percent",
-                    escalar(linea.getTasaIgv() != null ? linea.getTasaIgv().multiply(new BigDecimal("100")) : BigDecimal.ZERO)));
-            category.appendChild(cbcConAtributos(doc, "TaxExemptionReasonCode", linea.getIgvTipo(),
-                    ATTR_LIST_AGENCY_NAME, VALUE_PE_SUNAT,
-                    ATTR_LIST_NAME, "Afectacion del IGV",
-                    "listURI", "urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo07"));
-
-            Element scheme = cac(doc, TAG_TAX_SCHEME);
-            scheme.appendChild(cbcConAtributos(doc, "ID", cat.tribCode(),
-                    ATTR_SCHEME_AGENCY_NAME, VALUE_PE_SUNAT,
-                    ATTR_SCHEME_ID, VALUE_UN_ECE_5153,
-                    ATTR_SCHEME_NAME, VALUE_CODIGO_TRIBUTOS));
-            scheme.appendChild(cbc(doc, "Name", cat.tribName()));
-            scheme.appendChild(cbc(doc, TAG_TAX_TYPE_CODE, cat.tribTypeCode()));
-            category.appendChild(scheme);
-
-            subtotal.appendChild(category);
-            taxTotal.appendChild(subtotal);
-        }
+        taxTotal.appendChild(crearSubtotalImpuesto(doc, moneda, GrupoTributarioFactory.igv(linea)));
 
         // ICBPER
         if (linea.getIcb() != null) {

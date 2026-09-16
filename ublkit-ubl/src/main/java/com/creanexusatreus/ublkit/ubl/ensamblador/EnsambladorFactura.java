@@ -247,7 +247,7 @@ public final class EnsambladorFactura {
 
         if (linea.getIgv() == null && linea.getIgvBaseImponible() != null) {
             String tipo = linea.getIgvTipo();
-            if (esGravado(tipo)) {
+            if (esGravado(tipo) && !esGratuito(tipo)) {
                 linea.setIgv(linea.getIgvBaseImponible().multiply(tasaIgv).setScale(10, REDONDEO));
             } else {
                 linea.setIgv(BigDecimal.ZERO.setScale(10, REDONDEO));
@@ -445,64 +445,7 @@ public final class EnsambladorFactura {
         List<LineaDetalle> detalles = documento.getDetalles();
         if (detalles == null || detalles.isEmpty())
             return;
-
-        BigDecimal totalGeneral = BigDecimal.ZERO;
-        BigDecimal gravadoImp = BigDecimal.ZERO;
-        BigDecimal gravadoBase = BigDecimal.ZERO;
-        BigDecimal exoneradoImp = BigDecimal.ZERO;
-        BigDecimal exoneradoBase = BigDecimal.ZERO;
-        BigDecimal inafectoImp = BigDecimal.ZERO;
-        BigDecimal inafectoBase = BigDecimal.ZERO;
-        BigDecimal gratuitoImp = BigDecimal.ZERO;
-        BigDecimal gratuitoBase = BigDecimal.ZERO;
-        BigDecimal exportacionImp = BigDecimal.ZERO;
-        BigDecimal exportacionBase = BigDecimal.ZERO;
-        BigDecimal ivapImp = BigDecimal.ZERO;
-        BigDecimal ivapBase = BigDecimal.ZERO;
-        BigDecimal icbImp = BigDecimal.ZERO;
-        BigDecimal iscImp = BigDecimal.ZERO;
-        BigDecimal iscBase = BigDecimal.ZERO;
-
-        for (LineaDetalle linea : detalles) {
-            String tipo = linea.getIgvTipo() != null ? linea.getIgvTipo() : "10";
-            BigDecimal igv = orZero(linea.getIgv());
-            BigDecimal base = orZero(linea.getIgvBaseImponible());
-
-            if (esGratuito(tipo)) {
-                gratuitoImp = gratuitoImp.add(igv);
-                gratuitoBase = gratuitoBase.add(base);
-            } else if (esGravado(tipo)) {
-                gravadoImp = gravadoImp.add(igv);
-                gravadoBase = gravadoBase.add(base);
-            } else if (esExonerado(tipo)) {
-                exoneradoImp = exoneradoImp.add(igv);
-                exoneradoBase = exoneradoBase.add(base);
-            } else if (esInafecto(tipo)) {
-                inafectoImp = inafectoImp.add(igv);
-                inafectoBase = inafectoBase.add(base);
-            } else if (esExportacion(tipo)) {
-                exportacionImp = exportacionImp.add(igv);
-                exportacionBase = exportacionBase.add(base);
-            } else if (esIvap(tipo)) {
-                ivapImp = ivapImp.add(igv);
-                ivapBase = ivapBase.add(base);
-            }
-
-            if (linea.getIsc() != null) {
-                iscImp = iscImp.add(linea.getIsc());
-                iscBase = iscBase.add(orZero(linea.getIscBaseImponible()));
-            }
-            if (linea.getIcb() != null) {
-                icbImp = icbImp.add(linea.getIcb());
-            }
-        }
-
-        totalGeneral = gravadoImp.add(exoneradoImp).add(inafectoImp).add(iscImp).add(icbImp).add(ivapImp);
-
-        documento.setTotalImpuestos(new TotalImpuestos(totalGeneral.setScale(ESCALA, REDONDEO), nulo(gravadoImp),
-                nulo(gravadoBase), nulo(exoneradoImp), nulo(exoneradoBase), nulo(inafectoImp), nulo(inafectoBase),
-                nulo(gratuitoImp), nulo(gratuitoBase), nulo(exportacionImp), nulo(exportacionBase), nulo(ivapImp),
-                nulo(ivapBase), nulo(icbImp), nulo(iscImp), nulo(iscBase)));
+        documento.setTotalImpuestos(TotalImpuestos.desdeLineas(detalles));
     }
 
     // ── Total importe ────────────────────────────────────────────
