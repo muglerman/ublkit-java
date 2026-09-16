@@ -148,7 +148,7 @@ class RenderizadorEstilosDataValidationTest {
         assertContiene(html, "Retorno de vehículo vacío", estilo, "indicador de retorno");
         assertContiene(html, "Transbordo programado", estilo, "indicador de transbordo");
         assertContiene(html, "Transporte subcontratado", estilo, "indicador de subcontratación");
-        assertContiene(html, "Pagador del flete: destinatario", estilo, "indicador visual de pagador");
+        assertContiene(html, "Pagador del servicio de transporte: subcontratador", estilo, "indicador visual de pagador");
         assertContiene(html, "Producto A", estilo, "descripción del bien transportado");
         assertContiene(html, "GUÍA DE REMISIÓN TRANSPORTISTA", estilo, "rótulo de GRE transportista");
         assertTrue(html.indexOf("Estado de pago") < html.indexOf("Punto de partida"),
@@ -303,7 +303,7 @@ class RenderizadorEstilosDataValidationTest {
                 "estadoPago", "PAGADO",
                 "trackingNumber", "TRACK-2026-001",
                 "totalGuia", new BigDecimal("245.50"),
-                "tipoPagadorFlete", "Destinatario");
+                "tipoPagadorFlete", "Subcontratador");
     }
 
     private Map<String, Object> subcontractorAttributes() {

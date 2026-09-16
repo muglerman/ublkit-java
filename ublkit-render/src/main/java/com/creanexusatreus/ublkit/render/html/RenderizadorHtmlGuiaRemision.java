@@ -89,13 +89,23 @@ public class RenderizadorHtmlGuiaRemision implements RenderizadorDocumento<Borra
         if (document.getEnvio() != null && document.getEnvio().getIndicadores() != null) {
             document.getEnvio().getIndicadores().stream()
                     .filter(indicator -> indicator != null && !indicator.isBlank())
+                    .filter(indicator -> attributes == null || attributes.get("tipoPagadorFlete") == null
+                            || !indicator.startsWith("SUNAT_Envio_IndicadorPagadorFlete_"))
                     .map(indicator -> TRANSPORT_INDICATOR_LABELS.getOrDefault(indicator, indicator))
                     .forEach(labels::add);
         }
         if (attributes != null && attributes.get("tipoPagadorFlete") != null) {
             String payerType = attributes.get("tipoPagadorFlete").toString().trim();
             if (!payerType.isEmpty()) {
-                labels.add("Pagador del flete: " + payerType.toLowerCase(Locale.ROOT));
+                String detail = "";
+                if ("Tercero".equalsIgnoreCase(payerType)
+                        && attributes.get("pagadorFleteTerceroNombre") != null) {
+                    detail = " · " + attributes.get("pagadorFleteTerceroNombre")
+                            + (attributes.get("pagadorFleteTerceroDocumento") != null
+                                    ? " (" + attributes.get("pagadorFleteTerceroDocumento") + ")"
+                                    : "");
+                }
+                labels.add("Pagador del servicio de transporte: " + payerType.toLowerCase(Locale.ROOT) + detail);
             }
         }
         return labels.stream().distinct().toList();
@@ -114,10 +124,10 @@ public class RenderizadorHtmlGuiaRemision implements RenderizadorDocumento<Borra
         labels.put("SUNAT_Envio_IndicadorVehiculoConductoresTransp",
                 "Vehículo y conductores de transportista");
         labels.put("SUNAT_Envio_IndicadorTrasporteSubcontratado", "Transporte subcontratado");
-        labels.put("SUNAT_Envio_IndicadorPagadorFlete_Remitente", "Pagador del flete: remitente");
+        labels.put("SUNAT_Envio_IndicadorPagadorFlete_Remitente", "Pagador del servicio de transporte: remitente");
         labels.put("SUNAT_Envio_IndicadorPagadorFlete_Subcontratador",
-                "Pagador del flete: subcontratador");
-        labels.put("SUNAT_Envio_IndicadorPagadorFlete_Tercero", "Pagador del flete: tercero");
+                "Pagador del servicio de transporte: subcontratador");
+        labels.put("SUNAT_Envio_IndicadorPagadorFlete_Tercero", "Pagador del servicio de transporte: tercero");
         return Map.copyOf(labels);
     }
 }
