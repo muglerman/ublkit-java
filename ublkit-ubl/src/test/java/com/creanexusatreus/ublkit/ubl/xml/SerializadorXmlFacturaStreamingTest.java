@@ -61,6 +61,28 @@ class SerializadorXmlFacturaStreamingTest {
     }
 
     @Test
+    @DisplayName("AdditionalDocumentReference conserva códigos especiales del Catálogo 12")
+    void serializar_documentosRelacionados_conservaCodigosCatalogo12() {
+        BorradorFactura factura = crearFactura(1);
+        factura.setDocumentosRelacionados(List.of(
+                new DocumentoRelacionado("03", "B001-10"),
+                new DocumentoRelacionado("04", "ENAPU-20"),
+                new DocumentoRelacionado("05", "SCOP-30")));
+
+        Document doc = parseXml(new SerializadorXmlFactura().serializar(EnsambladorFactura.ensamblar(factura)));
+        NodeList codes = doc.getElementsByTagNameNS("*", "DocumentTypeCode");
+        assertEquals(3, codes.getLength());
+        assertEquals("03", codes.item(0).getTextContent());
+        assertEquals("04", codes.item(1).getTextContent());
+        assertEquals("05", codes.item(2).getTextContent());
+        for (int i = 0; i < codes.getLength(); i++) {
+            Element code = (Element) codes.item(i);
+            assertEquals("SUNAT: Identificador de documento relacionado", code.getAttribute("listName"));
+            assertEquals("urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo12", code.getAttribute("listURI"));
+        }
+    }
+
+    @Test
     @DisplayName("Las observaciones libres se serializan como notas adicionales")
     void serializar_observacionesLibres_emiteNotaAdicional() {
         BorradorFactura factura = crearFactura(1);

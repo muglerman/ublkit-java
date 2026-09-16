@@ -272,7 +272,7 @@ final class FragmentosXml {
             // atributos de lista, igual que la referencia de anticipos (evita 4009).
             additional.appendChild(cbcConAtributos(doc, "DocumentTypeCode", rel.tipoDocumento(),
                     ATTR_LIST_AGENCY_NAME, VALUE_PE_SUNAT,
-                    ATTR_LIST_NAME, "Documento Relacionado",
+                    ATTR_LIST_NAME, "SUNAT: Identificador de documento relacionado",
                     "listURI", "urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo12"));
             raiz.appendChild(additional);
         }
