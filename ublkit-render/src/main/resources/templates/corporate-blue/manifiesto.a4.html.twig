@@ -13,7 +13,7 @@
   .mono { font-family: 'IBM Plex Mono', monospace; font-variant-numeric: tabular-nums; }
   p { margin: 0; }
 
-  .band { background: var(--accent); color: #fff; padding: 16px 38px; display: grid; grid-template-columns: 1fr 300px; gap: 20px; align-items: center; }
+  .band { background: var(--accent); color: #fff; padding: 10px 38px; display: grid; grid-template-columns: 1fr 300px; gap: 20px; align-items: center; }
   .band, .foot { break-inside: avoid; page-break-inside: avoid; }
   .band .logo-block { display: flex; align-items: center; gap: 12px; }
   .band .logo { width: 42px; height: 42px; flex: none; background: rgba(255,255,255,.14); border-radius: 9px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
@@ -22,18 +22,18 @@
   .band .co-copy { min-width: 0; }
   .band .co-name { font-size: 15px; font-weight: 700; }
   .band .co-sub { font-size: 9px; opacity: 0.82; margin-top: 2px; }
-  .band .co-meta { font-size: 9px; opacity: 0.92; margin-top: 5px; display: grid; gap: 2px; }
-  .band .co-meta .manifest-header-registration { font-weight: 600; }
-  .band .docbox { background: #fff; color: var(--ink); border-radius: 9px; padding: 11px 14px; }
+  .band .co-meta { font-size: 8.5px; line-height: 1.2; opacity: 0.92; margin-top: 3px; display: block; }
+  .band .co-meta .manifest-header-location { margin-top: 2px; }
+  .band .docbox { background: #fff; color: var(--ink); border-radius: 9px; padding: 8px 12px; }
   .band .docbox .kind { font-size: 12px; font-weight: 800; color: var(--accent); }
   .band .docbox .sub { font-size: 8px; color: var(--ink-3); }
-  .band .docbox .num { font-family: 'IBM Plex Mono', monospace; font-size: 17px; font-weight: 600; margin: 4px 0 6px; }
-  .band .docbox .rule { height: 1px; background: var(--line); margin-bottom: 6px; }
-  .band .docbox .f { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 2px; }
-  .band .docbox .k { font-size: 8px; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.06em; white-space: nowrap; }
-  .band .docbox .v { font-size: 9px; font-weight: 600; white-space: nowrap; }
+  .band .docbox .num { font-family: 'IBM Plex Mono', monospace; font-size: 17px; font-weight: 600; margin: 2px 0 3px; }
+  .band .docbox .rule { height: 1px; background: var(--line); margin-bottom: 4px; }
+  .band .docbox .f { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 1px; line-height: 1.2; }
+  .band .docbox .k { font-size: 7.5px; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; }
+  .band .docbox .v { font-size: 8.5px; font-weight: 600; white-space: nowrap; }
 
-  .body-wrap { padding: 16px 38px 26px; }
+  .body-wrap { padding: 12px 38px 22px; }
 
   .sec-title { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
   .sec-title .t { font-size: 12px; font-weight: 700; }
@@ -43,27 +43,30 @@
   .items thead { display: table-header-group; }
   .items tfoot { display: table-row-group; }
   .items tr { break-inside: avoid; page-break-inside: avoid; }
-  .items thead th { font-size: 8.5px; text-transform: uppercase; letter-spacing: 0.04em; color: #fff; font-weight: 600; background: var(--ink); text-align: left; padding: 9px 10px; }
-  .items tbody td { padding: 8px 10px; border-top: 1px solid var(--line); vertical-align: top; font-size: 9.5px; }
+  .items thead th { font-size: 7.5px; line-height: 1.2; text-transform: uppercase; letter-spacing: 0.04em; color: #fff; font-weight: 600; background: var(--ink); text-align: left; padding: 6px; }
+  .items tbody td { padding: 3px 6px; border-top: 1px solid var(--line); vertical-align: top; font-size: 8.5px; line-height: 1.15; }
   .items tbody tr:first-child td { border-top: 0; }
   .items tbody tr:nth-child(even) td { background: #f8fafd; }
-  .items .c-fecha { width: 70px; white-space: nowrap; }
-  .items .c-serie { width: 96px; }
-  .items .c-taquito { width: 104px; white-space: nowrap; }
-  .items .c-bul, .items .c-weight, .items .c-flete { text-align: right; }
-  .items .c-bul { width: 52px; font-weight: 600; }
-  .items .c-weight { width: 78px; }
-  .items .c-flete { width: 84px; font-weight: 600; }
-  .items .c-pago { width: 100px; }
-  .items .party { font-weight: 500; word-break: break-word; }
-  .items .pago .pill { display: inline-block; font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.02em; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+  .items .c-index { width: 22px; text-align: center; }
+  .items .c-fecha { width: 65px; white-space: nowrap; }
+  .items .c-serie { width: 93px; white-space: nowrap; }
+  .items .c-taquito { width: 65px; white-space: nowrap; }
+  .items .c-destinatario { width: 215px; }
+  .items .c-mercancia { width: 129px; }
+  .items .c-flete { width: 65px; text-align: right; font-weight: 600; }
+  .items .c-pago { width: 65px; text-align: center; }
+  .items .party { font-size: 8px; font-weight: 500; }
+  .items .recipient-text { display: block; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .items .merchandise { font-weight: 500; white-space: normal; overflow-wrap: normal; }
+  .items .merch-item { display: inline-block; white-space: nowrap; }
+  .items .pago .pill { display: inline-block; font-size: 7.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.02em; padding: 2px 6px; border-radius: 999px; white-space: nowrap; }
   .items .pago .pill.cancelado { background: var(--accent); color: #fff; }
   .items .pago .pill.cobrar { background: var(--accent-soft); color: var(--accent); }
   .items .pago .pill.pce { border: 1px solid var(--line); color: var(--ink-2); }
-  .items tfoot td { padding: 9px 10px; background: var(--accent-soft); border-top: 2px solid var(--accent); font-weight: 700; font-size: 9.5px; }
-  .items tfoot .lbl { color: var(--accent); text-transform: uppercase; letter-spacing: 0.04em; font-size: 9px; }
-  .items tfoot .c-bul, .items tfoot .c-weight, .items tfoot .c-flete { text-align: right; }
-  .items tfoot .c-flete { padding-left: 6px; }
+  .items tfoot td { padding: 6px; background: var(--accent-soft); border-top: 2px solid var(--accent); font-weight: 700; font-size: 8.5px; line-height: 1.2; }
+  .items tfoot .lbl { color: var(--accent); text-transform: uppercase; letter-spacing: 0.04em; font-size: 8px; }
+  .items tfoot .totals { display: flex; justify-content: flex-end; gap: 15px; }
+  .items tfoot .total-k { color: var(--ink-3); font-size: 7.5px; margin-right: 4px; text-transform: uppercase; }
 
   .foot { margin-top: 18px; padding-top: 12px; border-top: 2px solid var(--ink); }
   .foot .note { font-size: 9px; color: var(--ink-2); }
@@ -82,10 +85,6 @@
       <div class="co-meta">
         {% if doc.emisorDireccion is not empty %}<div class="manifest-header-address">{{ doc.emisorDireccion }}</div>{% endif %}
         {% if doc.emisorUbicacion is not empty %}<div class="manifest-header-location">{{ doc.emisorUbicacion }}</div>{% endif %}
-        <div class="manifest-header-registration">RUC {{ doc.emisorRuc }}{% if doc.emisorRegistroMtc is not empty %} · Reg. MTC {{ doc.emisorRegistroMtc }}{% endif %}</div>
-        {% if doc.emisorEmail is not empty or doc.emisorTelefono is not empty %}
-        <div class="manifest-header-contact">{% if doc.emisorEmail is not empty %}<span class="manifest-contact-email">{{ doc.emisorEmail }}</span>{% endif %}{% if doc.emisorTelefono is not empty %}{% if doc.emisorEmail is not empty %}<span class="manifest-contact-separator"> · </span>{% endif %}<span class="manifest-contact-phone">{{ doc.emisorTelefono }}</span>{% endif %}</div>
-        {% endif %}
       </div>
     </div>
   </div>
@@ -94,25 +93,24 @@
     <div class="sub">Documento interno de control</div>
     <div class="num">{{ doc.numero }}</div>
     <div class="rule"></div>
+    <div class="f"><span class="k">Placa</span><span class="v">{{ doc.placa }}</span></div>
+    <div class="f"><span class="k">Marca</span><span class="v">{{ doc.marca }}</span></div>
     <div class="f"><span class="k">Fecha de salida</span><span class="v">{% if doc.fechaSalida is not null %}{{ doc.fechaSalida|date('d/m/Y') }}{% endif %}</span></div>
-    {% if doc.serie is not empty %}<div class="f"><span class="k">Serie · N°</span><span class="v">{{ doc.serie }} · {{ doc.numero }}</span></div>{% endif %}
-    <div class="f"><span class="k">Guías · bultos</span><span class="v">{{ doc.totalGuias }} · {{ doc.totalBultos }}</span></div>
-    <div class="f"><span class="k">Peso · flete</span><span class="v">{{ doc.totalPeso|n_format }} kg · S/ {{ doc.totalFlete|n_format }}</span></div>
   </div>
 </div>
 
 <div class="body-wrap">
 
-<div class="sec-title"><span class="t">Carga consolidada — guías de remisión</span><span class="c">{{ doc.totalGuias }} guías</span></div>
+<div class="sec-title"><span class="t">Carga consolidada — guías de remisión</span></div>
 <table class="items">
   <thead>
     <tr>
+      <th class="c-index">#</th>
       <th class="c-fecha">F. Emisión</th>
       <th class="c-serie">Serie · N°</th>
       <th class="c-taquito">N° Tracking</th>
-      <th>Destinatario</th>
-      <th class="c-weight">Peso kg</th>
-      <th class="c-bul">Bultos</th>
+      <th class="c-destinatario">Destinatario</th>
+      <th class="c-mercancia">Mercancía</th>
       <th class="c-flete">Flete S/</th>
       <th class="c-pago">Pago</th>
     </tr>
@@ -120,24 +118,26 @@
   <tbody>
     {% for l in doc.lineas %}
     <tr>
+      <td class="c-index mono">{{ l.numeroOrden }}</td>
       <td class="c-fecha mono">{% if l.fechaEmision is not null %}{{ l.fechaEmision|date('d/m/Y') }}{% endif %}</td>
       <td class="c-serie mono">{{ l.guiaSerieNumero }}</td>
       <td class="c-taquito mono">{{ l.taquito }}</td>
-      <td class="party">{{ l.destinatario }}</td>
-      <td class="c-weight mono">{{ l.peso|n_format }}</td>
-      <td class="c-bul mono">{{ l.bultos }}</td>
+      <td class="party c-destinatario"><span class="recipient-text">{{ l.destinatario }}</span></td>
+      <td class="merchandise c-mercancia">{% for item in l.mercancia|split(' · ') %}<span class="merch-item">{{ item }}{% if not loop.last %} ·{% endif %}</span>{% if not loop.last %} {% endif %}{% endfor %}</td>
       <td class="c-flete mono">{{ l.flete|n_format }}</td>
-      <td class="pago">{% if l.condicionPago is not empty %}<span class="pill {{ l.pagoClase }}">{{ l.condicionPago }}</span>{% endif %}</td>
+      <td class="pago c-pago">{% if l.condicionPago is not empty %}<span class="pill {{ l.pagoClase }}">{{ l.condicionPago }}</span>{% endif %}</td>
     </tr>
     {% endfor %}
   </tbody>
   <tfoot>
     <tr>
-      <td class="lbl" colspan="4">Total · {{ doc.totalGuias }} guías consolidadas</td>
-      <td class="c-weight mono">{{ doc.totalPeso|n_format }}</td>
-      <td class="c-bul mono">{{ doc.totalBultos }}</td>
-      <td class="c-flete mono">{{ doc.totalFlete|n_format }}</td>
-      <td class="c-pago"></td>
+      <td colspan="8">
+        <div class="totals">
+          <span class="lbl">Total · {{ doc.totalGuias }} guías consolidadas</span>
+          <span><span class="total-k">Bultos</span><span class="mono">{{ doc.totalBultos }}</span></span>
+          <span><span class="total-k">Flete</span><span class="mono">{{ doc.totalFlete|n_format }}</span></span>
+        </div>
+      </td>
     </tr>
   </tfoot>
 </table>

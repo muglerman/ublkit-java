@@ -12,17 +12,14 @@ import java.util.List;
  * @param emisorRazonSocial     Razón social de la empresa transportista emisora.
  * @param emisorNombreComercial Nombre comercial (opcional).
  * @param emisorDireccion       Dirección del emisor.
- * @param emisorEmail           Correo de contacto (opcional).
- * @param emisorTelefono        Teléfono de contacto (opcional).
  * @param emisorUbicacion       Ubicación del emisor en formato {@code DEPARTAMENTO - PROVINCIA - DISTRITO · ubigeo}.
- * @param emisorRuc             RUC del emisor.
- * @param emisorRegistroMtc     Registro MTC del emisor (opcional).
  * @param numero                Número del manifiesto (ej. {@code MF0002-18052025}).
  * @param serie                 Serie del manifiesto (opcional).
  * @param fechaSalida           Fecha de salida del viaje.
+ * @param placa                 Placa del vehículo principal asociado al manifiesto.
+ * @param marca                 Marca del mismo vehículo principal.
  * @param totalGuias            Cantidad de guías consolidadas.
  * @param totalBultos           Total de bultos.
- * @param totalPeso             Peso total en kilogramos.
  * @param totalFlete            Flete total en soles.
  * @param lineas                Guías consolidadas.
  *
@@ -32,17 +29,14 @@ public record BorradorManifiesto(
         String emisorRazonSocial,
         String emisorNombreComercial,
         String emisorDireccion,
-        String emisorEmail,
-        String emisorTelefono,
         String emisorUbicacion,
-        String emisorRuc,
-        String emisorRegistroMtc,
         String numero,
         String serie,
         LocalDate fechaSalida,
+        String placa,
+        String marca,
         int totalGuias,
         int totalBultos,
-        BigDecimal totalPeso,
         BigDecimal totalFlete,
         List<LineaManifiesto> lineas
 ) {

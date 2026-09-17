@@ -73,6 +73,11 @@ public final class PdfVisualSnapshotSupport {
         }
     }
 
+    public static void writePdfPreview(byte[] pdf, Path outputPath) throws IOException {
+        ensureParent(outputPath);
+        ImageIO.write(renderPdfPreview(pdf), "png", outputPath.toFile());
+    }
+
     public static int pageCount(byte[] pdf) throws IOException {
         try (PDDocument document = Loader.loadPDF(pdf)) {
             return document.getNumberOfPages();
