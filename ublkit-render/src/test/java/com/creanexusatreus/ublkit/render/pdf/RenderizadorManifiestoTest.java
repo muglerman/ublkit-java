@@ -26,7 +26,10 @@ import com.creanexusatreus.ublkit.render.modelo.ContextoRender;
 import com.creanexusatreus.ublkit.render.modelo.EstiloPlantilla;
 import com.creanexusatreus.ublkit.render.modelo.LineaManifiesto;
 import com.creanexusatreus.ublkit.render.modelo.ResultadoRender;
+import com.creanexusatreus.ublkit.render.pdf.helper.PlaywrightBrowserManager;
 import com.creanexusatreus.ublkit.render.support.PdfVisualSnapshotSupport;
+import com.microsoft.playwright.Page;
+import com.microsoft.playwright.options.Media;
 
 /**
  * Gate del Manifiesto de Carga: verifica que las 5 plantillas {@code manifiesto.a4.html.twig}
@@ -51,30 +54,41 @@ class RenderizadorManifiestoTest {
     private static BorradorManifiesto sample() {
         List<LineaManifiesto> lineas = List.of(
                 new LineaManifiesto(1, LocalDate.of(2025, 5, 22), "T001-02139", "0002-026708",
-                        "Comercial San Juan E.I.R.L.", "10 CAJAS",
+                        "Comercial San Juan E.I.R.L.", List.of("13 CAJAS"),
                         new BigDecimal("80.00"), "Cancelado", "cancelado"),
                 new LineaManifiesto(2, LocalDate.of(2025, 5, 20), "E07-0933", "",
                         "MAYTA VIVANCO CARMEN DOLORES Y ASOCIADOS DE TRANSPORTE INTERNACIONAL",
-                        "3 ATAUD · 6 CAJAS", new BigDecimal("150.00"), "Por cobrar", "cobrar"),
+                        List.of("3 ATAUD", "6 CAJAS"), new BigDecimal("150.00"), "Por cobrar", "cobrar"),
                 new LineaManifiesto(3, LocalDate.of(2025, 5, 21), "T002-0334", "0002-026715",
-                        "Multiservicios Jen E.I.R.L.", "1.5 ROLLOS · 2 PAQUETES · 4 SACOS",
-                        new BigDecimal("10.00"), null, ""));
+                        "Multiservicios Jen E.I.R.L.",
+                        List.of("5 CAJAS", "3 CAJAS CHICAS", "2 PAQUETES"),
+                        new BigDecimal("10.00"), null, ""),
+                new LineaManifiesto(4, LocalDate.of(2025, 5, 21), "T002-0335", "0002-026716",
+                        "Distribuidora Viviano E.I.R.L.",
+                        List.of("816 CAJAS - ÚTILES ESCOLARES / CUADERNOS"),
+                        new BigDecimal("100.00"), "P.C.E", "pce"),
+                new LineaManifiesto(5, LocalDate.of(2025, 5, 21), "T002-0336", "0002-026717",
+                        "IMPORTACIONES Y DISTRIBUCIONES INDUSTRIALES DEL CENTRO E.I.R.L.",
+                        List.of("1 CAJA", "2 SACOS", "3 FARDOS", "4 PAQUETES", "5 ROLLOS"),
+                        new BigDecimal("11777.00"), "PAGADO", "cancelado"));
 
         return new BorradorManifiesto(
                 "TRANSPORTES MANTARO E.I.R.L.", "Mantaro", "Av. Los Transportistas 1180 — Ate, Lima",
                 "LIMA - LIMA - ATE · 150103", "MF0002-18052025", null, LocalDate.of(2025, 5, 23),
-                "C7E778", "HINO", 3, 15, new BigDecimal("240.00"), lineas);
+                "C7E778", "HINO", 5, 15, new BigDecimal("12117.00"), lineas);
     }
 
     private static BorradorManifiesto multipageSample() {
-        List<LineaManifiesto> lineas = IntStream.rangeClosed(1, 72)
+        List<LineaManifiesto> lineas = IntStream.rangeClosed(1, 48)
                 .mapToObj(i -> new LineaManifiesto(
                         i,
                         LocalDate.of(2025, 5, (i % 28) + 1),
                         "T001-" + String.format("%05d", i),
                         "0002-" + String.format("%06d", i),
                         "Destinatario demo " + i,
-                        i + " CAJAS · 1.5 ROLLOS",
+                        List.of(
+                                i + " CAJAS CARGA-" + String.format("%03d", i) + "-A",
+                                "1.5 ROLLOS CARGA-" + String.format("%03d", i) + "-B"),
                         new BigDecimal("12.50"),
                         i % 2 == 0 ? "Cancelado" : "Por cobrar",
                         i % 2 == 0 ? "cancelado" : "cobrar"))
@@ -90,7 +104,7 @@ class RenderizadorManifiestoTest {
                 "C7E778", "HINO", lineas.size(), 180, totalFlete, lineas);
     }
 
-    private static BorradorManifiesto compactSample() {
+    private static BorradorManifiesto readabilitySample() {
         List<String> destinatarios = List.of(
                 "TRANSPORTES Y NEGOCIOS KOTOSH PERU S.A.C.",
                 "MAYTA VIVANCO CARMEN DOLORES",
@@ -98,13 +112,13 @@ class RenderizadorManifiestoTest {
                 "COMPUESTOS SINTETICOS S A",
                 "BARBOZA PINEDO EDWIN LUIS",
                 "DISTRIBUIDORA COMERCIAL DEL CENTRO E.I.R.L.");
-        List<String> mercancias = List.of(
-                "1 ATAUD",
-                "31 CAJAS",
-                "3 ATAUD · 6 CAJAS",
-                "10 ROLLOS",
-                "1.5 PAQUETES · 4 SACOS",
-                "82 BULTOS");
+        List<List<String>> mercancias = List.of(
+                List.of("13 CAJAS"),
+                List.of("31 CAJAS"),
+                List.of("3 ATAUD", "6 CAJAS"),
+                List.of("816 CAJAS - ÚTILES ESCOLARES / CUADERNOS"),
+                List.of("1 CAJA", "2 SACOS", "3 FARDOS", "4 PAQUETES", "5 ROLLOS"),
+                List.of("82 BULTOS"));
 
         List<LineaManifiesto> lineas = IntStream.rangeClosed(1, 12)
                 .mapToObj(i -> new LineaManifiesto(
@@ -114,7 +128,7 @@ class RenderizadorManifiestoTest {
                         i % 4 == 0 ? String.valueOf(8985 + i) : "",
                         destinatarios.get((i - 1) % destinatarios.size()),
                         mercancias.get((i - 1) % mercancias.size()),
-                        new BigDecimal(i % 3 == 0 ? "400.00" : i % 2 == 0 ? "30.00" : "100.00"),
+                        new BigDecimal(i == 12 ? "11777.00" : i % 3 == 0 ? "400.00" : i % 2 == 0 ? "30.00" : "100.00"),
                         i % 3 == 1 ? "P.C.E" : "PAGADO",
                         i % 3 == 1 ? "pce" : "cancelado"))
                 .toList();
@@ -209,7 +223,7 @@ class RenderizadorManifiestoTest {
 
         ResultadoRender resultado = new RenderizadorPdfManifiesto()
                 .renderizar(ContextoRender.of(
-                        compactSample(), null, null, Map.of("logo", LOGO_DATA_URI), EstiloPlantilla.CLASSIC_MONO));
+                        readabilitySample(), null, null, Map.of("logo", LOGO_DATA_URI), EstiloPlantilla.CLASSIC_MONO));
 
         PdfVisualSnapshotSupport.writePdfPreview(resultado.contenidoPdf(), Path.of(outputPath));
     }
@@ -237,13 +251,19 @@ class RenderizadorManifiestoTest {
         assertTrue(html.contains("Comercial San Juan E.I.R.L."), "Falta destinatario en " + estilo);
         assertTrue(html.contains("MAYTA VIVANCO CARMEN DOLORES Y ASOCIADOS DE TRANSPORTE INTERNACIONAL"),
                 "Falta destinatario largo en " + estilo);
-        assertTrue(html.contains("10 CAJAS"), "Falta mercancía de un ítem en " + estilo);
-        assertTrue(html.contains(">3 ATAUD ·</span>"), "Falta primer ítem de mercancía doble en " + estilo);
+        assertTrue(html.contains("13 CAJAS"), "Falta mercancía de un ítem en " + estilo);
+        assertTrue(html.contains(">3 ATAUD</span>"), "Falta primer ítem de mercancía doble en " + estilo);
         assertTrue(html.contains(">6 CAJAS</span>"), "Falta segundo ítem de mercancía doble en " + estilo);
-        assertTrue(html.contains(">1.5 ROLLOS ·</span>")
-                        && html.contains(">2 PAQUETES ·</span>")
-                        && html.contains(">4 SACOS</span>"),
+        assertTrue(html.contains(">5 CAJAS</span>")
+                        && html.contains(">3 CAJAS CHICAS</span>")
+                        && html.contains(">2 PAQUETES</span>"),
                 "Falta mercancía de tres ítems en " + estilo);
+        assertTrue(html.contains("816 CAJAS - ÚTILES ESCOLARES / CUADERNOS"),
+                "Falta descripción larga en " + estilo);
+        assertTrue(html.contains(">5 ROLLOS</span>"), "Falta mercancía de cinco ítems en " + estilo);
+        assertTrue(html.contains("11777.00"), "Falta flete grande en " + estilo);
+        assertFalse(html.contains("|split("), "La plantilla no debe dividir un String de mercancía en " + estilo);
+        assertFalse(html.contains("ATAUD ·"), "La mercancía no debe concatenarse horizontalmente en " + estilo);
         assertTrue(html.contains(">#</th>"), "Falta columna correlativa en " + estilo);
         assertTrue(html.contains(">Destinatario<"), "Falta columna Destinatario en " + estilo);
         assertTrue(html.contains(">Mercancía<"), "Falta columna Mercancía en " + estilo);
@@ -252,55 +272,86 @@ class RenderizadorManifiestoTest {
         assertFalse(html.contains(">null<"), "No debe imprimirse null para tracking vacío en " + estilo);
         assertTrue(html.contains("cancelado"), "Falta clase pill 'cancelado' en " + estilo);
         assertTrue(html.contains("cobrar"), "Falta clase pill 'cobrar' en " + estilo);
-        assertTrue(html.contains("Total · 3 guías consolidadas"), "Falta total de guías en " + estilo);
+        assertTrue(html.contains("Total · 5 guías consolidadas"), "Falta total de guías en " + estilo);
         assertTrue(html.contains(">Bultos</span>"), "Falta total de bultos en " + estilo);
         assertTrue(html.contains(">15</span>"), "Total de bultos incorrecto en " + estilo);
         assertTrue(html.contains(">Flete</span>"), "Falta total de flete en " + estilo);
-        assertTrue(html.contains("240.00"), "Total de flete incorrecto en " + estilo);
+        assertTrue(html.contains("12117.00"), "Total de flete incorrecto en " + estilo);
         assertTrue(html.contains("Uso interno"), "Falta nota de uso interno en " + estilo);
     }
 
     @ParameterizedTest(name = "manifiesto compacto · estilo {0}")
     @EnumSource(EstiloPlantilla.class)
-    @DisplayName("✓ Compacta columnas y controla el flujo de texto en cada estilo")
-    void compactaColumnasYControlaTextoEnCadaEstilo(EstiloPlantilla estilo) {
+    @DisplayName("✓ Mantiene tipografía legible y controla el flujo de texto en cada estilo")
+    void mantieneTipografiaLegibleYControlaTextoEnCadaEstilo(EstiloPlantilla estilo) {
         String html = renderHtml(sample(), estilo);
 
         assertTrue(html.contains(".items .c-index { width: 22px;"), "Ancho incorrecto para # en " + estilo);
-        assertTrue(html.contains(".items .c-fecha { width: 65px;"), "Ancho incorrecto para fecha en " + estilo);
-        assertTrue(html.contains(".items .c-serie { width: 93px;"), "Ancho incorrecto para serie en " + estilo);
-        assertTrue(html.contains(".items .c-taquito { width: 65px;"), "Ancho incorrecto para tracking en " + estilo);
-        assertTrue(html.contains(".items .c-destinatario { width: 215px;"),
+        assertTrue(html.contains(".items .c-fecha { width: 68px;"), "Ancho incorrecto para fecha en " + estilo);
+        assertTrue(html.contains(".items .c-serie { width: 94px;"), "Ancho incorrecto para serie en " + estilo);
+        assertTrue(html.contains(".items .c-taquito { width: 68px;"), "Ancho incorrecto para tracking en " + estilo);
+        assertTrue(html.contains(".items .c-destinatario { width: 190px;"),
                 "Ancho incorrecto para destinatario en " + estilo);
-        assertTrue(html.contains(".items .c-mercancia { width: 129px;"),
+        assertTrue(html.contains(".items .c-mercancia { width: 145px;"),
                 "Ancho incorrecto para mercancía en " + estilo);
-        assertTrue(html.contains(".items .c-flete { width: 65px;"), "Ancho incorrecto para flete en " + estilo);
-        assertTrue(html.contains(".items .c-pago { width: 65px;"), "Ancho incorrecto para pago en " + estilo);
-        assertTrue(html.contains("font-size: 7.5px; line-height: 1.2;"),
-                "La cabecera de tabla no está compactada en " + estilo);
-        assertTrue(html.contains("font-size: 8.5px; line-height: 1.15;"),
-                "Las filas no están compactadas en " + estilo);
-        assertTrue(html.contains("font-size: 8px;") && html.contains("white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"),
-                "Destinatario no usa fuente compacta, nowrap y ellipsis en " + estilo);
+        assertTrue(html.contains(".items .c-flete { width: 68px;"), "Ancho incorrecto para flete en " + estilo);
+        assertTrue(html.contains(".items .c-pago { width: 64px;"), "Ancho incorrecto para pago en " + estilo);
+        assertTrue(html.contains("font-size: 8.5px; line-height: 1.25;"),
+                "La cabecera de tabla no alcanza el mínimo legible en " + estilo);
+        assertTrue(html.contains("font-size: 9.5px; line-height: 1.3;"),
+                "Las filas no alcanzan el mínimo legible en " + estilo);
+        assertTrue(html.contains("-webkit-line-clamp: 2;") && html.contains("overflow-wrap: anywhere;"),
+                "Destinatario no permite hasta dos líneas controladas en " + estilo);
         assertTrue(html.contains("<span class=\"recipient-text\">"),
-                "Destinatario no usa contenedor de una sola línea en " + estilo);
-        assertTrue(html.contains(".items .merch-item { display: inline-block; white-space: nowrap; }"),
-                "Los ítems de mercancía no son bloques inseparables en " + estilo);
+                "Destinatario no usa contenedor controlado en " + estilo);
+        assertTrue(html.contains(".items .merch-item { display: block;"),
+                "Los ítems de mercancía no se renderizan en líneas independientes en " + estilo);
+        assertTrue(html.contains("height: auto;") && html.contains("word-break: normal;"),
+                "Mercancía no declara altura y wrap controlados en " + estilo);
+        assertTrue(html.contains("font-variant-numeric: tabular-nums;"),
+                "Flete no usa números tabulares en " + estilo);
+        assertTrue(html.contains("white-space: nowrap;"),
+                "Flete y pago no están protegidos contra saltos en " + estilo);
         assertTrue(html.contains("<td class=\"pago c-pago\">"), "Pago no usa alineación de columna en " + estilo);
         assertTrue(html.contains(">Placa<") && html.contains(">Marca<") && html.contains("Fecha de salida"),
                 "La cabecera derecha perdió datos en " + estilo);
     }
 
-    @ParameterizedTest(name = "12 guías compactas · estilo {0}")
+    @ParameterizedTest(name = "geometría legible · estilo {0}")
     @EnumSource(EstiloPlantilla.class)
-    @DisplayName("✓ Mantiene 12 guías compactas en una página A4")
-    void mantieneDoceGuiasEnUnaPagina(EstiloPlantilla estilo) {
-        ResultadoRender resultado = new RenderizadorPdfManifiesto()
-                .renderizar(ContextoRender.of(
-                        compactSample(), null, null, Map.of("logo", LOGO_DATA_URI), estilo));
-
-        assertEquals(1, pageCount(resultado.contenidoPdf()),
-                "El manifiesto compacto de 12 guías debe caber en una página en " + estilo);
+    @DisplayName("✓ No permite overflow ni intersección entre mercancía, flete y pago")
+    void evitaOverflowEInterseccionDeColumnas(EstiloPlantilla estilo) {
+        String html = renderHtml(readabilitySample(), estilo);
+        try (Page page = PlaywrightBrowserManager.getBrowser().newPage()) {
+            page.setViewportSize(794, 1123);
+            page.emulateMedia(new Page.EmulateMediaOptions().setMedia(Media.PRINT));
+            page.setContent(html);
+            Object layoutValido = page.evaluate("""
+                    () => {
+                      const table = document.querySelector('.items');
+                      if (!table || table.scrollWidth > table.clientWidth + 1) return false;
+                      return [...table.querySelectorAll('tbody tr')].every(row => {
+                        const merchandise = row.querySelector('.c-mercancia');
+                        const freight = row.querySelector('.c-flete');
+                        const payment = row.querySelector('.c-pago');
+                        if (!merchandise || !freight || !payment) return false;
+                        const m = merchandise.getBoundingClientRect();
+                        const f = freight.getBoundingClientRect();
+                        const p = payment.getBoundingClientRect();
+                        const itemsFit = [...merchandise.querySelectorAll('.merch-item')].every(item => {
+                          const box = item.getBoundingClientRect();
+                          return box.left >= m.left - 0.5 && box.right <= m.right + 0.5
+                              && item.scrollWidth <= merchandise.clientWidth + 1;
+                        });
+                        return itemsFit && m.right <= f.left + 0.5 && f.right <= p.left + 0.5
+                            && freight.scrollWidth <= freight.clientWidth + 1
+                            && payment.scrollWidth <= payment.clientWidth + 1;
+                      });
+                    }
+                    """);
+            assertEquals(Boolean.TRUE, layoutValido,
+                    "Existe overflow o solapamiento entre mercancía, flete y pago en " + estilo);
+        }
     }
 
     @ParameterizedTest(name = "manifiesto sin vehículo · estilo {0}")
@@ -345,5 +396,50 @@ class RenderizadorManifiestoTest {
                 "El contenido no inicia con la cabecera %PDF en " + estilo);
         assertTrue(pageCount(pdf) > 1, "El manifiesto debería abarcar más de una página en " + estilo);
         assertPaginasA4Vertical(pdf, estilo);
+        assertRepeatedHeadersAndIntactRows(pdf, estilo);
+    }
+
+    @Test
+    @DisplayName("✓ Bold Accent coincide con el baseline visual legible")
+    void boldAccentCoincideConBaselineVisual() throws IOException {
+        byte[] pdf = new RenderizadorPdfManifiesto()
+                .renderizar(ContextoRender.of(
+                        readabilitySample(), null, null, Map.of("logo", LOGO_DATA_URI), EstiloPlantilla.BOLD_ACCENT))
+                .contenidoPdf();
+
+        PdfVisualSnapshotSupport.assertPdfMatchesSnapshot(
+                pdf, "visual/manifiesto/bold-accent/readability.png");
+    }
+
+    private static void assertRepeatedHeadersAndIntactRows(byte[] pdf, EstiloPlantilla estilo) {
+        try {
+            List<String> pages = PdfVisualSnapshotSupport.extractTextByPage(pdf);
+            assertTrue(pages.size() > 1, "Se esperaba una segunda página en " + estilo);
+            for (int page = 0; page < pages.size(); page++) {
+                String text = pages.get(page).toUpperCase();
+                assertTrue(text.contains("F. EMISIÓN") && text.contains("MERCANCÍA"),
+                        "La página " + (page + 1) + " no repite la cabecera de tabla en " + estilo);
+            }
+            for (int i = 1; i <= 48; i++) {
+                String guide = "T001-" + String.format("%05d", i);
+                String itemA = "CARGA-" + String.format("%03d", i) + "-A";
+                String itemB = "CARGA-" + String.format("%03d", i) + "-B";
+                int guidePage = pageContaining(pages, guide);
+                assertTrue(guidePage >= 0, "No se encontró la guía " + guide + " en " + estilo);
+                assertTrue(pages.get(guidePage).contains(itemA) && pages.get(guidePage).contains(itemB),
+                        "La fila de " + guide + " se cortó entre páginas en " + estilo);
+            }
+        } catch (IOException e) {
+            throw new AssertionError("No se pudo inspeccionar la paginación PDF en " + estilo, e);
+        }
+    }
+
+    private static int pageContaining(List<String> pages, String value) {
+        for (int page = 0; page < pages.size(); page++) {
+            if (pages.get(page).contains(value)) {
+                return page;
+            }
+        }
+        return -1;
     }
 }

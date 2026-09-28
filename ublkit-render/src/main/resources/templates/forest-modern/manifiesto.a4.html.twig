@@ -40,21 +40,21 @@
   .items thead { display: table-header-group; }
   .items tfoot { display: table-row-group; }
   .items tr { break-inside: avoid; page-break-inside: avoid; }
-  .items thead th { font-size: 7.5px; line-height: 1.2; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ink-2); font-weight: 600; text-align: left; padding: 6px; background: var(--accent-soft); border-bottom: 1px solid var(--line); }
-  .items tbody td { padding: 3px 6px; border-top: 1px solid var(--line); vertical-align: top; font-size: 8.5px; line-height: 1.15; }
+  .items thead th { font-size: 8.5px; line-height: 1.25; text-transform: uppercase; letter-spacing: 0.03em; color: var(--ink-2); font-weight: 600; text-align: left; padding: 7px 5px; background: var(--accent-soft); border-bottom: 1px solid var(--line); }
+  .items tbody td { height: auto; min-width: 0; max-width: 100%; padding: 5px; border-top: 1px solid var(--line); vertical-align: top; font-size: 9.5px; line-height: 1.3; overflow: hidden; }
   .items .c-index { width: 22px; text-align: center; }
-  .items .c-fecha { width: 65px; white-space: nowrap; }
-  .items .c-serie { width: 93px; font-family: 'JetBrains Mono', monospace; color: var(--accent); white-space: nowrap; }
-  .items .c-taquito { width: 65px; white-space: nowrap; }
-  .items .c-destinatario { width: 215px; }
-  .items .c-mercancia { width: 129px; }
-  .items .c-flete { width: 65px; text-align: right; font-weight: 600; }
-  .items .c-pago { width: 65px; text-align: center; }
-  .items .party { font-size: 8px; font-weight: 500; }
-  .items .recipient-text { display: block; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .items .merchandise { font-weight: 500; white-space: normal; overflow-wrap: normal; }
-  .items .merch-item { display: inline-block; white-space: nowrap; }
-  .items .pago .pill { display: inline-block; font-size: 7.5px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.02em; padding: 2px 6px; border-radius: 999px; white-space: nowrap; }
+  .items .c-fecha { width: 68px; white-space: nowrap; }
+  .items .c-serie { width: 94px; font-family: 'JetBrains Mono', monospace; color: var(--accent); white-space: nowrap; }
+  .items .c-taquito { width: 68px; white-space: nowrap; }
+  .items .c-destinatario { width: 190px; }
+  .items .c-mercancia { width: 145px; }
+  .items .c-flete { width: 68px; text-align: right; font-weight: 600; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .items .c-pago { width: 64px; text-align: center; white-space: nowrap; }
+  .items .party { font-size: 9.5px; font-weight: 500; }
+  .items .recipient-text { display: -webkit-box; width: 100%; max-width: 100%; white-space: normal; overflow: hidden; overflow-wrap: anywhere; word-break: normal; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+  .items .merchandise { height: auto; max-width: 100%; font-weight: 500; white-space: normal; overflow-wrap: anywhere; word-break: normal; }
+  .items .merch-item { display: block; max-width: 100%; white-space: normal; overflow-wrap: anywhere; word-break: normal; }
+  .items .pago .pill { display: inline-block; max-width: 100%; font-size: 8.5px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.01em; padding: 2px 4px; border-radius: 999px; white-space: nowrap; }
   .items .pago .pill.cancelado { background: var(--accent); color: #fff; }
   .items .pago .pill.cobrar { background: var(--accent-2); color: var(--accent); }
   .items .pago .pill.pce { border: 1px solid var(--line); color: var(--ink-2); }
@@ -121,7 +121,7 @@
       <td class="c-serie mono">{{ l.guiaSerieNumero }}</td>
       <td class="c-taquito mono">{{ l.taquito }}</td>
       <td class="party c-destinatario"><span class="recipient-text">{{ l.destinatario }}</span></td>
-      <td class="merchandise c-mercancia">{% for item in l.mercancia|split(' · ') %}<span class="merch-item">{{ item }}{% if not loop.last %} ·{% endif %}</span>{% if not loop.last %} {% endif %}{% endfor %}</td>
+      <td class="merchandise c-mercancia">{% for item in l.mercancias %}<span class="merch-item">{{ item }}</span>{% endfor %}</td>
       <td class="c-flete mono">{{ l.flete|n_format }}</td>
       <td class="pago c-pago">{% if l.condicionPago is not empty %}<span class="pill {{ l.pagoClase }}">{{ l.condicionPago }}</span>{% endif %}</td>
     </tr>
