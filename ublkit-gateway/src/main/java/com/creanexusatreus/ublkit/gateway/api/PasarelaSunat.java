@@ -76,6 +76,14 @@ public interface PasarelaSunat {
     ResultadoConsulta consultarTicketRest(String ticket, CredencialesEmpresa credenciales, TipoAmbiente ambiente);
 
     /**
+     * Consulta el CDR de una factura o nota mediante billConsultService.getStatusCdr.
+     */
+    default ResultadoConsulta consultarCdr(String ruc, String tipo, String serie, String numero,
+            CredencialesEmpresa credenciales, TipoAmbiente ambiente) {
+        return ResultadoConsulta.error("UNSUPPORTED", "La pasarela no implementa getStatusCdr");
+    }
+
+    /**
      * Envía una GRE por REST y realiza polling asíncrono del ticket con backoff exponencial
      * hasta obtener CDR final o agotar intentos.
      *

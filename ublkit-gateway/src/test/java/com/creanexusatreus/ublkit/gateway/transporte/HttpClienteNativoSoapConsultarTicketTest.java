@@ -178,6 +178,73 @@ class HttpClienteNativoSoapConsultarTicketTest {
         }
     }
 
+    @Test
+    void enviarSincrono_fault0140_conservaCodigoNormalizado() throws Exception {
+        String fault = """
+                <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/">
+                  <soapenv:Body><soapenv:Fault>
+                    <faultcode>soap-env:Server.0140</faultcode>
+                    <faultstring>Existe un Documento igual en Proceso. Vuelva intentarlo en 15 minutos.</faultstring>
+                  </soapenv:Fault></soapenv:Body>
+                </soapenv:Envelope>
+                """;
+        HttpServer server = crearServidor(500, fault, new AtomicReference<>());
+        try {
+            var resultado = cliente.enviarSincrono("<Invoice/>", "20000000000-01-F001-1.xml",
+                    urlServidor(server), CREDENCIALES);
+            assertThat(resultado.estado()).isEqualTo(EstadoEnvio.EXCEPCION);
+            assertThat(resultado.codigoError()).isEqualTo("0140");
+            assertThat(resultado.mensajeError()).contains("Documento igual en Proceso");
+        } finally {
+            server.stop(0);
+        }
+    }
+
+    @Test
+    void consultarCdr_status0001_conContent_retornaCdrAceptado() throws Exception {
+        String soap = soapEnvelope("""
+                <ns1:getStatusCdrResponse xmlns:ns1="http://service.sunat.gob.pe"><statusCdr>
+                  <statusCode>0001</statusCode><statusMessage>Aceptado</statusMessage>
+                  <content>%s</content>
+                </statusCdr></ns1:getStatusCdrResponse>
+                """.formatted(cdrZipBase64("0", "Aceptado")));
+        AtomicReference<String> request = new AtomicReference<>();
+        HttpServer server = crearServidor(200, soap, request);
+        try {
+            ResultadoConsulta resultado = cliente.consultarCdr("20000000000", "01", "F001", "1",
+                    urlServidor(server), CREDENCIALES);
+            assertThat(resultado.estado()).isEqualTo(EstadoEnvio.ACEPTADO);
+            assertThat(resultado.cdr()).isNotNull();
+            assertThat(request.get()).contains("<ser:getStatusCdr>")
+                    .contains("<rucComprobante>20000000000</rucComprobante>")
+                    .contains("<tipoComprobante>01</tipoComprobante>")
+                    .contains("<serieComprobante>F001</serieComprobante>")
+                    .contains("<numeroComprobante>1</numeroComprobante>");
+        } finally {
+            server.stop(0);
+        }
+    }
+
+    @Test
+    void consultarCdr_status0011_retornaExcepcionSinCdr() throws Exception {
+        String soap = soapEnvelope("""
+                <ns1:getStatusCdrResponse xmlns:ns1="http://service.sunat.gob.pe"><statusCdr>
+                  <statusCode>0011</statusCode><statusMessage>El comprobante no existe</statusMessage>
+                </statusCdr></ns1:getStatusCdrResponse>
+                """);
+        HttpServer server = crearServidor(200, soap, new AtomicReference<>());
+        try {
+            ResultadoConsulta resultado = cliente.consultarCdr("20000000000", "01", "F001", "1",
+                    urlServidor(server), CREDENCIALES);
+            assertThat(resultado.estado()).isEqualTo(EstadoEnvio.EXCEPCION);
+            assertThat(resultado.codigoError()).isEqualTo("0011");
+            assertThat(resultado.mensajeError()).isEqualTo("El comprobante no existe");
+            assertThat(resultado.cdr()).isNull();
+        } finally {
+            server.stop(0);
+        }
+    }
+
     private static HttpServer crearServidor(int statusCode, String body, AtomicReference<String> requestBody) throws IOException {
         HttpServer server = HttpServer.create(new InetSocketAddress(0), 0);
         server.createContext("/", exchange -> responder(exchange, statusCode, body, requestBody));

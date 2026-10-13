@@ -38,4 +38,13 @@ public interface ClienteSoap {
      * Consulta el estado de un ticket previamente asignado (ej. billConsultService.getStatus).
      */
     ResultadoConsulta consultarTicket(String numeroTicket, String endpointUrl, CredencialesEmpresa credenciales);
+
+    /**
+     * Consulta el estado definitivo y CDR de un comprobante por su identificador
+     * (billConsultService.getStatusCdr).
+     */
+    default ResultadoConsulta consultarCdr(String ruc, String tipo, String serie, String numero,
+            String endpointUrl, CredencialesEmpresa credenciales) {
+        return ResultadoConsulta.error("UNSUPPORTED", "El cliente SOAP no implementa getStatusCdr");
+    }
 }

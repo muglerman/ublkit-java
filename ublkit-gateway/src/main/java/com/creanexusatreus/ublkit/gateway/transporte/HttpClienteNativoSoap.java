@@ -60,7 +60,9 @@ public class HttpClienteNativoSoap implements ClienteSoap {
             String applicationResponseBase64 = extractValue(responseDoc, "applicationResponse");
             if (applicationResponseBase64 == null) {
                 String fault = extractValue(responseDoc, "faultstring");
-                return ResultadoEnvio.error("SOAP_FAULT", fault != null ? fault : "No se encontró CDR ni Fault en la respuesta");
+                String faultCode = normalizarFaultCode(extractValue(responseDoc, "faultcode"));
+                return ResultadoEnvio.error(faultCode,
+                        fault != null ? fault : "No se encontró CDR ni Fault en la respuesta");
             }
 
             byte[] cdrZipBytes = Base64.getDecoder().decode(applicationResponseBase64);
@@ -89,7 +91,9 @@ public class HttpClienteNativoSoap implements ClienteSoap {
             String ticket = extractValue(responseDoc, "ticket");
             if (ticket == null) {
                 String fault = extractValue(responseDoc, "faultstring");
-                return ResultadoEnvio.error("SOAP_FAULT", fault != null ? fault : "No se encontró Ticket ni Fault en la respuesta");
+                String faultCode = normalizarFaultCode(extractValue(responseDoc, "faultcode"));
+                return ResultadoEnvio.error(faultCode,
+                        fault != null ? fault : "No se encontró Ticket ni Fault en la respuesta");
             }
 
             return ResultadoEnvio.asincrono(ticket);
@@ -112,7 +116,7 @@ public class HttpClienteNativoSoap implements ClienteSoap {
             if (fault != null && !fault.isBlank()) {
                 String faultCode = extractValue(responseDoc, "faultcode");
                 return ResultadoConsulta.error(
-                        faultCode != null && !faultCode.isBlank() ? faultCode : "SOAP_FAULT",
+                        normalizarFaultCode(faultCode),
                         fault
                 );
             }
@@ -144,6 +148,45 @@ public class HttpClienteNativoSoap implements ClienteSoap {
 
             return ResultadoConsulta.error(statusCode, "SUNAT devolvió statusCode " + statusCode);
 
+        } catch (com.creanexusatreus.ublkit.core.error.ExcepcionTransporte e) {
+            return ResultadoConsulta.error("HTTP_5XX", e.getMessage());
+        } catch (Exception e) {
+            return ResultadoConsulta.error("IO_ERROR", e.getMessage());
+        }
+    }
+
+    @Override
+    public ResultadoConsulta consultarCdr(String ruc, String tipo, String serie, String numero,
+            String endpointUrl, CredencialesEmpresa credenciales) {
+        try {
+            String payload = buildGetStatusCdrPayload(credenciales, ruc, tipo, serie, numero);
+            String response = executePost(endpointUrl, payload);
+            Document responseDoc = parsearXmlSeguro(response);
+
+            String fault = extractValue(responseDoc, "faultstring");
+            if (fault != null && !fault.isBlank()) {
+                return ResultadoConsulta.error(
+                        normalizarFaultCode(extractValue(responseDoc, "faultcode")), fault);
+            }
+
+            String statusCode = extractValue(responseDoc, "statusCode");
+            String statusMessage = extractValue(responseDoc, "statusMessage");
+            if ("0001".equals(statusCode) || "0002".equals(statusCode) || "0003".equals(statusCode)) {
+                String contentBase64 = extractValue(responseDoc, "content");
+                if (contentBase64 == null || contentBase64.isBlank()) {
+                    return ResultadoConsulta.error(statusCode,
+                            mensajeConsulta(statusMessage, "SUNAT devolvió " + statusCode + " sin CDR"));
+                }
+                byte[] cdrZipBytes = Base64.getDecoder().decode(contentBase64);
+                ArchivoCdr cdr = LectorCdr.extraer(cdrZipBytes);
+                return ResultadoConsulta.completado(LectorCdr.determinarEstado(cdr), cdr);
+            }
+            if (statusCode == null || statusCode.isBlank()) {
+                return ResultadoConsulta.error("UNKNOWN_STATUS",
+                        mensajeConsulta(statusMessage, "Respuesta SOAP sin statusCode"));
+            }
+            return ResultadoConsulta.error(statusCode,
+                    mensajeConsulta(statusMessage, "SUNAT devolvió statusCode " + statusCode));
         } catch (com.creanexusatreus.ublkit.core.error.ExcepcionTransporte e) {
             return ResultadoConsulta.error("HTTP_5XX", e.getMessage());
         } catch (Exception e) {
@@ -231,6 +274,44 @@ public class HttpClienteNativoSoap implements ClienteSoap {
                    </soapenv:Body>
                 </soapenv:Envelope>
                 """.formatted(cred.getUsernameConcatenado(), cred.claveSol(), ticket);
+    }
+
+    private String buildGetStatusCdrPayload(CredencialesEmpresa cred, String ruc, String tipo,
+            String serie, String numero) {
+        return """
+                <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ser="http://service.sunat.gob.pe" xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd">
+                   <soapenv:Header>
+                      <wsse:Security>
+                         <wsse:UsernameToken>
+                            <wsse:Username>%s</wsse:Username>
+                            <wsse:Password>%s</wsse:Password>
+                         </wsse:UsernameToken>
+                      </wsse:Security>
+                   </soapenv:Header>
+                   <soapenv:Body>
+                      <ser:getStatusCdr>
+                         <rucComprobante>%s</rucComprobante>
+                         <tipoComprobante>%s</tipoComprobante>
+                         <serieComprobante>%s</serieComprobante>
+                         <numeroComprobante>%s</numeroComprobante>
+                      </ser:getStatusCdr>
+                   </soapenv:Body>
+                </soapenv:Envelope>
+                """.formatted(cred.getUsernameConcatenado(), cred.claveSol(), ruc, tipo, serie, numero);
+    }
+
+    private String normalizarFaultCode(String faultCode) {
+        if (faultCode == null || faultCode.isBlank()) {
+            return "SOAP_FAULT";
+        }
+        String trimmed = faultCode.trim();
+        int separator = Math.max(trimmed.lastIndexOf('.'), trimmed.lastIndexOf(':'));
+        String suffix = separator >= 0 ? trimmed.substring(separator + 1) : trimmed;
+        return suffix.matches("\\d{4}") ? suffix : trimmed;
+    }
+
+    private String mensajeConsulta(String statusMessage, String fallback) {
+        return statusMessage != null && !statusMessage.isBlank() ? statusMessage : fallback;
     }
 
     private Document parsearXmlSeguro(String xml) throws Exception {
