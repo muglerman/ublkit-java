@@ -245,9 +245,45 @@ class HttpClienteNativoSoapConsultarTicketTest {
         }
     }
 
+    @Test
+    void consultarEstadoComprobante_usaCriteriosYSoapAction() throws Exception {
+        String soap = soapEnvelope("""
+                <ns1:getStatusResponse xmlns:ns1="http://service.sunat.gob.pe"><status>
+                  <statusCode>0002</statusCode><statusMessage>El comprobante existe y está rechazado</statusMessage>
+                </status></ns1:getStatusResponse>
+                """);
+        AtomicReference<String> request = new AtomicReference<>();
+        AtomicReference<String> soapAction = new AtomicReference<>();
+        HttpServer server = crearServidor(200, soap, request, soapAction);
+        try {
+            ResultadoConsulta resultado = cliente.consultarEstadoComprobante(
+                    "20000000000", "01", "F001", "123", urlServidor(server), CREDENCIALES);
+            assertThat(resultado.estado()).isEqualTo(EstadoEnvio.RECHAZADO);
+            assertThat(resultado.codigoError()).isEqualTo("0002");
+            assertThat(resultado.cdr()).isNull();
+            assertThat(soapAction.get()).isEqualTo("urn:getStatus");
+            assertThat(request.get()).contains("<ser:getStatus>")
+                    .contains("<rucComprobante>20000000000</rucComprobante>")
+                    .contains("<tipoComprobante>01</tipoComprobante>")
+                    .contains("<serieComprobante>F001</serieComprobante>")
+                    .contains("<numeroComprobante>123</numeroComprobante>")
+                    .doesNotContain("<ticket>");
+        } finally {
+            server.stop(0);
+        }
+    }
+
     private static HttpServer crearServidor(int statusCode, String body, AtomicReference<String> requestBody) throws IOException {
+        return crearServidor(statusCode, body, requestBody, new AtomicReference<>());
+    }
+
+    private static HttpServer crearServidor(int statusCode, String body, AtomicReference<String> requestBody,
+            AtomicReference<String> soapAction) throws IOException {
         HttpServer server = HttpServer.create(new InetSocketAddress(0), 0);
-        server.createContext("/", exchange -> responder(exchange, statusCode, body, requestBody));
+        server.createContext("/", exchange -> {
+            soapAction.set(exchange.getRequestHeaders().getFirst("SOAPAction"));
+            responder(exchange, statusCode, body, requestBody);
+        });
         server.start();
         return server;
     }

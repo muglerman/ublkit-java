@@ -54,7 +54,7 @@ public class HttpClienteNativoSoap implements ClienteSoap {
             String nombreZip = com.creanexusatreus.ublkit.core.valor.NombresArchivosSunat.submissionZip(nombreArchivo);
 
             String payload = buildSendBillPayload(credenciales, nombreZip, base64Zip);
-            String response = executePost(endpointUrl, payload);
+            String response = executePost(endpointUrl, payload, "urn:sendBill");
             Document responseDoc = parsearXmlSeguro(response);
 
             String applicationResponseBase64 = extractValue(responseDoc, "applicationResponse");
@@ -85,7 +85,7 @@ public class HttpClienteNativoSoap implements ClienteSoap {
             String nombreZip = com.creanexusatreus.ublkit.core.valor.NombresArchivosSunat.submissionZip(nombreArchivo);
 
             String payload = buildSendSummaryPayload(credenciales, nombreZip, base64Zip);
-            String response = executePost(endpointUrl, payload);
+            String response = executePost(endpointUrl, payload, "urn:sendSummary");
             Document responseDoc = parsearXmlSeguro(response);
 
             String ticket = extractValue(responseDoc, "ticket");
@@ -108,8 +108,8 @@ public class HttpClienteNativoSoap implements ClienteSoap {
     @Override
     public ResultadoConsulta consultarTicket(String numeroTicket, String endpointUrl, CredencialesEmpresa credenciales) {
         try {
-            String payload = buildGetStatusPayload(credenciales, numeroTicket);
-            String response = executePost(endpointUrl, payload);
+            String payload = buildGetTicketStatusPayload(credenciales, numeroTicket);
+            String response = executePost(endpointUrl, payload, "urn:getStatus");
             Document responseDoc = parsearXmlSeguro(response);
 
             String fault = extractValue(responseDoc, "faultstring");
@@ -156,11 +156,49 @@ public class HttpClienteNativoSoap implements ClienteSoap {
     }
 
     @Override
+    public ResultadoConsulta consultarEstadoComprobante(String ruc, String tipo, String serie, String numero,
+            String endpointUrl, CredencialesEmpresa credenciales) {
+        try {
+            String payload = buildGetDocumentStatusPayload(credenciales, ruc, tipo, serie, numero);
+            String response = executePost(endpointUrl, payload, "urn:getStatus");
+            Document responseDoc = parsearXmlSeguro(response);
+
+            String fault = extractValue(responseDoc, "faultstring");
+            if (fault != null && !fault.isBlank()) {
+                return ResultadoConsulta.error(
+                        normalizarFaultCode(extractValue(responseDoc, "faultcode")), fault);
+            }
+
+            String statusCode = extractValue(responseDoc, "statusCode");
+            String statusMessage = extractValue(responseDoc, "statusMessage");
+            return switch (statusCode != null ? statusCode : "") {
+                case "0001" -> ResultadoConsulta.resueltoSinCdr(
+                        EstadoEnvio.ACEPTADO, statusCode,
+                        mensajeConsulta(statusMessage, "El comprobante existe y está aceptado"));
+                case "0002" -> ResultadoConsulta.resueltoSinCdr(
+                        EstadoEnvio.RECHAZADO, statusCode,
+                        mensajeConsulta(statusMessage, "El comprobante existe y está rechazado"));
+                case "0003" -> ResultadoConsulta.resueltoSinCdr(
+                        EstadoEnvio.EXCEPCION, statusCode,
+                        mensajeConsulta(statusMessage, "El comprobante existe y está de baja"));
+                case "" -> ResultadoConsulta.error("UNKNOWN_STATUS",
+                        mensajeConsulta(statusMessage, "Respuesta SOAP sin statusCode"));
+                default -> ResultadoConsulta.error(statusCode,
+                        mensajeConsulta(statusMessage, "SUNAT devolvió statusCode " + statusCode));
+            };
+        } catch (com.creanexusatreus.ublkit.core.error.ExcepcionTransporte e) {
+            return ResultadoConsulta.error("HTTP_5XX", e.getMessage());
+        } catch (Exception e) {
+            return ResultadoConsulta.error("IO_ERROR", e.getMessage());
+        }
+    }
+
+    @Override
     public ResultadoConsulta consultarCdr(String ruc, String tipo, String serie, String numero,
             String endpointUrl, CredencialesEmpresa credenciales) {
         try {
             String payload = buildGetStatusCdrPayload(credenciales, ruc, tipo, serie, numero);
-            String response = executePost(endpointUrl, payload);
+            String response = executePost(endpointUrl, payload, "urn:getStatusCdr");
             Document responseDoc = parsearXmlSeguro(response);
 
             String fault = extractValue(responseDoc, "faultstring");
@@ -194,11 +232,12 @@ public class HttpClienteNativoSoap implements ClienteSoap {
         }
     }
 
-    private String executePost(String endpointUrl, String body) throws Exception {
+    private String executePost(String endpointUrl, String body, String soapAction) throws Exception {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(endpointUrl))
                 .timeout(readTimeout)
                 .header("Content-Type", "text/xml;charset=UTF-8")
+                .header("SOAPAction", soapAction)
                 .POST(HttpRequest.BodyPublishers.ofString(body))
                 .build();
 
@@ -256,7 +295,7 @@ public class HttpClienteNativoSoap implements ClienteSoap {
                 """.formatted(cred.getUsernameConcatenado(), cred.claveSol(), fileName, base64Content);
     }
 
-    private String buildGetStatusPayload(CredencialesEmpresa cred, String ticket) {
+    private String buildGetTicketStatusPayload(CredencialesEmpresa cred, String ticket) {
         return """
                 <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ser="http://service.sunat.gob.pe" xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd">
                    <soapenv:Header>
@@ -274,6 +313,30 @@ public class HttpClienteNativoSoap implements ClienteSoap {
                    </soapenv:Body>
                 </soapenv:Envelope>
                 """.formatted(cred.getUsernameConcatenado(), cred.claveSol(), ticket);
+    }
+
+    private String buildGetDocumentStatusPayload(CredencialesEmpresa cred, String ruc, String tipo,
+            String serie, String numero) {
+        return """
+                <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ser="http://service.sunat.gob.pe" xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd">
+                   <soapenv:Header>
+                      <wsse:Security>
+                         <wsse:UsernameToken>
+                            <wsse:Username>%s</wsse:Username>
+                            <wsse:Password>%s</wsse:Password>
+                         </wsse:UsernameToken>
+                      </wsse:Security>
+                   </soapenv:Header>
+                   <soapenv:Body>
+                      <ser:getStatus>
+                         <rucComprobante>%s</rucComprobante>
+                         <tipoComprobante>%s</tipoComprobante>
+                         <serieComprobante>%s</serieComprobante>
+                         <numeroComprobante>%s</numeroComprobante>
+                      </ser:getStatus>
+                   </soapenv:Body>
+                </soapenv:Envelope>
+                """.formatted(cred.getUsernameConcatenado(), cred.claveSol(), ruc, tipo, serie, numero);
     }
 
     private String buildGetStatusCdrPayload(CredencialesEmpresa cred, String ruc, String tipo,

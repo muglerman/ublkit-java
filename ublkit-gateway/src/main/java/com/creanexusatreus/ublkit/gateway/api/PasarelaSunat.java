@@ -75,6 +75,12 @@ public interface PasarelaSunat {
      */
     ResultadoConsulta consultarTicketRest(String ticket, CredencialesEmpresa credenciales, TipoAmbiente ambiente);
 
+    /** Consulta el estado documental mediante billConsultService.getStatus. */
+    default ResultadoConsulta consultarEstadoComprobante(String ruc, String tipo, String serie, String numero,
+            CredencialesEmpresa credenciales, TipoAmbiente ambiente) {
+        return ResultadoConsulta.error("UNSUPPORTED", "La pasarela no implementa getStatus documental");
+    }
+
     /**
      * Consulta el CDR de una factura o nota mediante billConsultService.getStatusCdr.
      */

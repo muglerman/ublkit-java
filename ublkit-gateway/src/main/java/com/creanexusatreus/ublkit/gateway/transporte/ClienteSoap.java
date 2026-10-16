@@ -40,6 +40,15 @@ public interface ClienteSoap {
     ResultadoConsulta consultarTicket(String numeroTicket, String endpointUrl, CredencialesEmpresa credenciales);
 
     /**
+     * Consulta el estado de una factura o nota por RUC, tipo, serie y número
+     * (billConsultService.getStatus). No es la consulta de ticket de billService.
+     */
+    default ResultadoConsulta consultarEstadoComprobante(String ruc, String tipo, String serie, String numero,
+            String endpointUrl, CredencialesEmpresa credenciales) {
+        return ResultadoConsulta.error("UNSUPPORTED", "El cliente SOAP no implementa getStatus documental");
+    }
+
+    /**
      * Consulta el estado definitivo y CDR de un comprobante por su identificador
      * (billConsultService.getStatusCdr).
      */

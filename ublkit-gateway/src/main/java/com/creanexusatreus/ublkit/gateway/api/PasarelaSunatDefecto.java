@@ -163,6 +163,14 @@ public class PasarelaSunatDefecto implements PasarelaSunat {
     }
 
     @Override
+    public ResultadoConsulta consultarEstadoComprobante(String ruc, String tipo, String serie, String numero,
+            CredencialesEmpresa credenciales, TipoAmbiente ambiente) {
+        String endpoint = ResolvedorEndpoints.urlSoapConsulta(ambiente);
+        return conRetry(() -> clienteSoap.consultarEstadoComprobante(
+                ruc, tipo, serie, numero, endpoint, credenciales));
+    }
+
+    @Override
     public ResultadoConsulta consultarCdr(String ruc, String tipo, String serie, String numero,
             CredencialesEmpresa credenciales, TipoAmbiente ambiente) {
         String endpoint = ResolvedorEndpoints.urlSoapConsulta(ambiente);

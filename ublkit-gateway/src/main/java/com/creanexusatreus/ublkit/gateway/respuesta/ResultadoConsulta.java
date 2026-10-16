@@ -26,6 +26,11 @@ public record ResultadoConsulta(
         return new ResultadoConsulta(EstadoEnvio.EN_PROCESAMIENTO, null, null, null);
     }
 
+    /** Resultado documental conocido aunque SUNAT no haya entregado el CDR. */
+    public static ResultadoConsulta resueltoSinCdr(EstadoEnvio estado, String codigo, String mensaje) {
+        return new ResultadoConsulta(estado, null, codigo, mensaje);
+    }
+
     public static ResultadoConsulta error(String codigoError, String mensajeError) {
         return new ResultadoConsulta(EstadoEnvio.EXCEPCION, null, codigoError, mensajeError);
     }
