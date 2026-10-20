@@ -45,6 +45,8 @@ Convierte borradores de dominio en XML UBL exigido por SUNAT.
 - Factura, boleta, notas, guías, resúmenes, bajas, retenciones y percepciones.
 - Cálculo de IGV, ISC, ICBPER, totales y leyendas.
 - Serialización DOM sin JAXB.
+- SPOT 1004 con valores referenciales `01/02/03` en `cac:DeliveryTerms` (PEN) y
+  datos físicos opcionales por vehículo en `cac:MeasurementDimension` (`unitCode="TNE"`).
 
 ## Reglas
 
@@ -63,4 +65,3 @@ Validar XML estructural, golden XMLs y casos normativos.
 ---
 
 Desarrollado por **Crea Nexus Atreus**
-

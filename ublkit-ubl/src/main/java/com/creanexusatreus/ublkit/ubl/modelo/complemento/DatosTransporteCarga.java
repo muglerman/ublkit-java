@@ -17,8 +17,17 @@ public record DatosTransporteCarga(
         BigDecimal valorReferencialServicio,
         BigDecimal valorReferencialCargaEfectiva,
         BigDecimal valorReferencialCargaUtilNominal,
-        List<TramoTransporteCarga> tramos
+        List<TramoTransporteCarga> tramos,
+        List<VehiculoTransporteCarga> vehiculos
 ) {
+    /** Constructor compatible para documentos que no informan detalle físico de vehículos. */
+    public DatosTransporteCarga(PuntoTransporte origen, PuntoTransporte destino, String detalleViaje,
+            BigDecimal valorReferencialServicio, BigDecimal valorReferencialCargaEfectiva,
+            BigDecimal valorReferencialCargaUtilNominal, List<TramoTransporteCarga> tramos) {
+        this(origen, destino, detalleViaje, valorReferencialServicio, valorReferencialCargaEfectiva,
+                valorReferencialCargaUtilNominal, tramos, List.of());
+    }
+
     public DatosTransporteCarga {
         if (origen == null) {
             throw new IllegalArgumentException("El punto de origen es obligatorio");
@@ -35,6 +44,7 @@ public record DatosTransporteCarga(
         validarMonto(valorReferencialCargaEfectiva, "valor referencial sobre la carga efectiva");
         validarMonto(valorReferencialCargaUtilNominal, "valor referencial sobre la carga útil nominal");
         tramos = tramos == null ? List.of() : List.copyOf(tramos);
+        vehiculos = vehiculos == null ? List.of() : List.copyOf(vehiculos);
     }
 
     private static void validarMonto(BigDecimal valor, String campo) {

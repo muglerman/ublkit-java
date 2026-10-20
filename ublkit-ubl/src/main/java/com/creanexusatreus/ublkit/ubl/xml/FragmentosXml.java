@@ -14,6 +14,7 @@ import com.creanexusatreus.ublkit.ubl.modelo.complemento.DocumentoRelacionado;
 import com.creanexusatreus.ublkit.ubl.modelo.complemento.GuiaRelacionada;
 import com.creanexusatreus.ublkit.ubl.modelo.complemento.PuntoTransporte;
 import com.creanexusatreus.ublkit.ubl.modelo.complemento.TramoTransporteCarga;
+import com.creanexusatreus.ublkit.ubl.modelo.complemento.VehiculoTransporteCarga;
 import com.creanexusatreus.ublkit.ubl.modelo.linea.CargoDescuento;
 import com.creanexusatreus.ublkit.ubl.modelo.linea.LineaDetalle;
 import com.creanexusatreus.ublkit.ubl.modelo.total.TotalImpuestos;
@@ -514,10 +515,13 @@ final class FragmentosXml {
         delivery.appendChild(crearValorReferencial(doc, "02", datos.valorReferencialCargaEfectiva()));
         delivery.appendChild(crearValorReferencial(doc, "03", datos.valorReferencialCargaUtilNominal()));
 
-        if (!datos.tramos().isEmpty()) {
+        if (!datos.tramos().isEmpty() || !datos.vehiculos().isEmpty()) {
             Element shipment = cac(doc, "Shipment");
             for (TramoTransporteCarga tramo : datos.tramos()) {
                 shipment.appendChild(crearTramo(doc, tramo));
+            }
+            for (VehiculoTransporteCarga vehiculo : datos.vehiculos()) {
+                shipment.appendChild(crearVehiculoCarga(doc, vehiculo));
             }
             delivery.appendChild(shipment);
         }
@@ -574,6 +578,51 @@ final class FragmentosXml {
             consignment.appendChild(deliveryTerms);
         }
         return consignment;
+    }
+
+    private static Element crearVehiculoCarga(Document doc, VehiculoTransporteCarga vehiculo) {
+        Element consignment = cac(doc, "Consignment");
+        consignment.appendChild(cbc(doc, "ID", vehiculo.identificador()));
+        if (vehiculo.valorPreliminarCargaUtilNominal() != null) {
+            consignment.appendChild(cbcMonto(doc, "DeclaredForCarriageValueAmount",
+                    vehiculo.valorPreliminarCargaUtilNominal(), "PEN"));
+        }
+        Element handlingUnit = cac(doc, "TransportHandlingUnit");
+        if (vehiculo.cargaUtilTne() != null) {
+            handlingUnit.appendChild(crearDimensionCarga(doc, "01", vehiculo.cargaUtilTne()));
+        }
+        if (vehiculo.cargaEfectivaTne() != null) {
+            handlingUnit.appendChild(crearDimensionCarga(doc, "02", vehiculo.cargaEfectivaTne()));
+        }
+        if (vehiculo.configuracionVehicular() != null || vehiculo.valorReferencialPorTne() != null
+                || vehiculo.aplicaRetornoVacio() != null) {
+            Element equipment = cac(doc, "TransportEquipment");
+            if (vehiculo.configuracionVehicular() != null) {
+                equipment.appendChild(cbcConAtributos(doc, "SizeTypeCode", vehiculo.configuracionVehicular(),
+                        ATTR_LIST_AGENCY_NAME, "PE:MTC", ATTR_LIST_NAME, "Configuracion Vehícular"));
+            }
+            if (vehiculo.valorReferencialPorTne() != null) {
+                Element equipmentDelivery = cac(doc, "Delivery");
+                Element terms = cac(doc, "DeliveryTerms");
+                terms.appendChild(cbcMonto(doc, "Amount", vehiculo.valorReferencialPorTne(), "PEN"));
+                equipmentDelivery.appendChild(terms);
+                equipment.appendChild(equipmentDelivery);
+            }
+            if (vehiculo.aplicaRetornoVacio() != null) {
+                equipment.appendChild(cbc(doc, "ReturnabilityIndicator",
+                        vehiculo.aplicaRetornoVacio().toString()));
+            }
+            handlingUnit.appendChild(equipment);
+        }
+        consignment.appendChild(handlingUnit);
+        return consignment;
+    }
+
+    private static Element crearDimensionCarga(Document doc, String tipo, BigDecimal toneladas) {
+        Element dimension = cac(doc, "MeasurementDimension");
+        dimension.appendChild(cbc(doc, "AttributeID", tipo));
+        dimension.appendChild(cbcCantidad(doc, "Measure", toneladas, "TNE"));
+        return dimension;
     }
 
     private static Element crearEventoTransporte(Document doc, String nombre, PuntoTransporte punto) {

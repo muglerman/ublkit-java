@@ -11,6 +11,7 @@ import com.creanexusatreus.ublkit.ubl.modelo.complemento.DatosTransporteCarga;
 import com.creanexusatreus.ublkit.ubl.modelo.complemento.Detraccion;
 import com.creanexusatreus.ublkit.ubl.modelo.complemento.PuntoTransporte;
 import com.creanexusatreus.ublkit.ubl.modelo.complemento.TramoTransporteCarga;
+import com.creanexusatreus.ublkit.ubl.modelo.complemento.VehiculoTransporteCarga;
 import com.creanexusatreus.ublkit.ubl.modelo.linea.LineaDetalle;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -135,7 +136,15 @@ class SerializadorXmlSpotTest {
                         new PuntoTransporte("150101", "Av. Argentina 123, Callao"),
                         new PuntoTransporte("130101", "Av. España 456, Trujillo"),
                         "Tramo virtual Callao - Trujillo",
-                        new BigDecimal("1300.00")))));
+                        new BigDecimal("1300.00"))),
+                List.of(new VehiculoTransporteCarga(
+                        "02",
+                        "T2S2",
+                        new BigDecimal("15.00"),
+                        new BigDecimal("14.50"),
+                        new BigDecimal("62.00"),
+                        new BigDecimal("899.00"),
+                        Boolean.FALSE))));
         factura.setDetraccion(new Detraccion("001", "00-032-019287", "027",
                 new BigDecimal("12"), new BigDecimal("120.00")));
 
@@ -162,10 +171,22 @@ class SerializadorXmlSpotTest {
         assertEquals("130101", texto(xml,
                 tramo + "/cac:PlannedDeliveryTransportEvent/cac:Location/cbc:ID"));
         assertEquals("PEN", atributo(xml, tramo + "/cac:DeliveryTerms/cbc:Amount", "currencyID"));
+        String vehiculo = entrega + "/cac:Shipment/cac:Consignment[cbc:ID='02']";
+        assertEquals("TNE", atributo(xml,
+                vehiculo + "/cac:TransportHandlingUnit/cac:MeasurementDimension[cbc:AttributeID='02']/cbc:Measure",
+                "unitCode"));
+        assertEquals("14.50", texto(xml,
+                vehiculo + "/cac:TransportHandlingUnit/cac:MeasurementDimension[cbc:AttributeID='02']/cbc:Measure"));
+        assertEquals("PEN", atributo(xml,
+                vehiculo + "/cac:TransportHandlingUnit/cac:TransportEquipment/cac:Delivery/cac:DeliveryTerms/cbc:Amount",
+                "currencyID"));
 
         Document streaming = parse(new SerializadorXmlFactura().serializarStreaming(factura));
         assertEquals("PEN", atributo(streaming,
                 entrega + "/cac:DeliveryTerms[cbc:ID='03']/cbc:Amount", "currencyID"));
+        assertEquals("TNE", atributo(streaming,
+                vehiculo + "/cac:TransportHandlingUnit/cac:MeasurementDimension[cbc:AttributeID='01']/cbc:Measure",
+                "unitCode"));
     }
 
     @Test

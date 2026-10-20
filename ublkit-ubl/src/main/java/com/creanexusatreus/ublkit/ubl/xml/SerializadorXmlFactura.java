@@ -663,10 +663,13 @@ public final class SerializadorXmlFactura implements SerializadorXml<BorradorFac
         escribirValorReferencialStreaming(writer, "02", datos.valorReferencialCargaEfectiva());
         escribirValorReferencialStreaming(writer, "03", datos.valorReferencialCargaUtilNominal());
 
-        if (!datos.tramos().isEmpty()) {
+        if (!datos.tramos().isEmpty() || !datos.vehiculos().isEmpty()) {
             writer.writeStartElement("cac", "Shipment", NS_CAC);
             for (TramoTransporteCarga tramo : datos.tramos()) {
                 escribirTramoStreaming(writer, tramo);
+            }
+            for (VehiculoTransporteCarga vehiculo : datos.vehiculos()) {
+                escribirVehiculoCargaStreaming(writer, vehiculo);
             }
             writer.writeEndElement();
         }
@@ -725,6 +728,52 @@ public final class SerializadorXmlFactura implements SerializadorXml<BorradorFac
             escribirCbcMonto(writer, "Amount", tramo.valorPreliminarReferencialCargaEfectiva(), "PEN");
             writer.writeEndElement();
         }
+        writer.writeEndElement();
+    }
+
+    private void escribirVehiculoCargaStreaming(XMLStreamWriter writer, VehiculoTransporteCarga vehiculo)
+            throws XMLStreamException {
+        writer.writeStartElement("cac", "Consignment", NS_CAC);
+        escribirCbc(writer, "ID", vehiculo.identificador());
+        if (vehiculo.valorPreliminarCargaUtilNominal() != null) {
+            escribirCbcMonto(writer, "DeclaredForCarriageValueAmount",
+                    vehiculo.valorPreliminarCargaUtilNominal(), "PEN");
+        }
+        writer.writeStartElement("cac", "TransportHandlingUnit", NS_CAC);
+        if (vehiculo.cargaUtilTne() != null) {
+            escribirDimensionCargaStreaming(writer, "01", vehiculo.cargaUtilTne());
+        }
+        if (vehiculo.cargaEfectivaTne() != null) {
+            escribirDimensionCargaStreaming(writer, "02", vehiculo.cargaEfectivaTne());
+        }
+        if (vehiculo.configuracionVehicular() != null || vehiculo.valorReferencialPorTne() != null
+                || vehiculo.aplicaRetornoVacio() != null) {
+            writer.writeStartElement("cac", "TransportEquipment", NS_CAC);
+            if (vehiculo.configuracionVehicular() != null) {
+                escribirCbcConAtributos(writer, "SizeTypeCode", vehiculo.configuracionVehicular(),
+                        "listAgencyName", "PE:MTC", "listName", "Configuracion Vehícular");
+            }
+            if (vehiculo.valorReferencialPorTne() != null) {
+                writer.writeStartElement("cac", "Delivery", NS_CAC);
+                writer.writeStartElement("cac", "DeliveryTerms", NS_CAC);
+                escribirCbcMonto(writer, "Amount", vehiculo.valorReferencialPorTne(), "PEN");
+                writer.writeEndElement();
+                writer.writeEndElement();
+            }
+            if (vehiculo.aplicaRetornoVacio() != null) {
+                escribirCbc(writer, "ReturnabilityIndicator", vehiculo.aplicaRetornoVacio().toString());
+            }
+            writer.writeEndElement();
+        }
+        writer.writeEndElement();
+        writer.writeEndElement();
+    }
+
+    private void escribirDimensionCargaStreaming(XMLStreamWriter writer, String tipo, BigDecimal toneladas)
+            throws XMLStreamException {
+        writer.writeStartElement("cac", "MeasurementDimension", NS_CAC);
+        escribirCbc(writer, "AttributeID", tipo);
+        escribirCbcCantidad(writer, "Measure", toneladas, "TNE");
         writer.writeEndElement();
     }
 
