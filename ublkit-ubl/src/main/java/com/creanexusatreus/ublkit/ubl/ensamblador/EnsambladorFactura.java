@@ -303,6 +303,9 @@ public final class EnsambladorFactura {
                 linea.setPrecioReferenciaTipo("01");
             }
         }
+        if (esGratuito(linea.getIgvTipo())) {
+            linea.setPrecio(BigDecimal.ZERO.setScale(10, REDONDEO));
+        }
     }
 
     public static void ajustarRedondeoLineas(List<LineaDetalle> detalles) {
@@ -427,7 +430,10 @@ public final class EnsambladorFactura {
             if (linea.getPrecioReferencia() != null && linea.getCantidad() != null
                     && linea.getCantidad().compareTo(BigDecimal.ZERO) > 0) {
                 if (esGratuito(linea.getIgvTipo())) {
-                    linea.setPrecioReferencia(BigDecimal.ZERO.setScale(ESCALA, REDONDEO));
+                    BigDecimal base = orZero(linea.getIgvBaseImponible());
+                    linea.setPrecioReferencia(base.divide(linea.getCantidad(), ESCALA, REDONDEO));
+                    linea.setPrecioReferenciaTipo("02");
+                    linea.setPrecio(BigDecimal.ZERO.setScale(ESCALA, REDONDEO));
                 } else {
                     BigDecimal base = orZero(linea.getIgvBaseImponible());
                     BigDecimal igv = orZero(linea.getIgv());

@@ -49,6 +49,31 @@ class ImpuestosMixtosXmlTest {
                 "10".equals(afectacion) ? "354.00" : ("11".equals(afectacion) ? "0.00" : base));
     }
 
+    @ParameterizedTest(name = "precios UBL para afectación {0}")
+    @CsvSource({
+            "10,100.00,18.00,100.0000000000,118.0000000000,01",
+            "20,100.00,0.00,100.0000000000,100.0000000000,01",
+            "30,100.00,0.00,100.0000000000,100.0000000000,01",
+            "11,100.00,18.00,0.0000000000,100.0000000000,02",
+            "21,100.00,0.00,0.0000000000,100.0000000000,02",
+            "31,100.00,0.00,0.0000000000,100.0000000000,02",
+            "40,100.00,0.00,100.0000000000,100.0000000000,01"
+    })
+    void precioYValorReferencialRespetanLaAfectacion(String afectacion, String base, String igv,
+            String precioEsperado, String referenciaEsperada, String tipoPrecioEsperado) {
+        BorradorFactura factura = factura(List.of(lineaConBase(
+                "ITEM", "1", base, afectacion, new BigDecimal(base), new BigDecimal(igv))));
+
+        Document doc = parse(new SerializadorXmlFactura().serializar(EnsambladorFactura.ensamblar(factura)));
+        Element line = (Element) doc.getElementsByTagNameNS("*", "InvoiceLine").item(0);
+        Element price = (Element) line.getElementsByTagNameNS("*", "Price").item(0);
+        Element reference = (Element) line.getElementsByTagNameNS("*", "AlternativeConditionPrice").item(0);
+
+        assertDecimalEquals(precioEsperado, text(price, "PriceAmount"));
+        assertDecimalEquals(referenciaEsperada, text(reference, "PriceAmount"));
+        assertEquals(tipoPrecioEsperado, text(reference, "PriceTypeCode"));
+    }
+
     @Test
     void gravadoExoneradoInafectoYGratuitoGeneranCuatroGruposGlobales() {
         BorradorFactura factura = factura(List.of(
@@ -210,6 +235,10 @@ class ImpuestosMixtosXmlTest {
         assertEquals(lineExtension, text(total, "LineExtensionAmount"));
         assertEquals(taxInclusive, text(total, "TaxInclusiveAmount"));
         assertEquals(payable, text(total, "PayableAmount"));
+    }
+
+    private static void assertDecimalEquals(String expected, String actual) {
+        assertEquals(0, new BigDecimal(expected).compareTo(new BigDecimal(actual)));
     }
 
     private static Element globalTaxTotal(Document doc) {
