@@ -22,6 +22,7 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Base64;
+import java.util.regex.Pattern;
 
 /**
  * Implementación de {@link ClienteSoap} utilizando {@link HttpClient} nativo de Java 11+.
@@ -30,6 +31,9 @@ import java.util.Base64;
  * @since 0.1.0
  */
 public class HttpClienteNativoSoap implements ClienteSoap {
+
+    private static final Pattern BASE64_BLOCK = Pattern.compile("[A-Za-z0-9+/]{128,}={0,2}");
+    private static final int MAX_SAFE_MESSAGE_LENGTH = 1000;
 
     private final HttpClient httpClient;
     private final Duration readTimeout;
@@ -62,7 +66,7 @@ public class HttpClienteNativoSoap implements ClienteSoap {
                 String fault = extractValue(responseDoc, "faultstring");
                 String faultCode = normalizarFaultCode(extractValue(responseDoc, "faultcode"));
                 return ResultadoEnvio.error(faultCode,
-                        fault != null ? fault : "No se encontró CDR ni Fault en la respuesta");
+                        safeSoapMessage(fault, "No se encontró CDR ni Fault en la respuesta"));
             }
 
             byte[] cdrZipBytes = Base64.getDecoder().decode(applicationResponseBase64);
@@ -72,9 +76,9 @@ public class HttpClienteNativoSoap implements ClienteSoap {
             return ResultadoEnvio.sincronoProcesado(estado, cdr);
 
         } catch (com.creanexusatreus.ublkit.core.error.ExcepcionTransporte e) {
-            return ResultadoEnvio.error("HTTP_5XX", e.getMessage());
+            return ResultadoEnvio.error("HTTP_5XX", safeSoapMessage(e.getMessage(), "Error HTTP consultando SUNAT"));
         } catch (Exception e) {
-            return ResultadoEnvio.error("IO_ERROR", e.getMessage());
+            return ResultadoEnvio.error("IO_ERROR", safeSoapMessage(e.getMessage(), "Error procesando respuesta SUNAT"));
         }
     }
 
@@ -93,15 +97,15 @@ public class HttpClienteNativoSoap implements ClienteSoap {
                 String fault = extractValue(responseDoc, "faultstring");
                 String faultCode = normalizarFaultCode(extractValue(responseDoc, "faultcode"));
                 return ResultadoEnvio.error(faultCode,
-                        fault != null ? fault : "No se encontró Ticket ni Fault en la respuesta");
+                        safeSoapMessage(fault, "No se encontró Ticket ni Fault en la respuesta"));
             }
 
             return ResultadoEnvio.asincrono(ticket);
 
         } catch (com.creanexusatreus.ublkit.core.error.ExcepcionTransporte e) {
-            return ResultadoEnvio.error("HTTP_5XX", e.getMessage());
+            return ResultadoEnvio.error("HTTP_5XX", safeSoapMessage(e.getMessage(), "Error HTTP consultando SUNAT"));
         } catch (Exception e) {
-            return ResultadoEnvio.error("IO_ERROR", e.getMessage());
+            return ResultadoEnvio.error("IO_ERROR", safeSoapMessage(e.getMessage(), "Error procesando respuesta SUNAT"));
         }
     }
 
@@ -117,7 +121,7 @@ public class HttpClienteNativoSoap implements ClienteSoap {
                 String faultCode = extractValue(responseDoc, "faultcode");
                 return ResultadoConsulta.error(
                         normalizarFaultCode(faultCode),
-                        fault
+                        safeSoapMessage(fault, "SOAP fault sin mensaje seguro")
                 );
             }
 
@@ -149,9 +153,11 @@ public class HttpClienteNativoSoap implements ClienteSoap {
             return ResultadoConsulta.error(statusCode, "SUNAT devolvió statusCode " + statusCode);
 
         } catch (com.creanexusatreus.ublkit.core.error.ExcepcionTransporte e) {
-            return ResultadoConsulta.error("HTTP_5XX", e.getMessage());
+            return ResultadoConsulta.error("HTTP_5XX",
+                    safeSoapMessage(e.getMessage(), "Error HTTP consultando SUNAT"));
         } catch (Exception e) {
-            return ResultadoConsulta.error("IO_ERROR", e.getMessage());
+            return ResultadoConsulta.error("IO_ERROR",
+                    safeSoapMessage(e.getMessage(), "Error procesando respuesta SUNAT"));
         }
     }
 
@@ -166,7 +172,8 @@ public class HttpClienteNativoSoap implements ClienteSoap {
             String fault = extractValue(responseDoc, "faultstring");
             if (fault != null && !fault.isBlank()) {
                 return ResultadoConsulta.error(
-                        normalizarFaultCode(extractValue(responseDoc, "faultcode")), fault);
+                        normalizarFaultCode(extractValue(responseDoc, "faultcode")),
+                        safeSoapMessage(fault, "SOAP fault sin mensaje seguro"));
             }
 
             String statusCode = extractValue(responseDoc, "statusCode");
@@ -187,9 +194,11 @@ public class HttpClienteNativoSoap implements ClienteSoap {
                         mensajeConsulta(statusMessage, "SUNAT devolvió statusCode " + statusCode));
             };
         } catch (com.creanexusatreus.ublkit.core.error.ExcepcionTransporte e) {
-            return ResultadoConsulta.error("HTTP_5XX", e.getMessage());
+            return ResultadoConsulta.error("HTTP_5XX",
+                    safeSoapMessage(e.getMessage(), "Error HTTP consultando SUNAT"));
         } catch (Exception e) {
-            return ResultadoConsulta.error("IO_ERROR", e.getMessage());
+            return ResultadoConsulta.error("IO_ERROR",
+                    safeSoapMessage(e.getMessage(), "Error procesando respuesta SUNAT"));
         }
     }
 
@@ -204,20 +213,26 @@ public class HttpClienteNativoSoap implements ClienteSoap {
             String fault = extractValue(responseDoc, "faultstring");
             if (fault != null && !fault.isBlank()) {
                 return ResultadoConsulta.error(
-                        normalizarFaultCode(extractValue(responseDoc, "faultcode")), fault);
+                        normalizarFaultCode(extractValue(responseDoc, "faultcode")),
+                        safeSoapMessage(fault, "SOAP fault sin mensaje seguro"));
             }
 
             String statusCode = extractValue(responseDoc, "statusCode");
             String statusMessage = extractValue(responseDoc, "statusMessage");
-            if ("0001".equals(statusCode) || "0002".equals(statusCode) || "0003".equals(statusCode)) {
-                String contentBase64 = extractValue(responseDoc, "content");
-                if (contentBase64 == null || contentBase64.isBlank()) {
-                    return ResultadoConsulta.error(statusCode,
-                            mensajeConsulta(statusMessage, "SUNAT devolvió " + statusCode + " sin CDR"));
+            String contentBase64 = extractValue(responseDoc, "content");
+            // getStatusCdr adjunta la evidencia en content. SUNAT puede responder con
+            // códigos distintos de 0001/0002/0003 (por ejemplo 0004, "La constancia
+            // existe"), por lo que el CDR es la fuente de verdad y se procesa siempre
+            // que esté presente.
+            if (contentBase64 != null && !contentBase64.isBlank()) {
+                try {
+                    byte[] cdrZipBytes = Base64.getDecoder().decode(contentBase64);
+                    ArchivoCdr cdr = LectorCdr.extraer(cdrZipBytes);
+                    return ResultadoConsulta.completado(LectorCdr.determinarEstado(cdr), cdr);
+                } catch (Exception invalidCdr) {
+                    return ResultadoConsulta.error("INVALID_CDR",
+                            "SUNAT devolvió un CDR inválido");
                 }
-                byte[] cdrZipBytes = Base64.getDecoder().decode(contentBase64);
-                ArchivoCdr cdr = LectorCdr.extraer(cdrZipBytes);
-                return ResultadoConsulta.completado(LectorCdr.determinarEstado(cdr), cdr);
             }
             if (statusCode == null || statusCode.isBlank()) {
                 return ResultadoConsulta.error("UNKNOWN_STATUS",
@@ -226,9 +241,11 @@ public class HttpClienteNativoSoap implements ClienteSoap {
             return ResultadoConsulta.error(statusCode,
                     mensajeConsulta(statusMessage, "SUNAT devolvió statusCode " + statusCode));
         } catch (com.creanexusatreus.ublkit.core.error.ExcepcionTransporte e) {
-            return ResultadoConsulta.error("HTTP_5XX", e.getMessage());
+            return ResultadoConsulta.error("HTTP_5XX",
+                    safeSoapMessage(e.getMessage(), "Error HTTP consultando SUNAT"));
         } catch (Exception e) {
-            return ResultadoConsulta.error("IO_ERROR", e.getMessage());
+            return ResultadoConsulta.error("IO_ERROR",
+                    safeSoapMessage(e.getMessage(), "Error procesando respuesta SUNAT"));
         }
     }
 
@@ -246,7 +263,10 @@ public class HttpClienteNativoSoap implements ClienteSoap {
         if (response.statusCode() >= 500) {
             String fault = extractValueSeguro(response.body(), "faultstring");
             if (fault == null || fault.isBlank()) {
-                throw new com.creanexusatreus.ublkit.core.error.ExcepcionTransporte("HTTP_" + response.statusCode() + " - " + response.body());
+                // Algunos proxies reflejan el request SOAP completo, incluido el
+                // UsernameToken. Nunca propagar el body crudo a logs o persistencia.
+                throw new com.creanexusatreus.ublkit.core.error.ExcepcionTransporte(
+                        "HTTP_" + response.statusCode() + " - Respuesta SOAP sin faultstring");
             }
         }
 
@@ -374,7 +394,25 @@ public class HttpClienteNativoSoap implements ClienteSoap {
     }
 
     private String mensajeConsulta(String statusMessage, String fallback) {
-        return statusMessage != null && !statusMessage.isBlank() ? statusMessage : fallback;
+        return safeSoapMessage(statusMessage, fallback);
+    }
+
+    private String safeSoapMessage(String value, String fallback) {
+        if (value == null || value.isBlank()) {
+            return fallback;
+        }
+        String normalized = value.replace('\r', ' ').replace('\n', ' ').trim();
+        String lower = normalized.toLowerCase();
+        if (lower.contains("<soap") || lower.contains("soapenv:envelope")
+                || lower.contains("usernametoken") || lower.contains("wsse:")
+                || lower.contains("<username") || lower.contains("<password")
+                || lower.contains("contentfile") || lower.contains("applicationresponse")
+                || BASE64_BLOCK.matcher(normalized).find()) {
+            return fallback;
+        }
+        return normalized.length() <= MAX_SAFE_MESSAGE_LENGTH
+                ? normalized
+                : normalized.substring(0, MAX_SAFE_MESSAGE_LENGTH);
     }
 
     private Document parsearXmlSeguro(String xml) throws Exception {

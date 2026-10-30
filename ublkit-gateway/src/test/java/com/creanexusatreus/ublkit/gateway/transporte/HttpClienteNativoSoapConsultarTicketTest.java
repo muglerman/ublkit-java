@@ -226,6 +226,106 @@ class HttpClienteNativoSoapConsultarTicketTest {
     }
 
     @Test
+    void consultarCdr_status0004_conContent_retornaCdrAceptado() throws Exception {
+        String soap = soapEnvelope("""
+                <ns1:getStatusCdrResponse xmlns:ns1="http://service.sunat.gob.pe"><statusCdr>
+                  <statusCode>0004</statusCode><statusMessage>La constancia existe</statusMessage>
+                  <content>%s</content>
+                </statusCdr></ns1:getStatusCdrResponse>
+                """.formatted(cdrZipBase64("0", "Aceptado")));
+        HttpServer server = crearServidor(200, soap, new AtomicReference<>());
+        try {
+            ResultadoConsulta resultado = cliente.consultarCdr("20000000000", "01", "F001", "1",
+                    urlServidor(server), CREDENCIALES);
+            assertThat(resultado.estado()).isEqualTo(EstadoEnvio.ACEPTADO);
+            assertThat(resultado.cdr()).isNotNull();
+            assertThat(resultado.cdr().codigoRegreso()).isEqualTo("0");
+        } finally {
+            server.stop(0);
+        }
+    }
+
+    @Test
+    void consultarCdr_status0004_conContent_retornaCdrRechazado() throws Exception {
+        String soap = soapEnvelope("""
+                <ns1:getStatusCdrResponse xmlns:ns1="http://service.sunat.gob.pe"><statusCdr>
+                  <statusCode>0004</statusCode><statusMessage>La constancia existe</statusMessage>
+                  <content>%s</content>
+                </statusCdr></ns1:getStatusCdrResponse>
+                """.formatted(cdrZipBase64("2335", "Comprobante rechazado")));
+        HttpServer server = crearServidor(200, soap, new AtomicReference<>());
+        try {
+            ResultadoConsulta resultado = cliente.consultarCdr("20000000000", "01", "F001", "1",
+                    urlServidor(server), CREDENCIALES);
+            assertThat(resultado.estado()).isEqualTo(EstadoEnvio.RECHAZADO);
+            assertThat(resultado.cdr()).isNotNull();
+            assertThat(resultado.cdr().codigoRegreso()).isEqualTo("2335");
+        } finally {
+            server.stop(0);
+        }
+    }
+
+    @Test
+    void consultarCdr_contentInvalido_noPropagaBase64() throws Exception {
+        String invalidContent = "A".repeat(256);
+        String soap = soapEnvelope("""
+                <ns1:getStatusCdrResponse xmlns:ns1="http://service.sunat.gob.pe"><statusCdr>
+                  <statusCode>0004</statusCode><statusMessage>La constancia existe</statusMessage>
+                  <content>%s</content>
+                </statusCdr></ns1:getStatusCdrResponse>
+                """.formatted(invalidContent));
+        HttpServer server = crearServidor(200, soap, new AtomicReference<>());
+        try {
+            ResultadoConsulta resultado = cliente.consultarCdr("20000000000", "01", "F001", "1",
+                    urlServidor(server), CREDENCIALES);
+            assertThat(resultado.estado()).isEqualTo(EstadoEnvio.EXCEPCION);
+            assertThat(resultado.codigoError()).isEqualTo("INVALID_CDR");
+            assertThat(resultado.mensajeError()).doesNotContain(invalidContent);
+        } finally {
+            server.stop(0);
+        }
+    }
+
+    @Test
+    void consultarCdr_faultConCredenciales_retornaMensajeSeguro() throws Exception {
+        String fault = soapEnvelope("""
+                <soap:Fault xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+                  <faultcode>soap:Server</faultcode>
+                  <faultstring>&lt;wsse:UsernameToken&gt;20000000000MODDATOS/moddatos&lt;/wsse:UsernameToken&gt;</faultstring>
+                </soap:Fault>
+                """);
+        HttpServer server = crearServidor(500, fault, new AtomicReference<>());
+        try {
+            ResultadoConsulta resultado = cliente.consultarCdr("20000000000", "01", "F001", "1",
+                    urlServidor(server), CREDENCIALES);
+            assertThat(resultado.mensajeError())
+                    .isEqualTo("SOAP fault sin mensaje seguro")
+                    .doesNotContain("MODDATOS", "moddatos", "UsernameToken");
+        } finally {
+            server.stop(0);
+        }
+    }
+
+    @Test
+    void consultarCdr_http500ConRequestReflejado_noExponeCredenciales() throws Exception {
+        String reflected = soapEnvelope("""
+                <request><wsse:Username xmlns:wsse="urn:test">20000000000MODDATOS</wsse:Username>
+                <wsse:Password xmlns:wsse="urn:test">moddatos</wsse:Password></request>
+                """);
+        HttpServer server = crearServidor(500, reflected, new AtomicReference<>());
+        try {
+            ResultadoConsulta resultado = cliente.consultarCdr("20000000000", "01", "F001", "1",
+                    urlServidor(server), CREDENCIALES);
+            assertThat(resultado.codigoError()).isEqualTo("HTTP_5XX");
+            assertThat(resultado.mensajeError())
+                    .contains("HTTP_500")
+                    .doesNotContain("MODDATOS", "moddatos", "Username", "Password");
+        } finally {
+            server.stop(0);
+        }
+    }
+
+    @Test
     void consultarCdr_status0011_retornaExcepcionSinCdr() throws Exception {
         String soap = soapEnvelope("""
                 <ns1:getStatusCdrResponse xmlns:ns1="http://service.sunat.gob.pe"><statusCdr>
