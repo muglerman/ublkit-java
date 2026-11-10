@@ -146,7 +146,7 @@ class SerializadorXmlSpotTest {
                         new BigDecimal("899.00"),
                         Boolean.FALSE))));
         factura.setDetraccion(new Detraccion("001", "00-032-019287", "027",
-                new BigDecimal("12"), new BigDecimal("120.00")));
+                new BigDecimal("4"), new BigDecimal("60.00")));
 
         Document xml = parse(new SerializadorXmlFactura().serializar(EnsambladorFactura.ensamblar(factura)));
 
@@ -164,6 +164,8 @@ class SerializadorXmlSpotTest {
             assertNotNull(nodo(xml, terminos));
             assertEquals("PEN", atributo(xml, terminos, "currencyID"));
         }
+        assertEquals("4", texto(xml,
+                "/inv:Invoice/cac:PaymentTerms[cbc:ID='Detraccion']/cbc:PaymentPercent"));
         String tramo = entrega + "/cac:Shipment/cac:Consignment";
         assertEquals("01", texto(xml, tramo + "/cbc:ID"));
         assertEquals("150101", texto(xml,
